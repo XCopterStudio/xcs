@@ -1,0 +1,80 @@
+.margin-top-30 { margin-top: 50px; }
+
+body { background-image: url("../img/first_aid_kit.png"); }
+
+.hero-unit {
+    border: solid darkgrey 1px;
+    box-shadow: 0 4px 4px -1px gray;
+}
+
+#top-panel {
+    padding: 20px 20px;
+    border-bottom: solid gray 1px;
+    box-shadow: 0 4px 2px -2px gray;
+    background-color: whitesmoke;
+    z-index: 2;
+}
+
+#status-text, #status-led {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 20px;
+}
+
+#logo { margin-right: 20px; }
+
+.inline-block { display: inline-block; }
+.vertical-middle { vertical-align: middle; }
+
+.inline-middle { display: inline-block; vertical-align: middle; }
+
+/*** GRIDSTER ***/
+
+.widget { background-color: whitesmoke; border-radius: 3px; }
+
+.widget-line div { font-size: 48pt; line-height: 48pt; text-align: right; margin-top: 40px; margin-right: 10px; }
+
+.widget-graph {}
+
+.gridster { 
+    margin: auto 50px;;
+    height: 100%;
+}
+
+.gridster li {
+    list-style-type: none;
+    background-color: whitesmoke;
+    text-align: center;
+}
+
+/*** SIDEPANELs ***/
+
+.sidepanel {
+    width: 300px;
+    height: 100%;
+    position: absolute;
+    background: whitesmoke;
+    border-right: solid grey 1px;
+    border-left: solid grey 1px;
+}
+
+.sidepanel-left {
+    left: 0px;
+    margin-left: -240px;
+}
+
+.sidepanel-right {
+    right: 0px;
+    margin-right: -240px;
+}
+
+.menu-item {
+    display: block;
+    text-align:right;
+    margin: 20px auto;
+}
+
+.menu-item i {
+    margin: 10px;
+    text-decoration: none;
+}
