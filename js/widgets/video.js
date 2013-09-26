@@ -1,9 +1,9 @@
-$( document ).ready(function() {
- 
-    $( "a" ).click(function( event ) {
- 
-        alert( "Thanks for visiting!" );
- 
-    });
- 
-});
+var myVideo=document.getElementById("video-parrot"); 
+
+function playPause()
+{ 
+  if (myVideo.paused) 
+    myVideo.play(); 
+  else 
+    myVideo.pause(); 
+} 
