@@ -41,7 +41,7 @@ $(document).ready(function () {
     */
     
     
-    $('#left-menu').sidr();
+    //$('#left-menu').sidr();
     
     sampleRun();
 });

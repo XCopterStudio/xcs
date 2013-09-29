@@ -8,6 +8,9 @@
     <link href="css/jquery.gridster.css" rel="stylesheet">
     <!-- Custom styles -->
     <link href="css/custom.css" rel="stylesheet">
+    <!-- code mirror -->
+    <link href="css/codemirror/codemirror.css" rel="stylesheet">
+    <link href="css/codemirror/night.css" rel="stylesheet">
 </head>
 <body>
     <!-- Main X-copter Panel -->
@@ -88,10 +91,8 @@
                         <div id="map-widget-div" style="margin: auto"/>
                     </li>
                     <li id="script-editor-widget" class="widget" data-row="4" data-col="5" data-sizex="2" data-sizey="2">
-                        <!-- TODO -->
+                        <div id='script-editor-area'/>
                     </li>
-                                            
-                    
                 </ul>
             </div>
         </div>
@@ -104,6 +105,9 @@
     <script type="text/javascript" src="js/libs/three.min.js"></script>
     <script type="text/javascript" src="js/libs/Detector.js"></script>
     <script type="text/javascript" src="js/libs/stats.min.js"></script>
+    <!-- code mirror -->
+    <script type="text/javascript" src="js/codemirror/codemirror.js"></script>
+    <script type="text/javascript" src="js/codemirror/xcsMode.js"></script>
     <!-- Custom scripts -->
     <script type="text/javascript" src="js/custom.js"></script>
     <script type="text/javascript" src="js/widgets/script-editor.js"></script>
