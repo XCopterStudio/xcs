@@ -62,6 +62,11 @@ $(function() {
 
     $('#takeoff').click(function() {
         sampleRun();
+        $(this).hide();
+        $('#land').show();
+    });
+    $('#land').click(function(){
+       alert('Cannot land. The video takes 2:11.');
     });
 }
 );
