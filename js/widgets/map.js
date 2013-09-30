@@ -20,8 +20,9 @@ var cubeGeo, cubeMaterial;
 var i, intersector;
 var scaling = 1;
 
-var vx = 0, vy = 0, vz = 0;
+var vx = 0, vy = 0, vz = 0, cCount = 0;
 window.setInterval(function() {
+    if(cCount++ > 1000) return;
     addVoxel(vx, vy, vz);
     var r = Math.random();
 
@@ -45,7 +46,7 @@ window.setInterval(function() {
 }, 100);
 
 init();
-animate();
+//animate();
 
 function addVoxel(x, y, z) {
     var position = new THREE.Vector3(x * 50, y * 50, z * 50);
