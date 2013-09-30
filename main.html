@@ -32,9 +32,7 @@
                 <div class="btn-group">
                     <button id="takeoff" class="btn btn-large btn-primary">Take off</button> 
                 </div>
-                <div class="btn-group">
-                  <button id="play_pause" onclick="playPause()" class="btn btn-large btn-primary">Play/Pause Video</button>
-                </div>
+                
             </div>
             <!-- Flash messages -->
             <div id="flash-messages" class="span6">
@@ -85,6 +83,9 @@
                           <source src="video/video-parrot.webm" type='video/webm; codecs="vp8.0, vorbis"'>
                           Your browser does not support HTML5 video.
                         </video>
+                        <div class="btn-group">
+                          <button id="play_pause" onclick="playPause()" class="btn btn-primary">Play/Pause Video</button>
+                        </div>
                     </li>
                     
                     <li id="map-widget" class="widget" data-row="2" data-col="5" data-sizex="2" data-sizey="2">

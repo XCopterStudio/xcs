@@ -78,3 +78,6 @@ body { background-image: url("../img/first_aid_kit.png"); }
     margin: 10px;
     text-decoration: none;
 }
+
+/*** Widgets ***/
+#video-parrot { margin-top: 25px;}
