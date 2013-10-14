@@ -1,9 +1,10 @@
-var myVideo=document.getElementById("video-parrot"); 
-
-function playPause()
-{ 
-  if (myVideo.paused) 
-    myVideo.play(); 
-  else 
-    myVideo.pause(); 
-} 
+$(function() {
+    var video = document.getElementById("video-parrot");
+    $(video).click(function() {
+        if (video.paused) {
+            video.play();
+        } else {
+            video.pause();
+        }
+    });
+});

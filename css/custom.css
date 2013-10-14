@@ -65,6 +65,3 @@ body { background-image: url("../img/first_aid_kit.png"); }
 .sidepanel-right li > a > h3 { margin-right: 20px; }
 
 .menu-item { background-color: whitesmoke; }
-
-/*** Widgets ***/
-#video-parrot { margin-top: 25px;}
