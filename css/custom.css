@@ -50,34 +50,21 @@ body { background-image: url("../img/first_aid_kit.png"); }
 /*** SIDEPANELs ***/
 
 .sidepanel {
-    width: 300px;
-    height: 100%;
+    margin: 10px auto;
     position: absolute;
-    background: whitesmoke;
-    border-right: solid grey 1px;
-    border-left: solid grey 1px;
+    z-index: 1001;
 }
 
-.sidepanel-left {
-    left: 0px;
-    margin-left: -240px;
-}
+.sidepanel i { margin: 8px 0px 8px -5px; }
+.sidepanel li > a > h3 { display: inline; }
 
-.sidepanel-right {
-    right: 0px;
-    margin-right: -240px;
-}
+.sidepanel-left { left: 0px; }
+.sidepanel-left li > a > h3 { margin-left: 20px; }
 
-.menu-item {
-    display: block;
-    text-align:right;
-    margin: 20px auto;
-}
+.sidepanel-right { right: 0px; }
+.sidepanel-right li > a > h3 { margin-right: 20px; }
 
-.menu-item i {
-    margin: 10px;
-    text-decoration: none;
-}
+.menu-item { background-color: whitesmoke; }
 
 /*** Widgets ***/
 #video-parrot { margin-top: 25px;}
