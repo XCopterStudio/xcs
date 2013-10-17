@@ -4,11 +4,7 @@
 #include <string>
 #include <vector>
 
-typedef std::vector<Senzor> senzorList;
-typedef std::vector<std::string> specialCMDList;
-
 //! Types of senzor which x-copter can posses
-
 enum SenzorType{
 	AKCELEROMETR, /*!< Akcelerometer senzor. */
 	CAMERA, /*!< Camera senzor. */
@@ -19,34 +15,36 @@ enum SenzorType{
 };
 
 //! Information about senzor
-
 struct Senzor{
 	std::string name; /*!< Unique name in XCI for senzor. */
 	SenzorType type; /*!< Type of senzor (AKCELEROMETR, CAMERA etc.). */
 	std::string additionalInformation; /*!< Additional information about senzor in plain text. Example: "Resolution:1280x720,FPS:20" */
 };
 
-/*! Virtual class for unified x-copter interface */
+// Some usefull typedefs
+typedef std::vector<Senzor> senzorList;
+typedef std::vector<std::string> specialCMDList;
 
+//! Virtual class for unified x-copter interface
 class XCI{
 public:
 	//! A pure virtual member returning name of x-copter XCI
-	virtual std::string getName();
+	virtual std::string getName()=0;
 	//! A pure virtual member returning list of available senzor on x-copter
-	virtual senzorList getSenzorList();
+	virtual senzorList getSenzorList()=0;
 	//! A pure virtual member taking specifikation of senzor and returning void pointer to data from desired senzor
-	virtual void* getSenzorData(Senzor senzor);
+	virtual void* getSenzorData(Senzor senzor)=0;
 	//! A pure virtual member returning x-copter큦 configuration
-	virtual std::string getConfiguration();
+	virtual std::string getConfiguration()=0;
 	//! A pure virtual member returning list of x-copter큦 special commands 
-	virtual specialCMDList getSpecialCMD();
+	virtual specialCMDList getSpecialCMD()=0;
 	
 	//! A pure virtual member taking new x-copter큦 configuration and send this configuration to the x-copter
-	virtual void setConfiguration(std::string configuration);
+	virtual void setConfiguration(std::string configuration)=0;
 	//! A pure virtual member taking command from list of x-copter큦 special commands and send it to the x-copter
-	virtual void sendCommand(std::string command);
+	virtual void sendCommand(std::string command)=0;
 	//! A pure virtual member taking four fly parameters and send it ot the x-copter
-	virtual void sendFlyParam(double roll,double pitch, double yaw, double gaz);
+	virtual void sendFlyParam(double roll,double pitch, double yaw, double gaz)=0;
 };
 
 #endif
