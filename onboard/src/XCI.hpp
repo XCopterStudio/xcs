@@ -28,6 +28,8 @@ typedef std::vector<std::string> specialCMDList;
 //! Virtual class for unified x-copter interface
 class XCI{
 public:
+	//! A pure virtual member inicializing XCI for use
+	virtual void init()=0;
 	//! A pure virtual member returning name of x-copter XCI
 	virtual std::string getName()=0;
 	//! A pure virtual member returning list of available senzor on x-copter
