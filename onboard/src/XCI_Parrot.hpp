@@ -6,8 +6,10 @@
 #include "XCI.hpp"
 
 class XCI_Parrot : public virtual XCI{
-	const std::string name;
-	const int CMDPort = 5556;
+	static const std::string name;
+
+	unsigned int sequenceNumber;
+	static const int CMDPort;
 	boost::asio::ip::udp::endpoint parrotCMD;
 public:
 	//! Inicialize XCI for use
