@@ -31,7 +31,7 @@ public:
 	//
 	// Bellow are methods that are subject to change based on the discussions and real-world needs.
 	//
-	
+
 	//! A pure virtual member returning name of x-copter XCI
 	virtual std::string getName()=0;
 
@@ -63,6 +63,9 @@ public:
 	//! A pure virtual member taking four fly parameters and send it ot the x-copter
 	virtual void sendFlyParam(double roll,double pitch, double yaw, double gaz)=0;
 
+	//! A pure virtual member inicializing XCI for use
+	virtual void init()=0;
+	
 	//! Resets settings to default values and re-calibrates the sensors (if supported).
 	virtual void reset() = 0;
 
