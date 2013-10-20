@@ -28,23 +28,49 @@ typedef std::vector<std::string> specialCMDList;
 //! Virtual class for unified x-copter interface
 class XCI{
 public:
+	//
+	// Bellow are methods that are subject to change based on the discussions and real-world needs.
+	//
+	
 	//! A pure virtual member returning name of x-copter XCI
 	virtual std::string getName()=0;
+
 	//! A pure virtual member returning list of available sensors on x-copter
 	virtual sensorList getSensorList()=0;
+
 	//! A pure virtual member taking specification of sensor and returning void pointer to data from desired sensor
 	virtual void* getSensorData(Sensor sensor)=0;
-	//! A pure virtual member returning x-copter큦 configuration
-	virtual std::string getConfiguration()=0;
+
+	//! Returning x-copter큦 configuration value
+	virtual std::string getConfiguration(const std::string &key) = 0;
+	
+	//! Sets configuration value.
+	virtual setConfiguration(const std::string &key, const std::string &value) = 0;
+	
 	//! A pure virtual member returning list of x-copter큦 special commands 
-	virtual specialCMDList getSpecialCMD()=0;
+	virtual specialCMDList getSpecialCMD()=0;	
 	
 	//! A pure virtual member taking new x-copter큦 configuration and send this configuration to the x-copter
 	virtual void setConfiguration(std::string configuration)=0;
-	//! A pure virtual member taking command from list of x-copter큦 special commands and send it to the x-copter
+	
+	//! A pure virtual member taking command from list of x-copter큦 special commands and sending it to the x-copter
 	virtual void sendCommand(std::string command)=0;
+	
+	//
+	// Bellow are methods important for simple manually driven skeleton.
+	//
+	
 	//! A pure virtual member taking four fly parameters and send it ot the x-copter
 	virtual void sendFlyParam(double roll,double pitch, double yaw, double gaz)=0;
+
+	//! Resets settings to default values and re-calibrates the sensors (if supported).
+	virtual void reset() = 0;
+
+	//! Turns on the engines.
+	virtual void start() = 0;
+
+	//! Turns off the engines.
+	virtual void stop() = 0;
 };
 
 #endif
