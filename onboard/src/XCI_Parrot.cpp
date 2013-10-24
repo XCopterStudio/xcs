@@ -58,20 +58,36 @@ void XCI_Parrot::init(){
 	}
 }
 
+void XCI_Parrot::reset(){
+
+}
+
+void XCI_Parrot::start(){
+
+}
+
+void XCI_Parrot::stop(){
+
+}
+
 std::string XCI_Parrot::getName(){
 	return name;
 }
 
-senzorList XCI_Parrot::getSenzorList(){
-	return senzorList();
+sensorList XCI_Parrot::getSensorList(){
+	return sensorList();
 }
 
-void* XCI_Parrot::getSenzorData(Senzor senzor){
+void* XCI_Parrot::getSensorData(const Sensor &sensor){
 	return NULL;
 }
 
-std::string XCI_Parrot::getConfiguration(){
+std::string XCI_Parrot::getConfiguration(const std::string &key){
 	return "";
+}
+
+informationMap XCI_Parrot::getConfiguration(){
+	return informationMap();
 }
 
 specialCMDList XCI_Parrot::getSpecialCMD(){
@@ -83,15 +99,19 @@ specialCMDList XCI_Parrot::getSpecialCMD(){
 	return CMDList;
 }
 	
-void XCI_Parrot::setConfiguration(std::string configuration){
+int XCI_Parrot::setConfiguration(const std::string &key, const std::string &value){
+	return 1;
+}
+
+int XCI_Parrot::setConfiguration(const informationMap &configuration){
+	return 1;
+}
+
+void XCI_Parrot::sendCommand(const std::string &command){
 
 }
 
-void XCI_Parrot::sendCommand(std::string command){
-
-}
-
-void XCI_Parrot::sendFlyParam(double roll,double pitch, double yaw, double gaz){
+void XCI_Parrot::sendFlyParam(double roll, double pitch, double yaw, double gaz){
 
 }
 
