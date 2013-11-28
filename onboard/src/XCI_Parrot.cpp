@@ -52,7 +52,7 @@ void XCI_Parrot::init(){
 	char buffer_msg[1024];
     try{
 		// Take off
-		for(int i=0; i < 2000; i++){
+		for(int i=0; i < 10; i++){
 			// create magic bitField for take off
 			int bitField = (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) | (1 << 28) | (1 << 9);
 			int length = sprintf_s(buffer_msg,1024,"AT*REF=%d,%d\r",sequenceNumberCMD++,bitField);
@@ -60,11 +60,13 @@ void XCI_Parrot::init(){
 			// send AT-command to x-copter
 			socketCMD->send(boost::asio::buffer(buffer_msg,length));
 		
-			boost::this_thread::sleep_for( boost::chrono::milliseconds(10) );
+			boost::this_thread::sleep_for( boost::chrono::milliseconds(20) );
 		}
 
+    boost::this_thread::sleep_for( boost::chrono::milliseconds(3500) );
+
 		// Land
-		for(int i=0; i < 2000; i++){
+		for(int i=0; i < 10; i++){
 			// create magic bitField for land
 			int bitField = (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) | (1 << 28);
 			int length = sprintf_s(buffer_msg,1024,"AT*REF=%d,%d\r",sequenceNumberCMD++,bitField);
@@ -73,7 +75,7 @@ void XCI_Parrot::init(){
 			socketCMD->send(boost::asio::buffer(buffer_msg,length));
 			//print AT-command
 
-			boost::this_thread::sleep_for( boost::chrono::milliseconds(10) );
+			boost::this_thread::sleep_for( boost::chrono::milliseconds(20) );
 		}
     }catch(exception ex){
       cout << ex.what() << endl;
