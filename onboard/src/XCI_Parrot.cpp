@@ -19,29 +19,25 @@ void XCI_Parrot::initNetwork(){
 	boost::system::error_code ec;
 
 	udp::endpoint parrotCMD = udp::endpoint(address::from_string("192.168.1.1"),CMDPort);
-    io_service io_CMD;
-	socketCMD = new udp::socket(io_CMD);
+	socketCMD = new udp::socket(io_service);
 	socketCMD->connect(parrotCMD,ec);
 	if(ec){
 		printf("Error \n");
 	}
 
 	udp::endpoint parrotData = udp::endpoint(address::from_string("192.168.1.1"),DataPort);
-    io_service io_DATA;
-	socketData = new udp::socket(io_DATA);
+	socketData = new udp::socket(io_service);
 	socketData->connect(parrotData,ec);
 	if(ec){
 		printf("Error \n");
 	}
 
 	tcp::endpoint parrotVideo = tcp::endpoint(address::from_string("192.168.1.1"),VideoPort);
-    io_service io_Video;
-	socketVideo = new tcp::socket(io_Video);
+	socketVideo = new tcp::socket(io_service);
 	socketVideo->connect(parrotVideo,ec);
 	if(ec){
 		printf("Error \n");
 	}
-
 }
 
 // ----------------- Public function ---------------- //
@@ -53,31 +49,31 @@ void XCI_Parrot::init(){
 
   initNetwork();
 
-	char buffer[1024];
+	char buffer_msg[1024];
     try{
 		// Take off
-		for(int i=0; i < 100; i++){
+		for(int i=0; i < 2000; i++){
 			// create magic bitField for take off
 			int bitField = (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) | (1 << 28) | (1 << 9);
-			int length = sprintf_s(buffer,1024,"AT*REF=%d,%d\r",sequenceNumberCMD++,bitField);
-			printf("Buffer %s",&buffer);
+			int length = sprintf_s(buffer_msg,1024,"AT*REF=%d,%d\r",sequenceNumberCMD++,bitField);
+			printf("Buffer %s",&buffer_msg);
 			// send AT-command to x-copter
-			socketCMD->send(boost::asio::buffer(buffer));
+			socketCMD->send(boost::asio::buffer(buffer_msg,length));
 		
-			boost::this_thread::sleep_for( boost::chrono::milliseconds(50) );
+			boost::this_thread::sleep_for( boost::chrono::milliseconds(10) );
 		}
 
 		// Land
-		for(int i=0; i < 100; i++){
+		for(int i=0; i < 2000; i++){
 			// create magic bitField for land
 			int bitField = (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) | (1 << 28);
-			int length = sprintf_s(&buffer[0],1024,"AT*REF=%d,%d\r",sequenceNumberCMD++,bitField);
-			printf("Buffer %s",&buffer);
+			int length = sprintf_s(buffer_msg,1024,"AT*REF=%d,%d\r",sequenceNumberCMD++,bitField);
+			printf("Buffer %s",&buffer_msg);
 			// send AT-command to x-copter
-			socketCMD->send(boost::asio::buffer(buffer,length));
+			socketCMD->send(boost::asio::buffer(buffer_msg,length));
 			//print AT-command
 
-			boost::this_thread::sleep_for( boost::chrono::milliseconds(50) );
+			boost::this_thread::sleep_for( boost::chrono::milliseconds(10) );
 		}
     }catch(exception ex){
       cout << ex.what() << endl;

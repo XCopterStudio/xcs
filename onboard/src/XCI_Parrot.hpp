@@ -23,6 +23,7 @@ class XCI_Parrot : public virtual XCI{
 	// boost::asio::ip::udp::endpoint parrotData;
 	// boost::asio::ip::tcp::endpoint parrotVideo;
 
+  boost::asio::io_service io_service;
 	boost::asio::ip::udp::socket *socketCMD;
 	boost::asio::ip::udp::socket *socketData;
 	boost::asio::ip::tcp::socket *socketVideo;
