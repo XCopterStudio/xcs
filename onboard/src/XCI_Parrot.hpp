@@ -5,12 +5,30 @@
 
 #include "XCI.hpp"
 
+namespace xci_parrot{
+
 class XCI_Parrot : public virtual XCI{
+	// Constant
+	static const int CMDPort;
+	static const int VideoPort;
+	static const int DataPort;
+
 	static const std::string name;
 
-	unsigned int sequenceNumber;
-	static const int CMDPort;
-	boost::asio::ip::udp::endpoint parrotCMD;
+	unsigned int sequenceNumberCMD;
+	unsigned int sequenceNumberVideo;
+	unsigned int sequenceNumberData;
+
+	// boost::asio::ip::udp::endpoint parrotCMD;
+	// boost::asio::ip::udp::endpoint parrotData;
+	// boost::asio::ip::tcp::endpoint parrotVideo;
+
+	boost::asio::ip::udp::socket *socketCMD;
+	boost::asio::ip::udp::socket *socketData;
+	boost::asio::ip::tcp::socket *socketVideo;
+
+	void initNetwork();
+
 public:
 	//! Initialize XCI for use
 	void init();
@@ -43,4 +61,5 @@ public:
 	void sendFlyParam(double roll, double pitch, double yaw, double gaz);
 };
 
+}
 #endif
