@@ -1,7 +1,5 @@
 #include "XCI_Parrot.hpp"
 
-#include <array>
-
 #include <boost/thread/thread.hpp>
 
 using namespace std;
@@ -18,29 +16,32 @@ const int XCI_Parrot::DataPort = 5554;
 // ----------------- Private function --------------- //
 
 void XCI_Parrot::initNetwork(){
-	try{
+	boost::system::error_code ec;
 
-		udp::endpoint parrotCMD = udp::endpoint(address::from_string("192.168.1.1"),CMDPort);
+	udp::endpoint parrotCMD = udp::endpoint(address::from_string("192.168.1.1"),CMDPort);
     io_service io_CMD;
-		socketCMD = new udp::socket(io_CMD);
-    socketCMD->open(udp::v4());
-		socketCMD->connect(parrotCMD);
-
-		udp::endpoint parrotData = udp::endpoint(address::from_string("192.168.1.1"),DataPort);
-    io_service io_DATA;
-		socketData = new udp::socket(io_DATA);
-    socketData->open(udp::v4());
-		socketData->connect(parrotData);
-
-		tcp::endpoint parrotVideo = tcp::endpoint(address::from_string("192.168.1.1"),VideoPort);
-    io_service io_Video;
-		socketVideo = new tcp::socket(io_Video);
-    socketVideo->open(ip::tcp::v4());
-		socketVideo->connect(parrotVideo);
-
-	}catch(exception ex){
-		cout << ex.what() << endl;
+	socketCMD = new udp::socket(io_CMD);
+	socketCMD->connect(parrotCMD,ec);
+	if(ec){
+		printf("Error \n");
 	}
+
+	udp::endpoint parrotData = udp::endpoint(address::from_string("192.168.1.1"),DataPort);
+    io_service io_DATA;
+	socketData = new udp::socket(io_DATA);
+	socketData->connect(parrotData,ec);
+	if(ec){
+		printf("Error \n");
+	}
+
+	tcp::endpoint parrotVideo = tcp::endpoint(address::from_string("192.168.1.1"),VideoPort);
+    io_service io_Video;
+	socketVideo = new tcp::socket(io_Video);
+	socketVideo->connect(parrotVideo,ec);
+	if(ec){
+		printf("Error \n");
+	}
+
 }
 
 // ----------------- Public function ---------------- //
@@ -52,20 +53,16 @@ void XCI_Parrot::init(){
 
   initNetwork();
 
-		std::array<char,1024> buffer;
+	char buffer[1024];
     try{
 		// Take off
 		for(int i=0; i < 100; i++){
 			// create magic bitField for take off
 			int bitField = (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) | (1 << 28) | (1 << 9);
-			int length = sprintf_s(&buffer[0],1024,"AT*REF=%d,%d\r",sequenceNumberCMD++,bitField);
-      printf("Buffer %s",&buffer);
+			int length = sprintf_s(buffer,1024,"AT*REF=%d,%d\r",sequenceNumberCMD++,bitField);
+			printf("Buffer %s",&buffer);
 			// send AT-command to x-copter
-			socketCMD->send(boost::asio::buffer(buffer,1024));
-			//print AT-command
-			for(int a=0; a<length; a++){
-				cout << buffer[a];
-			}
+			socketCMD->send(boost::asio::buffer(buffer));
 		
 			boost::this_thread::sleep_for( boost::chrono::milliseconds(50) );
 		}
@@ -75,12 +72,10 @@ void XCI_Parrot::init(){
 			// create magic bitField for land
 			int bitField = (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) | (1 << 28);
 			int length = sprintf_s(&buffer[0],1024,"AT*REF=%d,%d\r",sequenceNumberCMD++,bitField);
+			printf("Buffer %s",&buffer);
 			// send AT-command to x-copter
 			socketCMD->send(boost::asio::buffer(buffer,length));
 			//print AT-command
-			for(int a=0; a<length; a++){
-				cout << buffer[a];
-			}
 
 			boost::this_thread::sleep_for( boost::chrono::milliseconds(50) );
 		}
