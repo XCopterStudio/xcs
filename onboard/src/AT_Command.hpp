@@ -21,7 +21,7 @@ union float_int{
 	float floatNumber;
 
 	float_int(int32_t intNumber) : intNumber(intNumber) {};
-	float_int(float floatNumber) : floatNumber(floatNumber) {};
+	float_int(float floatNumber = 0.0f) : floatNumber(floatNumber) {};
 };
 
 //! Drone's constant representation of movement. 
