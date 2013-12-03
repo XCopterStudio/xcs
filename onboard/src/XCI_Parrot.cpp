@@ -1,4 +1,5 @@
 #include "XCI_Parrot.hpp"
+#include "AT_Command.hpp"
 
 #include <boost/thread/thread.hpp>
 
@@ -18,6 +19,7 @@ const int XCI_Parrot::DataPort = 5554;
 void XCI_Parrot::initNetwork(){
 	boost::system::error_code ec;
 
+	// connect to cmd port
 	udp::endpoint parrotCMD = udp::endpoint(address::from_string("192.168.1.1"),CMDPort);
 	socketCMD = new udp::socket(io_service);
 	socketCMD->connect(parrotCMD,ec);
@@ -25,6 +27,7 @@ void XCI_Parrot::initNetwork(){
 		printf("Error \n");
 	}
 
+	// connect to navdata port
 	udp::endpoint parrotData = udp::endpoint(address::from_string("192.168.1.1"),DataPort);
 	socketData = new udp::socket(io_service);
 	socketData->connect(parrotData,ec);
@@ -32,6 +35,7 @@ void XCI_Parrot::initNetwork(){
 		printf("Error \n");
 	}
 
+	// connect to video port
 	tcp::endpoint parrotVideo = tcp::endpoint(address::from_string("192.168.1.1"),VideoPort);
 	socketVideo = new tcp::socket(io_service);
 	socketVideo->connect(parrotVideo,ec);
