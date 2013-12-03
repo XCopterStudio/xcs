@@ -24,12 +24,12 @@ union float_int{
 	float_int(float floatNumber) : floatNumber(floatNumber) {};
 };
 
-//! Drone's representation of movement. 
+//! Drone's constant representation of movement. 
 
 //! All input value must be in range <-1,1> otherwise constructor and setter 
 //! corect input value to this range. All values lower or higher than limits
-//! will be replaced with this limits.
-struct droneMove{
+//! will be replaced with this limits. 
+const struct droneMove{
 	float_int roll;
 	float_int pitch;
 	float_int yaw;
