@@ -9,7 +9,8 @@ enum behavior{
 	TAKEOFF,
 	LAND,
 	EMERGENCY,
-	NORMAL
+	NORMAL,
+	CLEAR
 };
 
 //! Serve for easier conversion between 32-bit integer and float
@@ -27,7 +28,7 @@ union float_int{
 //! Drone's constant representation of movement. 
 
 //! All input value must be in range <-1,1> otherwise constructor and setter 
-//! corect input value to this range. All values lower or higher than limits
+//! correct input value to this range. All values lower or higher than limits
 //! will be replaced with this limits. 
 const struct droneMove{
 	float_int roll;
@@ -47,15 +48,23 @@ public:
 };
 
 //! Drone take off, landing and emergency stop command.
-class atCommandRef : public atCommand{
-	const behavior basicBehavior;
+
+//! When you want change drone state from emergency to normal or otherwise
+//! first check in which state drone is because both commands have same 
+//! syntax. And when you send more then one command for changing drone state. 
+//! Drone will flip flop between this states.
+const class atCommandRef : public atCommand{
+	static const std::string nameOfCommand;
+	behavior basicBehavior;
 public:
 	atCommandRef(const behavior basicBehavior) : basicBehavior(basicBehavior) {};
 	std::string toString(const unsigned int sequenceNumber);
 };
 
 //! Move drone command.
-class atCommandPCMD : public atCommand{
+const class atCommandPCMD : public atCommand{
+private:
+	static const std::string nameOfCommand;
 protected:
 	droneMove move;
 	bool absoluteControl;
@@ -66,7 +75,8 @@ public:
 };
 
 //! Move drone command with absolute control support. 
-class atCommandPCMD_MAG : public atCommandPCMD{
+const class atCommandPCMD_MAG : public atCommandPCMD{
+	static const std::string nameOfCommand;
 	float_int magnetoAngle;
 	float_int magnetoAccuracy;
 public:
@@ -74,31 +84,36 @@ public:
 };
 
 //! Sets the reference for horizontal plane. Must be on the ground.
-class atCommandFTRIM : public atCommand{
+const class atCommandFTRIM : public atCommand{
+	static const std::string nameOfCommand;
 public:
 	std::string toString(const unsigned int sequenceNumber);
 };
 
 //! Configuration of the drone.
-class atCommandCONFIG : public atCommand{
+const class atCommandCONFIG : public atCommand{
+	static const std::string nameOfCommand;
 public:
 	std::string toString(const unsigned int sequenceNumber);
 };
 
 //! Identifiers for atCommandConfig.
-class atCommandCONFIG_IDS : public atCommand{
+const class atCommandCONFIG_IDS : public atCommand{
+	static const std::string nameOfCommand;
 public:
 	std::string toString(const unsigned int sequenceNumber);
 };
 
 //! Reset the communication watchdog timer.
-class atCommandCOMWDG : public atCommand{
+const class atCommandCOMWDG : public atCommand{
+	static const std::string nameOfCommand;
 public:
 	std::string toString(const unsigned int sequenceNumber);
 };
 
 //! Ask the drone to calibrate the magnetometer. Must be flying.
-class atCommandCALIB : public atCommand{
+const class atCommandCALIB : public atCommand{
+	static const std::string nameOfCommand;
 public:
 	std::string toString(const unsigned int sequenceNumber);
 };

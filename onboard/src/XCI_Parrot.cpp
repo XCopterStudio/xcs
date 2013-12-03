@@ -143,7 +143,9 @@ void XCI_Parrot::sendFlyParam(double roll, double pitch, double yaw, double gaz)
 
 }
 
+/*
 void main(){
 	XCI_Parrot parrot;
 	parrot.init();
 }
+*/
