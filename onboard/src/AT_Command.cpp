@@ -30,9 +30,7 @@ droneMove::droneMove(float roll, float pitch, float yaw, float gaz){
 }
 
 std::string atCommandRef::toString(const unsigned int sequenceNumber){
-	std::stringstream out;
-
-	// create magic bitField for basic behavior (take off, land, etc.)
+		// create magic bitField for basic behavior (take off, land, etc.)
 	// from documentation this bits must be set to 1
 	int bitField = (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) |(1 << 28);
 	switch(basicBehavior){
@@ -54,6 +52,7 @@ std::string atCommandRef::toString(const unsigned int sequenceNumber){
 			break;
 	}
 
+	std::stringstream out;
 	out << startOfAtComm << nameOfCommand << "=" << sequenceNumber;
 	out << delOfAtCommVal;
 	out << bitField;
@@ -62,10 +61,47 @@ std::string atCommandRef::toString(const unsigned int sequenceNumber){
 	return out.str();
 }
 
+atCommandPCMD::atCommandPCMD(const droneMove movement,const bool absControl, const bool combYaw,const bool progCmd) : move(movement), absoluteControl(absControl), combinedYaw(combYaw), progressivCommand(progCmd){
+
+}
+
+std::string atCommandPCMD::toString(const unsigned int sequenceNumber){
+	int bitField = 0;
+	// Create bitField according to Boolean arguments. More details in ar drone documentation.
+	bitField |= (progressivCommand << 0);
+	bitField |= (combinedYaw << 1);
+	bitField |= (absoluteControl << 2);
+
+	std::stringstream out;
+	out << startOfAtComm << nameOfCommand << "=" << sequenceNumber;
+	out << delOfAtCommVal << bitField;
+	out << delOfAtCommVal << move.roll.intNumber;
+	out << delOfAtCommVal << move.pitch.intNumber;
+	out << delOfAtCommVal << move.gaz.intNumber;
+	out << delOfAtCommVal << move.yaw.intNumber;
+	out << endOfAtComm;
+
+	return out.str();
+}
+
+atCommandPCMD_MAG::atCommandPCMD_MAG(const droneMove movement,const float psi, const float psiAccur, const bool absControl, const bool combYaw, const bool progCmd) : atCommandPCMD(movement), magnetoAngle(psi), magnetoAccuracy(psiAccur){
+
+}
+
+std::string atCommandPCMD_MAG::toString(const unsigned int sequenceNumber){
+	std::string pcmd = atCommandPCMD::toString(sequenceNumber);
+
+	std::stringstream out;
+	// remove last character (\r) from pcmd command
+	out << pcmd.substr(0, pcmd.length() -1);
+	// append additional values of drone heading according to magnetometer 
+	out << delOfAtCommVal << magnetoAngle.intNumber;
+	out << delOfAtCommVal << magnetoAccuracy.intNumber;
+	out << endOfAtComm;
+
+	return out.str();
+}
+
 void main(){
-	std::cout << atCommandRef(TAKEOFF).toString(1) << std::endl;
-	std::cout << atCommandRef(LAND).toString(1) << std::endl;
-	std::cout << atCommandRef(EMERGENCY).toString(1) << std::endl;
-	std::cout << atCommandRef(NORMAL).toString(1) << std::endl;
-	std::cout << atCommandRef(CLEAR).toString(1) << std::endl;
+	std::cout << atCommandPCMD_MAG(droneMove(), 0.1f,0.1f).toString(1);
 }
