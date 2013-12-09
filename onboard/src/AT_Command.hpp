@@ -31,10 +31,10 @@ union float_int{
 //! correct input value to this range. All values lower or higher than limits
 //! will be replaced with this limits. 
 const struct droneMove{
-	float_int roll; /*< */
-	float_int pitch;/*< */
-	float_int yaw;	/*< */
-	float_int gaz;	/*< */
+	float_int roll; /*< Negative values makes the drone tilt to its left and positive to its right. */
+	float_int pitch;/*< Negative values makes the drone lower its note and positive raise its nose. */
+	float_int yaw;	/*< Negative values makes the drone spin left and positive right. */
+	float_int gaz;	/*< Is percentage of the maximum vertical speed. Positive values makes the drone raise up and negative go down. */
 
 	droneMove(float roll = 0, float pitch = 0, float yaw = 0, float gaz = 0);
 };
@@ -77,7 +77,7 @@ const class atCommandPCMD : public atCommand{
 public:
 	//! Initialize constant class representing at command for drone movement.
 	/*!
-	\param movement is state which drone will try accomplish.
+	\param movement is state which drone will try accomplish. All values have to be in range <-1,1>.
 	\param absControl set whether drone will use absolute control mode or not. Absolute control mode switch between controller frame and ar drone frame more in documentation.
 	\param combYaw enable combined yaw control for generating complete turns (phi+yaw) from phi parameter.
 	*/
@@ -91,6 +91,13 @@ const class atCommandPCMD_MAG : public atCommandPCMD{
 	float_int magnetoAngle;
 	float_int magnetoAccuracy;
 public:
+	//! Initialize constant class representing at command for drone movement.
+	/*!
+	\param movement is state which drone will try accomplish. All values have to be in range <-1,1>.
+	\param absControl set whether drone will use absolute control mode or not. Absolute control mode switch between controller frame and ar drone frame more in documentation.
+	\param combYaw enable combined yaw control for generating complete turns (phi+yaw) from phi parameter.
+	\param psi is normalized angle <-1,1> from north provided by magnetometer sensor. Positive value means orientation to the east and negative to the west and 0 north.
+	*/
 	atCommandPCMD_MAG(const droneMove movement,const float psi, const float psiAccur, const bool absControl = false, const bool combYaw = false,const bool progCmd = true);
 	std::string toString(const unsigned int sequenceNumber);
 };

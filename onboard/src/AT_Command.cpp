@@ -84,8 +84,9 @@ std::string atCommandPCMD::toString(const unsigned int sequenceNumber){
 	return out.str();
 }
 
-atCommandPCMD_MAG::atCommandPCMD_MAG(const droneMove movement,const float psi, const float psiAccur, const bool absControl, const bool combYaw, const bool progCmd) : atCommandPCMD(movement), magnetoAngle(psi), magnetoAccuracy(psiAccur){
-
+atCommandPCMD_MAG::atCommandPCMD_MAG(const droneMove movement,const float psi, const float psiAccur, const bool absControl, const bool combYaw, const bool progCmd) : atCommandPCMD(movement){
+	magnetoAngle = valueInRange(psi,1.0f);
+	magnetoAccuracy = valueInRange(psiAccur,1.0f);
 }
 
 std::string atCommandPCMD_MAG::toString(const unsigned int sequenceNumber){
