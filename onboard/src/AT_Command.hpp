@@ -112,14 +112,27 @@ public:
 //! Configuration of the drone.
 const class atCommandCONFIG : public atCommand{
 	static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
+	std::string option;
+	std::string value;
 public:
+	//! Initialize at command with pair <option, value>. Class do not check if pair is valid!
+	/*!
+	\param option is name of ar drone parrot 2.0 option
+	\param value is value of ar drone parrot 2.0 option
+	*/
+	atCommandCONFIG(const std::string option, const std::string value);
 	std::string toString(const unsigned int sequenceNumber);
 };
 
 //! Identifiers for atCommandConfig.
 const class atCommandCONFIG_IDS : public atCommand{
 	static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
+	std::string sessionID;
+	std::string userID;
+	std::string applicationID;
 public:
+	//! Identify to which session in the multi configuration setting will be assigned next atCommandCONFIG. Have to be send before every atCommandCONFIG in multi configuration setting.
+	atCommandCONFIG_IDS(const std::string sessionID, std::string userID, std::string applicationID);
 	std::string toString(const unsigned int sequenceNumber);
 };
 
@@ -133,7 +146,13 @@ public:
 //! Ask the drone to calibrate the magnetometer. Must be flying.
 const class atCommandCALIB : public atCommand{
 	static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
+	int device;
 public:
+	//! Set which device will calibrate magnetometer.
+	/*!
+	\param device is identifier of the device to calibrate. Choose this identifier form ardrone_calibration_device_t.
+	*/
+	atCommandCALIB(const int device);
 	std::string toString(const unsigned int sequenceNumber);
 };
 

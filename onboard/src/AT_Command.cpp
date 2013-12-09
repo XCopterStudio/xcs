@@ -103,6 +103,61 @@ std::string atCommandPCMD_MAG::toString(const unsigned int sequenceNumber){
 	return out.str();
 }
 
+std::string atCommandFTRIM::toString(const unsigned int sequenceNumber){
+	std::stringstream out;
+	out << startOfAtComm << nameOfCommand << "=" << sequenceNumber << endOfAtComm;
+
+	return out.str();
+}
+
+atCommandCONFIG::atCommandCONFIG(const std::string option, const std::string value) : option(option), value(value){
+
+}
+
+std::string atCommandCONFIG::toString(const unsigned int sequenceNumber){
+	std::stringstream out;
+	out << startOfAtComm << nameOfCommand << "=" << sequenceNumber;
+	out << delOfAtCommVal << "\"" << option << "\"";
+	out << delOfAtCommVal << "\"" << value << "\"";
+	out << endOfAtComm;
+
+	return out.str();
+}
+
+atCommandCONFIG_IDS::atCommandCONFIG_IDS(const std::string sessionID, std::string userID, std::string applicationID) : sessionID(sessionID), userID(userID), applicationID(applicationID){
+
+}
+
+std::string atCommandCONFIG_IDS::toString(const unsigned int sequenceNumber){
+	std::stringstream out;
+	out << startOfAtComm << nameOfCommand << "=" << sequenceNumber;
+	out << delOfAtCommVal << "\"" << sessionID << "\""; 
+	out << delOfAtCommVal << "\"" << userID << "\""; 
+	out << delOfAtCommVal << "\"" << applicationID << "\""; 
+	out << endOfAtComm;
+
+	return out.str();
+}
+
+std::string atCommandCOMWDG::toString(const unsigned int sequenceNumber){
+		std::stringstream out;
+		out << startOfAtComm << nameOfCommand << "=" << sequenceNumber << endOfAtComm;
+
+		return out.str();
+}
+
+atCommandCALIB::atCommandCALIB(const int device) : device(device){
+
+}
+
+std::string atCommandCALIB::toString(const unsigned int sequenceNumber){
+	std::stringstream out;
+	out << startOfAtComm << nameOfCommand << "=" << sequenceNumber;
+	out << delOfAtCommVal << device; 
+	out << endOfAtComm;
+	return out.str();
+}
+
 void main(){
-	std::cout << atCommandPCMD_MAG(droneMove(), 0.1f,0.1f).toString(1);
+	std::cout << atCommandCALIB(1).toString(1);
 }
