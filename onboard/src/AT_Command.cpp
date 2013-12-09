@@ -159,5 +159,3 @@ std::string atCommandCALIB::toString(const unsigned int sequenceNumber){
 }
 
 
-#include "../../shared/tsqueue.hpp"
-#include <thread>
