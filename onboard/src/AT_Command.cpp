@@ -158,6 +158,6 @@ std::string atCommandCALIB::toString(const unsigned int sequenceNumber){
 	return out.str();
 }
 
-void main(){
-	std::cout << atCommandCALIB(1).toString(1);
-}
+
+#include "../../shared/tsqueue.hpp"
+#include <thread>
