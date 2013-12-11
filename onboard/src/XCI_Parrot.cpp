@@ -121,10 +121,14 @@ specialCMDList XCI_Parrot::getSpecialCMD(){
 }
 	
 int XCI_Parrot::setConfiguration(const std::string &key, const std::string &value){
+	atCommandQueue.push(new atCommandCONFIG(key, value));
 	return 1;
 }
 
 int XCI_Parrot::setConfiguration(const informationMap &configuration){
+	for(auto element : configuration){
+		atCommandQueue.push(new atCommandCONFIG(element.first,element.second));
+	}
 	return 1;
 }
 
@@ -145,7 +149,7 @@ void XCI_Parrot::sendCommand(const std::string &command){
 }
 
 void XCI_Parrot::sendFlyParam(double roll, double pitch, double yaw, double gaz){
-
+	atCommandQueue.push(new atCommandPCMD(droneMove(roll,pitch,yaw,gaz)));
 }
 
 XCI_Parrot::~XCI_Parrot(){
@@ -166,6 +170,16 @@ void main(){
 	parrot.init();
 	for(int i=0;i<10;++i){
 		parrot.sendCommand("TakeOff");
+		this_thread::sleep_for(std::chrono::microseconds(10000));
+	}
+
+	for(int i=0;i<10;++i){
+		parrot.sendFlyParam(0,0,0,-0.05);
+		this_thread::sleep_for(std::chrono::microseconds(10000));
+	}
+
+	for(int i=0;i<10;++i){
+		parrot.sendFlyParam(0,0,0,+0.05);
 		this_thread::sleep_for(std::chrono::microseconds(10000));
 	}
 
