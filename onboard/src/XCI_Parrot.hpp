@@ -2,8 +2,12 @@
 #define XCI_PARROT_H
 
 #include <boost/asio.hpp>
+#include <thread>
+#include <atomic>
 
 #include "XCI.hpp"
+#include "AT_Command.hpp"
+#include "../../shared/tsqueue.hpp"
 
 namespace xci_parrot{
 
@@ -13,15 +17,23 @@ class XCI_Parrot : public virtual XCI{
 	static const int VideoPort;
 	static const int DataPort;
 
+	static const unsigned int atCMDPacketSize;
+
 	static const std::string name;
 
+	// Sequence number for communication with the drone.
 	unsigned int sequenceNumberCMD;
 	unsigned int sequenceNumberVideo;
 	unsigned int sequenceNumberData;
 
-	// boost::asio::ip::udp::endpoint parrotCMD;
-	// boost::asio::ip::udp::endpoint parrotData;
-	// boost::asio::ip::tcp::endpoint parrotVideo;
+	// queue for at commands
+	tsqueue<atCommand*> atCommandQueue;
+
+	// threads
+	std::thread* sendingATCmdThread;
+
+	// end all thread
+	std::atomic<bool> endAll;
 
   boost::asio::io_service io_service;
 	boost::asio::ip::udp::socket *socketCMD;
@@ -29,6 +41,7 @@ class XCI_Parrot : public virtual XCI{
 	boost::asio::ip::tcp::socket *socketVideo;
 
 	void initNetwork();
+	void sendingATCommands();
 
 public:
 	//! Initialize XCI for use
@@ -60,6 +73,8 @@ public:
 	void sendCommand(const std::string &command);
 	//! Take four fly parameters and send it to the x-copter
 	void sendFlyParam(double roll, double pitch, double yaw, double gaz);
+
+	~XCI_Parrot();
 };
 
 }

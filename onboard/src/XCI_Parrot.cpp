@@ -1,18 +1,19 @@
 #include "XCI_Parrot.hpp"
 #include "AT_Command.hpp"
 
-#include <boost/thread/thread.hpp>
-
 using namespace std;
 using namespace boost::asio;
 using namespace boost::asio::ip;
 using namespace xci_parrot;
 // ----------------- Constant ----------------------- //
 
-const std::string XCI_Parrot::name ="Parrot AR Drone 2.0 XCI";
 const int XCI_Parrot::CMDPort = 5556;
 const int XCI_Parrot::VideoPort = 5555;
 const int XCI_Parrot::DataPort = 5554;
+
+const unsigned int XCI_Parrot::atCMDPacketSize = 1024;
+
+const std::string XCI_Parrot::name ="Parrot AR Drone 2.0 XCI";
 
 // ----------------- Private function --------------- //
 
@@ -44,6 +45,25 @@ void XCI_Parrot::initNetwork(){
 	}
 }
 
+void XCI_Parrot::sendingATCommands(){
+	std::stringstream packetString;
+	while(!endAll){ 
+		atCommand* cmd = atCommandQueue.pop();
+		std::string cmdString = cmd->toString(sequenceNumberCMD++);
+		delete cmd;
+
+		unsigned int newSize = packetString.str().size() + cmdString.size();
+		if(newSize > atCMDPacketSize || atCommandQueue.empty()){ // send packet
+			socketCMD->send(boost::asio::buffer(packetString.str()));
+			packetString.clear();
+		}
+
+		packetString << cmdString;
+	}
+
+	// end thread
+}
+
 // ----------------- Public function ---------------- //
 
 void XCI_Parrot::init(){
@@ -51,39 +71,11 @@ void XCI_Parrot::init(){
 	sequenceNumberVideo = 1;
 	sequenceNumberData = 1;
 
+	endAll = false;
+
   initNetwork();
-
-	char buffer_msg[1024];
-    try{
-		// Take off
-		for(int i=0; i < 10; i++){
-			// create magic bitField for take off
-			int bitField = (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) | (1 << 28) | (1 << 9);
-			int length = sprintf_s(buffer_msg,1024,"AT*REF=%d,%d\r",sequenceNumberCMD++,bitField);
-			printf("Buffer %s",&buffer_msg);
-			// send AT-command to x-copter
-			socketCMD->send(boost::asio::buffer(buffer_msg,length));
-		
-			boost::this_thread::sleep_for( boost::chrono::milliseconds(20) );
-		}
-
-    boost::this_thread::sleep_for( boost::chrono::milliseconds(3500) );
-
-		// Land
-		for(int i=0; i < 10; i++){
-			// create magic bitField for land
-			int bitField = (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) | (1 << 28);
-			int length = sprintf_s(buffer_msg,1024,"AT*REF=%d,%d\r",sequenceNumberCMD++,bitField);
-			printf("Buffer %s",&buffer_msg);
-			// send AT-command to x-copter
-			socketCMD->send(boost::asio::buffer(buffer_msg,length));
-			//print AT-command
-
-			boost::this_thread::sleep_for( boost::chrono::milliseconds(20) );
-		}
-    }catch(exception ex){
-      cout << ex.what() << endl;
-    }
+	sendingATCmdThread = new std::thread(&XCI_Parrot::sendingATCommands,this);
+	
 }
 
 void XCI_Parrot::reset(){
@@ -123,6 +115,7 @@ specialCMDList XCI_Parrot::getSpecialCMD(){
 	CMDList.push_back("TakeOff");
 	CMDList.push_back("Land");
 	CMDList.push_back("EmergencyStop");
+	CMDList.push_back("Normal");
 	CMDList.push_back("Reset");
 	return CMDList;
 }
@@ -136,16 +129,49 @@ int XCI_Parrot::setConfiguration(const informationMap &configuration){
 }
 
 void XCI_Parrot::sendCommand(const std::string &command){
-
+	if(command == "TakeOff"){
+		atCommandQueue.push(new atCommandRef(TAKEOFF));
+	}else{ if(command == "Land"){
+		atCommandQueue.push(new atCommandRef(LAND));
+	}else{ if(command == "EmegrencyStop"){
+		atCommandQueue.push(new atCommandRef(EMERGENCY));
+	}else{ if(command == "Normal"){
+		atCommandQueue.push(new atCommandRef(NORMAL));
+	}else{ if(command == "Reset"){
+		
+	}else{
+		
+	}}}}}
 }
 
 void XCI_Parrot::sendFlyParam(double roll, double pitch, double yaw, double gaz){
 
 }
 
-/*
+XCI_Parrot::~XCI_Parrot(){
+	endAll = true;
+
+	// wait for atCMDThread end and then clear memory
+	sendingATCmdThread->join();	
+	delete sendingATCmdThread;
+
+	// delete all atCommand in queue
+	while(atCommandQueue.empty())
+		delete atCommandQueue.pop();
+}
+
+
 void main(){
 	XCI_Parrot parrot;
 	parrot.init();
+	for(int i=0;i<10;++i){
+		parrot.sendCommand("TakeOff");
+		this_thread::sleep_for(std::chrono::microseconds(10000));
+	}
+
+	for(int i=0;i<10;++i){
+		parrot.sendCommand("Land");
+		this_thread::sleep_for(std::chrono::microseconds(10000));
+	}
 }
-*/
+
