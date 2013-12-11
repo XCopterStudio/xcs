@@ -33,7 +33,7 @@ class XCI_Parrot : public virtual XCI{
 	std::thread* sendingATCmdThread;
 
 	// end all thread
-	std::atomic<bool> endAll;
+	volatile std::atomic<bool> endAll;
 
   boost::asio::io_service io_service;
 	boost::asio::ip::udp::socket *socketCMD;

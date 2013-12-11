@@ -52,11 +52,19 @@ void XCI_Parrot::sendingATCommands(){
 		std::string cmdString = cmd->toString(sequenceNumberCMD++);
 		delete cmd;
 
-		unsigned int newSize = packetString.str().size() + cmdString.size();
+		unsigned int newSize = packetString.str().size() + cmdString.size() + 1; // one for new line 
 		if(newSize > atCMDPacketSize || atCommandQueue.empty()){ // send packet
-			socketCMD->send(boost::asio::buffer(packetString.str()));
+      socketCMD->send(boost::asio::buffer(packetString.str(),packetString.str().size()));
+      //std::cout << packetString.str() << endl;
+
+      // clear packet string
+      packetString.str(std::string());
 			packetString.clear();
 		}
+
+    if(packetString.str().size() > 0){
+      packetString << std::endl;
+    }
 
 		packetString << cmdString;
 	}
@@ -76,6 +84,8 @@ void XCI_Parrot::init(){
   initNetwork();
 	sendingATCmdThread = new std::thread(&XCI_Parrot::sendingATCommands,this);
 	
+  atCommandQueue.push(new atCommandCOMWDG());
+  atCommandQueue.push(new atCommandFTRIM());
 }
 
 void XCI_Parrot::reset(){
@@ -156,6 +166,7 @@ XCI_Parrot::~XCI_Parrot(){
 	endAll = true;
 
 	// wait for atCMDThread end and then clear memory
+  // TODO: 
 	sendingATCmdThread->join();	
 	delete sendingATCmdThread;
 
@@ -168,24 +179,31 @@ XCI_Parrot::~XCI_Parrot(){
 void main(){
 	XCI_Parrot parrot;
 	parrot.init();
-	for(int i=0;i<10;++i){
+
+  this_thread::sleep_for(std::chrono::microseconds(1000000));
+  
+	for(int i=0;i<25;++i){
 		parrot.sendCommand("TakeOff");
-		this_thread::sleep_for(std::chrono::microseconds(10000));
+		this_thread::sleep_for(std::chrono::microseconds(100000));
 	}
 
-	for(int i=0;i<10;++i){
-		parrot.sendFlyParam(0,0,0,-0.05);
-		this_thread::sleep_for(std::chrono::microseconds(10000));
+  this_thread::sleep_for(std::chrono::microseconds(2000000));
+
+	for(int i=0;i<20;++i){
+		parrot.sendFlyParam(0,0,0.2,0);
+		this_thread::sleep_for(std::chrono::microseconds(200000));
 	}
 
-	for(int i=0;i<10;++i){
-		parrot.sendFlyParam(0,0,0,+0.05);
-		this_thread::sleep_for(std::chrono::microseconds(10000));
+	for(int i=0;i<20;++i){
+		parrot.sendFlyParam(0,0,-0.2,0);
+		this_thread::sleep_for(std::chrono::microseconds(200000));
 	}
 
 	for(int i=0;i<10;++i){
 		parrot.sendCommand("Land");
-		this_thread::sleep_for(std::chrono::microseconds(10000));
+		this_thread::sleep_for(std::chrono::microseconds(100000));
 	}
+
+  this_thread::sleep_for(std::chrono::microseconds(5000000));
 }
 
