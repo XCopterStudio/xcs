@@ -3,10 +3,17 @@ project(onboard)
 
 set (CMAKE_CXX_FLAGS "-std=c++0x")
 
+# pthreads
+find_package (Threads)
+
+# Boost
 find_package(Boost REQUIRED COMPONENTS system thread) 
 
 include_directories(${Boost_INCLUDE_DIRS}) 
 add_executable(main src/XCI_Parrot.cpp src/AT_Command.cpp)
+
+# Linked libs
 target_link_libraries(main ${Boost_LIBRARIES})                                                                                                                                                       
+target_link_libraries (main ${CMAKE_THREAD_LIBS_INIT})
 
 
