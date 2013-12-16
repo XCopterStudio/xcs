@@ -176,7 +176,7 @@ XCI_Parrot::~XCI_Parrot(){
 }
 
 
-void main(){
+int main(){
 	XCI_Parrot parrot;
 	parrot.init();
 

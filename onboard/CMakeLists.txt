@@ -4,6 +4,8 @@ project(onboard)
 add_definitions(-DBOOST_ASIO_STANDALONE=1)
 add_definitions(-DBOOST_ASIO_HAS_STD_ADDRESSOF=1)
 
+set (CMAKE_CXX_FLAGS "-std=c++0x")
+
 include_directories(
 	../3rd-party/boost/algorithm/include
 	../3rd-party/boost/asio/include
