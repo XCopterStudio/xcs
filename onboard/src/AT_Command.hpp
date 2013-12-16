@@ -30,7 +30,7 @@ union float_int{
 //! All input value must be in range <-1,1> otherwise constructor and setter 
 //! correct input value to this range. All values lower or higher than limits
 //! will be replaced with this limits. 
-const struct droneMove{
+struct droneMove{
 	float_int roll; /*< Negative values makes the drone tilt to its left and positive to its right. */
 	float_int pitch;/*< Negative values makes the drone lower its note and positive raise its nose. */
 	float_int yaw;	/*< Negative values makes the drone spin left and positive right. */
@@ -58,7 +58,7 @@ public:
 //! first check in which state drone is because both commands have same 
 //! syntax. And when you send more then one command for changing drone state. 
 //! Drone will flip flop between this states.
-const class atCommandRef : public atCommand{
+class atCommandRef : public atCommand{
 	static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
 	behavior basicBehavior; /*< Represent behavior of drone (take off, land etc.).*/
 public:
@@ -68,7 +68,7 @@ public:
 };
 
 //! Move drone command.
-const class atCommandPCMD : public atCommand{
+class atCommandPCMD : public atCommand{
 	static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
 	droneMove move;
 	bool absoluteControl;
@@ -86,7 +86,7 @@ public:
 };
 
 //! Move drone command with absolute control support. 
-const class atCommandPCMD_MAG : public atCommandPCMD{
+class atCommandPCMD_MAG : public atCommandPCMD{
 	static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
 	float_int magnetoAngle;
 	float_int magnetoAccuracy;
@@ -103,14 +103,14 @@ public:
 };
 
 //! Sets the reference for horizontal plane. Must be on the ground.
-const class atCommandFTRIM : public atCommand{
+class atCommandFTRIM : public atCommand{
 	static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
 public:
 	std::string toString(const unsigned int sequenceNumber);
 };
 
 //! Configuration of the drone.
-const class atCommandCONFIG : public atCommand{
+class atCommandCONFIG : public atCommand{
 	static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
 	std::string option;
 	std::string value;
@@ -125,7 +125,7 @@ public:
 };
 
 //! Identifiers for atCommandConfig.
-const class atCommandCONFIG_IDS : public atCommand{
+class atCommandCONFIG_IDS : public atCommand{
 	static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
 	std::string sessionID;
 	std::string userID;
@@ -137,14 +137,14 @@ public:
 };
 
 //! Reset the communication watchdog timer.
-const class atCommandCOMWDG : public atCommand{
+class atCommandCOMWDG : public atCommand{
 	static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
 public:
 	std::string toString(const unsigned int sequenceNumber);
 };
 
 //! Ask the drone to calibrate the magnetometer. Must be flying.
-const class atCommandCALIB : public atCommand{
+class atCommandCALIB : public atCommand{
 	static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
 	int device;
 public:
