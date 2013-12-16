@@ -7,6 +7,7 @@ set (CMAKE_CXX_FLAGS "-std=c++0x")
 find_package (Threads)
 
 # Boost
+set(Boost_USE_STATIC_LIBS true)
 find_package(Boost REQUIRED COMPONENTS system thread) 
 
 include_directories(${Boost_INCLUDE_DIRS}) 
