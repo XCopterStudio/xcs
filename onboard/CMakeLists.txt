@@ -1,7 +1,15 @@
 cmake_minimum_required(VERSION 2.8)
 project(onboard)
 
-set (CMAKE_CXX_FLAGS "-std=c++0x")
+# Platform dependent stuff
+if(WIN32)
+  set(TPN_WIN32 "/EHsc")
+endif(WIN32)
+
+if(UNIX)
+  set (CMAKE_CXX_FLAGS "-std=c++0x")
+endif(UNIX)
+
 
 # pthreads
 find_package (Threads)
