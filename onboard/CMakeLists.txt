@@ -7,6 +7,7 @@ set (CMAKE_CXX_FLAGS "-std=c++0x")
 find_package (Threads)
 
 # Boost
+add_definitions(-DBOOST_ALL_NO_LIB)
 set(Boost_USE_STATIC_LIBS true)
 find_package(Boost REQUIRED COMPONENTS system thread) 
 
