@@ -31,6 +31,7 @@ class XCI_Parrot : public virtual XCI{
 
 	// threads
 	std::thread* sendingATCmdThread;
+  std::thread* receiveNavDataThread;
 
 	// end all thread
 	volatile std::atomic<bool> endAll;
@@ -42,6 +43,7 @@ class XCI_Parrot : public virtual XCI{
 
 	void initNetwork();
 	void sendingATCommands();
+  void receiveNavData();
 
 public:
 	//! Initialize XCI for use

@@ -72,6 +72,12 @@ void XCI_Parrot::sendingATCommands(){
 	// end thread
 }
 
+void XCI_Parrot::receiveNavData(){
+  while(!endAll){
+  
+  }
+}
+
 // ----------------- Public function ---------------- //
 
 void XCI_Parrot::init(){
