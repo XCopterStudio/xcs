@@ -74,15 +74,31 @@ void XCI_Parrot::sendingATCommands(){
 }
 
 void XCI_Parrot::receiveNavData(){
-  const unsigned int maxBufferSize = 4096;
-  char message[maxBufferSize];
+  uint8_t message[NAVDATA_MAX_SIZE];
   navdata_t* navdata = (navdata_t*) &message[0];
   int32_t flag = 1; // 1 - unicast, 2 - multicast
   socketData->send(boost::asio::buffer((uint8_t*)(&flag),sizeof(int32_t)));
   
-  socketData->receive(boost::asio::buffer(message,maxBufferSize));
- 
-  printf("Komunikace \n"); 
+  socketData->receive(boost::asio::buffer(message,NAVDATA_MAX_SIZE));
+  sequenceNumberData = navdata->sequence;
+  // test god type of navdata
+  if(navdata->header == NAVDATA_HEADER){
+    if(getMaskFromState(navdata->ardrone_state, def_ardrone_state_mask_t::ARDRONE_NAVDATA_BOOTSTRAP)){
+      string configNavDataMode = "AT*CONFIG=\"general:navdata_demo\",\"TRUE\"\\r";;
+      socketData->send(boost::asio::buffer(configNavDataMode,configNavDataMode.size()));
+
+      socketData->receive(boost::asio::buffer(message,NAVDATA_MAX_SIZE));
+      sequenceNumberData = navdata->sequence;
+
+      configNavDataMode = "AT*CTRL=0";
+      socketData->send(boost::asio::buffer(configNavDataMode,configNavDataMode.size()));
+
+      socketData->receive(boost::asio::buffer(message,NAVDATA_MAX_SIZE));
+      bool bootstrap = getMaskFromState(navdata->ardrone_state,ARDRONE_NAVDATA_BOOTSTRAP);
+      sequenceNumberData = navdata->sequence;
+    }
+  }
+
   while(!endAll){
     
   }
