@@ -1,5 +1,6 @@
 #include "XCI_Parrot.hpp"
 #include "AT_Command.hpp"
+#include "navdata_common.h"
 
 using namespace std;
 using namespace boost::asio;
@@ -73,8 +74,17 @@ void XCI_Parrot::sendingATCommands(){
 }
 
 void XCI_Parrot::receiveNavData(){
-  while(!endAll){
+  const unsigned int maxBufferSize = 4096;
+  char message[maxBufferSize];
+  navdata_t* navdata = (navdata_t*) &message[0];
+  int32_t flag = 1; // 1 - unicast, 2 - multicast
+  socketData->send(boost::asio::buffer((uint8_t*)(&flag),sizeof(int32_t)));
   
+  socketData->receive(boost::asio::buffer(message,maxBufferSize));
+ 
+  printf("Komunikace \n"); 
+  while(!endAll){
+    
   }
 }
 
@@ -89,6 +99,7 @@ void XCI_Parrot::init(){
 
   initNetwork();
 	sendingATCmdThread = new std::thread(&XCI_Parrot::sendingATCommands,this);
+  receiveNavDataThread = new std::thread(&XCI_Parrot::receiveNavData, this);
 	
   atCommandQueue.push(new atCommandCOMWDG());
   atCommandQueue.push(new atCommandFTRIM());
@@ -186,6 +197,7 @@ int main(){
 	XCI_Parrot parrot;
 	parrot.init();
 
+  /*
   this_thread::sleep_for(std::chrono::microseconds(1000000));
   
 	for(int i=0;i<25;++i){
@@ -211,5 +223,8 @@ int main(){
 	}
 
   this_thread::sleep_for(std::chrono::microseconds(5000000));
+  */
+  while(true){
+  };
 }
 

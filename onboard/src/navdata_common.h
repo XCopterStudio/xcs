@@ -9,12 +9,65 @@
 
 /*------------------------------------------ NAVDATA STRUCTURES DECLARATIONS ---------------------------------------------------------------*/
 
-#include <config.h>
-#include <vision_common.h>
+//#include <config.h>
+//#include <vision_common.h>
 
-#include <VP_Os/vp_os_types.h>
-#include <Maths/maths.h>
-#include <Maths/matrices.h>
+//#include <VP_Os/vp_os_types.h>
+//#include <Maths/maths.h>
+//#include <Maths/matrices.h>
+
+//TODO: CLEAN THIS FILE !!!
+
+#include <cstdint>
+
+// NUMBER OF TRACKERS FOR EACH TRACKING
+#define NB_CORNER_TRACKERS_WIDTH    5      /* number of trackers in width of current picture */
+#define NB_CORNER_TRACKERS_HEIGHT   4      /* number of trackers in height of current picture */
+
+#define DEFAULT_NB_TRACKERS_WIDTH    (NB_CORNER_TRACKERS_WIDTH+1)// + NB_BLOCK_TRACKERS_WIDTH)
+#define DEFAULT_NB_TRACKERS_HEIGHT   (NB_CORNER_TRACKERS_HEIGHT+1)// + NB_BLOCK_TRACKERS_HEIGHT)
+
+typedef int32_t bool_t;
+typedef float float32_t;
+
+typedef struct _screen_point_t {
+  int32_t x;
+  int32_t y;
+} screen_point_t;
+
+typedef struct _matrix33_t
+{
+  float32_t m11;
+  float32_t m12;
+  float32_t m13;
+  float32_t m21;
+  float32_t m22;
+  float32_t m23;
+  float32_t m31;
+  float32_t m32;
+  float32_t m33;
+} matrix33_t;
+
+typedef struct _vector31_t {
+  union {
+    float32_t v[3];
+    struct
+    {
+      float32_t x;
+      float32_t y;
+      float32_t z;
+    };
+  };
+} vector31_t;
+
+typedef union _vector21_t {
+  float32_t v[2];
+  struct
+  {
+    float32_t x;
+    float32_t y;
+  };
+} vector21_t;
 
 #if defined(_MSC_VER)
 	#define _ATTRIBUTE_PACKED_
@@ -183,7 +236,7 @@ typedef struct _velocities_t {
 #define CTRL_DEFAULT_NUM_HOVER_B_KI2_SHELL  8192
 #define CTRL_DEFAULT_NUM_HOVER_B_KD2_SHELL  8000
 /* Timeout for mayday maneuvers*/
-static const int32_t MAYDAY_TIMEOUT[ARDRONE_NB_ANIM_MAYDAY] = {
+static const int32_t MAYDAY_TIMEOUT[] = {
     1000,  // ARDRONE_ANIM_PHI_M30_DEG
     1000,  // ARDRONE_ANIM_PHI_30_DEG
     1000,  // ARDRONE_ANIM_THETA_M30_DEG
@@ -228,7 +281,7 @@ static const int32_t MAYDAY_TIMEOUT[ARDRONE_NB_ANIM_MAYDAY] = {
 #define NAVDATA_OPTION_CKS(STRUCTURE,NAME,TAG)   NAVDATA_NUM_TAGS, TAG = 0xFFFF
 
 typedef enum _navdata_tag_t {
-	#include <navdata_keys.h>
+	#include "navdata_keys.h"
 } navdata_tag_t;
 
 #define NAVDATA_OPTION_MASK(option) ( 1 << (option) )
