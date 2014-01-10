@@ -72,7 +72,7 @@ public:
 	//
 	
 	//! A pure virtual member taking four fly parameters and send it to the x-copter
-	virtual void sendFlyParam(double roll, double pitch, double yaw, double gaz)=0;
+	virtual void sendFlyParam(float roll, float pitch, float yaw, float gaz)=0;
 
 	//! A pure virtual member initializing XCI for use
 	virtual void init()=0;

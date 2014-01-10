@@ -35,6 +35,22 @@ public:
 		return element; // Pop first element of the queue.
 	}
 
+	//! Returns first element of queue.
+	/*! Function call is blocking. 
+		\return first element of queue.
+	*/
+	bool tryPop(T& element){
+		std::lock_guard<std::mutex> lck(lock); //! Acquire lock for safe access to the STL queue
+
+		if(queue.empty()) // ! Test emptiness of queue
+			return false;
+
+		element = std::move(queue.front()); // Add first element from queue to the reference parameter
+		queue.pop();
+
+		return true;
+	}
+
 	//! Push new element to the queue.
 	void push(T value){
 		std::lock_guard<std::mutex> lck(lock); //! Acquire lock for safe access to the STL queue

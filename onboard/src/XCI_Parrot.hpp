@@ -30,8 +30,9 @@ class XCI_Parrot : public virtual XCI{
 	tsqueue<atCommand*> atCommandQueue;
 
 	// threads
-	std::thread* sendingATCmdThread;
-  std::thread* receiveNavDataThread;
+	std::thread sendingATCmdThread;
+  std::thread receiveNavDataThread;
+	std::thread receiveVideoThread;
 
 	// end all thread
 	volatile std::atomic<bool> endAll;
@@ -44,6 +45,7 @@ class XCI_Parrot : public virtual XCI{
 	void initNetwork();
 	void sendingATCommands();
   void receiveNavData();
+	void receiveVideo();
 
 public:
 	//! Initialize XCI for use
@@ -74,7 +76,7 @@ public:
 	//! Take command from list of x-copter´s special commands and send it to the x-copter
 	void sendCommand(const std::string &command);
 	//! Take four fly parameters and send it to the x-copter
-	void sendFlyParam(double roll, double pitch, double yaw, double gaz);
+	void sendFlyParam(float roll, float pitch, float yaw, float gaz);
 
 	~XCI_Parrot();
 };
