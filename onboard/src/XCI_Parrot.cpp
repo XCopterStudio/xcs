@@ -88,7 +88,9 @@ void XCI_Parrot::receiveNavData(){
   while(!endAll){
     receiveSize = socketData->receive(boost::asio::buffer(message,NAVDATA_MAX_SIZE));
 		if(navdata->sequence < sequenceNumberData){ // all received data with sequence number lower then sequenceNumberData will be skipped.
-			processReceivedNavData(navdata, receiveSize);
+			if(isDataCorrect(navdata,receiveSize)){ // test correctness of received data
+				processReceivedNavData(navdata, receiveSize);
+			}
 		}
   }
 }
@@ -106,11 +108,18 @@ void XCI_Parrot::initNavdataReceive(){
   socketData->send(boost::asio::buffer((uint8_t*)(&flag),sizeof(int32_t)));
 }
 
-bool XCI_Parrot::isDataCorrect(navdata_t* navdata, const size_t size){
-	uint32_t checksume;
-	for(unsigned int i = 0; i < size; i++){
-		
+bool XCI_Parrot::isDataCorrect(navdata_t* navdata, const size_t size){ // simple check: only sum all data to uint32_t and then compare with value in checksum option
+	uint8_t* data = (uint8_t*) navdata;
+	uint32_t checksum;
+	size_t dataSize = size - sizeof(navdata_cks_t);
+
+	for(unsigned int i = 0; i < dataSize; i++){
+		checksum += data[i];
 	}
+
+	navdata_cks_t* navdataChecksum = (navdata_cks_t*)&navdata[dataSize];
+
+	return navdataChecksum->cks == checksum;
 }
 
 void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size){
@@ -120,7 +129,7 @@ void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size){
 			atCommandQueue.push(new atCommandCONFIG("general:navdata_demo","TRUE")); // exit bootstrap mode and drone will send the demo navdata
 		}else{
 		if(state.getState(ARDRONE_COM_WATCHDOG_MASK)){ // reset sequence number
-			sequenceNumberData = defaultSequenceNumber;
+			sequenceNumberData = defaultSequenceNumber - 1;
 			atCommandQueue.push(new atCommandCOMWDG());
 		}else{
 		if(state.getState(ARDRONE_COM_LOST_MASK)){ // TODO: check what exactly mean reinitialize the communication with the drone
