@@ -1,5 +1,7 @@
 #include "XCI_Parrot.hpp"
 
+#include "video_encapsulation.h"
+
 using namespace std;
 using namespace boost::asio;
 using namespace boost::asio::ip;
@@ -97,8 +99,10 @@ void XCI_Parrot::receiveNavData(){
 }
 
 void XCI_Parrot::receiveVideo(){
+	uint8_t message[NAVDATA_MAX_SIZE];
 	while(!endAll){
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		socketVideo->receive(boost::asio::buffer(message,NAVDATA_MAX_SIZE));
+		
 	}
 }
 

@@ -3,10 +3,6 @@
 
 #include <sstream>
 
-//remove
-#include <iostream>
-//end remove
-
 //! General constants for creating at commands.
 static const std::string startOfAtComm = "AT*";
 static const std::string endOfAtComm = "\r";
