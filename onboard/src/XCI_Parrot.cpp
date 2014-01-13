@@ -18,6 +18,8 @@ const std::string XCI_Parrot::name ="Parrot AR Drone 2.0 XCI";
 
 const int XCI_Parrot::defaultSequenceNumber = 1;
 
+const unsigned int XCI_Parrot::videoMaxSize = 1048576;
+
 // ----------------- Private function --------------- //
 
 void XCI_Parrot::initNetwork(){
@@ -99,11 +101,15 @@ void XCI_Parrot::receiveNavData(){
 }
 
 void XCI_Parrot::receiveVideo(){
-	uint8_t message[NAVDATA_MAX_SIZE];
+	uint8_t* message = new uint8_t[videoMaxSize];
+	size_t receivedSize;
 	while(!endAll){
-		socketVideo->receive(boost::asio::buffer(message,NAVDATA_MAX_SIZE));
-		
+		receivedSize = socketVideo->receive(boost::asio::buffer(message,videoMaxSize));
+		navdata_video_stream_t* videoPacket = (navdata_video_stream_t*) &message[0];
+		printf("Video readed. \n");
 	}
+
+	delete message;
 }
 
 // function for navdata handling
@@ -173,8 +179,7 @@ navdata_option_t* XCI_Parrot::getOption(navdata_option_t* ptr, navdata_tag_t  ta
 
 void XCI_Parrot::init(){
 	sequenceNumberCMD = defaultSequenceNumber;
-	sequenceNumberVideo = defaultSequenceNumber;
-	sequenceNumberData = defaultSequenceNumber;
+	sequenceNumberData = defaultSequenceNumber - 1;
 
 	endAll = false;
 

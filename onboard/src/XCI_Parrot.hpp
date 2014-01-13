@@ -25,9 +25,10 @@ class XCI_Parrot : public virtual XCI{
 
 	static const int defaultSequenceNumber;
 
+	static const unsigned int videoMaxSize;
+
 	// Sequence number for communication with the drone.
 	unsigned int sequenceNumberCMD;
-	unsigned int sequenceNumberVideo;
 	unsigned int sequenceNumberData;
 
 	// queue for at commands
