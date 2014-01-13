@@ -8,6 +8,8 @@
 #include "XCI.hpp"
 #include "AT_Command.hpp"
 #include "../../shared/tsqueue.hpp"
+#include "ardrone_state.hpp"
+#include "navdata_common.h"
 
 namespace xci_parrot{
 
@@ -21,6 +23,8 @@ class XCI_Parrot : public virtual XCI{
 
 	static const std::string name;
 
+	static const int defaultSequenceNumber;
+
 	// Sequence number for communication with the drone.
 	unsigned int sequenceNumberCMD;
 	unsigned int sequenceNumberVideo;
@@ -28,6 +32,9 @@ class XCI_Parrot : public virtual XCI{
 
 	// queue for at commands
 	tsqueue<atCommand*> atCommandQueue;
+
+	// actual state of ar.drone 2.0
+	ardroneState state;
 
 	// threads
 	std::thread sendingATCmdThread;
@@ -46,6 +53,11 @@ class XCI_Parrot : public virtual XCI{
 	void sendingATCommands();
   void receiveNavData();
 	void receiveVideo();
+
+	// function for navdata handling
+	void initNavdataReceive();
+	bool isDataCorrect(navdata_t* navdata, const size_t size);
+	void processReceivedNavData(navdata_t* navdata, const size_t size);
 
 public:
 	//! Initialize XCI for use
