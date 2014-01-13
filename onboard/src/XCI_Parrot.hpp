@@ -56,8 +56,9 @@ class XCI_Parrot : public virtual XCI{
 
 	// function for navdata handling
 	void initNavdataReceive();
-	bool isDataCorrect(navdata_t* navdata, const size_t size);
+	bool isCorrectData(navdata_t* navdata, const size_t size);
 	void processReceivedNavData(navdata_t* navdata, const size_t size);
+	navdata_option_t* getOption(navdata_option_t* ptr, navdata_tag_t  tag);
 
 public:
 	//! Initialize XCI for use

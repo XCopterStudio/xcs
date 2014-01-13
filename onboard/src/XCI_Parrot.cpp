@@ -88,7 +88,7 @@ void XCI_Parrot::receiveNavData(){
   while(!endAll){
     receiveSize = socketData->receive(boost::asio::buffer(message,NAVDATA_MAX_SIZE));
 		if(navdata->sequence < sequenceNumberData){ // all received data with sequence number lower then sequenceNumberData will be skipped.
-			if(isDataCorrect(navdata,receiveSize)){ // test correctness of received data
+			if(isCorrectData(navdata,receiveSize)){ // test correctness of received data
 				processReceivedNavData(navdata, receiveSize);
 			}
 		}
@@ -108,16 +108,18 @@ void XCI_Parrot::initNavdataReceive(){
   socketData->send(boost::asio::buffer((uint8_t*)(&flag),sizeof(int32_t)));
 }
 
-bool XCI_Parrot::isDataCorrect(navdata_t* navdata, const size_t size){ // simple check: only sum all data to uint32_t and then compare with value in checksum option
+bool XCI_Parrot::isCorrectData(navdata_t* navdata, const size_t size){ // simple check: only sum all data to uint32_t and then compare with value in checksum option
 	uint8_t* data = (uint8_t*) navdata;
-	uint32_t checksum;
+	uint32_t checksum = 0;
 	size_t dataSize = size - sizeof(navdata_cks_t);
 
 	for(unsigned int i = 0; i < dataSize; i++){
-		checksum += data[i];
+		checksum += (uint32_t) data[i];
 	}
 
-	navdata_cks_t* navdataChecksum = (navdata_cks_t*)&navdata[dataSize];
+	navdata_cks_t* navdataChecksum = (navdata_cks_t*) getOption(&navdata->options[0],NAVDATA_CKS_TAG);
+	if(navdataChecksum == std::nullptr_t())
+		return false;
 
 	return navdataChecksum->cks == checksum;
 }
@@ -138,6 +140,22 @@ void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size){
 		}}}
 
 	}
+}
+
+navdata_option_t* XCI_Parrot::getOption(navdata_option_t* ptr, navdata_tag_t  tag){
+	navdata_option_t* ptr_data = ptr;
+
+	do{
+		if(ptr_data->size == 0){
+			return std::nullptr_t();
+		}else{
+			if(ptr_data->tag == tag){
+				return ptr;
+			}
+			
+			ptr_data = (navdata_option_t*)(((uint8_t*) ptr_data) + ptr_data->size);
+		}
+	}while(true);
 }
 
 // ----------------- Public function ---------------- //
