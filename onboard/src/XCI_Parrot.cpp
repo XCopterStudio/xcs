@@ -87,9 +87,10 @@ void XCI_Parrot::receiveNavData(){
 
   while(!endAll){
     receiveSize = socketData->receive(boost::asio::buffer(message,NAVDATA_MAX_SIZE));
-		if(navdata->sequence < sequenceNumberData){ // all received data with sequence number lower then sequenceNumberData will be skipped.
+		if(navdata->sequence > sequenceNumberData){ // all received data with sequence number lower then sequenceNumberData will be skipped.
 			if(isDataCorrect(navdata,receiveSize)){ // test correctness of received data
 				processReceivedNavData(navdata, receiveSize);
+				sequenceNumberData = navdata->sequence;
 			}
 		}
   }
@@ -110,14 +111,15 @@ void XCI_Parrot::initNavdataReceive(){
 
 bool XCI_Parrot::isDataCorrect(navdata_t* navdata, const size_t size){ // simple check: only sum all data to uint32_t and then compare with value in checksum option
 	uint8_t* data = (uint8_t*) navdata;
-	uint32_t checksum;
+	uint32_t checksum = 0;
 	size_t dataSize = size - sizeof(navdata_cks_t);
 
 	for(unsigned int i = 0; i < dataSize; i++){
 		checksum += data[i];
 	}
 
-	navdata_cks_t* navdataChecksum = (navdata_cks_t*)&navdata[dataSize];
+	// TODO: find last option
+	navdata_cks_t* navdataChecksum = (navdata_cks_t*)&navdata->options[0];
 
 	return navdataChecksum->cks == checksum;
 }
