@@ -90,6 +90,7 @@ void XCI_Parrot::receiveNavData(){
 		if(navdata->sequence < sequenceNumberData){ // all received data with sequence number lower then sequenceNumberData will be skipped.
 			if(isCorrectData(navdata,receiveSize)){ // test correctness of received data
 				processReceivedNavData(navdata, receiveSize);
+				sequenceNumberData = navdata->sequence;
 			}
 		}
   }
