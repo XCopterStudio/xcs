@@ -130,18 +130,20 @@ void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size){
 	if(navdata->header == NAVDATA_HEADER){ // test god type of navdata
 		if(state.getState(ARDRONE_NAVDATA_BOOTSTRAP)){ //test if drone is in BOOTSTRAP MODE
 			atCommandQueue.push(new atCommandCONFIG("general:navdata_demo","TRUE")); // exit bootstrap mode and drone will send the demo navdata
-			atCommandQueue.push(new atCommandCOMWDG());
-		}else{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+
 		if(state.getState(ARDRONE_COM_WATCHDOG_MASK)){ // reset sequence number
 			sequenceNumberData = defaultSequenceNumber - 1;
 			atCommandQueue.push(new atCommandCOMWDG());
-		}else{
+		}
+
 		if(state.getState(ARDRONE_COM_LOST_MASK)){ // TODO: check what exactly mean reinitialize the communication with the drone
-			sequenceNumberData = defaultSequenceNumber;
+			sequenceNumberData = defaultSequenceNumber - 1;
 			initNavdataReceive();
-		}else{
-			printf("Heureka \n");
-		}}}
+		}
+
+		//TODO: parse options from ardrone!!!
 	}
 }
 
@@ -153,7 +155,7 @@ navdata_option_t* XCI_Parrot::getOption(navdata_option_t* ptr, navdata_tag_t  ta
 			return std::nullptr_t();
 		}else{
 			if(ptr_data->tag == tag){
-				return ptr;
+				return ptr_data;
 			}
 			
 			ptr_data = (navdata_option_t*)(((uint8_t*) ptr_data) + ptr_data->size);
