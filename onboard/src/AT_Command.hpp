@@ -150,9 +150,16 @@ class atCommandCALIB : public atCommand{
 public:
 	//! Set which device will calibrate magnetometer.
 	/*!
-	\param device is identifier of the device to calibrate. Choose this identifier form ardrone_calibration_device_t.
+	\param device is identifier of the device to calibrate. Choose this identifier from ardrone_calibration_device_t.
 	*/
 	atCommandCALIB(const int device);
+	std::string toString(const unsigned int sequenceNumber);
+};
+
+//! 
+class atCommandCTRL : public atCommand{
+	static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
+public:
 	std::string toString(const unsigned int sequenceNumber);
 };
 

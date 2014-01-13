@@ -21,6 +21,7 @@ const std::string atCommandCALIB::nameOfCommand = "CALIB";
 const std::string atCommandCONFIG::nameOfCommand = "CONFIG";
 const std::string atCommandCONFIG_IDS::nameOfCommand = "CONFIG_IDS";
 const std::string atCommandCOMWDG::nameOfCommand = "COMWDG";
+const std::string atCommandCTRL::nameOfCommand = "CTRL";
 
 droneMove::droneMove(float roll, float pitch, float yaw, float gaz){
 		this->roll.floatNumber = valueInRange(roll,1.0f);
@@ -154,6 +155,15 @@ std::string atCommandCALIB::toString(const unsigned int sequenceNumber){
 	std::stringstream out;
 	out << startOfAtComm << nameOfCommand << "=" << sequenceNumber;
 	out << delOfAtCommVal << device; 
+	out << endOfAtComm;
+	return out.str();
+}
+
+std::string atCommandCTRL::toString(const unsigned int sequenceNumber){
+	std::stringstream out;
+	out << startOfAtComm << nameOfCommand << "=" << sequenceNumber;
+	out << delOfAtCommVal << (int) 0; 
+	out << delOfAtCommVal << (int) 0; 
 	out << endOfAtComm;
 	return out.str();
 }

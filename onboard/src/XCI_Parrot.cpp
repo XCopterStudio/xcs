@@ -130,7 +130,10 @@ void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size){
 	if(navdata->header == NAVDATA_HEADER){ // test god type of navdata
 		if(state.getState(ARDRONE_NAVDATA_BOOTSTRAP)){ //test if drone is in BOOTSTRAP MODE
 			atCommandQueue.push(new atCommandCONFIG("general:navdata_demo","TRUE")); // exit bootstrap mode and drone will send the demo navdata
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+
+		if(state.getState(ARDRONE_COMMAND_MASK)){
+			atCommandQueue.push(new atCommandCTRL()); // accept control changes 
 		}
 
 		if(state.getState(ARDRONE_COM_WATCHDOG_MASK)){ // reset sequence number
