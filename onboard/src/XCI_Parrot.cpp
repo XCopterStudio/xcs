@@ -87,7 +87,7 @@ void XCI_Parrot::receiveNavData(){
 
   while(!endAll){
     receiveSize = socketData->receive(boost::asio::buffer(message,NAVDATA_MAX_SIZE));
-		if(navdata->sequence < sequenceNumberData){ // all received data with sequence number lower then sequenceNumberData will be skipped.
+		if(navdata->sequence > sequenceNumberData){ // all received data with sequence number lower then sequenceNumberData will be skipped.
 			if(isCorrectData(navdata,receiveSize)){ // test correctness of received data
 				processReceivedNavData(navdata, receiveSize);
 				sequenceNumberData = navdata->sequence;
@@ -130,6 +130,7 @@ void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size){
 	if(navdata->header == NAVDATA_HEADER){ // test god type of navdata
 		if(state.getState(ARDRONE_NAVDATA_BOOTSTRAP)){ //test if drone is in BOOTSTRAP MODE
 			atCommandQueue.push(new atCommandCONFIG("general:navdata_demo","TRUE")); // exit bootstrap mode and drone will send the demo navdata
+			atCommandQueue.push(new atCommandCOMWDG());
 		}else{
 		if(state.getState(ARDRONE_COM_WATCHDOG_MASK)){ // reset sequence number
 			sequenceNumberData = defaultSequenceNumber - 1;
@@ -138,8 +139,9 @@ void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size){
 		if(state.getState(ARDRONE_COM_LOST_MASK)){ // TODO: check what exactly mean reinitialize the communication with the drone
 			sequenceNumberData = defaultSequenceNumber;
 			initNavdataReceive();
+		}else{
+			printf("Heureka \n");
 		}}}
-
 	}
 }
 
