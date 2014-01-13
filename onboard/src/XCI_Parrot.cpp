@@ -98,7 +98,7 @@ void XCI_Parrot::receiveNavData(){
 
 void XCI_Parrot::receiveVideo(){
 	while(!endAll){
-		
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
 
@@ -129,21 +129,20 @@ void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size){
 	state.updateState(navdata->ardrone_state);
 	if(navdata->header == NAVDATA_HEADER){ // test god type of navdata
 		if(state.getState(ARDRONE_NAVDATA_BOOTSTRAP)){ //test if drone is in BOOTSTRAP MODE
+			socketData->send(boost::asio::buffer("Init",4));
 			atCommandQueue.push(new atCommandCONFIG("general:navdata_demo","TRUE")); // exit bootstrap mode and drone will send the demo navdata
-		}
-
-		if(state.getState(ARDRONE_COMMAND_MASK)){
+			//TODO: force change drone state to demo_mode
 			atCommandQueue.push(new atCommandCTRL()); // accept control changes 
-		}
+		}else{
+			if(state.getState(ARDRONE_COM_WATCHDOG_MASK)){ // reset sequence number
+				sequenceNumberData = defaultSequenceNumber - 1;
+				atCommandQueue.push(new atCommandCOMWDG());
+			}
 
-		if(state.getState(ARDRONE_COM_WATCHDOG_MASK)){ // reset sequence number
-			sequenceNumberData = defaultSequenceNumber - 1;
-			atCommandQueue.push(new atCommandCOMWDG());
-		}
-
-		if(state.getState(ARDRONE_COM_LOST_MASK)){ // TODO: check what exactly mean reinitialize the communication with the drone
-			sequenceNumberData = defaultSequenceNumber - 1;
-			initNavdataReceive();
+			if(state.getState(ARDRONE_COM_LOST_MASK)){ // TODO: check what exactly mean reinitialize the communication with the drone
+				sequenceNumberData = defaultSequenceNumber - 1;
+				initNavdataReceive();
+			}
 		}
 
 		//TODO: parse options from ardrone!!!
@@ -277,6 +276,7 @@ int main(){
 	parrot.init();
 
   while(true){
+		std::this_thread::sleep_for(std::chrono::seconds(1));
   };
 }
 
