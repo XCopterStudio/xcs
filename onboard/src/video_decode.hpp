@@ -1,16 +1,28 @@
 #ifndef VIDEO_DECODE_H
 #define VIDEO_DECODE_H
 
-#include <libavcodec\avcodec.h>
+extern "C" 
+{
+	#include <libavcodec/avcodec.h>
+	#include <libavformat/avformat.h>
+}
 
-#define INBUF_SIZE 4096
+#pragma comment (lib, "avcodec.lib")
+#pragma comment (lib, "avformat.lib")
 
-class videoDecoder{
+struct VideoParams{
+	unsigned int height;
+	unsigned int width;
+	unsigned int videoCodec;
+};
+
+class VideoDecoder{
 	AVCodec* codec;
 	AVCodecContext * context;
 	AVFrame *frame;
 public:
-	videoDecoder(const AVCodecID avCodec);
+	void init(const AVCodecID avCodec);
+	void decodeVideo(const VideoParams* params, const AVPacket* avpacket);
 };
 
 #endif

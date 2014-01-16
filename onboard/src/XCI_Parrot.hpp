@@ -10,6 +10,7 @@
 #include "../../shared/tsqueue.hpp"
 #include "ardrone_state.hpp"
 #include "navdata_common.h"
+#include "video_decode.hpp"
 
 namespace xci_parrot{
 
@@ -36,6 +37,8 @@ class XCI_Parrot : public virtual XCI{
 
 	// actual state of ar.drone 2.0
 	ardroneState state;
+	// video decoder
+	VideoDecoder videoDecoder;
 
 	// threads
 	std::thread sendingATCmdThread;

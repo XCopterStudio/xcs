@@ -1,7 +1,7 @@
 #include "video_decode.hpp"
 
-videoDecoder::videoDecoder(const AVCodecID avCodec){
-	codec = avcodec_find_encoder(avCodec);
+void VideoDecoder::init(const AVCodecID avCodec){
+	codec = avcodec_find_decoder(avCodec);
 	if(!codec){ // TODO: throw exception
 		fprintf(stderr, "Could not find encoder\n");
     exit(1);
@@ -24,4 +24,16 @@ videoDecoder::videoDecoder(const AVCodecID avCodec){
 			fprintf(stderr, "Could not open codec\n");
       exit(1);
   }
+
+	frame = av_frame_alloc();
+	if (!frame) {
+		fprintf(stderr, "Could not allocate video frame\n");
+    exit(1);
+  }
+
+}
+
+void VideoDecoder::decodeVideo(const VideoParams* params, const AVPacket* avpacket){
+	int len, gotFrame;
+	len = avcodec_decode_video2(context,frame,&gotFrame,avpacket);
 }

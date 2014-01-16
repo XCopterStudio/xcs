@@ -103,9 +103,14 @@ void XCI_Parrot::receiveNavData(){
 void XCI_Parrot::receiveVideo(){
 	uint8_t* message = new uint8_t[videoMaxSize];
 	size_t receivedSize;
+	videoDecoder.init(CODEC_ID_H264);
 	while(!endAll){
 		receivedSize = socketVideo->receive(boost::asio::buffer(message,videoMaxSize));
-		navdata_video_stream_t* videoPacket = (navdata_video_stream_t*) &message[0];
+		parrot_video_encapsulation_t* videoPacket = (parrot_video_encapsulation_t*) &message[0];
+		AVPacket avpacket;
+		avpacket.size = videoPacket->payload_size;
+		avpacket.data = &message[videoPacket->header_size];
+		videoDecoder.decodeVideo(std::nullptr_t(),&avpacket);
 		printf("Video readed. \n");
 	}
 
