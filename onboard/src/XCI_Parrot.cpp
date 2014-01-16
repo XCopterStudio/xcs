@@ -18,7 +18,7 @@ const std::string XCI_Parrot::name ="Parrot AR Drone 2.0 XCI";
 
 const int XCI_Parrot::defaultSequenceNumber = 1;
 
-const unsigned int XCI_Parrot::videoMaxSize = 1048576;
+const unsigned int XCI_Parrot::videoMaxSize = 3686400;
 
 // ----------------- Private function --------------- //
 
@@ -107,11 +107,13 @@ void XCI_Parrot::receiveVideo(){
 	while(!endAll){
 		receivedSize = socketVideo->receive(boost::asio::buffer(message,videoMaxSize));
 		parrot_video_encapsulation_t* videoPacket = (parrot_video_encapsulation_t*) &message[0];
-		AVPacket avpacket;
-		avpacket.size = videoPacket->payload_size;
-		avpacket.data = &message[videoPacket->header_size];
-		videoDecoder.decodeVideo(std::nullptr_t(),&avpacket);
-		printf("Video readed. \n");
+		if(videoPacket->signature[0] == 'P' && videoPacket->signature[1] == 'a' && videoPacket->signature[2] == 'V' && videoPacket->signature[3] == 'E'){
+			AVPacket avpacket;
+			avpacket.size = videoPacket->payload_size;
+			avpacket.data = &message[videoPacket->header_size];
+			videoDecoder.decodeVideo(std::nullptr_t(),&avpacket);
+			printf("Video readed. \n");
+		}
 	}
 
 	delete message;
