@@ -1,6 +1,7 @@
 #include "video_decode.hpp"
 
 void VideoDecoder::init(const AVCodecID avCodec){
+	av_register_all();
 	codec = avcodec_find_decoder(avCodec);
 	if(!codec){ // TODO: throw exception
 		fprintf(stderr, "Could not find encoder\n");
