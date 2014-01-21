@@ -3,6 +3,7 @@ project(onboard)
 
 # Configuration
 set(libav_INSTALL ../3rd-party/libav/install)
+set(Urbi_INCLUDE_DIRS ../3rd-party/urbi/include)
 
 # Platform dependent stuff
 if(WIN32)
@@ -25,6 +26,7 @@ find_package(Boost REQUIRED COMPONENTS system thread) # we don't specify version
 # Include dirs
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${libav_INSTALL}/include)
+include_directories(${Urbi_INCLUDE_DIRS})
 
 # Library dirs
 link_directories(${libav_INSTALL}/lib)

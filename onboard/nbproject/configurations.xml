@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="89">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="." name="onboard">
+      <df name="CMakeFiles">
+        <df name="2.8.11.2">
+          <df name="CompilerIdC">
+            <in>CMakeCCompilerId.c</in>
+          </df>
+          <df name="CompilerIdCXX">
+            <in>CMakeCXXCompilerId.cpp</in>
+          </df>
+        </df>
+      </df>
+      <df name="src">
+        <df name="uobjects">
+          <df name="Integrator.uob">
+            <in>Integrator.cpp</in>
+            <in>Integrator.hpp</in>
+            <in>UIntegrator.cpp</in>
+            <in>UIntegrator.hpp</in>
+          </df>
+        </df>
+        <in>AT_Command.cpp</in>
+        <in>AT_Command.hpp</in>
+        <in>XCI.hpp</in>
+        <in>XCI_Parrot.cpp</in>
+        <in>XCI_Parrot.hpp</in>
+        <in>ardrone_state.hpp</in>
+        <in>navdata_common.h</in>
+        <in>navdata_keys.h</in>
+        <in>video_decode.cpp</in>
+        <in>video_decode.hpp</in>
+        <in>video_encapsulation.h</in>
+      </df>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>CMakeLists.txt</itemPath>
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>false</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile</buildCommand>
+          <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
+          <executablePath></executablePath>
+        </makeTool>
+      </makefileType>
+      <item path="CMakeFiles/2.8.11.2/CompilerIdC/CMakeCCompilerId.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="CMakeFiles/2.8.11.2/CompilerIdCXX/CMakeCXXCompilerId.cpp"
+            ex="false"
+            tool="1"
+            flavor2="4">
+        <ccTool>
+        </ccTool>
+      </item>
+      <folder path="onboard/src">
+        <ccTool>
+          <incDir>
+            <pElem>../3rd-party/libav/install/include</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>BOOST_ALL_NO_LIB</Elem>
+          </preprocessorList>
+        </ccTool>
+      </folder>
+      <folder path="onboard/src/uobjects">
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+      </folder>
+      <item path="src/AT_Command.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool>
+          <incDir>
+            <pElem>../3rd-party/urbi/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+      </item>
+      <item path="src/AT_Command.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/XCI.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/XCI_Parrot.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool>
+          <incDir>
+            <pElem>../3rd-party/urbi/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+      </item>
+      <item path="src/XCI_Parrot.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ardrone_state.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/navdata_common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/navdata_keys.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/uobjects/Integrator.uob/Integrator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="4">
+        <ccTool>
+        </ccTool>
+      </item>
+      <item path="src/uobjects/Integrator.uob/Integrator.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/uobjects/Integrator.uob/UIntegrator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="4">
+        <ccTool>
+        </ccTool>
+      </item>
+      <item path="src/uobjects/Integrator.uob/UIntegrator.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/video_decode.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool>
+          <incDir>
+            <pElem>../3rd-party/urbi/include</pElem>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+      </item>
+      <item path="src/video_decode.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/video_encapsulation.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
