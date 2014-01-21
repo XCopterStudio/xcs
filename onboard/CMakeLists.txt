@@ -4,6 +4,7 @@ project(onboard)
 # Configuration
 set(libav_INSTALL ../3rd-party/libav/install)
 set(Urbi_INCLUDE_DIRS ../3rd-party/urbi/include)
+set(doMain false)
 
 # Platform dependent stuff
 if(WIN32)
@@ -31,14 +32,21 @@ include_directories(${Urbi_INCLUDE_DIRS})
 # Library dirs
 link_directories(${libav_INSTALL}/lib)
 
+if(doMain)
 # Binaries
 add_executable(main src/XCI_Parrot.cpp src/AT_Command.cpp src/video_decode.cpp)
 
 
 # Linked libs
-target_link_libraries(main ${Boost_LIBRARIES})
-target_link_libraries (main ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(main avdevice avformat avfilter avcodec swscale avutil)
-target_link_libraries(main dl m z)
+#target_link_libraries(main ${Boost_LIBRARIES})
+#target_link_libraries (main ${CMAKE_THREAD_LIBS_INIT})
+#target_link_libraries(main avdevice avformat avfilter avcodec swscale avutil)
+#target_link_libraries(main dl m z)
+endif(doMain)
 
-
+#
+#  Testing skeleton
+#
+add_executable(test src/Adapter.cpp src/Forest.cpp)
+target_link_libraries(test ${Boost_LIBRARIES})
+target_link_libraries (test ${CMAKE_THREAD_LIBS_INIT})
