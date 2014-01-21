@@ -6,6 +6,8 @@
  */
 
 #include "Forest.hpp"
+#include <string>
+#include <iostream>
 
 Forest::Forest() {
 }
@@ -14,5 +16,9 @@ Forest::Forest(const Forest& orig) {
 }
 
 Forest::~Forest() {
+}
+
+void Forest::doCommand(std::string command) {
+    std::cout << "Command: " << command << std::endl;
 }
 
