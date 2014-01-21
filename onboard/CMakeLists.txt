@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 project(onboard)
 
+# Configuration
+set(libav_INSTALL ../3rd-party/libav/install)
+
 # Platform dependent stuff
 if(WIN32)
   set(TPN_WIN32 "/EHsc")
@@ -20,14 +23,20 @@ set(Boost_USE_STATIC_LIBS true)
 find_package(Boost REQUIRED COMPONENTS system thread) # we don't specify version, asio seems to work for 1.46--1.54
 
 # Include dirs
-include_directories(${Boost_INCLUDE_DIRS}) 
+include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${libav_INSTALL}/include)
+
+# Library dirs
+link_directories(${libav_INSTALL}/lib)
 
 # Binaries
-add_executable(main src/XCI_Parrot.cpp src/AT_Command.cpp)
+add_executable(main src/XCI_Parrot.cpp src/AT_Command.cpp src/video_decode.cpp)
 
 
 # Linked libs
-target_link_libraries(main ${Boost_LIBRARIES})                                                                                                                                                       
+target_link_libraries(main ${Boost_LIBRARIES})
 target_link_libraries (main ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(main avdevice avformat avfilter avcodec swscale avutil)
+target_link_libraries(main dl m z)
 
 
