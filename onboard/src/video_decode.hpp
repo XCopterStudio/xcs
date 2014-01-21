@@ -22,7 +22,7 @@ class VideoDecoder{
 	AVFrame *frame;
 public:
 	void init(const AVCodecID avCodec);
-	void decodeVideo(const VideoParams* params, const AVPacket* avpacket);
+	void decodeVideo(const VideoParams* params, AVPacket* avpacket);
 };
 
 #endif
