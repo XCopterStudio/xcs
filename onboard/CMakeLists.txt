@@ -38,15 +38,17 @@ add_executable(main src/XCI_Parrot.cpp src/AT_Command.cpp src/video_decode.cpp)
 
 
 # Linked libs
-#target_link_libraries(main ${Boost_LIBRARIES})
-#target_link_libraries (main ${CMAKE_THREAD_LIBS_INIT})
-#target_link_libraries(main avdevice avformat avfilter avcodec swscale avutil)
+target_link_libraries(main ${Boost_LIBRARIES})
+target_link_libraries (main ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(main avdevice avformat avfilter avcodec swscale avutil)
 #target_link_libraries(main dl m z)
 endif(doMain)
+
+
 
 #
 #  Testing skeleton
 #
-add_executable(test src/Adapter.cpp src/Forest.cpp)
+add_executable(test src/Adapter.cpp src/Forest.cpp src/testAdapter.cpp)
 target_link_libraries(test ${Boost_LIBRARIES})
 target_link_libraries (test ${CMAKE_THREAD_LIBS_INIT})

@@ -1,0 +1,4 @@
+NodeJS server has to be installed.
+
+$ npm install
+$ node server.js
