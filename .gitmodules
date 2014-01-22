@@ -1,1 +1,4 @@
 
+[submodule "3rd-party/libav"]
+	path = 3rd-party/libav
+	url = git://git.libav.org/libav.git
