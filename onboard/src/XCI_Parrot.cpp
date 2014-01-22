@@ -287,12 +287,15 @@ XCI_Parrot::~XCI_Parrot(){
 }
 
 
-int main(){
-	XCI_Parrot parrot;
-	parrot.init();
+//int main(){
+//	XCI_Parrot parrot;
+//	parrot.init();
+//
+//  while(true){
+//		std::this_thread::sleep_for(std::chrono::seconds(1));
+//  };
+//}
 
-  while(true){
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-  };
+extern "C" {
+  XCI* CreateXci() { return new XCI_Parrot(); }
 }
-
