@@ -8,6 +8,7 @@
 #include <vector>
 #include <sstream>
 #include <thread>
+#include <iterator>
 #include "Onboard.hpp"
 #include "XCI.hpp"
 #include "XCILoader.hpp"

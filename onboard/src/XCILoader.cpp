@@ -18,7 +18,7 @@ XCI* XCILoader::Load()
 #ifdef _WIN32
   const std::string path = "xci.dll";
 #else
-  const std::string path = "xci.so";
+  const std::string path = "libxci.so";
 #endif
   LoadLib(path);
   return ((factoryLib*)LoadLibrarySymbol("CreateXci"))();
