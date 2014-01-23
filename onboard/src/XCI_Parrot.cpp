@@ -30,7 +30,7 @@ void XCI_Parrot::initNetwork(){
 	socketCMD = new udp::socket(io_serviceCMD);
 	socketCMD->connect(parrotCMD,ec);
 	if(ec){
-		printf("Error \n");
+		throw new ConnectionErrorException("Cannot connect to the command port.");
 	}
 
 	// connect to navdata port
@@ -38,7 +38,7 @@ void XCI_Parrot::initNetwork(){
 	socketData = new udp::socket(io_serviceData);
 	socketData->connect(parrotData,ec);
 	if(ec){
-		printf("Error \n");
+		throw new ConnectionErrorException("Cannot connect to the navigation data port.");
 	}
 
 	// connect to video port
@@ -46,7 +46,7 @@ void XCI_Parrot::initNetwork(){
 	socketVideo = new tcp::socket(io_serviceVideo);
 	socketVideo->connect(parrotVideo,ec);
 	if(ec){
-		printf("Error \n");
+		throw new ConnectionErrorException("Cannot connect to the video port.");
 	}
 }
 
@@ -75,7 +75,7 @@ void XCI_Parrot::sendingATCommands(){
 
 			packetString << cmdString;
 		}else{ // We haven't nothing to send. Put thread to sleep on some time.
-			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
 	}
 
@@ -184,7 +184,7 @@ navdata_option_t* XCI_Parrot::getOption(navdata_option_t* ptr, navdata_tag_t  ta
 
 // ----------------- Public function ---------------- //
 
-void XCI_Parrot::init(){
+void XCI_Parrot::init() throw(ConnectionErrorException){
 	sequenceNumberCMD = defaultSequenceNumber;
 	sequenceNumberData = defaultSequenceNumber - 1;
 
@@ -295,10 +295,6 @@ XCI_Parrot::~XCI_Parrot(){
 int main(){
 	XCI_Parrot parrot;
 	parrot.init();
-
-	parrot.start();
-	std::this_thread::sleep_for(std::chrono::seconds(4));
-	parrot.stop();
 
   while(true){
 		std::this_thread::sleep_for(std::chrono::seconds(1));

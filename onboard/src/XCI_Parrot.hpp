@@ -11,6 +11,7 @@
 #include "ardrone_state.hpp"
 #include "navdata_common.h"
 #include "video_decode.hpp"
+#include "xci_exception.hpp"
 
 namespace xci_parrot{
 
@@ -68,7 +69,7 @@ class XCI_Parrot : public virtual XCI{
 
 public:
 	//! Initialize XCI for use
-	void init();
+	void init() throw(ConnectionErrorException); 
 	//! Resets settings to default values and re-calibrates the sensors (if supported).
 	void reset();
 	//! Turns on the engines.
