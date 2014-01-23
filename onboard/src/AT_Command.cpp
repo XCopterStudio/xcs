@@ -158,7 +158,7 @@ std::string atCommandCALIB::toString(const unsigned int sequenceNumber){
 std::string atCommandCTRL::toString(const unsigned int sequenceNumber){
 	std::stringstream out;
 	out << startOfAtComm << nameOfCommand << "=" << sequenceNumber;
-	out << delOfAtCommVal << (int) 0; 
+	out << delOfAtCommVal << mode; 
 	out << delOfAtCommVal << (int) 0; 
 	out << endOfAtComm;
 	return out.str();

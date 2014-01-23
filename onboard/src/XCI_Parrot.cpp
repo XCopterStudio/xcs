@@ -1,5 +1,6 @@
-#include "XCI_Parrot.hpp"
+#include <array>
 
+#include "XCI_Parrot.hpp"
 #include "video_encapsulation.h"
 
 using namespace std;
@@ -27,27 +28,27 @@ void XCI_Parrot::initNetwork(){
 	boost::system::error_code ec;
 
 	// connect to cmd port
-	udp::endpoint parrotCMD = udp::endpoint(address::from_string("192.168.1.1"),CMDPort);
+	udp::endpoint parrotCMD(address::from_string("192.168.1.1"),CMDPort);
 	socketCMD = new udp::socket(io_serviceCMD);
 	socketCMD->connect(parrotCMD,ec);
 	if(ec){
-		throw new ConnectionErrorException("Cannot connect to the command port.");
+		throw new ConnectionErrorException("Cannot connect command port.");
 	}
 
 	// connect to navdata port
-	udp::endpoint parrotData = udp::endpoint(address::from_string("192.168.1.1"),DataPort);
+	udp::endpoint parrotData(address::from_string("192.168.1.1"),DataPort);
 	socketData = new udp::socket(io_serviceData);
 	socketData->connect(parrotData,ec);
 	if(ec){
-		throw new ConnectionErrorException("Cannot connect to the navigation data port.");
+		throw new ConnectionErrorException("Cannot connect navigation data port.");
 	}
 
 	// connect to video port
-	tcp::endpoint parrotVideo = tcp::endpoint(address::from_string("192.168.1.1"),VideoPort);
+	tcp::endpoint parrotVideo(address::from_string("192.168.1.1"),VideoPort);
 	socketVideo = new tcp::socket(io_serviceVideo);
 	socketVideo->connect(parrotVideo,ec);
 	if(ec){
-		throw new ConnectionErrorException("Cannot connect to the video port.");
+		throw new ConnectionErrorException("Cannot connect video port.");
 	}
 }
 
@@ -112,8 +113,7 @@ void XCI_Parrot::receiveVideo(){
 			AVPacket avpacket;
 			avpacket.size = videoPacket->payload_size;
 			avpacket.data = &message[videoPacket->header_size];
-			videoDecoder.decodeVideo(std::nullptr_t(),&avpacket);
-			printf("Video readed. \n");
+			//videoDecoder.decodeVideo(std::nullptr_t(),&avpacket);
 		}
 	}
 
@@ -147,10 +147,9 @@ void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size){
 	state.updateState(navdata->ardrone_state);
 	if(navdata->header == NAVDATA_HEADER){ // test god type of navdata
 		if(state.getState(ARDRONE_NAVDATA_BOOTSTRAP)){ //test if drone is in BOOTSTRAP MODE
-			socketData->send(boost::asio::buffer("Init",4));
 			atCommandQueue.push(new atCommandCONFIG("general:navdata_demo","TRUE")); // exit bootstrap mode and drone will send the demo navdata
 			//TODO: force change drone state to demo_mode
-			atCommandQueue.push(new atCommandCTRL()); // accept control changes 
+			atCommandQueue.push(new atCommandCTRL(ACK_CONTROL_MODE)); // accept control changes 
 		}else{
 			if(state.getState(ARDRONE_COM_WATCHDOG_MASK)){ // reset sequence number
 				sequenceNumberData = defaultSequenceNumber - 1;
@@ -181,6 +180,31 @@ navdata_option_t* XCI_Parrot::getOption(navdata_option_t* ptr, navdata_tag_t  ta
 			ptr_data = (navdata_option_t*)(((uint8_t*) ptr_data) + ptr_data->size);
 		}
 	}while(true);
+}
+
+
+// TODO: set timeout for receive!!!
+std::string XCI_Parrot::downloadConfiguration() throw(ConnectionErrorException){
+	boost::system::error_code ec;
+
+	boost::asio::io_service io_service;
+	tcp::socket socketComm(io_service);
+	tcp::endpoint parrotComm(address::from_string("192.168.1.1"),CommPort);
+	socketComm.connect(parrotComm,ec);
+	if(ec){
+		throw new ConnectionErrorException("Cannot connect communication port.");
+	}
+
+	atCommandQueue.push(new atCommandCTRL(CFG_GET_CONTROL_MODE));
+
+	std::array<char,8192> buf;
+	size_t size = socketComm.receive(boost::asio::buffer(buf));
+
+	for(int i=0; i<size;++i){
+		std::cout << buf[i];
+	}
+
+	return "";
 }
 
 // ----------------- Public function ---------------- //
@@ -234,6 +258,7 @@ std::string XCI_Parrot::getConfiguration(const std::string &key){
 }
 
 informationMap XCI_Parrot::getConfiguration(){
+	downloadConfiguration();
 	return informationMap();
 }
 
@@ -281,7 +306,8 @@ void XCI_Parrot::sendFlyParam(float roll, float pitch, float yaw, float gaz){
 }
 
 XCI_Parrot::~XCI_Parrot(){
-	endAll = true;
+	endAll = true; 
+
 	//delete all socket
 	delete socketCMD;
 	delete socketData;
@@ -299,6 +325,7 @@ XCI_Parrot::~XCI_Parrot(){
 int main(){
 	XCI_Parrot parrot;
 	parrot.init();
+	parrot.getConfiguration();
 
   while(true){
 		std::this_thread::sleep_for(std::chrono::seconds(1));

@@ -4,6 +4,17 @@
 #include <string>
 #include <cstdint>
 
+//! Possible states of the drone 'control' thread.
+enum ArdroneControlMode{
+  NO_CONTROL_MODE = 0,          /*<! Doing nothing */
+  ARDRONE_UPDATE_CONTROL_MODE,  /*<! Not used */
+  PIC_UPDATE_CONTROL_MODE,      /*<! Not used */
+  LOGS_GET_CONTROL_MODE,        /*<! Not used */
+  CFG_GET_CONTROL_MODE,         /*<! Send active configuration file to a client through the 'control' socket UDP 5559 */
+  ACK_CONTROL_MODE,             /*<! Reset command mask in navdata */
+  CUSTOM_CFG_GET_CONTROL_MODE   /*<! Requests the list of custom configuration IDs */
+};
+
 //! Basic behavior of parrot drone
 enum behavior{
 	TAKEOFF,
@@ -159,7 +170,9 @@ public:
 //! 
 class atCommandCTRL : public atCommand{
 	static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
+	ArdroneControlMode mode;
 public:
+	atCommandCTRL(ArdroneControlMode mode = NO_CONTROL_MODE) : mode(mode){};
 	std::string toString(const unsigned int sequenceNumber);
 };
 
