@@ -17,6 +17,7 @@ namespace xci_parrot{
 
 class XCI_Parrot : public virtual XCI{
 	// Constant
+	static const int CommPort;
 	static const int CMDPort;
 	static const int VideoPort;
 	static const int DataPort;
@@ -50,10 +51,11 @@ class XCI_Parrot : public virtual XCI{
 	volatile std::atomic<bool> endAll;
 
   boost::asio::io_service io_serviceCMD;
+	boost::asio::io_service io_serviceData;
+	boost::asio::io_service io_serviceVideo;
+
 	boost::asio::ip::udp::socket *socketCMD;
-	  boost::asio::io_service io_serviceData;
 	boost::asio::ip::udp::socket *socketData;
-	  boost::asio::io_service io_serviceVideo;
 	boost::asio::ip::tcp::socket *socketVideo;
 
 	void initNetwork();

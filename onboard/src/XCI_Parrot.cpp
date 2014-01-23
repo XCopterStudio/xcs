@@ -8,6 +8,7 @@ using namespace boost::asio::ip;
 using namespace xci_parrot;
 // ----------------- Constant ----------------------- //
 
+const int XCI_Parrot::CommPort = 5559;
 const int XCI_Parrot::CMDPort = 5556;
 const int XCI_Parrot::VideoPort = 5555;
 const int XCI_Parrot::DataPort = 5554;
@@ -281,7 +282,10 @@ void XCI_Parrot::sendFlyParam(float roll, float pitch, float yaw, float gaz){
 
 XCI_Parrot::~XCI_Parrot(){
 	endAll = true;
-
+	//delete all socket
+	delete socketCMD;
+	delete socketData;
+	delete socketVideo;
 	// wait for atCMDThread end and then clear memory
 	sendingATCmdThread.join();	
 	receiveNavDataThread.join();
