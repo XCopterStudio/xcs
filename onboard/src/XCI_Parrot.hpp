@@ -48,9 +48,11 @@ class XCI_Parrot : public virtual XCI{
 	// end all thread
 	volatile std::atomic<bool> endAll;
 
-  boost::asio::io_service io_service;
+  boost::asio::io_service io_serviceCMD;
 	boost::asio::ip::udp::socket *socketCMD;
+	  boost::asio::io_service io_serviceData;
 	boost::asio::ip::udp::socket *socketData;
+	  boost::asio::io_service io_serviceVideo;
 	boost::asio::ip::tcp::socket *socketVideo;
 
 	void initNetwork();

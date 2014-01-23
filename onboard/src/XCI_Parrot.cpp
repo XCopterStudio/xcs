@@ -27,7 +27,7 @@ void XCI_Parrot::initNetwork(){
 
 	// connect to cmd port
 	udp::endpoint parrotCMD = udp::endpoint(address::from_string("192.168.1.1"),CMDPort);
-	socketCMD = new udp::socket(io_service);
+	socketCMD = new udp::socket(io_serviceCMD);
 	socketCMD->connect(parrotCMD,ec);
 	if(ec){
 		printf("Error \n");
@@ -35,7 +35,7 @@ void XCI_Parrot::initNetwork(){
 
 	// connect to navdata port
 	udp::endpoint parrotData = udp::endpoint(address::from_string("192.168.1.1"),DataPort);
-	socketData = new udp::socket(io_service);
+	socketData = new udp::socket(io_serviceData);
 	socketData->connect(parrotData,ec);
 	if(ec){
 		printf("Error \n");
@@ -43,7 +43,7 @@ void XCI_Parrot::initNetwork(){
 
 	// connect to video port
 	tcp::endpoint parrotVideo = tcp::endpoint(address::from_string("192.168.1.1"),VideoPort);
-	socketVideo = new tcp::socket(io_service);
+	socketVideo = new tcp::socket(io_serviceVideo);
 	socketVideo->connect(parrotVideo,ec);
 	if(ec){
 		printf("Error \n");
@@ -203,11 +203,17 @@ void XCI_Parrot::reset(){
 }
 
 void XCI_Parrot::start(){
-
+	while(!state.getState(ARDRONE_FLY_MASK)){
+		atCommandQueue.push(new atCommandRef(TAKEOFF));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
 }
 
 void XCI_Parrot::stop(){
-
+	while(state.getState(ARDRONE_FLY_MASK)){
+		atCommandQueue.push(new atCommandRef(LAND));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
 }
 
 std::string XCI_Parrot::getName(){
@@ -286,16 +292,20 @@ XCI_Parrot::~XCI_Parrot(){
 		delete atCommandQueue.pop();
 }
 
+int main(){
+	XCI_Parrot parrot;
+	parrot.init();
 
-//int main(){
-//	XCI_Parrot parrot;
-//	parrot.init();
-//
-//  while(true){
-//		std::this_thread::sleep_for(std::chrono::seconds(1));
-//  };
-//}
+	parrot.start();
+	std::this_thread::sleep_for(std::chrono::seconds(4));
+	parrot.stop();
 
-extern "C" {
-  XCI* CreateXci() { return new XCI_Parrot(); }
+  while(true){
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+  };
 }
+
+
+//extern "C" {
+//  XCI* CreateXci() { return new XCI_Parrot(); }
+//}
