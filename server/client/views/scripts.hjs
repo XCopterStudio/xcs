@@ -1,0 +1,16 @@
+<!-- ...and bit of javascript -->
+<script type="text/javascript" src="js/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="js/bootstrap.js"></script>
+<script type="text/javascript" src="js/jquery.gridster.js"></script>
+<!-- 3D libraries -->
+<script type="text/javascript" src="js/libs/three.min.js"></script>
+<script type="text/javascript" src="js/libs/Detector.js"></script>
+<script type="text/javascript" src="js/libs/stats.min.js"></script>
+<!-- code mirror -->
+<script type="text/javascript" src="js/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="js/codemirror/xcsMode.js"></script>
+<!-- Custom scripts -->
+<script type="text/javascript" src="js/custom.js"></script>
+<script type="text/javascript" src="js/widgets/script-editor.js"></script>
+<script type="text/javascript" src="js/widgets/map.js"></script>
+<script type="text/javascript" src="js/widgets/video.js"></script>
