@@ -325,7 +325,10 @@ XCI_Parrot::~XCI_Parrot(){
 int main(){
 	XCI_Parrot parrot;
 	parrot.init();
-	parrot.getConfiguration();
+
+	parrot.start();
+	std::this_thread::sleep_for(std::chrono::seconds(6));
+	parrot.stop();
 
   while(true){
 		std::this_thread::sleep_for(std::chrono::seconds(1));
