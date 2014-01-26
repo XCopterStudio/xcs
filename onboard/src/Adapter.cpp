@@ -13,7 +13,7 @@
 using namespace boost::asio::ip;
 using namespace std;
 
-Adapter::Adapter(Forest & forest) : forest(forest) {
+Adapter::Adapter(Onboard & onboard) : onboard(onboard) {
 
 }
 
@@ -38,7 +38,8 @@ void Adapter::start(const string & host, const int port) {
     try {
         while (readBytes = this->socketServer->read_some(bufferSequence)) {
             string command = string(buffer, buffer + readBytes);
-            this->forest.doCommand(command);
+            cout << "Command: " << command << endl;
+            this->onboard.DoCommand(command);
         }
         cerr << "Error occured during read." << endl;
     } catch (exception &e) {

@@ -11,11 +11,13 @@
 #include "ardrone_state.hpp"
 #include "navdata_common.h"
 #include "video_decode.hpp"
+#include "xci_exception.hpp"
 
 namespace xci_parrot{
 
 class XCI_Parrot : public virtual XCI{
 	// Constant
+	static const int CommPort;
 	static const int CMDPort;
 	static const int VideoPort;
 	static const int DataPort;
@@ -48,7 +50,10 @@ class XCI_Parrot : public virtual XCI{
 	// end all thread
 	volatile std::atomic<bool> endAll;
 
-  boost::asio::io_service io_service;
+  boost::asio::io_service io_serviceCMD;
+	boost::asio::io_service io_serviceData;
+	boost::asio::io_service io_serviceVideo;
+
 	boost::asio::ip::udp::socket *socketCMD;
 	boost::asio::ip::udp::socket *socketData;
 	boost::asio::ip::tcp::socket *socketVideo;
@@ -63,10 +68,11 @@ class XCI_Parrot : public virtual XCI{
 	bool isCorrectData(navdata_t* navdata, const size_t size);
 	void processReceivedNavData(navdata_t* navdata, const size_t size);
 	navdata_option_t* getOption(navdata_option_t* ptr, navdata_tag_t  tag);
+	std::string downloadConfiguration() throw(ConnectionErrorException);
 
 public:
 	//! Initialize XCI for use
-	void init();
+	void init() throw(ConnectionErrorException); 
 	//! Resets settings to default values and re-calibrates the sensors (if supported).
 	void reset();
 	//! Turns on the engines.
