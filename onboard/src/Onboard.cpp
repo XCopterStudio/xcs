@@ -9,6 +9,7 @@
 #include <sstream>
 #include <thread>
 #include <iterator>
+#include <cstdarg>
 #include "Onboard.hpp"
 #include "XCI.hpp"
 #include "XCILoader.hpp"
@@ -23,7 +24,7 @@ Onboard::~Onboard() {
     delete xci;
 }
 
-bool Onboard::DoCommand(const string& cmd) {
+bool Onboard::DoCommand(const string& cmd, ...) {
     // check init state
     if (state != Onboard::INIT) {
         return false;
@@ -55,21 +56,18 @@ bool Onboard::DoCommand(const string& cmd) {
             xci->sendCommand("Reset");
             this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+    } else if (cmd == "FlyParam") {
+        va_list args; // TODO would variadic template be better? (float -> double)
+        va_start(args, cmd);
+        double roll = va_arg(args, double);
+        double pitch = va_arg(args, double);
+        double yaw = va_arg(args, double);
+        double gaz = va_arg(args, double);
+        xci->sendFlyParam(roll, pitch, yaw, gaz);
+        va_end(args);
     } else {
-        istringstream iss(cmd);
-        vector<string> tokens;
-        copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(tokens));
-        if (tokens.size() == 4) {
-            try {
-                xci->sendFlyParam(stof(tokens[0]), stof(tokens[1]), stof(tokens[2]), stof(tokens[3]));
-            } catch (...) {
-                //TODO: unknown command exception
-                return false;
-            }
-        } else {
-            //TODO: unknown command exception
-            return false;
-        }
+        //TODO: unknown command exception
+        return false;
     }
     return true;
 }

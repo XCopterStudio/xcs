@@ -28,7 +28,11 @@ public:
 
     Onboard();
     virtual ~Onboard();
-    bool DoCommand(const std::string& cmd);
+    /*!
+     * \param cmd  String name of the command (available command are listed in implementation).
+     * \param ...  additional parameters depending on the command
+     */
+    bool DoCommand(const std::string& cmd, ...);
 private:
     void init();
     XCI* getXci();

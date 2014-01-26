@@ -6,14 +6,20 @@
  */
 
 #include "Adapter.hpp"
-#include <boost/system/error_code.hpp>
+#include "xcs/ParseException.hpp"
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <vector>
 
 
 using namespace boost::asio::ip;
+using namespace boost::algorithm;
+using namespace boost::system;
 using namespace std;
+using namespace xcs;
 
-Adapter::Adapter(Onboard & onboard) : onboard(onboard) {
+Adapter::Adapter(Onboard & onboard) : onboard_(onboard) {
 
 }
 
@@ -29,28 +35,57 @@ void Adapter::start(const string & host, const int port) {
 
     // connect to the server
     tcp::endpoint serverPoint = tcp::endpoint(address::from_string(host), port);
-    this->socketServer = new tcp::socket(this->io_service);
-    this->socketServer->connect(serverPoint);
+    socketServer_ = new tcp::socket(io_service_);
+    socketServer_->connect(serverPoint);
 
     int readBytes = 0;
     cerr << "Start receiving data..." << endl;
 
     try {
-        while (readBytes = this->socketServer->read_some(bufferSequence)) {
+        //TODO implement a way to stop the adapter
+        while (readBytes = socketServer_->read_some(bufferSequence)) {
             string command = string(buffer, buffer + readBytes);
-            if (command[command.size() - 1] == '\n') {
-                command = command.substr(0, command.size() - 1);
+            try {
+                parseCommand(command);
+            } catch (const ParseException& e) {
+                cerr << e.what() << endl;
             }
-            cout << "Command: " << command << endl;
-            this->onboard.DoCommand(command);
         }
-        cerr << "Error occured during read." << endl;
-    } catch (exception &e) {
-        cerr << "Error: " << e.what() << endl;
+        cerr << "Error occurred during read." << endl;
+    } catch (system_error const &e) {
+        if (e.code() == boost::asio::error::eof) {
+            cerr << "Connection closed by comm server." << endl;
+        } else {
+            cerr << "Error: " << e.what() << endl;
+        }
     }
 
-    delete this->socketServer;
+    delete socketServer_;
     delete[] buffer;
+}
+
+void Adapter::parseCommand(const std::string& cmd) {
+    string command = cmd;
+    trim(command);
+
+    string cmdName = command.substr(0, command.find('('));
+    string cmdParams = (command.find('(') != string::npos) ? command.substr(command.find('(') + 1, command.find(')') - 1) : "";
+
+    if (cmdName.size() == 0 && cmdParams.size() > 0) {
+        // no command ~ explicit send fly params
+        vector<string> params;
+        split(params, cmdParams, is_any_of(","));
+        if (params.size() != 4) {
+            throw xcs::ParseException("Expecting 4 parameters, got '" + cmdParams + "'.");
+        }
+
+        onboard_.DoCommand("FlyParam", stod(params[0]), stod(params[1]), stod(params[2]), stod(params[3]));
+    } else if (cmdParams.size() == 0) {
+        // no-params command
+        onboard_.DoCommand(cmdName);
+    } else {
+        throw xcs::ParseException("Unknown input '" + command + "'.");
+    }
 }
 
 

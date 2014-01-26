@@ -11,7 +11,7 @@ if(WIN32)
 endif(WIN32)
 
 if(UNIX)
-  set (CMAKE_CXX_FLAGS "-std=c++0x")
+  set (CMAKE_CXX_FLAGS "-std=c++11")
 endif(UNIX)
 
 
@@ -32,7 +32,12 @@ include_directories(${Urbi_INCLUDE_DIRS})
 link_directories(${libav_INSTALL}/lib)
 
 # Binaries
-add_executable(main src/main.cpp src/Onboard.cpp src/XCILoader.cpp src/Adapter.cpp src/XCI_Parrot.cpp src/AT_Command.cpp src/video_decode.cpp)
+add_executable(main
+    src/main.cpp
+    src/Onboard.cpp src/XCILoader.cpp src/Adapter.cpp
+    src/XCI_Parrot.cpp src/AT_Command.cpp src/video_decode.cpp
+    src/xcs/Exception.cpp src/xcs/ParseException.cpp
+)
 add_library(xci SHARED src/XCI_Parrot.cpp)
 
 

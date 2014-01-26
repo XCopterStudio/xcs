@@ -23,12 +23,14 @@ public:
     virtual ~Adapter();
 
 private:
-    const int BUFFER_SIZE = 1024;
-    Onboard & onboard;
-    std::string host;
+    const static int BUFFER_SIZE = 1024;
+    Onboard & onboard_;
+    std::string host_;
 
-    boost::asio::io_service io_service;
-    boost::asio::ip::tcp::socket *socketServer;
+    boost::asio::io_service io_service_;
+    boost::asio::ip::tcp::socket *socketServer_;
+
+    void parseCommand(const std::string& cmd);
 
 };
 
