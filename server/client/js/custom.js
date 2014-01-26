@@ -61,6 +61,8 @@ $(function() {
     $('#status-led').height(ledSize).width(ledSize)
             .css({borderRadius: ledSize / 2, backgroundColor: "#5bb75b"});
 
+    /***
+
     // initialize gridster
     var gridster = $(".gridster > ul").gridster({
         widget_margins: [10, 10],
@@ -79,18 +81,11 @@ $(function() {
     // sidepanels init
     //$("#left-menu").css("float", "left").css("background", "whitesmoke").css("overflow", "hidden").css("width", "50px").css("z-index", "1001");
     
-    $('#takeoff').click(function() {
-        sampleRun();
-        $(this).hide();
-        $('#land').show();
-    });
-    $('#land').click(function(){
-       alert('Cannot land. The video takes 2:11.');
-    });
-    
     initSidepanels();
     
     sampleRun();
+    
+    ***/
 });
 
 function initSidepanels() {
