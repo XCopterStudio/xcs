@@ -14,19 +14,17 @@
 
 using namespace std;
 
-
-
 /*
  * 
  */
 int main(int argc, char** argv) {
-    vector<string> args(argv, argv+argc);
-    
-    if(args.size() < 3) {
+    vector<string> args(argv, argv + argc);
+
+    if (args.size() < 3) {
         cerr << "Usage: " << args[0] << " IP port" << endl;
         return 1;
     }
-    
+
     istringstream ss(args[2]);
     int port;
     ss >> port;

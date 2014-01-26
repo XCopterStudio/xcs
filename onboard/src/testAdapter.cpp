@@ -11,7 +11,6 @@
 
 using namespace std;
 
-
 /*
  * 
  */
@@ -19,9 +18,9 @@ int main(int argc, char** argv) {
     std::cout << "Start" << std::endl;
     Forest forest;
     Adapter adapter(forest);
-    
+
     adapter.start("127.0.0.1", 1234);
-    
+
     return 0;
 }
 

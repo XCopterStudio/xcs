@@ -38,8 +38,8 @@ void Adapter::start(const string & host, const int port) {
     try {
         while (readBytes = this->socketServer->read_some(bufferSequence)) {
             string command = string(buffer, buffer + readBytes);
-            if(command[command.size()-1] == '\n') {
-                command = command.substr(0, command.size()-1);
+            if (command[command.size() - 1] == '\n') {
+                command = command.substr(0, command.size() - 1);
             }
             cout << "Command: " << command << endl;
             this->onboard.DoCommand(command);
@@ -48,7 +48,7 @@ void Adapter::start(const string & host, const int port) {
     } catch (exception &e) {
         cerr << "Error: " << e.what() << endl;
     }
-    
+
     delete this->socketServer;
     delete[] buffer;
 }

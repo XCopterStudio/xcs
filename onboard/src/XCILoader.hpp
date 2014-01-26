@@ -16,20 +16,19 @@ class XCI;
 
 using namespace std;
 
-class XCILoader
-{
+class XCILoader {
 public:
 #ifdef _WIN32
-HINSTANCE lib_handle;
+    HINSTANCE lib_handle;
 #else
-void* lib_handle;
+    void* lib_handle;
 #endif
 
-  XCILoader(void);
-  virtual ~XCILoader(void);
+    XCILoader(void);
+    virtual ~XCILoader(void);
 
-  XCI* Load();
-  void LoadLib(const std::string & filepath);
-  void* LoadLibrarySymbol(const std::string & symbol);
+    XCI* Load();
+    void LoadLib(const std::string & filepath);
+    void* LoadLibrarySymbol(const std::string & symbol);
 };
 

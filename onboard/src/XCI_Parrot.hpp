@@ -13,96 +13,96 @@
 #include "video_decode.hpp"
 #include "xci_exception.hpp"
 
-namespace xci_parrot{
+namespace xci_parrot {
 
-class XCI_Parrot : public virtual XCI{
-	// Constant
-	static const int CommPort;
-	static const int CMDPort;
-	static const int VideoPort;
-	static const int DataPort;
+    class XCI_Parrot : public virtual XCI {
+        // Constant
+        static const int CommPort;
+        static const int CMDPort;
+        static const int VideoPort;
+        static const int DataPort;
 
-	static const unsigned int atCMDPacketSize;
+        static const unsigned int atCMDPacketSize;
 
-	static const std::string name;
+        static const std::string name;
 
-	static const int defaultSequenceNumber;
+        static const int defaultSequenceNumber;
 
-	static const unsigned int videoMaxSize;
+        static const unsigned int videoMaxSize;
 
-	// Sequence number for communication with the drone.
-	unsigned int sequenceNumberCMD;
-	unsigned int sequenceNumberData;
+        // Sequence number for communication with the drone.
+        unsigned int sequenceNumberCMD;
+        unsigned int sequenceNumberData;
 
-	// queue for at commands
-	tsqueue<atCommand*> atCommandQueue;
+        // queue for at commands
+        tsqueue<atCommand*> atCommandQueue;
 
-	// actual state of ar.drone 2.0
-	ardroneState state;
-	// video decoder
-	VideoDecoder videoDecoder;
+        // actual state of ar.drone 2.0
+        ardroneState state;
+        // video decoder
+        VideoDecoder videoDecoder;
 
-	// threads
-	std::thread sendingATCmdThread;
-  std::thread receiveNavDataThread;
-	std::thread receiveVideoThread;
+        // threads
+        std::thread sendingATCmdThread;
+        std::thread receiveNavDataThread;
+        std::thread receiveVideoThread;
 
-	// end all thread
-	volatile std::atomic<bool> endAll;
+        // end all thread
+        volatile std::atomic<bool> endAll;
 
-  boost::asio::io_service io_serviceCMD;
-	boost::asio::io_service io_serviceData;
-	boost::asio::io_service io_serviceVideo;
+        boost::asio::io_service io_serviceCMD;
+        boost::asio::io_service io_serviceData;
+        boost::asio::io_service io_serviceVideo;
 
-	boost::asio::ip::udp::socket *socketCMD;
-	boost::asio::ip::udp::socket *socketData;
-	boost::asio::ip::tcp::socket *socketVideo;
+        boost::asio::ip::udp::socket *socketCMD;
+        boost::asio::ip::udp::socket *socketData;
+        boost::asio::ip::tcp::socket *socketVideo;
 
-	void initNetwork();
-	void sendingATCommands();
-  void receiveNavData();
-	void receiveVideo();
+        void initNetwork();
+        void sendingATCommands();
+        void receiveNavData();
+        void receiveVideo();
 
-	// function for navdata handling
-	void initNavdataReceive();
-	bool isCorrectData(navdata_t* navdata, const size_t size);
-	void processReceivedNavData(navdata_t* navdata, const size_t size);
-	navdata_option_t* getOption(navdata_option_t* ptr, navdata_tag_t  tag);
-	std::string downloadConfiguration() throw(ConnectionErrorException);
+        // function for navdata handling
+        void initNavdataReceive();
+        bool isCorrectData(navdata_t* navdata, const size_t size);
+        void processReceivedNavData(navdata_t* navdata, const size_t size);
+        navdata_option_t* getOption(navdata_option_t* ptr, navdata_tag_t tag);
+        std::string downloadConfiguration() throw (ConnectionErrorException);
 
-public:
-	//! Initialize XCI for use
-	void init() throw(ConnectionErrorException); 
-	//! Resets settings to default values and re-calibrates the sensors (if supported).
-	void reset();
-	//! Turns on the engines.
-	void start();
-	//! Turns off the engines.
-	void stop();
-	//! Return name of x-copter XCI
-	std::string getName();
-	//!Return list of available sensor on x-copter
-	sensorList getSensorList();
-	//! Take specification of sensor and return void pointer to data from desired sensor
-	void* getSensorData(const Sensor &sensor);
-	//! Return x-copter´s configuration
-	std::string getConfiguration(const std::string &key);
-	//! Return x-copter´s configuration
-	informationMap getConfiguration();
-	//! Return list of x-copter´s special commands 
-	specialCMDList getSpecialCMD();
-	
-	//! Take new x-copter´s configuration and send this configuration to the x-copter
-	int setConfiguration(const std::string &key, const std::string &value);
-	//! Take new x-copter´s configuration and send this configuration to the x-copter
-	int setConfiguration(const informationMap &configuration);
-	//! Take command from list of x-copter´s special commands and send it to the x-copter
-	void sendCommand(const std::string &command);
-	//! Take four fly parameters and send it to the x-copter
-	void sendFlyParam(float roll, float pitch, float yaw, float gaz);
+    public:
+        //! Initialize XCI for use
+        void init() throw (ConnectionErrorException);
+        //! Resets settings to default values and re-calibrates the sensors (if supported).
+        void reset();
+        //! Turns on the engines.
+        void start();
+        //! Turns off the engines.
+        void stop();
+        //! Return name of x-copter XCI
+        std::string getName();
+        //!Return list of available sensor on x-copter
+        sensorList getSensorList();
+        //! Take specification of sensor and return void pointer to data from desired sensor
+        void* getSensorData(const Sensor &sensor);
+        //! Return x-copterï¿½s configuration
+        std::string getConfiguration(const std::string &key);
+        //! Return x-copterï¿½s configuration
+        informationMap getConfiguration();
+        //! Return list of x-copterï¿½s special commands 
+        specialCMDList getSpecialCMD();
 
-	~XCI_Parrot();
-};
+        //! Take new x-copterï¿½s configuration and send this configuration to the x-copter
+        int setConfiguration(const std::string &key, const std::string &value);
+        //! Take new x-copterï¿½s configuration and send this configuration to the x-copter
+        int setConfiguration(const informationMap &configuration);
+        //! Take command from list of x-copterï¿½s special commands and send it to the x-copter
+        void sendCommand(const std::string &command);
+        //! Take four fly parameters and send it to the x-copter
+        void sendFlyParam(float roll, float pitch, float yaw, float gaz);
+
+        ~XCI_Parrot();
+    };
 
 }
 #endif

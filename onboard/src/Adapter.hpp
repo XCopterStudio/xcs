@@ -14,8 +14,8 @@
 
 class Adapter {
 public:
-    
-    
+
+
     Adapter(Onboard & forest);
 
     void start(const std::string & host, const int port);
@@ -26,7 +26,7 @@ private:
     const int BUFFER_SIZE = 1024;
     Onboard & onboard;
     std::string host;
-    
+
     boost::asio::io_service io_service;
     boost::asio::ip::tcp::socket *socketServer;
 

@@ -19,21 +19,21 @@ class XCI;
 
 class Onboard {
 public:
-  enum State
-  {
-    UNDEFINED,
-    INIT,
-    SEROR,
-  };
-  
-  Onboard();
-  virtual ~Onboard();
-  bool DoCommand(const std::string& cmd);
- private:
-  void init();
-  XCI* getXci();
-  XCI* xci;
-  Onboard::State state;
+
+    enum State {
+        UNDEFINED,
+        INIT,
+        SEROR,
+    };
+
+    Onboard();
+    virtual ~Onboard();
+    bool DoCommand(const std::string& cmd);
+private:
+    void init();
+    XCI* getXci();
+    XCI* xci;
+    Onboard::State state;
 };
 
 #endif	/* ONBOARD_HPP */
