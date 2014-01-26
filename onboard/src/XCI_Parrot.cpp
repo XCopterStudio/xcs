@@ -200,7 +200,7 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
     atCommandQueue.push(new atCommandCTRL(CFG_GET_CONTROL_MODE));
 
     std::array<char, 8192> buf;
-    size_t size = socketComm.receive(boost::asio::buffer(buf));
+    size_t size = socketComm.receive(boost::asio::buffer(buf.data(), buf.size()));
 
     for (int i = 0; i < size; ++i) {
         std::cout << buf[i];
