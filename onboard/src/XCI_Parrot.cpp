@@ -203,11 +203,9 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
     std::array<char, 8192> buf;
     size_t size = socketComm.receive(boost::asio::buffer(buf.data(), buf.size()));
 
-    for (int i = 0; i < size; ++i) {
-        std::cout << buf[i];
-    }
+    std::string configuration(&buf[0],size);
 
-    return "";
+    return configuration;
 }
 
 // ----------------- Public function ---------------- //

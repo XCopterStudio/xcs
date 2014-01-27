@@ -1,9 +1,9 @@
 /* 
- * File:   Onboard.cpp
- * Author: michal
- * 
- * Created on January 21, 2014, 8:49 PM
- */
+* File:   Onboard.cpp
+* Author: michal
+* 
+* Created on January 21, 2014, 8:49 PM
+*/
 
 #include <vector>
 #include <sstream>
@@ -30,32 +30,16 @@ bool Onboard::DoCommand(const string& cmd, ...) {
         return false;
     }
 
-    //TODO: upravit pocty a frekventovanost posilani prikazu
     if (cmd == "TakeOff") {
-        for (int i = 0; i < 1000; ++i) {
-            xci->sendCommand("TakeOff");
-            this_thread::sleep_for(std::chrono::milliseconds(5));
-        }
+        xci->sendCommand("TakeOff");
     } else if (cmd == "Land") {
-        for (int i = 0; i < 1000; ++i) {
-            xci->sendCommand("Land");
-            this_thread::sleep_for(std::chrono::milliseconds(5));
-        }
+        xci->sendCommand("Land");
     } else if (cmd == "EmegrencyStop") {
-        for (int i = 0; i < 200; ++i) {
-            xci->sendCommand("EmegrencyStop");
-            this_thread::sleep_for(std::chrono::milliseconds(5));
-        }
+        xci->sendCommand("EmegrencyStop");
     } else if (cmd == "Normal") {
-        for (int i = 0; i < 5; ++i) {
-            xci->sendCommand("Normal");
-            this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
+        xci->sendCommand("Normal");
     } else if (cmd == "Reset") {
-        for (int i = 0; i < 5; ++i) {
-            xci->sendCommand("Reset");
-            this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
+        xci->sendCommand("Reset");
     } else if (cmd == "FlyParam") {
         va_list args; // TODO would variadic template be better? (float -> double)
         va_start(args, cmd);
