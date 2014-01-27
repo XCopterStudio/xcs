@@ -28,10 +28,10 @@ var flyParams = {
 };
 
 var keyMap = {
-    65: ['roll', -1.0], // A
-    68: ['roll', 1.0], // D
-    83: ['pitch', -0.5], // S
-    87: ['pitch', 0.5], // W
+    65: ['roll', -0.2], // A
+    68: ['roll', 0.2], // D
+    83: ['pitch', -0.2], // S
+    87: ['pitch', 0.2], // W
     37: ['yaw', -1.0], // left
     39: ['yaw', 1.0], // right
     38: ['gaz', 0.2], // up
