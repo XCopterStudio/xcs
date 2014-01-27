@@ -1,0 +1,35 @@
+<!-- Main X-copter Panel -->
+<div id="top-panel" class="container-fluid">
+    <div class="row-fluid">
+        <!-- Buttons -->
+        <div class="span4">
+            <h2 id="logo" class="inline-middle">XCS</h2>
+            <div class="btn-group">
+                <button class="disabled btn btn-large">Settings</button>
+            </div>
+            <div class="btn-group" data-toggle="buttons-radio">
+                <button class="disabled btn btn-large btn-inverse">Auto</button>
+                <button class="disabled btn btn-large btn-inverse">Manual</button>
+            </div>
+            <div class="btn-group">
+                <button class="disabled btn btn-large btn-danger">Reset</button>
+            </div>
+            <div class="btn-group">
+                <button id="takeoff" class="btn btn-large btn-primary">Take off</button> 
+            </div>
+            <div class="btn-group">                    
+                <button id="land" class="btn btn-large btn-success" style="display:none">Land</button> 
+            </div>
+        </div>
+        <!-- Flash messages -->
+        <div id="flash-messages" class="span6">
+        </div>
+        <!-- X-copter connectivity status -->
+        <div class="span2">
+            <div class="muted pull-right">
+                <h3 id="status-text">Connected</h3>
+                <div id="status-led"></div>
+            </div>
+        </div>
+    </div>
+</div>
