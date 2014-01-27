@@ -9,6 +9,7 @@ set(Urbi_INCLUDE_DIRS ../3rd-party/urbi/include)
 if(WIN32)
   set (TPN_WIN32 "/EHsc")
   set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+  add_definitions(-D_WIN32_WINNT=0x0501)
 endif(WIN32)
 
 if(UNIX)
@@ -44,7 +45,11 @@ add_library(xci SHARED src/XCI_Parrot.cpp src/AT_Command.cpp src/video_decode.cp
 # Linked libs
 target_link_libraries(main ${Boost_LIBRARIES})
 target_link_libraries (main ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(main avdevice avformat avfilter avcodec swscale avutil)
+
+
+target_link_libraries(xci ${Boost_LIBRARIES})
+target_link_libraries(xci ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(xci avdevice avformat avfilter avcodec swscale avutil)
 
 if(UNIX)
 	target_link_libraries(main dl m z)
