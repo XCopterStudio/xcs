@@ -81,9 +81,11 @@ void Adapter::parseCommand(const std::string& cmd) {
         }
 
         onboard_.DoCommand("FlyParam", stod(params[0]), stod(params[1]), stod(params[2]), stod(params[3]));
+        cerr << "[adapter] flyParam " << stod(params[0]) << ", " << stod(params[1]) << ", " << stod(params[2]) << ", " << stod(params[3]) << endl;
     } else if (cmdParams.size() == 0) {
         // no-params command
         onboard_.DoCommand(cmdName);
+        cerr << "[adapter] cmd " << cmdName << endl;
     } else {
         throw xcs::ParseException("Unknown input '" + command + "'.");
     }
