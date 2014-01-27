@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(onboard)
 
 # Configuration
-set(libav_INSTALL ../3rd-party/libav/install)
+set(libav_INSTALL ../3rd-party/ffmpeg/install)
 set(Urbi_INCLUDE_DIRS ../3rd-party/urbi/include)
 
 # Platform dependent stuff
@@ -22,7 +22,7 @@ find_package (Threads)
 
 # Boost
 add_definitions(-DBOOST_ALL_NO_LIB) # disable autolinking (causing problems in MS VS)
-set(Boost_USE_STATIC_LIBS true)
+set(Boost_USE_STATIC_LIBS false)
 find_package(Boost REQUIRED COMPONENTS system thread) # we don't specify version, asio seems to work for 1.46--1.54
 
 # Include dirs
@@ -47,8 +47,6 @@ target_link_libraries(main ${Boost_LIBRARIES})
 target_link_libraries(main ${CMAKE_THREAD_LIBS_INIT})
 
 
-target_link_libraries(xci ${Boost_LIBRARIES})
-target_link_libraries(xci ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(xci avdevice avformat avfilter avcodec swscale avutil)
 
 if(UNIX)
