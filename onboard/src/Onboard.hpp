@@ -32,7 +32,7 @@ public:
      * \param cmd  String name of the command (available command are listed in implementation).
      * \param ...  additional parameters depending on the command
      */
-    bool DoCommand(const std::string& cmd, ...);
+    bool DoCommand(const std::string& cmd, float roll = 0, float pitch = 0, float yaw = 0, float gaz = 0);
 private:
     void init();
     XCI* getXci();
