@@ -2,8 +2,18 @@ cmake_minimum_required(VERSION 2.8)
 project(onboard)
 
 # Configuration
-set(libav_INSTALL ../3rd-party/ffmpeg/install)
-set(Urbi_INCLUDE_DIRS ../3rd-party/urbi/include)
+set(libav_INSTALL ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party/ffmpeg/install)
+set(Urbi_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party/urbi/include)
+
+set(main_SOURCES
+    src/main.cpp
+    src/Onboard.cpp src/XCILoader.cpp src/Adapter.cpp
+    src/xcs/Exception.cpp src/xcs/ParseException.cpp
+)
+
+set(xci_SOURCES
+    src/XCI_Parrot.cpp src/AT_Command.cpp src/video_decode.cpp
+)
 
 # Platform dependent stuff
 if(WIN32)
@@ -33,25 +43,26 @@ include_directories(${Urbi_INCLUDE_DIRS})
 # Library dirs
 link_directories(${libav_INSTALL}/lib)
 
-# Binaries
-add_executable(main
-    src/main.cpp
-    src/Onboard.cpp src/XCILoader.cpp src/Adapter.cpp
-    src/xcs/Exception.cpp src/xcs/ParseException.cpp
-)
-add_library(xci SHARED src/XCI_Parrot.cpp src/AT_Command.cpp src/video_decode.cpp)
-
-
-# Linked libs
+# Binaries & their static libraries
+add_executable(main ${main_SOURCES})
 target_link_libraries(main ${Boost_LIBRARIES})
 target_link_libraries(main ${CMAKE_THREAD_LIBS_INIT})
-
-
-target_link_libraries(xci avdevice avformat avfilter avcodec swscale avutil)
-
 if(UNIX)
-	target_link_libraries(main dl m z)
+	target_link_libraries(main dl)
 endif(UNIX)
+
+add_library(xci SHARED ${xci_SOURCES})
+target_link_libraries(xci avdevice avformat avfilter avcodec swscale avutil)
+if(UNIX)
+	target_link_libraries(xci m z)
+endif(UNIX)
+
+
+
+
+
+
+
 
 
 
