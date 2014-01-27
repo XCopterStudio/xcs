@@ -21,6 +21,8 @@ namespace xci_parrot {
         static const int CMDPort;
         static const int VideoPort;
         static const int DataPort;
+        
+        static const float epsilon;
 
         static const unsigned int atCMDPacketSize;
 
