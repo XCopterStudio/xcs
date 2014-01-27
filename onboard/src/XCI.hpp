@@ -5,6 +5,17 @@
 #include <vector>
 #include <map>
 
+#if defined (_WIN32) 
+    #if defined(xci_EXPORTS)
+        #define  XCI_LIB_EXPORT __declspec(dllexport)
+    #else
+        #define  XCI_LIB_EXPORT __declspec(dllimport)
+    #endif /* xci_EXPORTS */
+#else /* defined (_WIN32) */
+    #define XCI_LIB_EXPORT
+#endif
+
+
 typedef std::map<std::string, std::string> informationMap;
 
 //! Types of sensor which x-copter can posses
@@ -90,4 +101,7 @@ public:
     virtual void stop() = 0;
 };
 
+extern "C" {
+    XCI_LIB_EXPORT XCI* CreateXci();
+}
 #endif
