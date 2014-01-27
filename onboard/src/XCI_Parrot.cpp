@@ -1,4 +1,5 @@
 #include <array>
+#include <iostream>
 
 #include "XCI_Parrot.hpp"
 #include "video_encapsulation.h"
@@ -290,25 +291,23 @@ int XCI_Parrot::setConfiguration(const informationMap &configuration) {
 
 void XCI_Parrot::sendCommand(const std::string &command) {
     if (command == "TakeOff") {
-        atCommandQueue.push(new atCommandRef(TAKEOFF));
-    } else {
-        if (command == "Land") {
-            atCommandQueue.push(new atCommandRef(LAND));
-        } else {
-            if (command == "EmegrencyStop") {
-                atCommandQueue.push(new atCommandRef(EMERGENCY));
-            } else {
-                if (command == "Normal") {
-                    atCommandQueue.push(new atCommandRef(NORMAL));
-                } else {
-                    if (command == "Reset") {
-
-                    } else {
-
-                    }
-                }
-            }
+        while (!state.getState(ARDRONE_FLY_MASK)) {
+            atCommandQueue.push(new atCommandRef(TAKEOFF));
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
+    } else if (command == "Land") {
+        while (state.getState(ARDRONE_FLY_MASK)) {
+            atCommandQueue.push(new atCommandRef(LAND));
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+    } else if (command == "EmegrencyStop") {
+        atCommandQueue.push(new atCommandRef(EMERGENCY));
+    } else if (command == "Normal") {
+        atCommandQueue.push(new atCommandRef(NORMAL));
+    } else if (command == "Reset") {
+
+    } else {
+
     }
 }
 
@@ -348,5 +347,5 @@ XCI_Parrot::~XCI_Parrot() {
 
 
 extern "C" {
-  XCI* CreateXci() { return new XCI_Parrot(); }
+    XCI* CreateXci() { return new XCI_Parrot(); }
 }

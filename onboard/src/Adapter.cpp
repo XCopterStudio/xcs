@@ -11,6 +11,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <vector>
+#include <iostream>
 
 
 using namespace boost::asio::ip;
@@ -52,7 +53,7 @@ void Adapter::start(const string & host, const int port) {
             }
         }
         cerr << "Error occurred during read." << endl;
-    } catch (system_error const &e) {
+    } catch (boost::system::system_error const &e) {
         if (e.code() == boost::asio::error::eof) {
             cerr << "Connection closed by comm server." << endl;
         } else {

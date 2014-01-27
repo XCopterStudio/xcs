@@ -7,7 +7,8 @@ set(Urbi_INCLUDE_DIRS ../3rd-party/urbi/include)
 
 # Platform dependent stuff
 if(WIN32)
-  set(TPN_WIN32 "/EHsc")
+  set (TPN_WIN32 "/EHsc")
+  set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
 endif(WIN32)
 
 if(UNIX)
@@ -35,17 +36,20 @@ link_directories(${libav_INSTALL}/lib)
 add_executable(main
     src/main.cpp
     src/Onboard.cpp src/XCILoader.cpp src/Adapter.cpp
-    src/XCI_Parrot.cpp src/AT_Command.cpp src/video_decode.cpp
     src/xcs/Exception.cpp src/xcs/ParseException.cpp
 )
-add_library(xci SHARED src/XCI_Parrot.cpp)
+add_library(xci SHARED src/XCI_Parrot.cpp src/AT_Command.cpp src/video_decode.cpp)
 
 
 # Linked libs
 target_link_libraries(main ${Boost_LIBRARIES})
 target_link_libraries (main ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(main avdevice avformat avfilter avcodec swscale avutil)
-target_link_libraries(main dl m z)
+
+if(UNIX)
+	target_link_libraries(main dl m z)
+endif(UNIX)
+
 
 
 
