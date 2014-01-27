@@ -55,17 +55,19 @@ void XCI_Parrot::initNetwork() {
 
 void XCI_Parrot::sendingATCommands() {
     std::stringstream packetString;
+    unsigned int counter = 0;
 
     while (!endAll) { // EndAll is true when instance of XCI_Parrot is in destructor.
         atCommand* cmd;
         if (atCommandQueue.tryPop(cmd)) {
+            counter = 0;
             std::string cmdString = cmd->toString(sequenceNumberCMD++);
+            //printf("%s\n", cmdString.c_str());
             delete cmd;
 
             unsigned int newSize = packetString.str().size() + cmdString.size() + 1; // one for new line 
             if (newSize > atCMDPacketSize || atCommandQueue.empty()) { // send prepared packet
                 socketCMD->send(boost::asio::buffer(packetString.str(), packetString.str().size()));
-
                 // clear packet string
                 packetString.str(std::string());
                 packetString.clear();
@@ -78,6 +80,10 @@ void XCI_Parrot::sendingATCommands() {
 
             packetString << cmdString;
         } else { // We haven't nothing to send. Put thread to sleep on some time.
+            /*if(++counter > 20){
+            atCommandQueue.push(new atCommandPCMD(droneMove()));
+            counter=0;
+            }*/
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     }
@@ -147,25 +153,27 @@ bool XCI_Parrot::isCorrectData(navdata_t* navdata, const size_t size) { // simpl
 
 void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size) {
     state.updateState(navdata->ardrone_state);
-    if (navdata->header == NAVDATA_HEADER) { // test god type of navdata
-        if (state.getState(ARDRONE_NAVDATA_BOOTSTRAP)) { //test if drone is in BOOTSTRAP MODE
-            atCommandQueue.push(new atCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
-            //TODO: force change drone state to demo_mode
-            atCommandQueue.push(new atCommandCTRL(ACK_CONTROL_MODE)); // accept control changes 
-        } else {
-            if (state.getState(ARDRONE_COM_WATCHDOG_MASK)) { // reset sequence number
-                sequenceNumberData = defaultSequenceNumber - 1;
-                atCommandQueue.push(new atCommandCOMWDG());
-            }
+    printf("Drone state %x \n",navdata->ardrone_state);
 
-            if (state.getState(ARDRONE_COM_LOST_MASK)) { // TODO: check what exactly mean reinitialize the communication with the drone
-                sequenceNumberData = defaultSequenceNumber - 1;
-                initNavdataReceive();
-            }
-        }
-
-        //TODO: parse options from ardrone!!!
+    if (state.getState(ARDRONE_NAVDATA_BOOTSTRAP)) { //test if drone is in BOOTSTRAP MODE
+        atCommandQueue.push(new atCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
+        //TODO: force change drone state to demo_mode
+        atCommandQueue.push(new atCommandCTRL(ACK_CONTROL_MODE)); // accept control changes 
     }
+
+    if (state.getState(ARDRONE_COM_WATCHDOG_MASK)) { // reset sequence number
+        sequenceNumberData = defaultSequenceNumber - 1;
+        atCommandQueue.push(new atCommandCOMWDG());
+    }
+
+    if (state.getState(ARDRONE_COM_LOST_MASK)) { // TODO: check what exactly mean reinitialize the communication with the drone
+        sequenceNumberData = defaultSequenceNumber - 1;
+        printf("Lost \n");
+        initNavdataReceive();
+    }
+
+
+    //TODO: parse options from ardrone!!!
 }
 
 navdata_option_t* XCI_Parrot::getOption(navdata_option_t* ptr, navdata_tag_t tag) {
@@ -231,14 +239,14 @@ void XCI_Parrot::reset() {
 void XCI_Parrot::start() {
     while (!state.getState(ARDRONE_FLY_MASK)) {
         atCommandQueue.push(new atCommandRef(TAKEOFF));
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 }
 
 void XCI_Parrot::stop() {
     while (state.getState(ARDRONE_FLY_MASK)) {
         atCommandQueue.push(new atCommandRef(LAND));
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 }
 
@@ -291,12 +299,12 @@ void XCI_Parrot::sendCommand(const std::string &command) {
     if (command == "TakeOff") {
         while (!state.getState(ARDRONE_FLY_MASK)) {
             atCommandQueue.push(new atCommandRef(TAKEOFF));
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
         }
     } else if (command == "Land") {
         while (state.getState(ARDRONE_FLY_MASK)) {
             atCommandQueue.push(new atCommandRef(LAND));
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
         }
     } else if (command == "EmegrencyStop") {
         if(!state.getState(ARDRONE_EMERGENCY_MASK)){
@@ -314,6 +322,7 @@ void XCI_Parrot::sendCommand(const std::string &command) {
 }
 
 void XCI_Parrot::sendFlyParam(float roll, float pitch, float yaw, float gaz) {
+    //printf("Roll %f Pitch %f YAW %f GAZ %f \n", roll,pitch,yaw,gaz);
     atCommandQueue.push(new atCommandPCMD(droneMove(roll, pitch, yaw, gaz)));
 }
 

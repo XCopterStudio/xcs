@@ -32,7 +32,7 @@ find_package (Threads)
 
 # Boost
 add_definitions(-DBOOST_ALL_NO_LIB) # disable autolinking (causing problems in MS VS)
-set(Boost_USE_STATIC_LIBS false)
+set(Boost_USE_STATIC_LIBS true)
 find_package(Boost REQUIRED COMPONENTS system thread) # we don't specify version, asio seems to work for 1.46--1.54
 
 # Include dirs
@@ -52,6 +52,7 @@ if(UNIX)
 endif(UNIX)
 
 add_library(xci SHARED ${xci_SOURCES})
+target_link_libraries(xci ${Boost_LIBRARIES})
 target_link_libraries(xci avdevice avformat avfilter avcodec swscale avutil)
 if(UNIX)
 	target_link_libraries(xci m z)

@@ -104,7 +104,7 @@ public:
     \param absControl set whether drone will use absolute control mode or not. Absolute control mode switch between controller frame and ar drone frame more in documentation.
     \param combYaw enable combined yaw control for generating complete turns (phi+yaw) from phi parameter.
      */
-    atCommandPCMD(const droneMove movement, const bool absControl = false, const bool combYaw = false, const bool progCmd = true);
+    atCommandPCMD(const droneMove movement, const bool absControl = false, const bool combYaw = false, const bool progCmd = false);
     std::string toString(const unsigned int sequenceNumber);
 };
 
@@ -122,7 +122,7 @@ public:
     \param combYaw enable combined yaw control for generating complete turns (phi+yaw) from phi parameter.
     \param psi is normalized angle <-1,1> from north provided by magnetometer sensor. Positive value means orientation to the east and negative to the west and 0 north.
      */
-    atCommandPCMD_MAG(const droneMove movement, const float psi, const float psiAccur, const bool absControl = false, const bool combYaw = false, const bool progCmd = true);
+    atCommandPCMD_MAG(const droneMove movement, const float psi, const float psiAccur, const bool absControl = false, const bool combYaw = false, const bool progCmd = false);
     std::string toString(const unsigned int sequenceNumber);
 };
 

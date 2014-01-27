@@ -29,7 +29,7 @@ droneMove::droneMove(float roll, float pitch, float yaw, float gaz) {
 std::string atCommandRef::toString(const unsigned int sequenceNumber) {
     // create magic bitField for basic behavior (take off, land, etc.)
     // from documentation this bits must be set to 1
-    int bitField = (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) | (1 << 28);
+    int32_t bitField = (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) | (1 << 28);
     switch (basicBehavior) {
         case TAKEOFF:
             bitField |= (1 << 9); // 9-bit of bit field decides between take-off and land, 1 for take off, 0 for land
@@ -63,7 +63,7 @@ atCommandPCMD::atCommandPCMD(const droneMove movement, const bool absControl, co
 }
 
 std::string atCommandPCMD::toString(const unsigned int sequenceNumber) {
-    int bitField = 0;
+    int32_t bitField = 0;
     // Create bitField according to Boolean arguments. More details in ar drone documentation.
     bitField |= (progressivCommand << 0);
     bitField |= (combinedYaw << 1);
