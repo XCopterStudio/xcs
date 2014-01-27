@@ -44,7 +44,7 @@ add_library(xci SHARED src/XCI_Parrot.cpp src/AT_Command.cpp src/video_decode.cp
 
 # Linked libs
 target_link_libraries(main ${Boost_LIBRARIES})
-target_link_libraries (main ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(main ${CMAKE_THREAD_LIBS_INIT})
 
 
 target_link_libraries(xci ${Boost_LIBRARIES})

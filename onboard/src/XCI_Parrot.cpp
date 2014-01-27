@@ -301,9 +301,13 @@ void XCI_Parrot::sendCommand(const std::string &command) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     } else if (command == "EmegrencyStop") {
-        atCommandQueue.push(new atCommandRef(EMERGENCY));
+        if(!state.getState(ARDRONE_EMERGENCY_MASK)){
+            atCommandQueue.push(new atCommandRef(EMERGENCY));
+        }
     } else if (command == "Normal") {
-        atCommandQueue.push(new atCommandRef(NORMAL));
+        if(state.getState(ARDRONE_EMERGENCY_MASK)){
+            atCommandQueue.push(new atCommandRef(NORMAL));
+        }
     } else if (command == "Reset") {
 
     } else {
