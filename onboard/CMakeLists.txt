@@ -47,7 +47,7 @@ target_link_libraries(main ${Boost_LIBRARIES})
 target_link_libraries (main ${CMAKE_THREAD_LIBS_INIT})
 
 
-target_link_libraries(xci ${Boost_LIBRARIES}
+target_link_libraries(xci ${Boost_LIBRARIES})
 target_link_libraries(xci ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(xci avdevice avformat avfilter avcodec swscale avutil)
 
