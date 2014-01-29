@@ -31,17 +31,17 @@ bool Onboard::DoCommand(const std::string& cmd, float roll, float pitch, float y
     }
 
     if (cmd == "TakeOff") {
-        xci->sendCommand("TakeOff");
+        xci->command("TakeOff");
     } else if (cmd == "Land") {
-        xci->sendCommand("Land");
+        xci->command("Land");
     } else if (cmd == "EmegrencyStop") {
-        xci->sendCommand("EmegrencyStop");
+        xci->command("EmegrencyStop");
     } else if (cmd == "Normal") {
-        xci->sendCommand("Normal");
+        xci->command("Normal");
     } else if (cmd == "Reset") {
-        xci->sendCommand("Reset");
+        xci->command("Reset");
     } else if (cmd == "FlyParam") {
-        xci->sendFlyParam(roll, pitch, yaw, gaz);
+        xci->flyParam(roll, pitch, yaw, gaz);
     } else {
         //TODO: unknown command exception
         return false;

@@ -82,26 +82,26 @@ namespace xci_parrot {
         //! Turns off the engines.
         void stop();
         //! Return name of x-copter XCI
-        std::string getName();
+        std::string name();
         //!Return list of available sensor on x-copter
-        sensorList getSensorList();
+        SensorList sensorList();
         //! Take specification of sensor and return void pointer to data from desired sensor
-        void* getSensorData(const Sensor &sensor);
+        void* sensorData(const Sensor &sensor);
         //! Return x-copter�s configuration
-        std::string getConfiguration(const std::string &key);
+        std::string configuration(const std::string &key);
         //! Return x-copter�s configuration
-        informationMap getConfiguration();
+        InformationMap configuration();
         //! Return list of x-copter�s special commands 
-        specialCMDList getSpecialCMD();
+        SpecialCMDList specialCMD();
 
         //! Take new x-copter�s configuration and send this configuration to the x-copter
-        int setConfiguration(const std::string &key, const std::string &value);
+        int configuration(const std::string &key, const std::string &value);
         //! Take new x-copter�s configuration and send this configuration to the x-copter
-        int setConfiguration(const informationMap &configuration);
+        int configuration(const InformationMap &configuration);
         //! Take command from list of x-copter�s special commands and send it to the x-copter
-        void sendCommand(const std::string &command);
+        void command(const std::string &command);
         //! Take four fly parameters and send it to the x-copter
-        void sendFlyParam(float roll, float pitch, float yaw, float gaz);
+        void flyParam(float roll, float pitch, float yaw, float gaz);
 
         ~XCI_Parrot();
     };

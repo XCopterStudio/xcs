@@ -255,29 +255,29 @@ void XCI_Parrot::stop() {
     }
 }
 
-std::string XCI_Parrot::getName() {
+std::string XCI_Parrot::name() {
     return NAME;
 }
 
-sensorList XCI_Parrot::getSensorList() {
+SensorList XCI_Parrot::sensorList() {
     return sensorList();
 }
 
-void* XCI_Parrot::getSensorData(const Sensor &sensor) {
+void* XCI_Parrot::sensorData(const Sensor &sensor) {
     return NULL;
 }
 
-std::string XCI_Parrot::getConfiguration(const std::string &key) {
+std::string XCI_Parrot::configuration(const std::string &key) {
     return "";
 }
 
-informationMap XCI_Parrot::getConfiguration() {
+InformationMap XCI_Parrot::configuration() {
     downloadConfiguration();
-    return informationMap();
+    return InformationMap();
 }
 
-specialCMDList XCI_Parrot::getSpecialCMD() {
-    specialCMDList CMDList;
+SpecialCMDList XCI_Parrot::specialCMD() {
+    SpecialCMDList CMDList;
     CMDList.push_back("TakeOff");
     CMDList.push_back("Land");
     CMDList.push_back("EmergencyStop");
@@ -286,12 +286,12 @@ specialCMDList XCI_Parrot::getSpecialCMD() {
     return CMDList;
 }
 
-int XCI_Parrot::setConfiguration(const std::string &key, const std::string &value) {
+int XCI_Parrot::configuration(const std::string &key, const std::string &value) {
     atCommandQueue_.push(new atCommandCONFIG(key, value));
     return 1;
 }
 
-int XCI_Parrot::setConfiguration(const informationMap &configuration) {
+int XCI_Parrot::configuration(const InformationMap &configuration) {
     for (auto element : configuration) {
         atCommandQueue_.push(new atCommandCONFIG(element.first, element.second));
     }
@@ -300,7 +300,7 @@ int XCI_Parrot::setConfiguration(const informationMap &configuration) {
 
 // TODO: update according to the ardrone state
 
-void XCI_Parrot::sendCommand(const std::string &command) {
+void XCI_Parrot::command(const std::string &command) {
     if (command == "TakeOff") {
         while (!state_.getState(ARDRONE_FLY_MASK)) {
             atCommandQueue_.push(new atCommandRef(TAKEOFF));
@@ -326,7 +326,7 @@ void XCI_Parrot::sendCommand(const std::string &command) {
     }
 }
 
-void XCI_Parrot::sendFlyParam(float roll, float pitch, float yaw, float gaz) {
+void XCI_Parrot::flyParam(float roll, float pitch, float yaw, float gaz) {
     //printf("Roll %f Pitch %f YAW %f GAZ %f \n", roll,pitch,yaw,gaz);
     if(std::abs(pitch) < EPSILON && std::abs(roll) < EPSILON){
         atCommandQueue_.push(new atCommandPCMD(droneMove(roll, pitch, yaw, gaz)));    

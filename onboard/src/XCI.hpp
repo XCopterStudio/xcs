@@ -16,7 +16,7 @@
 #endif
 
 
-typedef std::map<std::string, std::string> informationMap;
+typedef std::map<std::string, std::string> InformationMap;
 
 //! Types of sensor which x-copter can posses
 
@@ -39,12 +39,12 @@ enum SensorType {
 struct Sensor {
     std::string name; /*!< Unique name in XCI for sensor. */
     SensorType type; /*!< Type of sensor (ACCELEROMETR, CAMERA etc.). */
-    informationMap additionalInformation; /*!< Additional information about sensor in plain text. Example: "Resolution:1280x720,FPS:20" */
+    InformationMap additionalInformation; /*!< Additional information about sensor in plain text. Example: "Resolution:1280x720,FPS:20" */
 };
 
 // Some useful typedefs
-typedef std::vector<Sensor> sensorList;
-typedef std::vector<std::string> specialCMDList;
+typedef std::vector<Sensor> SensorList;
+typedef std::vector<std::string> SpecialCMDList;
 
 //! Virtual class for unified x-copter interface
 
@@ -55,38 +55,38 @@ public:
     //
 
     //! A pure virtual member returning name of x-copter XCI
-    virtual std::string getName() = 0;
+    virtual std::string name() = 0;
 
     //! A pure virtual member returning list of available sensors on x-copter
-    virtual sensorList getSensorList() = 0;
+    virtual SensorList sensorList() = 0;
 
     //! A pure virtual member taking specification of sensor and returning void pointer to data from desired sensor
-    virtual void* getSensorData(const Sensor &sensor) = 0;
+    virtual void* sensorData(const Sensor &sensor) = 0;
 
     //! A pure virtual member returning x-copter�s configuration value
-    virtual std::string getConfiguration(const std::string &key) = 0;
+    virtual std::string configuration(const std::string &key) = 0;
 
     //! A pure virtual member returning x-copter�s configuration values
-    virtual informationMap getConfiguration() = 0;
+    virtual InformationMap configuration() = 0;
 
     //! A pure virtual member returning list of x-copter�s special commands 
-    virtual specialCMDList getSpecialCMD() = 0;
+    virtual SpecialCMDList specialCMD() = 0;
 
     //! A pure virtual member sets configuration value.
-    virtual int setConfiguration(const std::string &key, const std::string &value) = 0;
+    virtual int configuration(const std::string &key, const std::string &value) = 0;
 
     //! A pure virtual member taking new x-copter�s configuration and send this configuration to the x-copter
-    virtual int setConfiguration(const informationMap &configuration) = 0;
+    virtual int configuration(const InformationMap &configuration) = 0;
 
     //! A pure virtual member taking command from list of x-copter�s special commands and sending it to the x-copter
-    virtual void sendCommand(const std::string &command) = 0;
+    virtual void command(const std::string &command) = 0;
 
     //
     // Bellow are methods important for simple manually driven skeleton.
     //
 
     //! A pure virtual member taking four fly parameters and send it to the x-copter
-    virtual void sendFlyParam(float roll, float pitch, float yaw, float gaz) = 0;
+    virtual void flyParam(float roll, float pitch, float yaw, float gaz) = 0;
 
     //! A pure virtual member initializing XCI for use
     virtual void init() = 0;
