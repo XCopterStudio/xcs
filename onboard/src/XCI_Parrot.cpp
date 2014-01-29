@@ -33,24 +33,24 @@ void XCI_Parrot::initNetwork() {
 
     // connect to cmd port
     udp::endpoint parrotCMD(address::from_string("192.168.1.1"), PORT_CMD);
-    socketCMD = new udp::socket(io_serviceCMD);
-    socketCMD->connect(parrotCMD, ec);
+    socketCMD_ = new udp::socket(io_serviceCMD_);
+    socketCMD_->connect(parrotCMD, ec);
     if (ec) {
         throw new ConnectionErrorException("Cannot connect command port.");
     }
 
     // connect to navdata port
     udp::endpoint parrotData(address::from_string("192.168.1.1"), PORT_DATA);
-    socketData = new udp::socket(io_serviceData);
-    socketData->connect(parrotData, ec);
+    socketData_ = new udp::socket(io_serviceData_);
+    socketData_->connect(parrotData, ec);
     if (ec) {
         throw new ConnectionErrorException("Cannot connect navigation data port.");
     }
 
     // connect to video port
     tcp::endpoint parrotVideo(address::from_string("192.168.1.1"), PORT_VIDEO);
-    socketVideo = new tcp::socket(io_serviceVideo);
-    socketVideo->connect(parrotVideo, ec);
+    socketVideo_ = new tcp::socket(io_serviceVideo_);
+    socketVideo_->connect(parrotVideo, ec);
     if (ec) {
         throw new ConnectionErrorException("Cannot connect video port.");
     }
@@ -60,17 +60,17 @@ void XCI_Parrot::sendingATCommands() {
     std::stringstream packetString;
     unsigned int counter = 0;
 
-    while (!endAll) { // EndAll is true when instance of XCI_Parrot is in destructor.
+    while (!endAll_) { // EndAll is true when instance of XCI_Parrot is in destructor.
         atCommand* cmd;
-        if (atCommandQueue.tryPop(cmd)) {
+        if (atCommandQueue_.tryPop(cmd)) {
             counter = 0;
-            std::string cmdString = cmd->toString(sequenceNumberCMD++);
+            std::string cmdString = cmd->toString(sequenceNumberCMD_++);
             printf("%s\n", cmdString.c_str());
             delete cmd;
 
             unsigned int newSize = packetString.str().size() + cmdString.size() + 1; // one for new line 
-            if (newSize > AT_CMD_PACKET_SIZE || atCommandQueue.empty()) { // send prepared packet
-                socketCMD->send(boost::asio::buffer(packetString.str(), packetString.str().size()));
+            if (newSize > AT_CMD_PACKET_SIZE || atCommandQueue_.empty()) { // send prepared packet
+                socketCMD_->send(boost::asio::buffer(packetString.str(), packetString.str().size()));
                 // clear packet string
                 packetString.str(std::string());
                 packetString.clear();
@@ -84,7 +84,7 @@ void XCI_Parrot::sendingATCommands() {
             packetString << cmdString;
         } else { // We haven't nothing to send. Put thread to sleep on some time.
             /*if(++counter > 50){
-                atCommandQueue.push(new atCommandCOMWDG());
+                atCommandQueue_.push(new atCommandCOMWDG());
                 counter=0;
             }*/
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -101,12 +101,12 @@ void XCI_Parrot::receiveNavData() {
 
     initNavdataReceive();
 
-    while (!endAll) {
-        receiveSize = socketData->receive(boost::asio::buffer(message, NAVDATA_MAX_SIZE));
-        if (navdata->sequence > sequenceNumberData) { // all received data with sequence number lower then sequenceNumberData will be skipped.
+    while (!endAll_) {
+        receiveSize = socketData_->receive(boost::asio::buffer(message, NAVDATA_MAX_SIZE));
+        if (navdata->sequence > sequenceNumberData_) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
             if (isCorrectData(navdata, receiveSize)) { // test correctness of received data
                 processReceivedNavData(navdata, receiveSize);
-                sequenceNumberData = navdata->sequence;
+                sequenceNumberData_ = navdata->sequence;
             }
         }
     }
@@ -115,15 +115,15 @@ void XCI_Parrot::receiveNavData() {
 void XCI_Parrot::receiveVideo() {
     uint8_t* message = new uint8_t[VIDEO_MAX_SIZE];
     size_t receivedSize;
-    videoDecoder.init(AV_CODEC_ID_H264);
-    while (!endAll) {
-        receivedSize = socketVideo->receive(boost::asio::buffer(message, VIDEO_MAX_SIZE));
+    videoDecoder_.init(AV_CODEC_ID_H264);
+    while (!endAll_) {
+        receivedSize = socketVideo_->receive(boost::asio::buffer(message, VIDEO_MAX_SIZE));
         parrot_video_encapsulation_t* videoPacket = (parrot_video_encapsulation_t*) & message[0];
         if (videoPacket->signature[0] == 'P' && videoPacket->signature[1] == 'a' && videoPacket->signature[2] == 'V' && videoPacket->signature[3] == 'E') {
             AVPacket avpacket;
             avpacket.size = videoPacket->payload_size;
             avpacket.data = &message[videoPacket->header_size];
-            //videoDecoder.decodeVideo(std::nullptr_t(),&avpacket);
+            //videoDecoder_.decodeVideo(std::nullptr_t(),&avpacket);
         }
     }
 
@@ -135,7 +135,7 @@ void XCI_Parrot::receiveVideo() {
 void XCI_Parrot::initNavdataReceive() {
     // magic
     int32_t flag = 1; // 1 - unicast, 2 - multicast
-    socketData->send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)));
+    socketData_->send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)));
 }
 
 bool XCI_Parrot::isCorrectData(navdata_t* navdata, const size_t size) { // simple check: only sum all data to uint32_t and then compare with value in checksum option
@@ -155,25 +155,25 @@ bool XCI_Parrot::isCorrectData(navdata_t* navdata, const size_t size) { // simpl
 }
 
 void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size) {
-    state.updateState(navdata->ardrone_state);
+    state_.updateState(navdata->ardrone_state);
 
     //printf("Drone state %x, watchdog %i \n",navdata->ardrone_state,state.getState(ARDRONE_COM_WATCHDOG_MASK));
 
-    if (state.getState(ARDRONE_NAVDATA_BOOTSTRAP)) { //test if drone is in BOOTSTRAP MODE
-        atCommandQueue.push(new atCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
+    if (state_.getState(ARDRONE_NAVDATA_BOOTSTRAP)) { //test if drone is in BOOTSTRAP MODE
+        atCommandQueue_.push(new atCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
     }
 
-    if(state.getState(ARDRONE_COMMAND_MASK)){
-        atCommandQueue.push(new atCommandCTRL(ACK_CONTROL_MODE));
+    if(state_.getState(ARDRONE_COMMAND_MASK)){
+        atCommandQueue_.push(new atCommandCTRL(ACK_CONTROL_MODE));
     }
 
-    if (state.getState(ARDRONE_COM_WATCHDOG_MASK)) { // reset sequence number
-        sequenceNumberData = DEFAULT_SEQUENCE_NUMBER - 1;
-        atCommandQueue.push(new atCommandCOMWDG());
+    if (state_.getState(ARDRONE_COM_WATCHDOG_MASK)) { // reset sequence number
+        sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
+        atCommandQueue_.push(new atCommandCOMWDG());
     }
 
-    if (state.getState(ARDRONE_COM_LOST_MASK)) { // TODO: check what exactly mean reinitialize the communication with the drone
-        sequenceNumberData = DEFAULT_SEQUENCE_NUMBER - 1;
+    if (state_.getState(ARDRONE_COM_LOST_MASK)) { // TODO: check what exactly mean reinitialize the communication with the drone
+        sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
         initNavdataReceive();
     }
 
@@ -211,7 +211,7 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
         throw new ConnectionErrorException("Cannot connect communication port.");
     }
 
-    atCommandQueue.push(new atCommandCTRL(CFG_GET_CONTROL_MODE));
+    atCommandQueue_.push(new atCommandCTRL(CFG_GET_CONTROL_MODE));
 
     std::array<char, 8192> buf;
     size_t size = socketComm.receive(boost::asio::buffer(buf.data(), buf.size()));
@@ -224,17 +224,17 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
 // ----------------- Public function ---------------- //
 
 void XCI_Parrot::init() throw (ConnectionErrorException) {
-    sequenceNumberCMD = DEFAULT_SEQUENCE_NUMBER;
-    sequenceNumberData = DEFAULT_SEQUENCE_NUMBER - 1;
+    sequenceNumberCMD_ = DEFAULT_SEQUENCE_NUMBER;
+    sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
 
-    endAll = false;
+    endAll_ = false;
 
     initNetwork();
 
     // start all threads
-    sendingATCmdThread = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
-    receiveNavDataThread = std::move(std::thread(&XCI_Parrot::receiveNavData, this));
-    receiveVideoThread = std::move(std::thread(&XCI_Parrot::receiveVideo, this));
+    threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
+    threadReceiveNavData_ = std::move(std::thread(&XCI_Parrot::receiveNavData, this));
+    threadReceiveVideo_ = std::move(std::thread(&XCI_Parrot::receiveVideo, this));
 }
 
 void XCI_Parrot::reset() {
@@ -242,15 +242,15 @@ void XCI_Parrot::reset() {
 }
 
 void XCI_Parrot::start() {
-    while (!state.getState(ARDRONE_FLY_MASK)) {
-        atCommandQueue.push(new atCommandRef(TAKEOFF));
+    while (!state_.getState(ARDRONE_FLY_MASK)) {
+        atCommandQueue_.push(new atCommandRef(TAKEOFF));
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
 }
 
 void XCI_Parrot::stop() {
-    while (state.getState(ARDRONE_FLY_MASK)) {
-        atCommandQueue.push(new atCommandRef(LAND));
+    while (state_.getState(ARDRONE_FLY_MASK)) {
+        atCommandQueue_.push(new atCommandRef(LAND));
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
 }
@@ -287,13 +287,13 @@ specialCMDList XCI_Parrot::getSpecialCMD() {
 }
 
 int XCI_Parrot::setConfiguration(const std::string &key, const std::string &value) {
-    atCommandQueue.push(new atCommandCONFIG(key, value));
+    atCommandQueue_.push(new atCommandCONFIG(key, value));
     return 1;
 }
 
 int XCI_Parrot::setConfiguration(const informationMap &configuration) {
     for (auto element : configuration) {
-        atCommandQueue.push(new atCommandCONFIG(element.first, element.second));
+        atCommandQueue_.push(new atCommandCONFIG(element.first, element.second));
     }
     return 1;
 }
@@ -302,22 +302,22 @@ int XCI_Parrot::setConfiguration(const informationMap &configuration) {
 
 void XCI_Parrot::sendCommand(const std::string &command) {
     if (command == "TakeOff") {
-        while (!state.getState(ARDRONE_FLY_MASK)) {
-            atCommandQueue.push(new atCommandRef(TAKEOFF));
+        while (!state_.getState(ARDRONE_FLY_MASK)) {
+            atCommandQueue_.push(new atCommandRef(TAKEOFF));
             std::this_thread::sleep_for(std::chrono::milliseconds(25));
         }
     } else if (command == "Land") {
-        while (state.getState(ARDRONE_FLY_MASK)) {
-            atCommandQueue.push(new atCommandRef(LAND));
+        while (state_.getState(ARDRONE_FLY_MASK)) {
+            atCommandQueue_.push(new atCommandRef(LAND));
             std::this_thread::sleep_for(std::chrono::milliseconds(25));
         }
     } else if (command == "EmegrencyStop") {
-        if(!state.getState(ARDRONE_EMERGENCY_MASK)){
-            atCommandQueue.push(new atCommandRef(EMERGENCY));
+        if(!state_.getState(ARDRONE_EMERGENCY_MASK)){
+            atCommandQueue_.push(new atCommandRef(EMERGENCY));
         }
     } else if (command == "Normal") {
-        if(state.getState(ARDRONE_EMERGENCY_MASK)){
-            atCommandQueue.push(new atCommandRef(NORMAL));
+        if(state_.getState(ARDRONE_EMERGENCY_MASK)){
+            atCommandQueue_.push(new atCommandRef(NORMAL));
         }
     } else if (command == "Reset") {
 
@@ -329,28 +329,28 @@ void XCI_Parrot::sendCommand(const std::string &command) {
 void XCI_Parrot::sendFlyParam(float roll, float pitch, float yaw, float gaz) {
     //printf("Roll %f Pitch %f YAW %f GAZ %f \n", roll,pitch,yaw,gaz);
     if(std::abs(pitch) < EPSILON && std::abs(roll) < EPSILON){
-        atCommandQueue.push(new atCommandPCMD(droneMove(roll, pitch, yaw, gaz)));    
+        atCommandQueue_.push(new atCommandPCMD(droneMove(roll, pitch, yaw, gaz)));    
     }else{
-        atCommandQueue.push(new atCommandPCMD(droneMove(roll, pitch, yaw, gaz),false,false,true));    
+        atCommandQueue_.push(new atCommandPCMD(droneMove(roll, pitch, yaw, gaz),false,false,true));    
     }
     
 }
 
 XCI_Parrot::~XCI_Parrot() {
-    endAll = true;
+    endAll_ = true;
 
     //delete all socket
-    delete socketCMD;
-    delete socketData;
-    delete socketVideo;
+    delete socketCMD_;
+    delete socketData_;
+    delete socketVideo_;
     // wait for atCMDThread end and then clear memory
-    sendingATCmdThread.join();
-    receiveNavDataThread.join();
-    receiveVideoThread.join();
+    threadSendingATCmd_.join();
+    threadReceiveNavData_.join();
+    threadReceiveVideo_.join();
 
     // delete all atCommand in queue
-    while (atCommandQueue.empty())
-        delete atCommandQueue.pop();
+    while (atCommandQueue_.empty())
+        delete atCommandQueue_.pop();
 }
 // TODO this should be always compiled as a library
 //int main() {

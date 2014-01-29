@@ -33,32 +33,32 @@ namespace xci_parrot {
         static const unsigned int VIDEO_MAX_SIZE;
 
         // Sequence number for communication with the drone.
-        unsigned int sequenceNumberCMD;
-        unsigned int sequenceNumberData;
+        unsigned int sequenceNumberCMD_;
+        unsigned int sequenceNumberData_;
 
         // queue for at commands
-        tsqueue<atCommand*> atCommandQueue;
+        tsqueue<atCommand*> atCommandQueue_;
 
         // actual state of ar.drone 2.0
-        ardroneState state;
+        ardroneState state_;
         // video decoder
-        VideoDecoder videoDecoder;
+        VideoDecoder videoDecoder_;
 
         // threads
-        std::thread sendingATCmdThread;
-        std::thread receiveNavDataThread;
-        std::thread receiveVideoThread;
+        std::thread threadSendingATCmd_;
+        std::thread threadReceiveNavData_;
+        std::thread threadReceiveVideo_;
 
         // end all thread
-        volatile std::atomic<bool> endAll;
+        volatile std::atomic<bool> endAll_;
 
-        boost::asio::io_service io_serviceCMD;
-        boost::asio::io_service io_serviceData;
-        boost::asio::io_service io_serviceVideo;
+        boost::asio::io_service io_serviceCMD_;
+        boost::asio::io_service io_serviceData_;
+        boost::asio::io_service io_serviceVideo_;
 
-        boost::asio::ip::udp::socket *socketCMD;
-        boost::asio::ip::udp::socket *socketData;
-        boost::asio::ip::tcp::socket *socketVideo;
+        boost::asio::ip::udp::socket *socketCMD_;
+        boost::asio::ip::udp::socket *socketData_;
+        boost::asio::ip::tcp::socket *socketVideo_;
 
         void initNetwork();
         void sendingATCommands();
