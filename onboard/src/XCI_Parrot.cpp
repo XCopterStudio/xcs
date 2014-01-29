@@ -11,20 +11,20 @@ using namespace boost::asio::ip;
 using namespace xci_parrot;
 // ----------------- Constant ----------------------- //
 
-const int XCI_Parrot::CommPort = 5559;
-const int XCI_Parrot::CMDPort = 5556;
-const int XCI_Parrot::VideoPort = 5555;
-const int XCI_Parrot::DataPort = 5554;
+const int XCI_Parrot::PORT_COM = 5559;
+const int XCI_Parrot::PORT_CMD = 5556;
+const int XCI_Parrot::PORT_VIDEO = 5555;
+const int XCI_Parrot::PORT_DATA = 5554;
 
-const float XCI_Parrot::epsilon = 1.0e-10;
+const float XCI_Parrot::EPSILON = 1.0e-10;
 
-const unsigned int XCI_Parrot::atCMDPacketSize = 1024;
+const unsigned int XCI_Parrot::AT_CMD_PACKET_SIZE = 1024;
 
-const std::string XCI_Parrot::name = "Parrot AR Drone 2.0 XCI";
+const std::string XCI_Parrot::NAME = "Parrot AR Drone 2.0 XCI";
 
-const int XCI_Parrot::defaultSequenceNumber = 1;
+const int XCI_Parrot::DEFAULT_SEQUENCE_NUMBER = 1;
 
-const unsigned int XCI_Parrot::videoMaxSize = 3686400;
+const unsigned int XCI_Parrot::VIDEO_MAX_SIZE = 3686400;
 
 // ----------------- Private function --------------- //
 
@@ -32,7 +32,7 @@ void XCI_Parrot::initNetwork() {
     boost::system::error_code ec;
 
     // connect to cmd port
-    udp::endpoint parrotCMD(address::from_string("192.168.1.1"), CMDPort);
+    udp::endpoint parrotCMD(address::from_string("192.168.1.1"), PORT_CMD);
     socketCMD = new udp::socket(io_serviceCMD);
     socketCMD->connect(parrotCMD, ec);
     if (ec) {
@@ -40,7 +40,7 @@ void XCI_Parrot::initNetwork() {
     }
 
     // connect to navdata port
-    udp::endpoint parrotData(address::from_string("192.168.1.1"), DataPort);
+    udp::endpoint parrotData(address::from_string("192.168.1.1"), PORT_DATA);
     socketData = new udp::socket(io_serviceData);
     socketData->connect(parrotData, ec);
     if (ec) {
@@ -48,7 +48,7 @@ void XCI_Parrot::initNetwork() {
     }
 
     // connect to video port
-    tcp::endpoint parrotVideo(address::from_string("192.168.1.1"), VideoPort);
+    tcp::endpoint parrotVideo(address::from_string("192.168.1.1"), PORT_VIDEO);
     socketVideo = new tcp::socket(io_serviceVideo);
     socketVideo->connect(parrotVideo, ec);
     if (ec) {
@@ -69,7 +69,7 @@ void XCI_Parrot::sendingATCommands() {
             delete cmd;
 
             unsigned int newSize = packetString.str().size() + cmdString.size() + 1; // one for new line 
-            if (newSize > atCMDPacketSize || atCommandQueue.empty()) { // send prepared packet
+            if (newSize > AT_CMD_PACKET_SIZE || atCommandQueue.empty()) { // send prepared packet
                 socketCMD->send(boost::asio::buffer(packetString.str(), packetString.str().size()));
                 // clear packet string
                 packetString.str(std::string());
@@ -113,11 +113,11 @@ void XCI_Parrot::receiveNavData() {
 }
 
 void XCI_Parrot::receiveVideo() {
-    uint8_t* message = new uint8_t[videoMaxSize];
+    uint8_t* message = new uint8_t[VIDEO_MAX_SIZE];
     size_t receivedSize;
     videoDecoder.init(AV_CODEC_ID_H264);
     while (!endAll) {
-        receivedSize = socketVideo->receive(boost::asio::buffer(message, videoMaxSize));
+        receivedSize = socketVideo->receive(boost::asio::buffer(message, VIDEO_MAX_SIZE));
         parrot_video_encapsulation_t* videoPacket = (parrot_video_encapsulation_t*) & message[0];
         if (videoPacket->signature[0] == 'P' && videoPacket->signature[1] == 'a' && videoPacket->signature[2] == 'V' && videoPacket->signature[3] == 'E') {
             AVPacket avpacket;
@@ -168,12 +168,12 @@ void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size) {
     }
 
     if (state.getState(ARDRONE_COM_WATCHDOG_MASK)) { // reset sequence number
-        sequenceNumberData = defaultSequenceNumber - 1;
+        sequenceNumberData = DEFAULT_SEQUENCE_NUMBER - 1;
         atCommandQueue.push(new atCommandCOMWDG());
     }
 
     if (state.getState(ARDRONE_COM_LOST_MASK)) { // TODO: check what exactly mean reinitialize the communication with the drone
-        sequenceNumberData = defaultSequenceNumber - 1;
+        sequenceNumberData = DEFAULT_SEQUENCE_NUMBER - 1;
         initNavdataReceive();
     }
 
@@ -205,7 +205,7 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
 
     boost::asio::io_service io_service;
     tcp::socket socketComm(io_service);
-    tcp::endpoint parrotComm(address::from_string("192.168.1.1"), CommPort);
+    tcp::endpoint parrotComm(address::from_string("192.168.1.1"), PORT_COM);
     socketComm.connect(parrotComm, ec);
     if (ec) {
         throw new ConnectionErrorException("Cannot connect communication port.");
@@ -224,8 +224,8 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
 // ----------------- Public function ---------------- //
 
 void XCI_Parrot::init() throw (ConnectionErrorException) {
-    sequenceNumberCMD = defaultSequenceNumber;
-    sequenceNumberData = defaultSequenceNumber - 1;
+    sequenceNumberCMD = DEFAULT_SEQUENCE_NUMBER;
+    sequenceNumberData = DEFAULT_SEQUENCE_NUMBER - 1;
 
     endAll = false;
 
@@ -256,7 +256,7 @@ void XCI_Parrot::stop() {
 }
 
 std::string XCI_Parrot::getName() {
-    return name;
+    return NAME;
 }
 
 sensorList XCI_Parrot::getSensorList() {
@@ -328,7 +328,7 @@ void XCI_Parrot::sendCommand(const std::string &command) {
 
 void XCI_Parrot::sendFlyParam(float roll, float pitch, float yaw, float gaz) {
     //printf("Roll %f Pitch %f YAW %f GAZ %f \n", roll,pitch,yaw,gaz);
-    if(std::abs(pitch) < epsilon && std::abs(roll) < epsilon){
+    if(std::abs(pitch) < EPSILON && std::abs(roll) < EPSILON){
         atCommandQueue.push(new atCommandPCMD(droneMove(roll, pitch, yaw, gaz)));    
     }else{
         atCommandQueue.push(new atCommandPCMD(droneMove(roll, pitch, yaw, gaz),false,false,true));    

@@ -32,7 +32,7 @@ find_package (Threads)
 
 # Boost
 add_definitions(-DBOOST_ALL_NO_LIB) # disable autolinking (causing problems in MS VS)
-set(Boost_USE_STATIC_LIBS true)
+set(Boost_USE_STATIC_LIBS false)
 find_package(Boost REQUIRED COMPONENTS system thread) # we don't specify version, asio seems to work for 1.46--1.54
 
 # Include dirs

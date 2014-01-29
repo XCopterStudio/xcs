@@ -17,20 +17,20 @@ namespace xci_parrot {
 
     class XCI_Parrot : public virtual XCI {
         // Constant
-        static const int CommPort;
-        static const int CMDPort;
-        static const int VideoPort;
-        static const int DataPort;
+        static const int PORT_COM;
+        static const int PORT_CMD;
+        static const int PORT_VIDEO;
+        static const int PORT_DATA;
         
-        static const float epsilon;
+        static const float EPSILON;
 
-        static const unsigned int atCMDPacketSize;
+        static const unsigned int AT_CMD_PACKET_SIZE;
 
-        static const std::string name;
+        static const std::string NAME;
 
-        static const int defaultSequenceNumber;
+        static const int DEFAULT_SEQUENCE_NUMBER;
 
-        static const unsigned int videoMaxSize;
+        static const unsigned int VIDEO_MAX_SIZE;
 
         // Sequence number for communication with the drone.
         unsigned int sequenceNumberCMD;
