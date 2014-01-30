@@ -97,7 +97,7 @@ void XCI_Parrot::sendingATCommands() {
 
 void XCI_Parrot::receiveNavData() {
     uint8_t message[NAVDATA_MAX_SIZE];
-    navdata_t* navdata = (navdata_t*) & message[0];
+    Navdata* navdata = (Navdata*) & message[0];
     size_t receiveSize = 0;
 
     initNavdataReceive();
@@ -136,23 +136,23 @@ void XCI_Parrot::initNavdataReceive() {
     socketData_->send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)));
 }
 
-bool XCI_Parrot::isCorrectData(navdata_t* navdata, const size_t size) { // simple check: only sum all data to uint32_t and then compare with value in checksum option
+bool XCI_Parrot::isCorrectData(Navdata* navdata, const size_t size) { // simple check: only sum all data to uint32_t and then compare with value in checksum option
     uint8_t* data = (uint8_t*) navdata;
     uint32_t checksum = 0;
-    size_t dataSize = size - sizeof (navdata_cks_t);
+    size_t dataSize = size - sizeof (NavdataCks);
 
     for (unsigned int i = 0; i < dataSize; i++) {
         checksum += (uint32_t) data[i];
     }
 
-    navdata_cks_t* navdataChecksum = (navdata_cks_t*) getOption(&navdata->options[0], NAVDATA_CKS_TAG);
+    NavdataCks* navdataChecksum = (NavdataCks*) getOption(&navdata->options[0], NAVDATA_CKS_TAG);
     if (navdataChecksum == std::nullptr_t())
         return false;
 
     return navdataChecksum->cks == checksum;
 }
 
-void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size) {
+void XCI_Parrot::processReceivedNavData(Navdata* navdata, const size_t size) {
     state_.updateState(navdata->ardrone_state);
 
     //printf("Drone state %x, watchdog %i \n",navdata->ardrone_state,state.getState(ARDRONE_COM_WATCHDOG_MASK));
@@ -179,18 +179,18 @@ void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size) {
     //TODO: parse options from ardrone!!!
 }
 
-navdata_option_t* XCI_Parrot::getOption(navdata_option_t* ptr, navdata_tag_t tag) {
-    navdata_option_t* ptr_data = ptr;
+NavdataOption* XCI_Parrot::getOption(NavdataOption* ptr, NavdataTag tag) {
+    NavdataOption* ptrData = ptr;
 
     do {
-        if (ptr_data->size == 0) {
+        if (ptrData->size == 0) {
             return std::nullptr_t();
         } else {
-            if (ptr_data->tag == tag) {
-                return ptr_data;
+            if (ptrData->tag == tag) {
+                return ptrData;
             }
 
-            ptr_data = (navdata_option_t*) (((uint8_t*) ptr_data) + ptr_data->size);
+            ptrData = (NavdataOption*) (((uint8_t*) ptrData) + ptrData->size);
         }
     } while (true);
 }

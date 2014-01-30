@@ -9,7 +9,7 @@
 #include "AT_Command.hpp"
 #include "../../shared/tsqueue.hpp"
 #include "ardrone_state.hpp"
-#include "navdata_common.h"
+#include "navdata_options.hpp"
 #include "xci_exception.hpp"
 
 namespace xcs{
@@ -66,9 +66,9 @@ namespace parrot{
 
         // function for navdata handling
         void initNavdataReceive();
-        bool isCorrectData(navdata_t* navdata, const size_t size);
-        void processReceivedNavData(navdata_t* navdata, const size_t size);
-        navdata_option_t* getOption(navdata_option_t* ptr, navdata_tag_t tag);
+        bool isCorrectData(Navdata* navdata, const size_t size);
+        void processReceivedNavData(Navdata* navdata, const size_t size);
+        NavdataOption* getOption(NavdataOption* ptr, NavdataTag tag);
         std::string downloadConfiguration() throw (ConnectionErrorException);
 
     public:
