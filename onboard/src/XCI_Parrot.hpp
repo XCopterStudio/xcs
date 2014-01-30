@@ -29,16 +29,16 @@ namespace parrot{
 
         static const std::string NAME;
 
-        static const int DEFAULT_SEQUENCE_NUMBER;
+        static const int32_t DEFAULT_SEQUENCE_NUMBER;
 
         static const unsigned int VIDEO_MAX_SIZE;
 
         // Sequence number for communication with the drone.
-        unsigned int sequenceNumberCMD_;
-        unsigned int sequenceNumberData_;
+        uint32_t sequenceNumberCMD_;
+        uint32_t sequenceNumberData_;
 
         // queue for at commands
-        tsqueue<atCommand*> atCommandQueue_;
+        tsqueue<AtCommand*> atCommandQueue_;
 
         // actual state of ar.drone 2.0
         ardroneState state_;

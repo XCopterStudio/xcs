@@ -17,13 +17,13 @@ const int XCI_Parrot::PORT_CMD = 5556;
 const int XCI_Parrot::PORT_VIDEO = 5555;
 const int XCI_Parrot::PORT_DATA = 5554;
 
-const float XCI_Parrot::EPSILON = 1.0e-10;
+const float XCI_Parrot::EPSILON = (float) 1.0e-10;
 
 const unsigned int XCI_Parrot::AT_CMD_PACKET_SIZE = 1024;
 
 const std::string XCI_Parrot::NAME = "Parrot AR Drone 2.0 XCI";
 
-const int XCI_Parrot::DEFAULT_SEQUENCE_NUMBER = 1;
+const int32_t XCI_Parrot::DEFAULT_SEQUENCE_NUMBER = 1;
 
 const unsigned int XCI_Parrot::VIDEO_MAX_SIZE = 3686400;
 
@@ -62,7 +62,7 @@ void XCI_Parrot::sendingATCommands() {
     unsigned int counter = 0;
 
     while (!endAll_) { // EndAll is true when instance of XCI_Parrot is in destructor.
-        atCommand* cmd;
+        AtCommand* cmd;
         if (atCommandQueue_.tryPop(cmd)) {
             counter = 0;
             std::string cmdString = cmd->toString(sequenceNumberCMD_++);
@@ -77,7 +77,7 @@ void XCI_Parrot::sendingATCommands() {
                 packetString.clear();
             }
 
-            // add end of line at the end of each atCommand
+            // add end of line at the end of each AtCommand
             if (packetString.str().size() > 0) {
                 packetString << std::endl;
             }
@@ -85,7 +85,7 @@ void XCI_Parrot::sendingATCommands() {
             packetString << cmdString;
         } else { // We haven't nothing to send. Put thread to sleep on some time.
             /*if(++counter > 50){
-                atCommandQueue_.push(new atCommandCOMWDG());
+                atCommandQueue_.push(new AtCommandCOMWDG());
                 counter=0;
             }*/
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -158,16 +158,16 @@ void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size) {
     //printf("Drone state %x, watchdog %i \n",navdata->ardrone_state,state.getState(ARDRONE_COM_WATCHDOG_MASK));
 
     if (state_.getState(ARDRONE_NAVDATA_BOOTSTRAP)) { //test if drone is in BOOTSTRAP MODE
-        atCommandQueue_.push(new atCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
+        atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
     }
 
     if(state_.getState(ARDRONE_COMMAND_MASK)){
-        atCommandQueue_.push(new atCommandCTRL(STATE_ACK_CONTROL_MODE));
+        atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
     }
 
     if (state_.getState(ARDRONE_COM_WATCHDOG_MASK)) { // reset sequence number
         sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
-        atCommandQueue_.push(new atCommandCOMWDG());
+        atCommandQueue_.push(new AtCommandCOMWDG());
     }
 
     if (state_.getState(ARDRONE_COM_LOST_MASK)) { // TODO: check what exactly mean reinitialize the communication with the drone
@@ -209,7 +209,7 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
         throw new ConnectionErrorException("Cannot connect communication port.");
     }
 
-    atCommandQueue_.push(new atCommandCTRL(STATE_CFG_GET_CONTROL_MODE));
+    atCommandQueue_.push(new AtCommandCTRL(STATE_CFG_GET_CONTROL_MODE));
 
     std::array<char, 8192> buf;
     size_t size = socketComm.receive(boost::asio::buffer(buf.data(), buf.size()));
@@ -241,14 +241,14 @@ void XCI_Parrot::reset() {
 
 void XCI_Parrot::start() {
     while (!state_.getState(ARDRONE_FLY_MASK)) {
-        atCommandQueue_.push(new atCommandRef(STATE_TAKEOFF));
+        atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
 }
 
 void XCI_Parrot::stop() {
     while (state_.getState(ARDRONE_FLY_MASK)) {
-        atCommandQueue_.push(new atCommandRef(STATE_LAND));
+        atCommandQueue_.push(new AtCommandRef(STATE_LAND));
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
 }
@@ -285,12 +285,12 @@ SpecialCMDList XCI_Parrot::specialCMD() {
 }
 
 void XCI_Parrot::configuration(const std::string &key, const std::string &value) {
-    atCommandQueue_.push(new atCommandCONFIG(key, value));
+    atCommandQueue_.push(new AtCommandCONFIG(key, value));
 }
 
 void XCI_Parrot::configuration(const InformationMap &configuration) {
     for (auto element : configuration) {
-        atCommandQueue_.push(new atCommandCONFIG(element.first, element.second));
+        atCommandQueue_.push(new AtCommandCONFIG(element.first, element.second));
     }
 }
 
@@ -299,21 +299,21 @@ void XCI_Parrot::configuration(const InformationMap &configuration) {
 void XCI_Parrot::command(const std::string &command) {
     if (command == "TakeOff") {
         while (!state_.getState(ARDRONE_FLY_MASK)) {
-            atCommandQueue_.push(new atCommandRef(STATE_TAKEOFF));
+            atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
             std::this_thread::sleep_for(std::chrono::milliseconds(25));
         }
     } else if (command == "Land") {
         while (state_.getState(ARDRONE_FLY_MASK)) {
-            atCommandQueue_.push(new atCommandRef(STATE_LAND));
+            atCommandQueue_.push(new AtCommandRef(STATE_LAND));
             std::this_thread::sleep_for(std::chrono::milliseconds(25));
         }
     } else if (command == "EmegrencyStop") {
         if(!state_.getState(ARDRONE_EMERGENCY_MASK)){
-            atCommandQueue_.push(new atCommandRef(STATE_EMERGENCY));
+            atCommandQueue_.push(new AtCommandRef(STATE_EMERGENCY));
         }
     } else if (command == "Normal") {
         if(state_.getState(ARDRONE_EMERGENCY_MASK)){
-            atCommandQueue_.push(new atCommandRef(STATE_NORMAL));
+            atCommandQueue_.push(new AtCommandRef(STATE_NORMAL));
         }
     } else if (command == "Reset") {
 
@@ -325,9 +325,9 @@ void XCI_Parrot::command(const std::string &command) {
 void XCI_Parrot::flyParam(float roll, float pitch, float yaw, float gaz) {
     //printf("Roll %f Pitch %f YAW %f GAZ %f \n", roll,pitch,yaw,gaz);
     if(std::abs(pitch) < EPSILON && std::abs(roll) < EPSILON){
-        atCommandQueue_.push(new atCommandPCMD(droneMove(roll, pitch, yaw, gaz)));    
+        atCommandQueue_.push(new AtCommandPCMD(DroneMove(roll, pitch, yaw, gaz)));    
     }else{
-        atCommandQueue_.push(new atCommandPCMD(droneMove(roll, pitch, yaw, gaz),false,false,true));    
+        atCommandQueue_.push(new AtCommandPCMD(DroneMove(roll, pitch, yaw, gaz),false,false,true));    
     }
     
 }
@@ -344,7 +344,7 @@ XCI_Parrot::~XCI_Parrot() {
     threadReceiveNavData_.join();
     threadReceiveVideo_.join();
 
-    // delete all atCommand in queue
+    // delete all AtCommand in queue
     while (atCommandQueue_.empty())
         delete atCommandQueue_.pop();
 }
