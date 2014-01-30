@@ -10,12 +10,11 @@
 #include "../../shared/tsqueue.hpp"
 #include "ardrone_state.hpp"
 #include "navdata_common.h"
-#include "video_decode.hpp"
 #include "xci_exception.hpp"
 
 namespace xcs{
 namespace xci{
-namespace parrot {
+namespace parrot{
 
     class XCI_Parrot : public virtual XCI {
         // Constant
@@ -43,8 +42,6 @@ namespace parrot {
 
         // actual state of ar.drone 2.0
         ardroneState state_;
-        // video decoder
-        VideoDecoder videoDecoder_;
 
         // threads
         std::thread threadSendingATCmd_;
@@ -97,9 +94,9 @@ namespace parrot {
         SpecialCMDList specialCMD();
 
         //! Take new x-copter�s configuration and send this configuration to the x-copter
-        int configuration(const std::string &key, const std::string &value);
+        void configuration(const std::string &key, const std::string &value);
         //! Take new x-copter�s configuration and send this configuration to the x-copter
-        int configuration(const InformationMap &configuration);
+        void configuration(const InformationMap &configuration);
         //! Take command from list of x-copter�s special commands and send it to the x-copter
         void command(const std::string &command);
         //! Take four fly parameters and send it to the x-copter

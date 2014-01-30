@@ -18,8 +18,6 @@
 namespace xcs{
 namespace xci{
 
-    typedef std::map<std::string, std::string> InformationMap;
-
     //! Types of sensor which x-copter can posses
 
     enum SensorType {
@@ -36,8 +34,9 @@ namespace xci{
         UNKNOWN /*!< Unknown type of sensor. Use it for new type of sensor which XCS doesn�t know. */
     };
 
-    //! Information about sensor
+    typedef std::map<std::string, std::string> InformationMap;
 
+    //! Information about sensor
     struct Sensor {
         std::string name; /*!< Unique name in XCI for sensor. */
         SensorType type; /*!< Type of sensor (ACCELEROMETR, CAMERA etc.). */
@@ -72,10 +71,10 @@ namespace xci{
         virtual SpecialCMDList specialCMD() = 0;
 
         //! A pure virtual member sets configuration value.
-        virtual int configuration(const std::string &key, const std::string &value) = 0;
+        virtual void configuration(const std::string &key, const std::string &value) = 0;
 
         //! A pure virtual member taking new x-copter�s configuration and send this configuration to the x-copter
-        virtual int configuration(const InformationMap &configuration) = 0;
+        virtual void configuration(const InformationMap &configuration) = 0;
 
         //! A pure virtual member taking command from list of x-copter�s special commands and sending it to the x-copter
         virtual void command(const std::string &command) = 0;
