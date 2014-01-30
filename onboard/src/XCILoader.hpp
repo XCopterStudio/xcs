@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "XCI.hpp"
 
 #ifndef USE_PRECOMPILED_HEADERS
 #ifdef _WIN32
@@ -11,8 +12,6 @@
 #include <dlfcn.h>
 #endif
 #endif
-
-class XCI;
 
 using namespace std;
 
@@ -27,7 +26,7 @@ public:
     XCILoader(void);
     virtual ~XCILoader(void);
 
-    XCI* Load();
+    xcs::xci::XCI* Load();
     void LoadLib(const std::string & filepath);
     void* LoadLibrarySymbol(const std::string & symbol);
 };

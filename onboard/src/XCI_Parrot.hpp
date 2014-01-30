@@ -13,7 +13,9 @@
 #include "video_decode.hpp"
 #include "xci_exception.hpp"
 
-namespace xci_parrot {
+namespace xcs{
+namespace xci{
+namespace parrot {
 
     class XCI_Parrot : public virtual XCI {
         // Constant
@@ -21,7 +23,7 @@ namespace xci_parrot {
         static const int PORT_CMD;
         static const int PORT_VIDEO;
         static const int PORT_DATA;
-        
+
         static const float EPSILON;
 
         static const unsigned int AT_CMD_PACKET_SIZE;
@@ -105,6 +107,5 @@ namespace xci_parrot {
 
         ~XCI_Parrot();
     };
-
-}
+}}}
 #endif

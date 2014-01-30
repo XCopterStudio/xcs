@@ -15,6 +15,7 @@
 #include "XCILoader.hpp"
 
 using namespace std;
+using namespace xcs::xci;
 
 Onboard::Onboard() {
     init();

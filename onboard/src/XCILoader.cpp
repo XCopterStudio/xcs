@@ -2,6 +2,8 @@
 #include "XCI.hpp"
 #include <iostream>
 
+using namespace xcs::xci;
+
 XCILoader::XCILoader(void) {
 }
 

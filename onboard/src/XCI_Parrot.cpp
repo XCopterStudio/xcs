@@ -8,7 +8,8 @@
 using namespace std;
 using namespace boost::asio;
 using namespace boost::asio::ip;
-using namespace xci_parrot;
+using namespace xcs::xci;
+using namespace xcs::xci::parrot;
 // ----------------- Constant ----------------------- //
 
 const int XCI_Parrot::PORT_COM = 5559;
@@ -120,10 +121,7 @@ void XCI_Parrot::receiveVideo() {
         receivedSize = socketVideo_->receive(boost::asio::buffer(message, VIDEO_MAX_SIZE));
         parrot_video_encapsulation_t* videoPacket = (parrot_video_encapsulation_t*) & message[0];
         if (videoPacket->signature[0] == 'P' && videoPacket->signature[1] == 'a' && videoPacket->signature[2] == 'V' && videoPacket->signature[3] == 'E') {
-            AVPacket avpacket;
-            avpacket.size = videoPacket->payload_size;
-            avpacket.data = &message[videoPacket->header_size];
-            //videoDecoder_.decodeVideo(std::nullptr_t(),&avpacket);
+            //TODO: process video data
         }
     }
 

@@ -9,13 +9,12 @@
 #define	ONBOARD_HPP
 
 #include <string>
+#include "XCI.hpp"
 
 //#define Prop(T, X) \
 //  private:  T _##X;  \
 //  public:   T Get##X() { return _##X; } \
 //  void Set##X(const T& x) { _##X = x; }
-
-class XCI;
 
 class Onboard {
 public:
@@ -35,8 +34,8 @@ public:
     bool DoCommand(const std::string& cmd, float roll = 0, float pitch = 0, float yaw = 0, float gaz = 0);
 private:
     void init();
-    XCI* getXci();
-    XCI* xci;
+    xcs::xci::XCI* getXci();
+    xcs::xci::XCI* xci;
     Onboard::State state;
 };
 
