@@ -7,23 +7,23 @@
 //! Possible states of the drone 'control' thread.
 
 enum ArdroneControlMode {
-    NO_CONTROL_MODE = 0, /*<! Doing nothing */
-    ARDRONE_UPDATE_CONTROL_MODE, /*<! Not used */
-    PIC_UPDATE_CONTROL_MODE, /*<! Not used */
-    LOGS_GET_CONTROL_MODE, /*<! Not used */
-    CFG_GET_CONTROL_MODE, /*<! Send active configuration file to a client through the 'control' socket UDP 5559 */
-    ACK_CONTROL_MODE, /*<! Reset command mask in navdata */
-    CUSTOM_CFG_GET_CONTROL_MODE /*<! Requests the list of custom configuration IDs */
+    STATE_NO_CONTROL_MODE = 0, /*<! Doing nothing */
+    STATE_ARDRONE_UPDATE_CONTROL_MODE, /*<! Not used */
+    STATE_PIC_UPDATE_CONTROL_MODE, /*<! Not used */
+    STATE_LOGS_GET_CONTROL_MODE, /*<! Not used */
+    STATE_CFG_GET_CONTROL_MODE, /*<! Send active configuration file to a client through the 'control' socket UDP 5559 */
+    STATE_ACK_CONTROL_MODE, /*<! Reset command mask in navdata */
+    STATE_CUSTOM_CFG_GET_CONTROL_MODE /*<! Requests the list of custom configuration IDs */
 };
 
 //! Basic behavior of parrot drone
 
-enum behavior {
-    TAKEOFF,
-    LAND,
-    EMERGENCY,
-    NORMAL,
-    CLEAR
+enum Behavior{
+    STATE_TAKEOFF,
+    STATE_LAND,
+    STATE_EMERGENCY,
+    STATE_NORMAL,
+    STATE_CLEAR
 };
 
 //! Serve for easier conversion between 32-bit integer and float
@@ -80,11 +80,11 @@ public:
 
 class atCommandRef : public atCommand {
     static const std::string nameOfCommand; /*!< AT command name according to the ar drone 2.0 documentation. */
-    behavior basicBehavior; /*< Represent behavior of drone (take off, land etc.).*/
+    Behavior basicBehavior; /*< Represent behavior of drone (take off, land etc.).*/
 public:
     //! Initialize constant class representing at command for drone movement.
 
-    atCommandRef(const behavior basicBehavior) : basicBehavior(basicBehavior) {
+    atCommandRef(const Behavior basicBehavior) : basicBehavior(basicBehavior) {
     };
     std::string toString(const unsigned int sequenceNumber);
 };
@@ -192,7 +192,7 @@ class atCommandCTRL : public atCommand {
     ArdroneControlMode mode;
 public:
 
-    atCommandCTRL(ArdroneControlMode mode = NO_CONTROL_MODE) : mode(mode) {
+    atCommandCTRL(ArdroneControlMode mode = STATE_NO_CONTROL_MODE) : mode(mode) {
     };
     std::string toString(const unsigned int sequenceNumber);
 };

@@ -116,7 +116,7 @@ void XCI_Parrot::receiveNavData() {
 void XCI_Parrot::receiveVideo() {
     uint8_t* message = new uint8_t[VIDEO_MAX_SIZE];
     size_t receivedSize;
-    videoDecoder_.init(AV_CODEC_ID_H264);
+ 
     while (!endAll_) {
         receivedSize = socketVideo_->receive(boost::asio::buffer(message, VIDEO_MAX_SIZE));
         parrot_video_encapsulation_t* videoPacket = (parrot_video_encapsulation_t*) & message[0];
@@ -162,7 +162,7 @@ void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size) {
     }
 
     if(state_.getState(ARDRONE_COMMAND_MASK)){
-        atCommandQueue_.push(new atCommandCTRL(ACK_CONTROL_MODE));
+        atCommandQueue_.push(new atCommandCTRL(STATE_ACK_CONTROL_MODE));
     }
 
     if (state_.getState(ARDRONE_COM_WATCHDOG_MASK)) { // reset sequence number
@@ -209,7 +209,7 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
         throw new ConnectionErrorException("Cannot connect communication port.");
     }
 
-    atCommandQueue_.push(new atCommandCTRL(CFG_GET_CONTROL_MODE));
+    atCommandQueue_.push(new atCommandCTRL(STATE_CFG_GET_CONTROL_MODE));
 
     std::array<char, 8192> buf;
     size_t size = socketComm.receive(boost::asio::buffer(buf.data(), buf.size()));
@@ -241,14 +241,14 @@ void XCI_Parrot::reset() {
 
 void XCI_Parrot::start() {
     while (!state_.getState(ARDRONE_FLY_MASK)) {
-        atCommandQueue_.push(new atCommandRef(TAKEOFF));
+        atCommandQueue_.push(new atCommandRef(STATE_TAKEOFF));
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
 }
 
 void XCI_Parrot::stop() {
     while (state_.getState(ARDRONE_FLY_MASK)) {
-        atCommandQueue_.push(new atCommandRef(LAND));
+        atCommandQueue_.push(new atCommandRef(STATE_LAND));
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
 }
@@ -284,16 +284,14 @@ SpecialCMDList XCI_Parrot::specialCMD() {
     return CMDList;
 }
 
-int XCI_Parrot::configuration(const std::string &key, const std::string &value) {
+void XCI_Parrot::configuration(const std::string &key, const std::string &value) {
     atCommandQueue_.push(new atCommandCONFIG(key, value));
-    return 1;
 }
 
-int XCI_Parrot::configuration(const InformationMap &configuration) {
+void XCI_Parrot::configuration(const InformationMap &configuration) {
     for (auto element : configuration) {
         atCommandQueue_.push(new atCommandCONFIG(element.first, element.second));
     }
-    return 1;
 }
 
 // TODO: update according to the ardrone state
@@ -301,21 +299,21 @@ int XCI_Parrot::configuration(const InformationMap &configuration) {
 void XCI_Parrot::command(const std::string &command) {
     if (command == "TakeOff") {
         while (!state_.getState(ARDRONE_FLY_MASK)) {
-            atCommandQueue_.push(new atCommandRef(TAKEOFF));
+            atCommandQueue_.push(new atCommandRef(STATE_TAKEOFF));
             std::this_thread::sleep_for(std::chrono::milliseconds(25));
         }
     } else if (command == "Land") {
         while (state_.getState(ARDRONE_FLY_MASK)) {
-            atCommandQueue_.push(new atCommandRef(LAND));
+            atCommandQueue_.push(new atCommandRef(STATE_LAND));
             std::this_thread::sleep_for(std::chrono::milliseconds(25));
         }
     } else if (command == "EmegrencyStop") {
         if(!state_.getState(ARDRONE_EMERGENCY_MASK)){
-            atCommandQueue_.push(new atCommandRef(EMERGENCY));
+            atCommandQueue_.push(new atCommandRef(STATE_EMERGENCY));
         }
     } else if (command == "Normal") {
         if(state_.getState(ARDRONE_EMERGENCY_MASK)){
-            atCommandQueue_.push(new atCommandRef(NORMAL));
+            atCommandQueue_.push(new atCommandRef(STATE_NORMAL));
         }
     } else if (command == "Reset") {
 

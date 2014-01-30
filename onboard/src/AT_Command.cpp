@@ -31,22 +31,22 @@ std::string atCommandRef::toString(const unsigned int sequenceNumber) {
     // from documentation this bits must be set to 1
     int32_t bitField = (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) | (1 << 28);
     switch (basicBehavior) {
-        case TAKEOFF:
-            bitField |= (1 << 9); // 9-bit of bit field decides between take-off and land, 1 for take off, 0 for land
-            break;
-        case LAND:
-            bitField &= ~(1 << 9); // 9-bit of bit field decides between take-off and land, 1 for take off, 0 for land
-            break;
-        case EMERGENCY:
-            bitField |= (1 << 8); // when drone is in normal state this bit set to 1 makes the drones enter to an emergency mode (cut off engine).
-            break;
-        case NORMAL:
-            bitField |= (1 << 8); // when drone is in emergency state this bit set to 1 makes the drones resume a normal mode.
-        case CLEAR:
-            // don't change anything on bit field
-            break;
-        default: // this state is not accessible
-            break;
+    case STATE_TAKEOFF:
+        bitField |= (1 << 9); // 9-bit of bit field decides between take-off and land, 1 for take off, 0 for land
+        break;
+    case STATE_LAND:
+        bitField &= ~(1 << 9); // 9-bit of bit field decides between take-off and land, 1 for take off, 0 for land
+        break;
+    case STATE_EMERGENCY:
+        bitField |= (1 << 8); // when drone is in normal state this bit set to 1 makes the drones enter to an emergency mode (cut off engine).
+        break;
+    case STATE_NORMAL:
+        bitField |= (1 << 8); // when drone is in emergency state this bit set to 1 makes the drones resume a normal mode.
+    case STATE_CLEAR:
+        // don't change anything on bit field
+        break;
+    default: // this state is not accessible
+        break;
     }
 
     std::stringstream out;
@@ -159,7 +159,7 @@ std::string atCommandCTRL::toString(const unsigned int sequenceNumber) {
     std::stringstream out;
     out << startOfAtComm << nameOfCommand << "=" << sequenceNumber;
     out << delOfAtCommVal << mode;
-    out << delOfAtCommVal << (int) 0;
+    out << delOfAtCommVal << (int)0;
     out << endOfAtComm;
     return out.str();
 }
