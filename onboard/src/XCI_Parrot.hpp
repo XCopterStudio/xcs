@@ -41,7 +41,7 @@ namespace parrot{
         Tsqueue<AtCommand*> atCommandQueue_;
 
         // actual state of ar.drone 2.0
-        ardroneState state_;
+        ArdroneState state_;
 
         // threads
         std::thread threadSendingATCmd_;

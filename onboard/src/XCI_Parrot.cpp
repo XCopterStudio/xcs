@@ -157,20 +157,20 @@ void XCI_Parrot::processReceivedNavData(navdata_t* navdata, const size_t size) {
 
     //printf("Drone state %x, watchdog %i \n",navdata->ardrone_state,state.getState(ARDRONE_COM_WATCHDOG_MASK));
 
-    if (state_.getState(ARDRONE_NAVDATA_BOOTSTRAP)) { //test if drone is in BOOTSTRAP MODE
+    if (state_.getState(FLAG_ARDRONE_NAVDATA_BOOTSTRAP)) { //test if drone is in BOOTSTRAP MODE
         atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
     }
 
-    if(state_.getState(ARDRONE_COMMAND_MASK)){
+    if (state_.getState(FLAG_ARDRONE_COMMAND_MASK)){
         atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
     }
 
-    if (state_.getState(ARDRONE_COM_WATCHDOG_MASK)) { // reset sequence number
+    if (state_.getState(FLAG_ARDRONE_COM_WATCHDOG_MASK)) { // reset sequence number
         sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
         atCommandQueue_.push(new AtCommandCOMWDG());
     }
 
-    if (state_.getState(ARDRONE_COM_LOST_MASK)) { // TODO: check what exactly mean reinitialize the communication with the drone
+    if (state_.getState(FLAG_ARDRONE_COM_LOST_MASK)) { // TODO: check what exactly mean reinitialize the communication with the drone
         sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
         initNavdataReceive();
     }
@@ -240,14 +240,14 @@ void XCI_Parrot::reset() {
 }
 
 void XCI_Parrot::start() {
-    while (!state_.getState(ARDRONE_FLY_MASK)) {
+    while (!state_.getState(FLAG_ARDRONE_FLY_MASK)) {
         atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
 }
 
 void XCI_Parrot::stop() {
-    while (state_.getState(ARDRONE_FLY_MASK)) {
+    while (state_.getState(FLAG_ARDRONE_FLY_MASK)) {
         atCommandQueue_.push(new AtCommandRef(STATE_LAND));
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
@@ -298,21 +298,21 @@ void XCI_Parrot::configuration(const InformationMap &configuration) {
 
 void XCI_Parrot::command(const std::string &command) {
     if (command == "TakeOff") {
-        while (!state_.getState(ARDRONE_FLY_MASK)) {
+        while (!state_.getState(FLAG_ARDRONE_FLY_MASK)) {
             atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
             std::this_thread::sleep_for(std::chrono::milliseconds(25));
         }
     } else if (command == "Land") {
-        while (state_.getState(ARDRONE_FLY_MASK)) {
+        while (state_.getState(FLAG_ARDRONE_FLY_MASK)) {
             atCommandQueue_.push(new AtCommandRef(STATE_LAND));
             std::this_thread::sleep_for(std::chrono::milliseconds(25));
         }
     } else if (command == "EmegrencyStop") {
-        if(!state_.getState(ARDRONE_EMERGENCY_MASK)){
+        if (!state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)){
             atCommandQueue_.push(new AtCommandRef(STATE_EMERGENCY));
         }
     } else if (command == "Normal") {
-        if(state_.getState(ARDRONE_EMERGENCY_MASK)){
+        if (state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)){
             atCommandQueue_.push(new AtCommandRef(STATE_NORMAL));
         }
     } else if (command == "Reset") {
