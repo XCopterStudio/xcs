@@ -5,6 +5,7 @@
 #include <mutex>
 #include <condition_variable>
 
+namespace xcs{
 
 //! Queue with support for the thread safe operations.
 template <class T>
@@ -59,4 +60,5 @@ public:
 	}
 };
 
+}
 #endif

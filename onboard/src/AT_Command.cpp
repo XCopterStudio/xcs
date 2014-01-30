@@ -3,6 +3,8 @@
 
 #include <sstream>
 
+using namespace xcs::xci::parrot;
+
 //! General constants for creating at commands.
 static const std::string startOfAtComm = "AT*";
 static const std::string endOfAtComm = "\r";
