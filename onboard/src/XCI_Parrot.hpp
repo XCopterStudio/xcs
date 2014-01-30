@@ -38,7 +38,7 @@ namespace parrot{
         uint32_t sequenceNumberData_;
 
         // queue for at commands
-        tsqueue<AtCommand*> atCommandQueue_;
+        Tsqueue<AtCommand*> atCommandQueue_;
 
         // actual state of ar.drone 2.0
         ardroneState state_;
