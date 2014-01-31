@@ -171,10 +171,7 @@ namespace parrot{
     * @brief Last navdata option that *must* be included at the end of all navdata packets
     * + 6 bytes
     */
-    struct _ATTRIBUTE_PACKED_ NavdataCks {
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataCks : public NavdataOption {
         // Checksum for all navdatas (including options)
         uint32_t cks;
     };
@@ -185,10 +182,7 @@ namespace parrot{
     * @brief Timestamp
     * + 6 bytes
     */
-    struct _ATTRIBUTE_PACKED_ NavdataTime {
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataTime : public NavdataOption {
         uint32_t time; /*!< 32 bit value where the 11 most significant bits represents the seconds, and the 21 least significant bits are the microseconds. */
     };
 
@@ -199,11 +193,7 @@ namespace parrot{
     /**
     * @brief Raw sensors measurements
     */
-    struct _ATTRIBUTE_PACKED_ NavdataRawMeasures{
-        uint16_t tag;
-        uint16_t size;
-
-        // +12 bytes
+    struct _ATTRIBUTE_PACKED_ NavdataRawMeasures : public NavdataOption{
         uint16_t raw_accs[ACCELEROMETERS_NUMBER]; // filtered accelerometers
         int16_t raw_gyros[GYROS_NUMBER]; // filtered gyrometers
         int16_t raw_gyros_110[2]; // gyrometers  x/y 110 deg/s
@@ -225,20 +215,14 @@ namespace parrot{
 
     // split next struc into magneto_navdata_t and pressure_navdata_t
 
-    struct _ATTRIBUTE_PACKED_ NavdataPressureRaw {
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataPressureRaw : public NavdataOption{
         int32_t up;
         int16_t ut;
         int32_t Temperature_meas;
         int32_t Pression_meas;
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataMagneto{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataMagneto : public NavdataOption{
         int16_t mx;
         int16_t my;
         int16_t mz;
@@ -253,13 +237,9 @@ namespace parrot{
         float32_t magneto_radius;
         float32_t error_mean;
         float32_t error_var;
-
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataWindSpeed{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataWindSpeed : public NavdataOption{
         float32_t wind_speed; // estimated wind speed [m/s]
         float32_t wind_angle; // estimated wind direction in North-East frame [rad] e.g. if wind_angle is pi/4, wind is from South-West to North-East
         float32_t wind_compensation_theta;
@@ -275,10 +255,7 @@ namespace parrot{
         float32_t magneto_debug3;
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataKalmanPressure{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataKalmanPressure : public NavdataOption{
         float32_t offset_pressure;
         float32_t est_z;
         float32_t est_zdot;
@@ -300,19 +277,13 @@ namespace parrot{
 
     // TODO: depreciated struct ? remove it ?
 
-    struct _ATTRIBUTE_PACKED_ NavdataZimmu3000{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataZimmu3000 : public NavdataOption{
         int32_t vzimmuLSB;
         float32_t vzfind;
 
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataPhysMeasures{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataPhysMeasures : public NavdataOption{
         float32_t accs_temp;
         uint16_t gyro_temp;
         float32_t phys_accs[ACCELEROMETERS_NUMBER];
@@ -322,25 +293,16 @@ namespace parrot{
         uint32_t vrefIDG; // ref volt IDG gyro [LSB]
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataGyrosOffsets{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataGyrosOffsets : public NavdataOption{
         float32_t offset_g[GYROS_NUMBER];
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataEulerAngles{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataEulerAngles : public NavdataOption{
         float32_t theta_a;
         float32_t phi_a;
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataReferences{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataReferences : public NavdataOption{
         int32_t ref_theta;
         int32_t ref_phi;
         int32_t ref_theta_I;
@@ -365,22 +327,15 @@ namespace parrot{
         float32_t ui_psi;
         float32_t ui_psi_accuracy;
         int32_t ui_seq;
-
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataTrims{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataTrims : public NavdataOption{
         float32_t angular_rates_trim_r;
         float32_t euler_angles_trim_theta;
         float32_t euler_angles_trim_phi;
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataRcReferences{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataRcReferences : public NavdataOption{
         int32_t rc_ref_pitch;
         int32_t rc_ref_roll;
         int32_t rc_ref_yaw;
@@ -388,10 +343,7 @@ namespace parrot{
         int32_t rc_ref_ag;
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataPwm{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataPwm : public NavdataOption{
         uint8_t motor1;
         uint8_t motor2;
         uint8_t motor3;
@@ -421,10 +373,7 @@ namespace parrot{
         float32_t altitude_der;
     };
 
-    struct NavdataAltitude{
-        uint16_t tag;
-        uint16_t size;
-
+    struct NavdataAltitude : public NavdataOption{
         int32_t altitude_vision;
         float32_t altitude_vz;
         int32_t altitude_ref;
@@ -436,22 +385,15 @@ namespace parrot{
         uint32_t obs_state;
         Vector21 est_vb;
         uint32_t est_state;
-
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataVisionRaw{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataVisionRaw : public NavdataOption{
         float32_t vision_tx_raw;
         float32_t vision_ty_raw;
         float32_t vision_tz_raw;
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataVision{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataVision : public NavdataOption{
         uint32_t vision_state;
         int32_t vision_misc;
         float32_t vision_phi_trim;
@@ -477,11 +419,7 @@ namespace parrot{
         float32_t gold_y;
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataVisionPerf{
-        uint16_t tag;
-        uint16_t size;
-
-        // +44 bytes
+    struct _ATTRIBUTE_PACKED_ NavdataVisionPerf : public NavdataOption{
         float32_t time_szo;
         float32_t time_corners;
         float32_t time_compute;
@@ -491,19 +429,13 @@ namespace parrot{
         float32_t time_custom[NAVDATA_MAX_CUSTOM_TIME_SAVE];
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataTrackersSend{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataTrackersSend : public NavdataOption{
         int32_t locked[DEFAULT_NB_TRACKERS_WIDTH * DEFAULT_NB_TRACKERS_HEIGHT];
         ScreenPoint point[DEFAULT_NB_TRACKERS_WIDTH * DEFAULT_NB_TRACKERS_HEIGHT];
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataVisionDetect{
+    struct _ATTRIBUTE_PACKED_ NavdataVisionDetect : public NavdataOption{
         /* !! Change the function 'navdata_server_reset_vision_detect()' if this structure is modified !! */
-        uint16_t tag;
-        uint16_t size;
-
         uint32_t nb_detected;
         uint32_t type[NB_NAVDATA_DETECTION_RESULTS];
         uint32_t xc[NB_NAVDATA_DETECTION_RESULTS];
@@ -517,34 +449,21 @@ namespace parrot{
         uint32_t camera_source[NB_NAVDATA_DETECTION_RESULTS];
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataVisionOf{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataVisionOf : public NavdataOption{
         float32_t of_dx[5];
         float32_t of_dy[5];
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataWatchdog{
-        uint16_t tag;
-        uint16_t size;
-
-        // +4 bytes
+    struct _ATTRIBUTE_PACKED_ NavdataWatchdog : public NavdataOption{
         int32_t watchdog;
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataAdcDataFrame{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataAdcDataFrame : public NavdataOption{
         uint32_t version;
         uint8_t data_frame[32];
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataVideoStream{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataVideoStream : public NavdataOption{
         uint8_t quant; // quantizer reference used to encode frame [1:31]
         uint32_t frame_size; // frame size (bytes)
         uint32_t frame_number; // frame index
@@ -567,13 +486,9 @@ namespace parrot{
         // queue usage
         uint32_t tcp_queue_level;
         uint32_t fifo_queue_level;
-
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataHDVideoStream{
-        uint16_t tag;
-        uint16_t size;
-
+    struct _ATTRIBUTE_PACKED_ NavdataHDVideoStream : public NavdataOption{
         uint32_t hdvideo_state;
         uint32_t storage_fifo_nb_packets;
         uint32_t storage_fifo_size;
@@ -581,19 +496,14 @@ namespace parrot{
         uint32_t usbkey_freespace; /*! USB key free space in kbytes - 0 if no key present */
         uint32_t frame_number; /*! 'frame_number' PaVE field of the frame starting to be encoded for the HD stream */
         uint32_t usbkey_remaining_time; /*! time in seconds */
-
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataGames{
-        uint16_t tag;
-        uint16_t size;
+    struct _ATTRIBUTE_PACKED_ NavdataGames : public NavdataOption{
         uint32_t double_tap_counter;
         uint32_t finish_line_counter;
     };
 
-    struct _ATTRIBUTE_PACKED_ NavdataWifi{
-        uint16_t tag;
-        uint16_t size;
+    struct _ATTRIBUTE_PACKED_ NavdataWifi : public NavdataOption{
         uint32_t link_quality;
     };
 
