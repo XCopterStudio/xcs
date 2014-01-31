@@ -110,18 +110,6 @@ namespace parrot{
         #define _ATTRIBUTE_PACKED_  __attribute__ ((packed))
     #endif
 
-    /**
-    * @brief Navdata structure sent over the network.
-    */
-    struct _ATTRIBUTE_PACKED_ Navdata{
-        uint32_t header; /*!< Always set to NAVDATA_HEADER */
-        uint32_t ardrone_state; /*!< Bit mask built from def_ardrone_state_mask_t */
-        uint32_t sequence; /*!< Sequence number, incremented for each sent packet */
-        bool_t vision_defined;
-
-        NavdataOption options[1];
-    } ;
-
     struct _ATTRIBUTE_PACKED_ NavdataOption{
         uint16_t tag; /*!< Navdata block ('option') identifier */
         uint16_t size; /*!< set this to the size of this structure */
@@ -133,6 +121,18 @@ namespace parrot{
         //uint8_t data[];
         //#endif
     };
+
+    /**
+    * @brief Navdata structure sent over the network.
+    */
+    struct _ATTRIBUTE_PACKED_ Navdata{
+        uint32_t header; /*!< Always set to NAVDATA_HEADER */
+        uint32_t ardrone_state; /*!< Bit mask built from def_ardrone_state_mask_t */
+        uint32_t sequence; /*!< Sequence number, incremented for each sent packet */
+        bool_t vision_defined;
+
+        NavdataOption options[1];
+    } ;
 
     /**
     * @brief Minimal navigation data for all flights.
