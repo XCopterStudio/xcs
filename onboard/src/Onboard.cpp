@@ -11,7 +11,7 @@
 #include <iterator>
 #include <cstdarg>
 #include "Onboard.hpp"
-#include "XCI.hpp"
+#include "xci/XCI.hpp"
 #include "XCILoader.hpp"
 
 using namespace std;

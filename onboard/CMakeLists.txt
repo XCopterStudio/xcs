@@ -12,7 +12,7 @@ set(main_SOURCES
 )
 
 set(xci_SOURCES
-    src/XCI_Parrot.cpp src/AT_Command.cpp src/video_decode.cpp
+    src/xci/XCI_Parrot.cpp src/xci/AT_Command.cpp
 )
 
 # Platform dependent stuff
@@ -53,10 +53,12 @@ endif(UNIX)
 
 add_library(xci SHARED ${xci_SOURCES})
 target_link_libraries(xci ${Boost_LIBRARIES})
-target_link_libraries(xci avdevice avformat avfilter avcodec swscale avutil)
 if(UNIX)
 	target_link_libraries(xci m z)
 endif(UNIX)
+
+# Removed
+# target_link_libraries(xci avdevice avformat avfilter avcodec swscale avutil)
 
 
 

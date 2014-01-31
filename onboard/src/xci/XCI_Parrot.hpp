@@ -7,7 +7,7 @@
 
 #include "XCI.hpp"
 #include "AT_Command.hpp"
-#include "../../shared/tsqueue.hpp"
+#include "../../../shared/tsqueue.hpp"
 #include "ardrone_state.hpp"
 #include "navdata_options.hpp"
 #include "xci_exception.hpp"

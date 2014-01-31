@@ -1,5 +1,5 @@
 #include "XCILoader.hpp"
-#include "XCI.hpp"
+#include "xci/XCI.hpp"
 #include <iostream>
 
 using namespace xcs::xci;
