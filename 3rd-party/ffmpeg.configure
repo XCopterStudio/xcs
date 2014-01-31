@@ -1,0 +1,15 @@
+#!/bin/bash
+
+DIR=./ffmpeg
+
+cd $DIR
+xargs ./configure <<EOQ
+--prefix=./build
+--disable-programs
+--disable-doc
+--enable-pic
+--enable-shared
+--disable-everything
+--enable-decoder=h264
+EOQ
+cd -

@@ -1,0 +1,14 @@
+Build
+=====
+
+0) Update repository's Git submodules
+
+1) Install required libraries
+	- libboost (TODO fix version)
+
+2) Build ffmpeg library (in '3rd-party')
+	- run `ffmpeg.configure`
+	- run `cd ffmpeg && make install`
+
+3) Build onboard (in 'onboard/build')
+	- run `cmake ../src && make`

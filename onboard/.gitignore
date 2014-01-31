@@ -1,6 +1,4 @@
 .kdev4
-CMakeCache.txt
-CMakeFiles
-Makefile
-cmake_install.cmake
 nbproject
+build/*
+!build/.placeholder

@@ -2,17 +2,17 @@ cmake_minimum_required(VERSION 2.8)
 project(onboard)
 
 # Configuration
-set(libav_INSTALL ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party/ffmpeg/install)
-set(Urbi_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party/urbi/include)
+set(ffmpeg_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/ffmpeg/build)
+set(Urbi_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/urbi/include)
 
 set(main_SOURCES
-    src/main.cpp
-    src/Onboard.cpp src/XCILoader.cpp src/Adapter.cpp
-    src/xcs/Exception.cpp src/xcs/ParseException.cpp
+    main.cpp
+    Onboard.cpp XCILoader.cpp Adapter.cpp
+    xcs/Exception.cpp xcs/ParseException.cpp
 )
 
 set(xci_SOURCES
-    src/xci/XCI_Parrot.cpp src/xci/AT_Command.cpp
+    xci/XCI_Parrot.cpp xci/AT_Command.cpp
 )
 
 # Platform dependent stuff
@@ -37,11 +37,11 @@ find_package(Boost REQUIRED COMPONENTS system thread) # we don't specify version
 
 # Include dirs
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${libav_INSTALL}/include)
+include_directories(${ffmpeg_ROOT}/include)
 include_directories(${Urbi_INCLUDE_DIRS})
 
 # Library dirs
-link_directories(${libav_INSTALL}/lib)
+link_directories(${ffmpeg_ROOT}/lib)
 
 # Binaries & their static libraries
 add_executable(main ${main_SOURCES})
