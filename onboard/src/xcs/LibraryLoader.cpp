@@ -14,7 +14,6 @@ using namespace xcs;
 using namespace std;
 
 LibraryLoader::LibraryLoader(const std::string& libraryName) : libHandle_(0), libraryName_(libraryName) {
-    load();
 }
 
 LibraryLoader::~LibraryLoader() {
@@ -29,22 +28,25 @@ std::string LibraryLoader::libraryName() const {
     return libraryName_;
 }
 
-
 bool LibraryLoader::isLoaded() const {
     return libHandle_ != 0;
 }
 
-void LibraryLoader::load() {
-    string filename = getFilename();
+void LibraryLoader::load(const std::string& filename) {
+    if (isLoaded()) {
+        return;
+    }
+
+    string realFilename = (filename == "") ? getFilename() : filename;
 #ifdef _WIN32
-    libHandle_ = LoadLibrary(TEXT(filename.c_str()));
+    libHandle_ = LoadLibrary(TEXT(realFilename.c_str()));
 #else
     dlerror(); // reset errors
-    libHandle_ = dlopen(filename.c_str(), RTLD_NOW);
+    libHandle_ = dlopen(realFilename.c_str(), RTLD_NOW);
 #endif
 
     if (!libHandle_) {
-        throw Exception("Cannot load library '" + libraryName_ + "', searched in '" + filename + "'.");
+        throw Exception("Cannot load library '" + libraryName_ + "', searched in '" + realFilename + "'.");
     }
 }
 
@@ -56,7 +58,8 @@ void LibraryLoader::unload() {
     FreeLibrary(libHandle_);
 #else
     dlclose(libHandle_);
-#endif    
+#endif
+    libHandle_ = 0;
 }
 
 std::string LibraryLoader::getFilename() const {

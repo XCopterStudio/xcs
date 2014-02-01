@@ -9,6 +9,7 @@
 #define	LIBRARYLOADER_HPP
 
 #include <string>
+#include <mutex> 
 
 #include "Multiton.hpp"
 
@@ -27,12 +28,12 @@ namespace xcs {
 
 /*!
  * Class implements multiton pattern -- one instance for each loaded library.
- * \todo Thread safety.
  */
 class LibraryLoader : public Multiton<LibraryLoader, std::string> {
     friend class Multiton<LibraryLoader, std::string>;
 public:
 #ifdef _WIN32
+    //TODO check this weird macro in MS VC++
     HINSTANCE;
     typedef HINSTANCE HandleType;
 #else
@@ -42,15 +43,29 @@ public:
     virtual ~LibraryLoader();
 
     bool isLoaded() const;
+
+    /*!
+     * Release the library from memory.
+     */
     void unload();
-    void load();
+
+    /*!
+     * Loads the library by the instance name or the name provided.
+     * \note If loaded, does nothing.
+     * \param filename Full filename (relative to LD_LIBRARY_PATH or absolute) with the library.
+     */
+    void load(const std::string& filename = "");
+        
     HandleType libHandle() const;
+    
     std::string libraryName() const;
 
 private:
-
     HandleType libHandle_;
+
     std::string libraryName_;
+
+    std::mutex mutex_;
 
     std::string getFilename() const;
 

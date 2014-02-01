@@ -11,13 +11,13 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <mutex>
 
 namespace xcs {
 
 /*!
  * Based on implementation on Wikipedia
  * \see http://en.wikipedia.org/wiki/Multiton_pattern#C.2B.2B
- * \todo Thread safety.
  */
 template <typename T, typename Key = std::string>
 class Multiton {
@@ -42,12 +42,13 @@ private:
     typedef std::map<Key, std::unique_ptr<T> > InstancesMap;
 
     static T* getPtr(const Key& key) {
-        auto it = instances.find(key);
-
-        if (it == instances.end()) {
-            instances.insert(typename InstancesMap::value_type(key, std::unique_ptr<T>(new T(key))));
+        mutex_.lock();
+        auto it = instances_.find(key);
+        if (it == instances_.end()) {
+            instances_.insert(typename InstancesMap::value_type(key, std::unique_ptr<T>(new T(key))));
         }
-        return instances[key].get();
+        mutex_.unlock();
+        return instances_[key].get();
     }
 
     Multiton(const Multiton&) {
@@ -57,11 +58,13 @@ private:
         return *this;
     }
 
-    static InstancesMap instances;
+    static InstancesMap instances_;
+
+    static std::mutex mutex_;
 };
 
 template <typename T, typename Key>
-typename Multiton<T, Key>::InstancesMap Multiton<T, Key>::instances;
+typename Multiton<T, Key>::InstancesMap Multiton<T, Key>::instances_;
 
 }
 
