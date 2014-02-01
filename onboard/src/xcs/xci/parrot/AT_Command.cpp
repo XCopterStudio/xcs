@@ -1,5 +1,5 @@
 #include "AT_Command.hpp"
-#include "../../../shared/basic.hpp"
+#include "basic.hpp"
 
 #include <sstream>
 

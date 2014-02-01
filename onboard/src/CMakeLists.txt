@@ -9,11 +9,11 @@ set(main_SOURCES
     main.cpp
     Onboard.cpp XCILoader.cpp Adapter.cpp
     xcs/Exception.cpp xcs/ParseException.cpp
-    shared/LibraryLoader.cpp
+    xcs/LibraryLoader.cpp
 )
 
 set(xci_SOURCES
-    xci/XCI_Parrot.cpp xci/AT_Command.cpp
+    xcs/xci/parrot/XCI_Parrot.cpp xcs/xci/parrot/AT_Command.cpp
 )
 
 # Platform dependent stuff

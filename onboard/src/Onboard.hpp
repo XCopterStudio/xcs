@@ -9,7 +9,7 @@
 #define	ONBOARD_HPP
 
 #include <string>
-#include "xci/XCI.hpp"
+#include "xcs/xci/XCI.hpp"
 
 //#define Prop(T, X) \
 //  private:  T _##X;  \

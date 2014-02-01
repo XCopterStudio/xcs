@@ -5,12 +5,12 @@
 #include <thread>
 #include <atomic>
 
-#include "XCI.hpp"
+#include "xcs/xci/XCI.hpp"
 #include "AT_Command.hpp"
-#include "../../../shared/tsqueue.hpp"
+#include "xcs/tsqueue.hpp"
 #include "ardrone_state.hpp"
 #include "navdata_options.hpp"
-#include "xci_exception.hpp"
+#include "xcs/xci/ConnectionErrorException.hpp"
 
 namespace xcs{
 namespace xci{
