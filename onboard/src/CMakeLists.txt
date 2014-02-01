@@ -9,6 +9,7 @@ set(main_SOURCES
     main.cpp
     Onboard.cpp XCILoader.cpp Adapter.cpp
     xcs/Exception.cpp xcs/ParseException.cpp
+    shared/LibraryLoader.cpp
 )
 
 set(xci_SOURCES
@@ -39,6 +40,7 @@ find_package(Boost REQUIRED COMPONENTS system thread) # we don't specify version
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${ffmpeg_ROOT}/include)
 include_directories(${Urbi_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Library dirs
 link_directories(${ffmpeg_ROOT}/lib)
