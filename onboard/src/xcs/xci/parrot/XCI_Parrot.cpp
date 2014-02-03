@@ -104,7 +104,7 @@ void XCI_Parrot::receiveNavData() {
 
     while (!endAll_) {
         receiveSize = socketData_->receive(boost::asio::buffer(message, NAVDATA_MAX_SIZE));
-        if (navdata->sequence > sequenceNumberData_) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
+        if (navdata->sequence > sequenceNumberData_ && navdata->header == 0x55667788) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
             uint32_t navdataCks = NavdataProcess::computeChecksum(navdata, receiveSize);
             vector<NavdataOption*> options = NavdataProcess::parse(navdata, navdataCks ,receiveSize);
             if (options.size() > 0){
@@ -163,7 +163,10 @@ void XCI_Parrot::processState(uint32_t droneState){
 }
 
 void XCI_Parrot::processNavdata(vector<NavdataOption*> &options) {
-    //TODO: options from ardrone!!!
+    OptionVisitor visitor;
+    /*for(auto option : options){
+        option->accept(visitor);
+    }*/
 }
 
 NavdataOption* XCI_Parrot::getOption(NavdataOption* ptr, NavdataTag tag) {

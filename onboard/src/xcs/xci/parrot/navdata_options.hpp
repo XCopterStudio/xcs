@@ -9,6 +9,7 @@
 #define NAVDATA_OPTIONS_H
 
 #include <cstdint>
+#include "options_visitor.hpp"
 
 namespace xcs{
 namespace xci{
@@ -114,7 +115,6 @@ namespace parrot{
         uint16_t tag; /*!< Navdata block ('option') identifier */
         uint16_t size; /*!< set this to the size of this structure */
 
-        virtual void accept(OptionVisitor &visitor);
         //#if defined _MSC_VER || defined (__ARMCC_VERSION)
         ///* Do not use flexible arrays (C99 feature) with these compilers */
         //uint8_t data[1];
@@ -133,7 +133,7 @@ namespace parrot{
         bool_t vision_defined;
 
         NavdataOption options[1];
-    } ;
+    };
 
     /**
     * @brief Minimal navigation data for all flights.
@@ -164,6 +164,10 @@ namespace parrot{
         // Camera parameters compute by drone
         Matrix33 drone_camera_rot; /*!<  Deprecated ! Don't use ! */
         Vector31 drone_camera_trans; /*!<  Deprecated ! Don't use ! */
+
+        /*void accept(class OptionVisitor &visitor){
+            visitor.visit(this);
+        };*/
     };
 
     /*----------------------------------------------------------------------------*/

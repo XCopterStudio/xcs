@@ -18,7 +18,7 @@ std::vector<NavdataOption*> NavdataProcess::parse(xcs::xci::parrot::Navdata* nav
     unsigned int optionsLenght = lenght - sizeof(Navdata) + sizeof(NavdataOption*);
     unsigned int index = 0;
     std::vector<NavdataOption*> options;
-    NavdataOption* optionPtr = &navdata->options[0];
+    NavdataOption* optionPtr = navdata->options;
     while(index < optionsLenght){
         switch (optionPtr->tag){
         case NAVDATA_DEMO_TAG:{
@@ -59,7 +59,7 @@ std::vector<NavdataOption*> NavdataProcess::parse(xcs::xci::parrot::Navdata* nav
         case NAVDATA_TRIMS_TAG:{
             NavdataTrims* trims = new NavdataTrims;
             *trims = *reinterpret_cast<NavdataTrims*>(optionPtr);
-            options.push_back(optionPtr);
+            options.push_back(trims);
             }break;
         case NAVDATA_RC_REFERENCES_TAG:{
             NavdataRcReferences* rcReferences = new NavdataRcReferences;

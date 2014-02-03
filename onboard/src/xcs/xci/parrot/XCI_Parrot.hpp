@@ -12,6 +12,7 @@
 #include "ardrone_state.hpp"
 #include "navdata_options.hpp"
 #include "navdata_parser.hpp"
+#include "options_visitor.hpp"
 #include "xcs/xci/ConnectionErrorException.hpp"
 
 namespace xcs{
