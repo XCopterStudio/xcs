@@ -22,6 +22,9 @@ public:
      * \param libraryLoader Expects loaded library loader.
      */
     SymbolLoader(const LibraryLoader& libraryLoader) : libraryLoader_(libraryLoader) {
+        if (!libraryLoader.isLoaded()) {
+            throw Exception("Library '" + libraryLoader_.libraryName() + "' is not loaded.");
+        }
     }
 
     virtual ~SymbolLoader() {
