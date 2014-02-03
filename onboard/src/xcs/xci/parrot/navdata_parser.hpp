@@ -11,8 +11,8 @@ namespace parrot{
 
     class NavdataProcess{
     public:
-        static uint32_t computeChecksum(Navdata* navdata, const size_t size);
-        static std::vector<NavdataOption*> parse(Navdata* navdata, unsigned int lenght);
+        static uint32_t computeChecksum(Navdata* navdata ,const size_t size);
+        static std::vector<NavdataOption*> parse(Navdata* navdata, uint32_t navdataCks, unsigned int lenght);
     };
 
 }}}

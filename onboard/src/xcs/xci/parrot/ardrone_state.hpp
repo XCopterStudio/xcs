@@ -2,6 +2,7 @@
 #define ARDRONE_STATE_H
 
 #include <cstdint>
+#include <mutex>
 
 namespace xcs{
 namespace xci{
@@ -48,10 +49,11 @@ namespace parrot{
 
     class ArdroneState{
         uint32_t bitFieldStates_;
+        std::mutex stateMutex_;
     public:
         ArdroneState() : bitFieldStates_(0) {};
-        void updateState(uint32_t bitFieldStates){ this->bitFieldStates_ = bitFieldStates; };
-        bool getState(ArdronePossibleStates state){ return state & bitFieldStates_ ? true : false; };
+        void updateState(uint32_t bitFieldStates){ std::lock_guard<std::mutex> lock(stateMutex_); this->bitFieldStates_ = bitFieldStates; };
+        bool getState(ArdronePossibleStates state){ std::lock_guard<std::mutex> lock(stateMutex_); return state & bitFieldStates_ ? true : false; };
     };
 
 }}}

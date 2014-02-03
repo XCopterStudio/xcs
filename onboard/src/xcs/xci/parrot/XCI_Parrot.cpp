@@ -66,7 +66,7 @@ void XCI_Parrot::sendingATCommands() {
         if (atCommandQueue_.tryPop(cmd)) {
             counter = 0;
             std::string cmdString = cmd->toString(sequenceNumberCMD_++);
-            printf("%s\n", cmdString.c_str());
+            //printf("%s\n", cmdString.c_str());
             delete cmd;
 
             unsigned int newSize = packetString.str().size() + cmdString.size() + 1; // one for new line 
@@ -104,12 +104,15 @@ void XCI_Parrot::receiveNavData() {
 
     while (!endAll_) {
         receiveSize = socketData_->receive(boost::asio::buffer(message, NAVDATA_MAX_SIZE));
-        vector<NavdataOption*> options = navdataProcess.parse(navdata, receiveSize);
         if (navdata->sequence > sequenceNumberData_) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
-            if (isCorrectData(navdata, receiveSize)) { // test correctness of received data
-                processReceivedNavData(navdata, receiveSize);
-                sequenceNumberData_ = navdata->sequence;
+            uint32_t navdataCks = NavdataProcess::computeChecksum(navdata, receiveSize);
+            vector<NavdataOption*> options = NavdataProcess::parse(navdata, navdataCks ,receiveSize);
+            if (options.size() > 0){
+                processState(navdata->ardrone_state);
+                processNavdata(options);
             }
+            
+            sequenceNumberData_ = navdata->sequence;
         }
     }
 }
@@ -137,26 +140,8 @@ void XCI_Parrot::initNavdataReceive() {
     socketData_->send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)));
 }
 
-bool XCI_Parrot::isCorrectData(Navdata* navdata, const size_t size) { // simple check: only sum all data to uint32_t and then compare with value in checksum option
-    uint8_t* data = (uint8_t*) navdata;
-    uint32_t checksum = 0;
-    size_t dataSize = size - sizeof (NavdataCks);
-
-    for (unsigned int i = 0; i < dataSize; i++) {
-        checksum += (uint32_t) data[i];
-    }
-
-    NavdataCks* navdataChecksum = (NavdataCks*) getOption(&navdata->options[0], NAVDATA_CKS_TAG);
-    if (navdataChecksum == std::nullptr_t())
-        return false;
-
-    return navdataChecksum->cks == checksum;
-}
-
-void XCI_Parrot::processReceivedNavData(Navdata* navdata, const size_t size) {
-    state_.updateState(navdata->ardrone_state);
-
-    //printf("Drone state %x, watchdog %i \n",navdata->ardrone_state,state.getState(ARDRONE_COM_WATCHDOG_MASK));
+void XCI_Parrot::processState(uint32_t droneState){
+    state_.updateState(droneState);
 
     if (state_.getState(FLAG_ARDRONE_NAVDATA_BOOTSTRAP)) { //test if drone is in BOOTSTRAP MODE
         atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
@@ -175,9 +160,10 @@ void XCI_Parrot::processReceivedNavData(Navdata* navdata, const size_t size) {
         sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
         initNavdataReceive();
     }
+}
 
-
-    //TODO: parse options from ardrone!!!
+void XCI_Parrot::processNavdata(vector<NavdataOption*> &options) {
+    //TODO: options from ardrone!!!
 }
 
 NavdataOption* XCI_Parrot::getOption(NavdataOption* ptr, NavdataTag tag) {

@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <thread>
+#include <vector>
 #include <atomic>
 
 #include "xcs/xci/XCI.hpp"
@@ -47,9 +48,6 @@ namespace parrot{
         //
         DataReceiver dataSender_;
 
-        //
-        NavdataProcess navdataProcess;
-
         // threads
         std::thread threadSendingATCmd_;
         std::thread threadReceiveNavData_;
@@ -73,8 +71,8 @@ namespace parrot{
 
         // function for navdata handling
         void initNavdataReceive();
-        bool isCorrectData(Navdata* navdata, const size_t size);
-        void processReceivedNavData(Navdata* navdata, const size_t size);
+        void processState(uint32_t droneState);
+        void processNavdata(std::vector<NavdataOption*> &options);
         NavdataOption* getOption(NavdataOption* ptr, NavdataTag tag);
         std::string downloadConfiguration() throw (ConnectionErrorException);
 

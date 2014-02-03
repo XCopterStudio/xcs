@@ -2,7 +2,19 @@
 
 using namespace xcs::xci::parrot;
 
-std::vector<NavdataOption*> NavdataProcess::parse(xcs::xci::parrot::Navdata* navdata, unsigned int lenght){
+uint32_t NavdataProcess::computeChecksum(Navdata* navdata, const size_t size){
+    uint8_t* data = (uint8_t*)navdata;
+    uint32_t checksum = 0;
+    size_t dataSize = size - sizeof (NavdataCks);
+
+    for (unsigned int i = 0; i < dataSize; i++) {
+        checksum += (uint32_t)data[i];
+    }
+
+    return checksum;
+}
+
+std::vector<NavdataOption*> NavdataProcess::parse(xcs::xci::parrot::Navdata* navdata, uint32_t navdataCks, unsigned int lenght){
     unsigned int optionsLenght = lenght - sizeof(Navdata) + sizeof(NavdataOption*);
     unsigned int index = 0;
     std::vector<NavdataOption*> options;
@@ -152,8 +164,14 @@ std::vector<NavdataOption*> NavdataProcess::parse(xcs::xci::parrot::Navdata* nav
         case NAVDATA_CKS_TAG:{
             NavdataCks* cks = new NavdataCks;
             *cks = *reinterpret_cast<NavdataCks*>(optionPtr);
-            options.push_back(cks);
-            }break;
+            if (navdataCks != cks->cks){
+                for(auto option : options)
+                    delete option;
+
+                options.clear();
+            }else{
+                options.push_back(cks);
+            }}break;
         default:
             break;
         }
