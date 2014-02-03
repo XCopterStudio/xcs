@@ -2,6 +2,7 @@
 #define NAVDATA_PARSER_H
 
 #include <vector>
+#include <cstddef>
 
 #include "navdata_options.hpp"
 #include "options_visitor.hpp"

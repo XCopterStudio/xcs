@@ -166,6 +166,7 @@ void XCI_Parrot::processNavdata(vector<OptionAcceptor*> &options) {
     OptionVisitor visitor;
     for(auto option : options){
         option->accept(visitor);
+        delete option;
     }
 }
 
@@ -217,12 +218,15 @@ void XCI_Parrot::init() throw (ConnectionErrorException) {
 
     endAll_ = false;
 
+    std::cerr << "Before network" << std::endl;
     initNetwork();
+    std::cerr << "After network" << std::endl;
 
     // start all threads
     threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
     threadReceiveNavData_ = std::move(std::thread(&XCI_Parrot::receiveNavData, this));
     threadReceiveVideo_ = std::move(std::thread(&XCI_Parrot::receiveVideo, this));
+    std::cerr << "After threads" << std::endl;
 }
 
 void XCI_Parrot::reset() {
