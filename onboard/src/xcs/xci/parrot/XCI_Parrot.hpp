@@ -10,6 +10,7 @@
 #include "xcs/tsqueue.hpp"
 #include "ardrone_state.hpp"
 #include "navdata_options.hpp"
+#include "navdata_parser.hpp"
 #include "xcs/xci/ConnectionErrorException.hpp"
 
 namespace xcs{
@@ -43,6 +44,12 @@ namespace parrot{
         // actual state of ar.drone 2.0
         ArdroneState state_;
 
+        //
+        DataReceiver dataSender_;
+
+        //
+        NavdataProcess navdataProcess;
+
         // threads
         std::thread threadSendingATCmd_;
         std::thread threadReceiveNavData_;
@@ -72,6 +79,7 @@ namespace parrot{
         std::string downloadConfiguration() throw (ConnectionErrorException);
 
     public:
+        XCI_Parrot(const DataReceiver dataReceiver) : XCI(dataReceiver) {};
         //! Initialize XCI for use
         void init() throw (ConnectionErrorException);
         //! Resets settings to default values and re-calibrates the sensors (if supported).
@@ -97,6 +105,8 @@ namespace parrot{
         void configuration(const std::string &key, const std::string &value);
         //! Take new x-copter�s configuration and send this configuration to the x-copter
         void configuration(const InformationMap &configuration);
+        //! Take instance of the DataReceiver
+        void dataReceiver(DataReceiver* dataReceiver);
         //! Take command from list of x-copter�s special commands and send it to the x-copter
         void command(const std::string &command);
         //! Take four fly parameters and send it to the x-copter

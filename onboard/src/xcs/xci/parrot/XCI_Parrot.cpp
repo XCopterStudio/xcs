@@ -104,6 +104,7 @@ void XCI_Parrot::receiveNavData() {
 
     while (!endAll_) {
         receiveSize = socketData_->receive(boost::asio::buffer(message, NAVDATA_MAX_SIZE));
+        vector<NavdataOption*> options = navdataProcess.parse(navdata, receiveSize);
         if (navdata->sequence > sequenceNumberData_) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
             if (isCorrectData(navdata, receiveSize)) { // test correctness of received data
                 processReceivedNavData(navdata, receiveSize);
@@ -294,8 +295,6 @@ void XCI_Parrot::configuration(const InformationMap &configuration) {
     }
 }
 
-// TODO: update according to the ardrone state
-
 void XCI_Parrot::command(const std::string &command) {
     if (command == "TakeOff") {
         while (!state_.getState(FLAG_ARDRONE_FLY_MASK)) {
@@ -364,5 +363,8 @@ XCI_Parrot::~XCI_Parrot() {
 
 
 extern "C" {
-    XCI* CreateXci() { return new XCI_Parrot(); }
+    XCI* CreateXci() { 
+        DataReceiver DataReceiver;
+        return new XCI_Parrot(DataReceiver); 
+    }
 }

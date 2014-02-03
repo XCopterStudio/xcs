@@ -5,6 +5,8 @@
 #include <vector>
 #include <map>
 
+#include "data_receiver.hpp"
+
 #if defined (_WIN32) 
     #if defined(xci_EXPORTS)
         #define  XCI_LIB_EXPORT __declspec(dllexport)
@@ -50,11 +52,13 @@ namespace xci{
     //! Virtual class for unified x-copter interface
 
     class XCI {
+    protected:
+        const DataReceiver dataSender_;
     public:
         //
         // Bellow are methods that are subject to change based on the discussions and real-world needs.
         //
-
+        XCI(const DataReceiver dataSender) : dataSender_(dataSender) {};
         //! A pure virtual member returning name of x-copter XCI
         virtual std::string name() = 0;
 
