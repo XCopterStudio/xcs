@@ -14,6 +14,12 @@ set(main_SOURCES
 
 set(xci_SOURCES
     xcs/xci/parrot/XCI_Parrot.cpp xcs/xci/parrot/AT_Command.cpp
+    xcs/xci/parrot/options_visitor.cpp xcs/xci/parrot/navdata_parser.cpp
+)
+
+set(uxci_SOURCES
+    xcs/urbi/Xci.uob/UXci.cpp xcs/Exception.cpp xcs/LibraryLoader.cpp
+    ${xci_SOURCES}
 )
 
 # Platform dependent stuff
@@ -57,6 +63,12 @@ add_library(xci SHARED ${xci_SOURCES})
 target_link_libraries(xci ${Boost_LIBRARIES})
 if(UNIX)
 	target_link_libraries(xci m z)
+endif(UNIX)
+
+add_library(uxci SHARED ${uxci_SOURCES})
+target_link_libraries(xci ${Boost_LIBRARIES})
+if(UNIX)
+	target_link_libraries(uxci m z)
 endif(UNIX)
 
 # Removed
