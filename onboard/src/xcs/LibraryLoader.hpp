@@ -34,8 +34,7 @@ class LibraryLoader : public Multiton<LibraryLoader, std::string> {
 public:
 #ifdef _WIN32
     //TODO check this weird macro in MS VC++
-    HINSTANCE;
-    typedef HINSTANCE HandleType;
+    typedef HMODULE HandleType;
 #else
     typedef void* HandleType;
 #endif
