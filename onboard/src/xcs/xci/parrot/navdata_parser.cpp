@@ -15,7 +15,7 @@ uint32_t NavdataProcess::computeChecksum(Navdata* navdata, const size_t size){
 }
 
 std::vector<OptionAcceptor*> NavdataProcess::parse(xcs::xci::parrot::Navdata* navdata, uint32_t navdataCks, unsigned int lenght){
-    unsigned int optionsLenght = lenght - sizeof(Navdata) + sizeof(NavdataOption*);
+    unsigned int optionsLenght = lenght - sizeof(Navdata);
     unsigned int index = 0;
     std::vector<OptionAcceptor*> options;
     NavdataOption* optionPtr = navdata->options;
