@@ -9,7 +9,6 @@
 #define NAVDATA_OPTIONS_H
 
 #include <cstdint>
-#include "options_visitor.hpp"
 
 namespace xcs{
 namespace xci{

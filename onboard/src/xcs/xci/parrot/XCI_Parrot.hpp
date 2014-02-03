@@ -73,7 +73,7 @@ namespace parrot{
         // function for navdata handling
         void initNavdataReceive();
         void processState(uint32_t droneState);
-        void processNavdata(std::vector<NavdataOption*> &options);
+        void processNavdata(std::vector<OptionAcceptor*> &options);
         NavdataOption* getOption(NavdataOption* ptr, NavdataTag tag);
         std::string downloadConfiguration() throw (ConnectionErrorException);
 
