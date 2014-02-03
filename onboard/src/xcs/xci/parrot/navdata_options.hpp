@@ -114,6 +114,7 @@ namespace parrot{
         uint16_t tag; /*!< Navdata block ('option') identifier */
         uint16_t size; /*!< set this to the size of this structure */
 
+        virtual void accept(OptionVisitor &visitor);
         //#if defined _MSC_VER || defined (__ARMCC_VERSION)
         ///* Do not use flexible arrays (C99 feature) with these compilers */
         //uint8_t data[1];
