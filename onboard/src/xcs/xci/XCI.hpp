@@ -48,6 +48,7 @@ namespace xci{
     // Some useful typedefs
     typedef std::vector<Sensor> SensorList;
     typedef std::vector<std::string> SpecialCMDList;
+    typedef class XCI* (XciFactoryFunction)();
 
     //! Virtual class for unified x-copter interface
 
