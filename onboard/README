@@ -4,11 +4,12 @@ Build
 0) Update repository's Git submodules
 
 1) Install required libraries
-	- libboost (TODO fix version)
+	- Boost 1.55
+	- Urbi SDK (dev version from Github)
 
-2) Build ffmpeg library (in '3rd-party')
-	- run `ffmpeg.configure`
-	- run `cd ffmpeg && make install`
+2) Create symlinks to installed libraries
+	- 3rd-party/boost -> BOOST_ROOT
+	- 3rd-party/urbi -> Urbi SDK
 
 3) Build onboard (in 'onboard/build')
 	- run `cmake ../src && make`
