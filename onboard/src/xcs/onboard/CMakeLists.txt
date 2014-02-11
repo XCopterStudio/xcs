@@ -10,7 +10,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} xcs)
 
-if(UNIX)
+if(X_LIN)
     target_link_libraries(${PROJECT_NAME} dl)
-endif(UNIX)
+endif(X_LIN)
 
