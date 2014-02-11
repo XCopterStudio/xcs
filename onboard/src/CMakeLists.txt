@@ -1,87 +1,54 @@
 cmake_minimum_required(VERSION 2.8)
-project(onboard)
+project(xcs)
 
-# Configuration
-set(ffmpeg_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/ffmpeg/build)
+#
+# Global configuration
+#
 set(Urbi_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/urbi/include)
+set(BOOST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/boost)
 
-set(main_SOURCES
-    main.cpp
-    Onboard.cpp XCILoader.cpp Adapter.cpp
-    xcs/Exception.cpp xcs/ParseException.cpp
-    xcs/LibraryLoader.cpp
-)
-
-set(xci_SOURCES
-    xcs/xci/parrot/XCI_Parrot.cpp xcs/xci/parrot/AT_Command.cpp
-    xcs/xci/parrot/options_visitor.cpp xcs/xci/parrot/navdata_parser.cpp
-)
-
-set(uxci_SOURCES
-    xcs/urbi/Xci.uob/UXci.cpp xcs/Exception.cpp xcs/LibraryLoader.cpp
-    ${xci_SOURCES}
-)
-
-# Platform dependent stuff
+#
+# Platform dispatch helpers
+#
 if(WIN32)
+    set(X_WIN true)
+    set(X_LIN false)
+elseif(UNIX)
+    set(X_WIN false)
+    set(X_LIN true)
+endif()
+
+if(X_WIN)
   set (TPN_WIN32 "/EHsc")
   set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
   add_definitions(-D_WIN32_WINNT=0x0501)
-endif(WIN32)
-
-if(UNIX)
+elseif(X_LIN)
   set (CMAKE_CXX_FLAGS "-std=c++11")
-endif(UNIX)
+endif()
 
-
+#
+# Linked libraries
+#
 # pthreads
 find_package (Threads)
 
-# Boost
+# Boost (TODO consider moving boost only to subprojects requiring them)
 add_definitions(-DBOOST_ALL_NO_LIB) # disable autolinking (causing problems in MS VS)
 set(Boost_USE_STATIC_LIBS false)
-find_package(Boost REQUIRED COMPONENTS system thread) # we don't specify version, asio seems to work for 1.46--1.54
+find_package(Boost 1.55 REQUIRED COMPONENTS system thread)
 
+#
 # Include dirs
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${ffmpeg_ROOT}/include)
-include_directories(${Urbi_INCLUDE_DIRS})
+#
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-# Library dirs
-link_directories(${ffmpeg_ROOT}/lib)
+#
+# Subprojects
+#
+add_subdirectory(xcs)
+add_subdirectory(xcs/xci/parrot)
+add_subdirectory(xcs/onboard)
 
-# Binaries & their static libraries
-add_executable(main ${main_SOURCES})
-target_link_libraries(main ${Boost_LIBRARIES})
-target_link_libraries(main ${CMAKE_THREAD_LIBS_INIT})
-if(UNIX)
-	target_link_libraries(main dl)
-endif(UNIX)
-
-add_library(xci SHARED ${xci_SOURCES})
-target_link_libraries(xci ${Boost_LIBRARIES})
-if(UNIX)
-	target_link_libraries(xci m z)
-endif(UNIX)
-
-add_library(uxci SHARED ${uxci_SOURCES})
-target_link_libraries(xci ${Boost_LIBRARIES})
-if(UNIX)
-	target_link_libraries(uxci m z)
-endif(UNIX)
-
-# Removed
-# target_link_libraries(xci avdevice avformat avfilter avcodec swscale avutil)
-
-
-
-
-
-
-
-
-
-
-
+# Subprojects (UObjects)
+add_subdirectory(xcs/urbi/Xci.uob)
 

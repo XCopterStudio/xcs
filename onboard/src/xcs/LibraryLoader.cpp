@@ -8,7 +8,7 @@
 #include <map>
 #include <iostream>
 #include "LibraryLoader.hpp"
-#include "xcs/Exception.hpp"
+#include "Exception.hpp"
 
 using namespace xcs;
 using namespace std;

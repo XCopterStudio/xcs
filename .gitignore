@@ -1,4 +1,11 @@
+# binaries
 *.o
 *.so
 *.a
+
+# temporary files
 *~
+
+# it's site-specific symlink
+3rd-party/boost
+3rd-party/urbi
