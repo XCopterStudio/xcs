@@ -8,7 +8,7 @@ namespace xcs{
 namespace xci{
 namespace parrot{
 
-    typedef enum ArdronePossibleStates{
+    enum ArdronePossibleStates{
         FLAG_ARDRONE_FLY_MASK = 1U << 0,  /*!< FLY MASK : (0) ardrone is landed, (1) ardrone is flying */
         FLAG_ARDRONE_VIDEO_MASK = 1U << 1,  /*!< VIDEO MASK : (0) video disable, (1) video enable */
         FLAG_ARDRONE_VISION_MASK = 1U << 2,  /*!< VISION MASK : (0) vision disable, (1) vision enable */
