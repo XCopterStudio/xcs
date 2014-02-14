@@ -46,9 +46,6 @@ namespace parrot{
         // actual state of ar.drone 2.0
         ArdroneState state_;
 
-        //
-        DataReceiver dataSender_;
-
         // threads
         std::thread threadSendingATCmd_;
         std::thread threadReceiveNavData_;
@@ -78,7 +75,7 @@ namespace parrot{
         std::string downloadConfiguration() throw (ConnectionErrorException);
 
     public:
-        XCI_Parrot(const DataReceiver dataReceiver) : XCI(dataReceiver) {};
+        XCI_Parrot(DataReceiver &dataReceiver) : XCI(dataReceiver) {};
         //! Initialize XCI for use
         void init() throw (ConnectionErrorException);
         //! Resets settings to default values and re-calibrates the sensors (if supported).

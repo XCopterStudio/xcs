@@ -47,6 +47,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 #
 add_subdirectory(xcs)
 add_subdirectory(xcs/xci/parrot)
+add_subdirectory(xcs/xci/dodo)
 add_subdirectory(xcs/onboard)
 
 # Subprojects (UObjects)

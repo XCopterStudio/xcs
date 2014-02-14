@@ -1,0 +1,89 @@
+/*
+ * Class definitions (TODO put in another file)
+ */
+class Adapter {
+
+    var _socket;
+    var output;
+
+    function init() {
+        output = Object.clone();
+    };
+
+    function start(server, port) {
+        _socket = Socket.new();
+        _socket.connect(server, port);
+        at (_socket.received?(var data)) {
+            echo("Received: " + data);
+            output = data;
+        };
+        clog << "Started adapter %s:%s." % [server, port];
+    };
+    
+    function send(data) {
+        assert(_socket != nil);
+        _socket.write(data);
+    };
+}|;
+
+class SemanticSender {
+
+    var input;
+
+    function init(adapter, semanticType) {
+        var that = this;
+        &input.notifyChange(function() {
+            // simple JSON encoder -- no escaping!
+            adapter.send("{" + semanticType + ":" + that.input + "}\n");
+        });
+    };
+}|;
+
+// Very simple and incomplete JSON parser.
+// TODO redefine protocol or wrap existing C++ JSON parser
+function parseJson(json) {
+    json = json.replace("\n", "").replace("\r", ""); // strip EOL
+    json = json[1,-1]; // strip {}
+    var result = [ => ];
+    for(var pair: json.split(",")) {
+        var parts = pair.split(":");
+        if(parts.size != 2) continue;
+        result[parts[0]] = parts[1]; // support only unquoted values
+    };
+    return result;
+}|;
+
+class SemanticReceiver {
+    function init(adapter, types, parseJson) { // parseJson as arg, lookup is wierd in this case (package/import?)
+        for(var type: types) setSlot(type, nil);
+
+        var that = this;
+        at(adapter.output->changed?) {        
+            var data = parseJson(adapter.output);
+            for(var type: types) 
+                if(type in data) 
+                    that.updateSlot(type, data[type]);
+        };
+    };
+}|;
+
+/*
+ * Dataflow graph
+ */
+
+// create graph nodes
+var adapter = Adapter.new();
+var xci = UXci.new("");
+var aliveSender = SemanticSender.new(adapter, "alive");
+var flyParamReceiver = SemanticReceiver.new(adapter, ["roll", "pitch", "yaw", "gaz"], parseJson);
+
+// connect graph nodes
+xci.&alive >> aliveSender.&input;
+flyParamReceiver.&roll >> xci.&roll;
+flyParamReceiver.&pitch >> xci.&pitch;
+flyParamReceiver.&yaw >> xci.&yaw;
+flyParamReceiver.&gaz >> xci.&gaz;
+
+// enable/start graph nodes
+adapter.start("127.0.0.1", 1234);
+//xci.xciInit();

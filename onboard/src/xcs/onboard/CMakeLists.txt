@@ -3,7 +3,9 @@ project(${PROJECT_NAME})
 
 file(GLOB SOURCES *.cpp)
 
+#include_directories(${Urbi_INCLUDE_DIRS}) # dependency in DataReceiver
 include_directories(${Boost_INCLUDE_DIR})
+
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 

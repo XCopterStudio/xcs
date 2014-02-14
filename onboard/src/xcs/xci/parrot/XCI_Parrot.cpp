@@ -356,8 +356,7 @@ XCI_Parrot::~XCI_Parrot() {
 
 
 extern "C" {
-    XCI* CreateXci() { 
-        DataReceiver DataReceiver;
-        return new XCI_Parrot(DataReceiver); 
+    XCI* CreateXci(DataReceiver &dataReceiver) { 
+        return new XCI_Parrot(dataReceiver); 
     }
 }

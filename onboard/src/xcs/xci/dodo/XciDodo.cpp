@@ -1,0 +1,109 @@
+#include "XciDodo.hpp"
+
+#include <iostream>
+#include <chrono>
+#include "xcs/xci/DataReceiver.hpp"
+
+using namespace std;
+using namespace xcs::xci;
+using namespace xcs::xci::dodo;
+
+/*
+ * Constants
+ */
+const std::string XciDodo::NAME_ = "Dodo Test Drone";
+
+/*
+ * Implementation
+ */
+XciDodo::XciDodo(DataReceiver& dataReceiver) : XCI(dataReceiver) {
+
+}
+
+XciDodo::~XciDodo() {
+
+}
+
+void XciDodo::init() {
+    inited_ = true;
+    sensorThread_ = move(thread(&XciDodo::sensorGenerator, this));
+}
+
+std::string XciDodo::name() {
+    return NAME_;
+}
+
+SensorList XciDodo::sensorList() {
+    SensorList result;
+    //TODO figure out better initialization of sensor list
+    Sensor sensor;
+    sensor.name = "alive";
+    sensor.semanticType = "alive";
+    result.push_back(sensor);
+    return result;
+}
+
+void XciDodo::command(const std::string& command) {
+    cout << "[dodo] command: " << command << endl;
+}
+
+void XciDodo::flyParam(float roll, float pitch, float yaw, float gaz) {
+    cout << "[dodo] flyParam: " << roll << ", " << pitch << ", " << yaw << ", " << gaz << endl;
+}
+
+void XciDodo::sensorGenerator() {
+    while (1) {
+        dataReceiver_.notify("alive", true);
+        this_thread::sleep_for(chrono::milliseconds(1000));
+    }
+}
+
+/*
+ * NOT IMPLEMENTED (only for linker)
+ */
+std::string XciDodo::configuration(const std::string& key) {
+
+}
+
+InformationMap XciDodo::configuration() {
+
+}
+
+void XciDodo::configuration(const std::string& key, const std::string& value) {
+
+}
+
+void XciDodo::configuration(const InformationMap &configuration) {
+
+}
+
+void XciDodo::reset() {
+
+}
+
+SpecialCMDList XciDodo::specialCMD() {
+
+}
+
+void XciDodo::start() {
+
+}
+
+void XciDodo::stop() {
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

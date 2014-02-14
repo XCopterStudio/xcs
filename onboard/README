@@ -13,3 +13,9 @@ Build
 
 3) Build onboard (in 'onboard/build')
 	- run `cmake ../src && make`
+
+Run
+===
+In onboard directory run (urbi-launch must be in PATH)
+	`urbi-launch -s build/xcs/urbi/Xci.uob/libuxci.so -- -f src/demo.u -i`
+
