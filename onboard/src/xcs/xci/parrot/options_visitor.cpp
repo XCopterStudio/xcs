@@ -1,14 +1,17 @@
 #include <iostream>
 
+
 #include "options_visitor.hpp"
+#include "basic.hpp"
+
 
 using namespace xcs::xci::parrot;
 
 void OptionVisitor::visit(NavdataDemo* demo){
-    dataReceiver_.notify("psi",demo->psi);
-    dataReceiver_.notify("theta", demo->theta);
-    dataReceiver_.notify("phi", demo->phi);
-    dataReceiver_.notify("altitude", demo->altitude);
+    dataReceiver_.notify("psi", miliDegreesToRadias(demo->psi));
+    dataReceiver_.notify("theta", miliDegreesToRadias(demo->theta));
+    dataReceiver_.notify("phi", miliDegreesToRadias(demo->phi));
+    dataReceiver_.notify("altitude", demo->altitude / 100);
 }
 
 void OptionVisitor::visit(NavdataCks* cks){

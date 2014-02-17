@@ -1,6 +1,10 @@
 #ifndef BASIC_H
 #define BASIC_H
 
+#define _USE_MATH_DEFINES
+
+#include <cmath>
+
 //! Check if value is in interval <-range,range> and if not set value to the limits of the interval.
 
 /*!
@@ -28,6 +32,10 @@ type valueInRange(const type value,const type range){
 			return range; 
 		}
 	}
+}
+
+inline double miliDegreesToRadias(int degrees){
+    return (double)( degrees * M_PI / 180000);
 }
 
 #endif
