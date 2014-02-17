@@ -1,10 +1,12 @@
 #ifndef XCI_PARROT_H
 #define XCI_PARROT_H
 
-#include <boost/asio.hpp>
 #include <thread>
 #include <vector>
 #include <atomic>
+
+#include <boost/asio.hpp>
+#include <boost/asio/deadline_timer.hpp>
 
 #include "xcs/xci/XCI.hpp"
 #include "AT_Command.hpp"
@@ -46,6 +48,9 @@ namespace parrot{
         // actual state of ar.drone 2.0
         ArdroneState state_;
 
+        //deadline timers
+        boost::asio::deadline_timer receiveDeadline_;
+
         // threads
         std::thread threadSendingATCmd_;
         std::thread threadReceiveNavData_;
@@ -53,6 +58,9 @@ namespace parrot{
 
         // end all thread
         volatile std::atomic<bool> endAll_;
+
+        //navdata buffer
+        uint8_t navdataMessage[NAVDATA_MAX_SIZE];
 
         boost::asio::io_service io_serviceCMD_;
         boost::asio::io_service io_serviceData_;
@@ -64,11 +72,15 @@ namespace parrot{
 
         void initNetwork();
         void sendingATCommands();
+
+        void initNavdataReceive();
         void receiveNavData();
+        void checkNavdata(const boost::system::error_code& error, std::size_t received);
+        void checkReceiveDeadline();
+
         void receiveVideo();
 
         // function for navdata handling
-        void initNavdataReceive();
         void processState(uint32_t droneState);
         void processNavdata(std::vector<OptionAcceptor*> &options);
         NavdataOption* getOption(NavdataOption* ptr, NavdataTag tag);
