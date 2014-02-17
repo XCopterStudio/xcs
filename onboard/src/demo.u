@@ -28,13 +28,13 @@ class Adapter {
 
 class SemanticSender {
 
-    var input;
-
     function init(adapter, semanticType) {
         var that = this;
-        &input.notifyChange(function() {
+        var this.input;
+
+        this.&input.notifyChange(function() {
             // simple JSON encoder -- no escaping!
-            adapter.send("{" + semanticType + ":" + that.input + "}\n");
+            adapter.send("{" + semanticType + ":" + that.input.asString() + "}\n");
         });
     };
 }|;
@@ -74,11 +74,13 @@ class SemanticReceiver {
 // create graph nodes
 var adapter = Adapter.new();
 var xci = UXci.new("");
-var aliveSender = SemanticSender.new(adapter, "alive");
+var altitudeSender = SemanticSender.new(adapter, "altitude");
+var phiSender = SemanticSender.new(adapter, "phi");
 var flyParamReceiver = SemanticReceiver.new(adapter, ["roll", "pitch", "yaw", "gaz"], parseJson);
 
 // connect graph nodes
-xci.&alive >> aliveSender.&input;
+xci.&altitude >> altitudeSender.&input;
+xci.&phi >> phiSender.&input;
 flyParamReceiver.&roll >> xci.&roll;
 flyParamReceiver.&pitch >> xci.&pitch;
 flyParamReceiver.&yaw >> xci.&yaw;
