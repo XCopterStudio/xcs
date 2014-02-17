@@ -8,17 +8,6 @@
 #include <vector>
 #include <map>
 
-namespace xcs {
-namespace xci {
-/*!
- * Forward declaration as DataReceiver transitively includes
- * uobject.hh and we don't want to soil XCI.hpp's include path with Urbi's.
- */
-class DataReceiver;
-}
-}
-
-
 #if defined (_WIN32) 
 #if defined(xci_EXPORTS)
 #define  XCI_LIB_EXPORT __declspec(dllexport)
@@ -34,12 +23,20 @@ namespace xci {
 
 typedef std::map<std::string, std::string> InformationMap;
 
+/*!
+* Forward declaration as DataReceiver transitively includes
+* uobject.hh and we don't want to soil XCI.hpp's include path with Urbi's.
+*/
+class DataReceiver;
+
 //! Information about sensor
 
 struct Sensor {
     std::string name; /*!< Unique name in XCI for sensor. */
     std::string semanticType; /*!< Type of sensor (ACCELEROMETR, CAMERA etc.). */
     InformationMap additionalInformation; /*!< Additional information about sensor in plain text. Example: "Resolution:1280x720,FPS:20" */
+
+    Sensor(std::string name = "", std::string semanticType = "", InformationMap additionalInformation = InformationMap()) : name(name), semanticType(semanticType), additionalInformation(additionalInformation) {};
 };
 
 // Some useful typedefs

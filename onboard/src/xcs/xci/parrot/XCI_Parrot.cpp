@@ -163,7 +163,7 @@ void XCI_Parrot::processState(uint32_t droneState){
 }
 
 void XCI_Parrot::processNavdata(vector<OptionAcceptor*> &options) {
-    OptionVisitor visitor;
+    OptionVisitor visitor(dataReceiver_);
     for(auto option : options){
         option->accept(visitor);
         delete option;
@@ -252,7 +252,14 @@ std::string XCI_Parrot::name() {
 }
 
 SensorList XCI_Parrot::sensorList() {
-    return sensorList();
+    SensorList sensorList;
+
+    sensorList.push_back(Sensor("phi","phi"));
+    sensorList.push_back(Sensor("theta","theta"));
+    sensorList.push_back(Sensor("psi","psi"));
+    sensorList.push_back(Sensor("altitude","altitude"));
+
+    return sensorList;
 }
 
 void* XCI_Parrot::sensorData(const Sensor &sensor) {
