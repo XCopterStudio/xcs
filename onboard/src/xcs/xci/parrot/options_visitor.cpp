@@ -5,7 +5,10 @@
 using namespace xcs::xci::parrot;
 
 void OptionVisitor::visit(NavdataDemo* demo){
-    printf("\r Navdata demo [%f,%f,%f]",demo->phi,demo->theta,demo->psi);
+    dataReceiver_.notify("psi",demo->psi);
+    dataReceiver_.notify("theta", demo->theta);
+    dataReceiver_.notify("phi", demo->phi);
+    dataReceiver_.notify("altitude", demo->altitude);
 }
 
 void OptionVisitor::visit(NavdataCks* cks){

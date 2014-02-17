@@ -2,13 +2,17 @@
 #define OPTIONS_VISITOR_H
 
 #include "navdata_options.hpp"
+#include "../DataReceiver.hpp"
 
 namespace xcs{
 namespace xci{
 namespace parrot{
 
     class OptionVisitor{
+        DataReceiver& dataReceiver_;
     public:
+        OptionVisitor(DataReceiver& dataReceiver) : dataReceiver_(dataReceiver) {};
+
         virtual void visit(NavdataDemo* demo);
         virtual void visit(NavdataCks* cks);
         virtual void visit(NavdataTime* time);
