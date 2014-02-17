@@ -16,6 +16,9 @@ Build
 
 Run
 ===
-In onboard directory run (urbi-launch must be in PATH)
+In onboard directory run
 	`urbi-launch -s build/xcs/urbi/Xci.uob/libuxci.so -- -f src/demo.u -i`
+
+urbi-launch must be in PATH and libboost must be in LD_LIBRARY_PATH,
+optionally source 'env' file in onboard directory.
 
