@@ -73,7 +73,7 @@ class SemanticReceiver {
 
 // create graph nodes
 var adapter = Adapter.new();
-var xci = UXci.new("");
+//var xci = UXci.new("");
 var aliveSender = SemanticSender.new(adapter, "alive");
 var flyParamReceiver = SemanticReceiver.new(adapter, ["roll", "pitch", "yaw", "gaz"], parseJson);
 
