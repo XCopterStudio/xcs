@@ -12,6 +12,8 @@
 #include <vector>
 #include <memory>
 #include <thread>
+#include <condition_variable>
+#include <mutex>
 
 #include "xcs/xci/XCI.hpp"
 #include "xcs/xci/DataReceiver.hpp"
@@ -21,10 +23,14 @@ namespace urbi {
 
 class UXci : public ::urbi::UObject {
 public:
+    ::urbi::UVar flyParamPersistence;
+    
     ::urbi::InputPort roll;
     ::urbi::InputPort pitch;
     ::urbi::InputPort yaw;
     ::urbi::InputPort gaz;
+
+    ::urbi::InputPort command;
 
     UXci(const std::string &name);
 
@@ -35,10 +41,9 @@ public:
 
     void xciInit();
 
-    void command(const std::string &command);
+    void doCommand(const std::string &command);
 
     void flyParam(double roll, double pitch, double yaw, double gaz);
-
 
     virtual ~UXci();
 private:
@@ -66,11 +71,24 @@ private:
     void onChangeGaz(double gaz);
 
     void keepFlyParam();
+    
+    /*!
+     * Setter for flyParam persistence.
+     * It blocks/unblock the persistence thread.
+     */
+    void setFlyParamPersistence(unsigned int value);
+    
     /*!
      * How often is fly param sent to XCI (in ms).
+     * When set to 0, no persistence is enforced.
      */
     unsigned int flyParamPersistence_;
+    
     std::thread flyParamThread_;
+    
+    std::mutex flyParamMtx_;
+    
+    std::condition_variable flyParamCond_;
 
     void initOutputs();
 };

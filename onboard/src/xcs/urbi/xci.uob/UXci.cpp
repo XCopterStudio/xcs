@@ -6,7 +6,7 @@
  */
 
 #include "UXci.hpp"
-#include "xcs/xci/parrot/XCI_Parrot.hpp"
+//#include "xcs/xci/parrot/XCI_Parrot.hpp"
 #include "xcs/xci/dodo/XciDodo.hpp"
 
 #include <iostream>
@@ -20,7 +20,7 @@ using namespace xcs::xci;
 using namespace std;
 
 // TODO should be removed when dynamic loading will be solved
-using namespace xcs::xci::parrot;
+//using namespace xcs::xci::parrot;
 using namespace xcs::xci::dodo;
 
 UXci::UXci(const std::string& name) :
@@ -30,11 +30,14 @@ UXci::UXci(const std::string& name) :
   pitch_(0),
   yaw_(0),
   gaz_(0),
-  flyParamPersistence_(30) { //TODO remove this magic value
+  flyParamPersistence_(0) {
     UBindFunction(UXci, init);
     UBindFunction(UXci, xciInit);
-    UBindFunction(UXci, command);
+    UBindFunction(UXci, doCommand);
     UBindFunction(UXci, flyParam);
+
+    UBindVar(UXci, flyParamPersistence);
+    UNotifyChange(flyParamPersistence, &UXci::setFlyParamPersistence);
 
     UBindVar(UXci, roll);
     UNotifyChange(roll, &UXci::onChangeRoll);
@@ -44,6 +47,9 @@ UXci::UXci(const std::string& name) :
     UNotifyChange(yaw, &UXci::onChangeYaw);
     UBindVar(UXci, gaz);
     UNotifyChange(gaz, &UXci::onChangeGaz);
+
+    UBindVar(UXci, command);
+    UNotifyChange(command, &UXci::doCommand);
 
 }
 
@@ -62,18 +68,24 @@ void UXci::init(const std::string& driver) {
 void UXci::xciInit() {
     if (!inited_) {
         xci_->init();
-        flyParamThread_ = move(thread(&UXci::keepFlyParam, this)); //TODO who'll stop&join this thread
+        flyParamThread_ = move(thread(&UXci::keepFlyParam, this));
     } else {
         cerr << "[UXci] already called init." << endl; //TODO general way for runtime warnings
     }
 }
 
-void UXci::command(const std::string& command) {
+void UXci::doCommand(const std::string& command) {
     xci_->command(command);
 }
 
 void UXci::flyParam(double roll, double pitch, double yaw, double gaz) {
     xci_->flyParam(roll, pitch, yaw, gaz);
+}
+
+void UXci::setFlyParamPersistence(unsigned int value) {
+    unique_lock<mutex> lock(flyParamMtx_);
+    flyParamPersistence_ = value;
+    flyParamCond_.notify_all();
 }
 
 void UXci::onChangeRoll(double roll) {
@@ -103,6 +115,10 @@ void UXci::initOutputs() {
 
 void UXci::keepFlyParam() {
     while (1) {
+        unique_lock<mutex> lock(flyParamMtx_);
+        flyParamCond_.wait(lock, [this] {
+            return flyParamPersistence_ > 0;
+        });
         flyParam(roll_, pitch_, yaw_, gaz_);
         this_thread::sleep_for(chrono::milliseconds(flyParamPersistence_));
     }
