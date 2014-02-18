@@ -6,6 +6,7 @@ project(xcs)
 #
 set(Urbi_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/urbi/include)
 set(BOOST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/boost)
+set(rapidjson_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/rapidjson)
 
 #
 # Platform dispatch helpers
@@ -51,5 +52,6 @@ add_subdirectory(xcs/xci/dodo)
 add_subdirectory(xcs/onboard)
 
 # Subprojects (UObjects)
-add_subdirectory(xcs/urbi/Xci.uob)
+add_subdirectory(xcs/urbi/xci.uob)
+add_subdirectory(xcs/urbi/json.uob)
 
