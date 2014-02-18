@@ -1,6 +1,8 @@
 <!-- ...and bit of javascript -->
 <script type="text/javascript" src="js/jquery-1.10.2.js"></script>
 <script type="text/javascript" src="js/bootstrap.js"></script>
+<script type="text/javascript" src="js/underscore.js"></script>
+<script type="text/javascript" src="js/backbone.js"></script>
 <script type="text/javascript" src="js/jquery.gridster.js"></script>
 <!-- 3D libraries -->
 <script type="text/javascript" src="js/libs/three.min.js"></script>
@@ -20,4 +22,8 @@
 	XCS Client logic
  -->
 <script type="text/javascript" src="socket.io/socket.io.js"></script>
-<script type="text/javascript" src="src/manual.js"></script>
+
+<script type="text/javascript" src="src/models/ManualControl.js"></script>
+<script type="text/javascript" src="src/views/KeyboardControllerView.js"></script>
+<script type="text/javascript" src="src/views/AppView.js"></script>
+<script type="text/javascript" src="src/app.js"></script>
