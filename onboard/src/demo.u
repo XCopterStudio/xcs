@@ -26,6 +26,22 @@ class Adapter {
     };
 }|;
 
+class FlashSender {
+
+    function init(adapter, UJson) {
+        var this.adapter = adapter;
+        var this.ujson = UJson;        
+    }|;
+
+    function send(message) {
+        var data = [ => ];
+        data["type"] = "flash";
+        data["data"] = message;
+        this.adapter.send(this.ujson.encode(data));
+    }|;
+}|;
+
+
 class SemanticSender {
 
     function init(adapter, semanticType) {
@@ -71,12 +87,32 @@ class SemanticReceiver {
  * Dataflow graph
  */
 
-// create graph nodes
+// connect to onboard
 var adapter = Adapter.new();
+//adapter.start("192.168.0.99", 1234);
+adapter.start("127.0.0.1", 1234);
+
+// create graph nodes
 var xci = UXci.new("");
-var altitudeSender = SemanticSender.new(adapter, "altitude");
-var phiSender = SemanticSender.new(adapter, "phi");
-var flyParamReceiver = SemanticReceiver.new(adapter, ["roll", "pitch", "yaw", "gaz"], parseJson);
+var semanticSender = SemanticSender.new(adapter, [
+    "altitude" => "altitude",
+    "phi" => "phi",
+    "psi" => "psi",
+    "theta" => "theta",
+    "alive" => "alive",
+], UJson);
+
+var flyParamReceiver = SemanticReceiver.new(adapter, [
+    "roll" => "roll",
+    "pitch" => "pitch",
+    "yaw" => "yaw",
+    "gaz" => "gaz",
+    "command" => "command"
+], UJson);
+
+var flashSender = FlashSender.new(adapter, UJson);
+
+flashSender.send("Created graph nodes.");
 
 // connect graph nodes
 xci.&altitude >> altitudeSender.&input;
@@ -85,7 +121,19 @@ flyParamReceiver.&roll >> xci.&roll;
 flyParamReceiver.&pitch >> xci.&pitch;
 flyParamReceiver.&yaw >> xci.&yaw;
 flyParamReceiver.&gaz >> xci.&gaz;
+flyParamReceiver.&command >> xci.&command;
+
+flashSender.send("Connected graph nodes.");
 
 // enable/start graph nodes
-adapter.start("127.0.0.1", 1234);
-//xci.xciInit();
+
+/*
+xci.xciInit();
+xci.doCommand("TakeOff");
+sleep(2000ms);
+xci.flyParam(0, 0, 0.2, 0);
+sleep(4000ms);
+xci.flyParam(0, 0, 0, 0);
+sleep(500ms);
+xci.doCommand("Land");
+*/

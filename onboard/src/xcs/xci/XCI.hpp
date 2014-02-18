@@ -24,9 +24,9 @@ namespace xci {
 typedef std::map<std::string, std::string> InformationMap;
 
 /*!
-* Forward declaration as DataReceiver transitively includes
-* uobject.hh and we don't want to soil XCI.hpp's include path with Urbi's.
-*/
+ * Forward declaration as DataReceiver transitively includes
+ * uobject.hh and we don't want to soil XCI.hpp's include path with Urbi's.
+ */
 class DataReceiver;
 
 //! Information about sensor
@@ -36,12 +36,19 @@ struct Sensor {
     std::string semanticType; /*!< Type of sensor (ACCELEROMETR, CAMERA etc.). */
     InformationMap additionalInformation; /*!< Additional information about sensor in plain text. Example: "Resolution:1280x720,FPS:20" */
 
-    Sensor(std::string name = "", std::string semanticType = "", InformationMap additionalInformation = InformationMap()) : name(name), semanticType(semanticType), additionalInformation(additionalInformation) {};
+    Sensor(std::string name = "", std::string semanticType = "", InformationMap additionalInformation = InformationMap()) : name(name), semanticType(semanticType), additionalInformation(additionalInformation) {
+    };
+};
+
+enum ParameterNameType {
+    //! How long is non-zero fly param active before it's zeroed (in milliseconds).
+    XCI_PARAM_FP_PERSISTENCE
 };
 
 // Some useful typedefs
 typedef std::vector<Sensor> SensorList;
 typedef std::vector<std::string> SpecialCMDList;
+typedef std::string ParameterValueType;
 typedef class XCI* (XciFactoryFunction) (DataReceiver &dataReceiver);
 
 //! Virtual class for unified x-copter interface
@@ -61,6 +68,9 @@ public:
 
     //! A pure virtual member returning list of available sensors on x-copter
     virtual SensorList sensorList() = 0;
+
+    //! A pure virtual member returning specific x-copter's parameter.
+    virtual ParameterValueType parameter(ParameterNameType name) = 0;
 
     //! A pure virtual member returning x-copter's configuration value
     virtual std::string configuration(const std::string &key) = 0;

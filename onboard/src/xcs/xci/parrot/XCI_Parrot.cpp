@@ -226,6 +226,7 @@ void XCI_Parrot::init() throw (ConnectionErrorException) {
     threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
     threadReceiveNavData_ = std::move(std::thread(&XCI_Parrot::receiveNavData, this));
     threadReceiveVideo_ = std::move(std::thread(&XCI_Parrot::receiveVideo, this));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // workaround as Parrot needs some time before another command can be send to it
     std::cerr << "After threads" << std::endl;
 }
 
@@ -260,6 +261,15 @@ SensorList XCI_Parrot::sensorList() {
     sensorList.push_back(Sensor("altitude","altitude"));
 
     return sensorList;
+}
+
+ParameterValueType XCI_Parrot::parameter(ParameterNameType name) {
+    switch(name) {
+        case XCI_PARAM_FP_PERSISTENCE:
+            return "30";
+        default:
+            throw std::runtime_error("Parameter not defined.");
+    }
 }
 
 void* XCI_Parrot::sensorData(const Sensor &sensor) {

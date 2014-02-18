@@ -6,7 +6,7 @@
  */
 
 #include "UXci.hpp"
-//#include "xcs/xci/parrot/XCI_Parrot.hpp"
+#include "xcs/xci/parrot/XCI_Parrot.hpp"
 #include "xcs/xci/dodo/XciDodo.hpp"
 
 #include <iostream>
@@ -20,7 +20,7 @@ using namespace xcs::xci;
 using namespace std;
 
 // TODO should be removed when dynamic loading will be solved
-//using namespace xcs::xci::parrot;
+using namespace xcs::xci::parrot;
 using namespace xcs::xci::dodo;
 
 UXci::UXci(const std::string& name) :
@@ -62,12 +62,14 @@ void UXci::init(const std::string& driver) {
     //    xci_ = factory();
 
     xci_ = new XciDodo(dataReceiver_);
+    //xci_ = new XCI_Parrot(dataReceiver_);
     initOutputs();
 }
 
 void UXci::xciInit() {
     if (!inited_) {
         xci_->init();
+        setFlyParamPersistence(stoi(xci_->parameter(xci::XCI_PARAM_FP_PERSISTENCE)));
         flyParamThread_ = move(thread(&UXci::keepFlyParam, this));
     } else {
         cerr << "[UXci] already called init." << endl; //TODO general way for runtime warnings
@@ -79,7 +81,11 @@ void UXci::doCommand(const std::string& command) {
 }
 
 void UXci::flyParam(double roll, double pitch, double yaw, double gaz) {
-    xci_->flyParam(roll, pitch, yaw, gaz);
+    roll_ = roll;
+    pitch_ = pitch;
+    yaw_ = yaw;
+    gaz_ = gaz;
+    sendFlyParam();
 }
 
 void UXci::setFlyParamPersistence(unsigned int value) {
@@ -90,18 +96,22 @@ void UXci::setFlyParamPersistence(unsigned int value) {
 
 void UXci::onChangeRoll(double roll) {
     roll_ = roll;
+    sendFlyParam();
 }
 
 void UXci::onChangePitch(double pitch) {
     pitch_ = pitch;
+    sendFlyParam();
 }
 
 void UXci::onChangeYaw(double yaw) {
     yaw_ = yaw;
+    sendFlyParam();
 }
 
 void UXci::onChangeGaz(double gaz) {
     gaz_ = gaz;
+    sendFlyParam();
 }
 
 void UXci::initOutputs() {
@@ -119,9 +129,13 @@ void UXci::keepFlyParam() {
         flyParamCond_.wait(lock, [this] {
             return flyParamPersistence_ > 0;
         });
-        flyParam(roll_, pitch_, yaw_, gaz_);
+        sendFlyParam();
         this_thread::sleep_for(chrono::milliseconds(flyParamPersistence_));
     }
+}
+
+void UXci::sendFlyParam() {
+    xci_->flyParam(roll_, pitch_, yaw_, gaz_);
 }
 
 UXci::~UXci() {

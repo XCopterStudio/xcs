@@ -43,6 +43,16 @@ SensorList XciDodo::sensorList() {
     return result;
 }
 
+ParameterValueType XciDodo::parameter(ParameterNameType name) {
+    switch(name) {
+        case XCI_PARAM_FP_PERSISTENCE:
+            return "1000";
+        default:
+            throw std::runtime_error("Parameter not defined.");
+    }
+}
+
+
 void XciDodo::command(const std::string& command) {
     cout << "[dodo] command: " << command << endl;
 }

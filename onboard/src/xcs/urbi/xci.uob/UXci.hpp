@@ -43,7 +43,7 @@ public:
 
     void doCommand(const std::string &command);
 
-    void flyParam(double roll, double pitch, double yaw, double gaz);
+    void flyParam(double roll = 0, double pitch = 0, double yaw = 0, double gaz = 0);
 
     virtual ~UXci();
 private:
@@ -69,6 +69,8 @@ private:
     //! InputPort doesn't provide its current value, we keep it ourselves
     double gaz_;
     void onChangeGaz(double gaz);
+
+    void sendFlyParam();
 
     void keepFlyParam();
     
