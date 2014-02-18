@@ -44,41 +44,35 @@ class FlashSender {
 
 class SemanticSender {
 
-    function init(adapter, semanticType) {
-        var that = this;
-        var this.input;
+    function init(adapter, outputs, UJson) {
+        for(var output: outputs) {
+            setSlot(output.first, nil);
+            var slot = getSlot(output.first);
+            var that = this;
 
-        this.&input.notifyChange(function() {
-            // simple JSON encoder -- no escaping!
-            adapter.send("{" + semanticType + ":" + that.input.asString() + "}\n");
-        });
-    };
-}|;
-
-// Very simple and incomplete JSON parser.
-// TODO redefine protocol or wrap existing C++ JSON parser
-function parseJson(json) {
-    json = json.replace("\n", "").replace("\r", ""); // strip EOL
-    json = json[1,-1]; // strip {}
-    var result = [ => ];
-    for(var pair: json.split(",")) {
-        var parts = pair.split(":");
-        if(parts.size != 2) continue;
-        result[parts[0]] = parts[1]; // support only unquoted values
-    };
-    return result;
+            slot.notifyChange(function() {
+                // simple JSON encoder -- no escaping!
+                var data = [ => ];
+                data["type"] = "data";
+                data["data"] = [ output.first => that.getSlotValue(output.first) ];
+                adapter.send(UJson.encode(data));
+            });
+        };
+    }|;
 }|;
 
 class SemanticReceiver {
-    function init(adapter, types, parseJson) { // parseJson as arg, lookup is wierd in this case (package/import?)
-        for(var type: types) setSlot(type, nil);
+    function init(adapter, inputs, UJson) { // parseJson as arg, lookup is wierd in this case (package/import?)
+        for(var input: inputs) setSlot(input.first, nil);
 
         var that = this;
         at(adapter.output->changed?) {        
-            var data = parseJson(adapter.output);
-            for(var type: types) 
-                if(type in data) 
-                    that.updateSlot(type, data[type]);
+            var data = UJson.decode(adapter.output);
+            for(var input: inputs) {
+                var name = input.first;
+                if(name in data) 
+                    that.updateSlot(name, data[name]);
+            };
         };
     };
 }|;
@@ -115,8 +109,12 @@ var flashSender = FlashSender.new(adapter, UJson);
 flashSender.send("Created graph nodes.");
 
 // connect graph nodes
-xci.&altitude >> altitudeSender.&input;
-xci.&phi >> phiSender.&input;
+xci.&altitude >> semanticSender.&altitude;
+xci.&phi >> semanticSender.&phi;
+xci.&psi >> semanticSender.&psi;
+xci.&theta >> semanticSender.&theta;
+xci.&alive >> semanticSender.&alive;
+
 flyParamReceiver.&roll >> xci.&roll;
 flyParamReceiver.&pitch >> xci.&pitch;
 flyParamReceiver.&yaw >> xci.&yaw;
