@@ -4,7 +4,6 @@
 #include "XCI_Parrot.hpp"
 #include "video_encapsulation.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/bind.hpp>
 
 using namespace std;
 using namespace boost::asio;
@@ -39,6 +38,14 @@ void XCI_Parrot::initNetwork() {
     socketCMD_->connect(parrotCMD, ec);
     if (ec) {
         throw new ConnectionErrorException("Cannot connect command port.");
+    }
+
+    // connect to navdata port
+    udp::endpoint parrotData(address::from_string("192.168.1.1"), PORT_DATA);
+    socketData_ = new udp::socket(io_serviceData_);
+    socketData_->connect(parrotData, ec);
+    if (ec) {
+        throw new ConnectionErrorException("Cannot connect navigation data port.");
     }
 
     // connect to video port
@@ -88,76 +95,26 @@ void XCI_Parrot::sendingATCommands() {
     // end thread
 }
 
-// function for navdata handling
+void XCI_Parrot::receiveNavData() {
+    uint8_t message[NAVDATA_MAX_SIZE];
+    Navdata* navdata = (Navdata*) & message[0];
+    size_t receiveSize = 0;
 
-void XCI_Parrot::initNavdataReceive(){
-    // connect to navdata port
-    udp::endpoint parrotData(address::from_string("192.168.1.1"), PORT_DATA);
-    socketData_ = new udp::socket(io_serviceData_);
+    initNavdataReceive();
 
-    boost::system::error_code ec;
-    socketData_->connect(parrotData, ec);
-    if (ec) {
-        throw new ConnectionErrorException("Cannot connect navigation data port.");
-    }
-
-    receiveDeadline_.expires_from_now(boost::posix_time::seconds(1));
-    // magic
-    int32_t flag = 1; // 1 - unicast, 2 - multicast
-    socketData_->async_send(boost::asio::buffer((uint8_t*)(&flag), sizeof (int32_t)), boost::bind(&XCI_Parrot::receiveNavData, this));
-
-    receiveDeadline_.async_wait(boost::bind(&XCI_Parrot::checkReceiveDeadline, this));
-}
-
-void XCI_Parrot::receiveNavData(){
-    if (endAll_)
-        return;
-
-    receiveDeadline_.expires_from_now(boost::posix_time::seconds(1));
-    socketData_->async_receive(boost::asio::buffer(navdataMessage, NAVDATA_MAX_SIZE), &XCI_Parrot::processNavdata);
-}
-
-void XCI_Parrot::checkNavdata(const boost::system::error_code& error, std::size_t received){
-    receiveDeadline_.expires_at(boost::posix_time::pos_infin);
-
-    Navdata* navdata = (Navdata*) & navdataMessage[0];
-    
-    if (navdata->sequence > sequenceNumberData_ && navdata->header == 0x55667788) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
-        uint32_t navdataCks = NavdataProcess::computeChecksum(navdata, received);
-        vector<OptionAcceptor*> options = NavdataProcess::parse(navdata, navdataCks, received);
-        if (options.size() > 0){
-            processState(navdata->ardrone_state);
-            processNavdata(options);
+    while (!endAll_) {
+        receiveSize = socketData_->receive(boost::asio::buffer(message, NAVDATA_MAX_SIZE));
+        if (navdata->sequence > sequenceNumberData_ && navdata->header == 0x55667788) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
+            uint32_t navdataCks = NavdataProcess::computeChecksum(navdata, receiveSize);
+            vector<OptionAcceptor*> options = NavdataProcess::parse(navdata, navdataCks ,receiveSize);
+            if (options.size() > 0){
+                processState(navdata->ardrone_state);
+                processNavdata(options);
+            }
+            
+            sequenceNumberData_ = navdata->sequence;
         }
-
-        sequenceNumberData_ = navdata->sequence;
     }
-
-    receiveNavData();
-}
-
-void XCI_Parrot::checkReceiveDeadline(){
-    if (endAll_)
-        return;
-
-    // Check whether the deadline has passed. We compare the deadline against
-    // the current time since a new asynchronous operation may have moved the
-    // deadline before this actor had a chance to run.
-    if (receiveDeadline_.expires_at() <= deadline_timer::traits_type::now())
-    {
-        // The deadline has passed. The socket is closed so that any outstanding
-        // asynchronous operations are cancelled.
-        socketData_->close();
-
-        // There is no longer an active deadline. The expiry is set to positive
-        // infinity so that the actor takes no action until a new deadline is set.
-        receiveDeadline_.expires_at(boost::posix_time::pos_infin);
-
-        initNavdataReceive();
-    }
-
-    // Put the actor back to sleep.
-    receiveDeadline_.async_wait(boost::bind(&XCI_Parrot::checkReceiveDeadline, this));
 }
 
 void XCI_Parrot::receiveVideo() {
@@ -173,6 +130,14 @@ void XCI_Parrot::receiveVideo() {
     }
 
     delete message;
+}
+
+// function for navdata handling
+
+void XCI_Parrot::initNavdataReceive() {
+    // magic
+    int32_t flag = 1; // 1 - unicast, 2 - multicast
+    socketData_->send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)));
 }
 
 void XCI_Parrot::processState(uint32_t droneState){
@@ -253,16 +218,13 @@ void XCI_Parrot::init() throw (ConnectionErrorException) {
 
     endAll_ = false;
 
-    receiveDeadline_ = std::move(deadline_timer(io_serviceData_));
-    receiveDeadline_.expires_at(boost::posix_time::pos_infin);
-
     std::cerr << "Before network" << std::endl;
     initNetwork();
     std::cerr << "After network" << std::endl;
 
     // start all threads
     threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
-    threadReceiveNavData_ = std::move(std::thread(&XCI_Parrot::initNavdataReceive, this));
+    threadReceiveNavData_ = std::move(std::thread(&XCI_Parrot::receiveNavData, this));
     threadReceiveVideo_ = std::move(std::thread(&XCI_Parrot::receiveVideo, this));
     std::cerr << "After threads" << std::endl;
 }
