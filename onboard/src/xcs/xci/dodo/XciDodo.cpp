@@ -72,11 +72,11 @@ void XciDodo::sensorGenerator() {
  * NOT IMPLEMENTED (only for linker)
  */
 std::string XciDodo::configuration(const std::string& key) {
-
+    return "";
 }
 
 InformationMap XciDodo::configuration() {
-
+    return InformationMap();
 }
 
 void XciDodo::configuration(const std::string& key, const std::string& value) {
@@ -92,7 +92,7 @@ void XciDodo::reset() {
 }
 
 SpecialCMDList XciDodo::specialCMD() {
-
+    return SpecialCMDList();
 }
 
 void XciDodo::start() {
