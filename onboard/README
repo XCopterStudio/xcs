@@ -6,10 +6,12 @@ Build
 1) Install required libraries
 	- Boost 1.55
 	- Urbi SDK (dev version from Github)
+	- rapidjson 0.11 (header only)
 
 2) Create symlinks to installed libraries
 	- 3rd-party/boost -> BOOST_ROOT
 	- 3rd-party/urbi -> Urbi SDK
+	- 3rd-paty/rapidjson -> rapidjson's include dir
 
 3) Build onboard (in 'onboard/build')
 	- run `cmake ../src && make`
@@ -17,7 +19,7 @@ Build
 Run
 ===
 In onboard directory run
-	`urbi-launch -s build/xcs/urbi/Xci.uob/libuxci.so -- -f src/demo.u -i`
+	`urbi-launch -s build/xcs/urbi/Xci.uob/libuxci.so build/xcs/urbi/json.uob/libujson.so -- -f src/demo.u -i`
 
 urbi-launch must be in PATH and libboost must be in LD_LIBRARY_PATH,
 optionally source 'env' file in onboard directory.

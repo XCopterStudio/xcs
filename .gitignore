@@ -8,4 +8,5 @@
 
 # it's site-specific symlink
 3rd-party/boost
+3rd-party/rapidjson
 3rd-party/urbi
