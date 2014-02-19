@@ -16,7 +16,8 @@
 namespace xcs {
 
 /*!
- * Based on implementation on Wikipedia
+ * Thread safe multiton patter,
+ * based on implementation on Wikipedia
  * \see http://en.wikipedia.org/wiki/Multiton_pattern#C.2B.2B
  */
 template <typename T, typename Key = std::string>
@@ -42,12 +43,12 @@ private:
     typedef std::map<Key, std::unique_ptr<T> > InstancesMap;
 
     static T* getPtr(const Key& key) {
-        mutex_.lock();
+        std::lock_guard<std::mutex> lock(mutex_);
+
         auto it = instances_.find(key);
         if (it == instances_.end()) {
             instances_.insert(typename InstancesMap::value_type(key, std::unique_ptr<T>(new T(key))));
         }
-        mutex_.unlock();
         return instances_[key].get();
     }
 
