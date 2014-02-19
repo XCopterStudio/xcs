@@ -103,17 +103,8 @@ void XciDodo::stop() {
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+extern "C" {
+    XCI* CreateXci(DataReceiver &dataReceiver) { 
+        return new XciDodo(dataReceiver); 
+    }
+}

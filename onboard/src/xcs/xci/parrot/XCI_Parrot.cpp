@@ -357,20 +357,6 @@ XCI_Parrot::~XCI_Parrot() {
     while (atCommandQueue_.empty())
         delete atCommandQueue_.pop();
 }
-// TODO this should be always compiled as a library
-//int main() {
-//    XCI_Parrot parrot;
-//    parrot.init();
-//
-//    parrot.start();
-//    std::this_thread::sleep_for(std::chrono::seconds(6));
-//    parrot.stop();
-//
-//    while (true) {
-//        std::this_thread::sleep_for(std::chrono::seconds(1));
-//    };
-//}
-
 
 extern "C" {
     XCI* CreateXci(DataReceiver &dataReceiver) { 

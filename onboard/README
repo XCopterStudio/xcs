@@ -21,6 +21,7 @@ Run
 In onboard directory run
 	`urbi-launch -s build/xcs/urbi/xci.uob/libuxci.so build/xcs/urbi/json.uob/libujson.so -- -f src/demo.u -i`
 
-urbi-launch must be in PATH and libboost must be in LD_LIBRARY_PATH,
-optionally source 'env' file in onboard directory.
+urbi-launch must be in PATH and
+in LD_LIBRARY_PATH must be path to libboost and to XCI drivers.
+On Linux `source ./env` file in onboard directory.
 

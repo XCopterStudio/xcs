@@ -54,15 +54,12 @@ UXci::UXci(const std::string& name) :
 }
 
 void UXci::init(const std::string& driver) {
-    // TODO resolve dynamic loading & linking
-    //    LibraryLoader & libraryLoader = LibraryLoader::getInstance(driver);
-    //    libraryLoader.load(driver);
-    //    SymbolLoader<XciFactoryFunction*> symbolLoader(libraryLoader);
-    //    XciFactoryFunction* factory = symbolLoader.loadSymbol("CreateXci");
-    //    xci_ = factory();
+    LibraryLoader & libraryLoader = LibraryLoader::getInstance(driver);
+    libraryLoader.load();
+    SymbolLoader<XciFactoryFunction*> symbolLoader(libraryLoader);
+    XciFactoryFunction* factory = symbolLoader.loadSymbol("CreateXci");
+    xci_ = factory(dataReceiver_);
 
-    xci_ = new XciDodo(dataReceiver_);
-    //xci_ = new XCI_Parrot(dataReceiver_);
     initOutputs();
 }
 

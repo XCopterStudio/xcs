@@ -1,5 +1,5 @@
 #!/bin/bash
 
 export PATH="../3rd-party/urbi/bin:$PATH"
-export LD_LIBRARY_PATH="../3rd-party/boost/lib"
+export LD_LIBRARY_PATH="../3rd-party/boost/lib:build/xcs/xci/parrot:build/xcs/xci/dodo"
 

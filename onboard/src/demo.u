@@ -86,11 +86,11 @@ class SemanticReceiver {
 
 // connect to onboard
 var adapter = Adapter.new();
-adapter.start("192.168.0.99", 1234);
-//adapter.start("127.0.0.1", 1234);
+//adapter.start("192.168.0.99", 1234);
+adapter.start("127.0.0.1", 1234);
 
 // create graph nodes
-var xci = UXci.new("");
+var xci = UXci.new("xci-dodo");
 var semanticSender = SemanticSender.new(adapter, [
     "altitude" => "altitude",
     "phi" => "phi",

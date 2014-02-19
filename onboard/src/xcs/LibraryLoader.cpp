@@ -66,7 +66,7 @@ std::string LibraryLoader::getFilename() const {
 #ifdef _WIN32
     return libraryName_ + ".dll";
 #else
-    return "./lib" + libraryName_ + ".so"; //TODO really search always relative to working directory?
+    return "lib" + libraryName_ + ".so";
 #endif    
 }
 

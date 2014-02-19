@@ -66,6 +66,9 @@ private:
 template <typename T, typename Key>
 typename Multiton<T, Key>::InstancesMap Multiton<T, Key>::instances_;
 
+template <typename T, typename Key>
+std::mutex Multiton<T, Key>::mutex_;
+
 }
 
 #endif	/* MULTITON_HPP */
