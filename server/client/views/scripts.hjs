@@ -24,6 +24,9 @@
 <script type="text/javascript" src="socket.io/socket.io.js"></script>
 
 <script type="text/javascript" src="src/models/ManualControl.js"></script>
+<script type="text/javascript" src="src/models/XcopterState.js"></script>
 <script type="text/javascript" src="src/views/KeyboardControllerView.js"></script>
+<script type="text/javascript" src="src/views/FlashMessagesView.js"></script>
+<script type="text/javascript" src="src/views/AbstractNavdataView.js"></script>
 <script type="text/javascript" src="src/views/AppView.js"></script>
 <script type="text/javascript" src="src/app.js"></script>

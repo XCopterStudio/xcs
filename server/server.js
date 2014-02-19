@@ -38,13 +38,27 @@ var com = net.createServer(function (conn) {
 	connection = null;
 	console.log('Onboard DISCONNECTED');
     });
+    // Routing data from onboard to client
+    conn.on('data', function (data) {
+	try {
+	    var parsed = JSON.parse(data);
+	} catch (e) {
+	    parsed = null
+	}
+	
+	if (client && parsed)
+	    client.emit('data', parsed);
+        console.log(parsed);
+    });
 });
 com.listen(1234, function () {
     console.log('XCS onboard service running on port ' + 1234);
 });
 
 // WebSockets logic
+var client = null;
 io.sockets.on('connection', function (socket) {
+    client = socket;
     // handling manual control
     socket.on('init_manual', function () {
 	
@@ -58,3 +72,5 @@ io.sockets.on('connection', function (socket) {
 	
     });
 });
+
+
