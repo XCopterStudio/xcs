@@ -37,7 +37,7 @@ class FlashSender {
         var data = [ => ];
         data["type"] = "flash";
         data["data"] = message;
-        this.adapter.send(this.ujson.encode(data));
+        this.adapter.send(this.ujson.encode(data) + "\n");
     }|;
 }|;
 
@@ -55,7 +55,7 @@ class SemanticSender {
                 var data = [ => ];
                 data["type"] = "data";
                 data["data"] = [ output.first => that.getSlotValue(output.first) ];
-                adapter.send(UJson.encode(data));
+                adapter.send(UJson.encode(data) + "\n");
             });
         };
     }|;
@@ -67,11 +67,14 @@ class SemanticReceiver {
 
         var that = this;
         at(adapter.output->changed?) {        
-            var data = UJson.decode(adapter.output);
+            var rawData = UJson.decode(adapter.output);
+            var data = rawData["data"];
             for(var input: inputs) {
                 var name = input.first;
-                if(name in data) 
+                if(name in data) {
+                    echo("updating: " + name);
                     that.updateSlot(name, data[name]);
+                }
             };
         };
     };
@@ -83,8 +86,8 @@ class SemanticReceiver {
 
 // connect to onboard
 var adapter = Adapter.new();
-//adapter.start("192.168.0.99", 1234);
-adapter.start("127.0.0.1", 1234);
+adapter.start("192.168.0.99", 1234);
+//adapter.start("127.0.0.1", 1234);
 
 // create graph nodes
 var xci = UXci.new("");
@@ -128,10 +131,10 @@ flashSender.send("Connected graph nodes.");
 /*
 xci.xciInit();
 xci.doCommand("TakeOff");
-sleep(2000ms);
-xci.flyParam(0, 0, 0.2, 0);
+sleep(3000ms);
+xci.flyParam(0, 0, 0.8, 0);
 sleep(4000ms);
 xci.flyParam(0, 0, 0, 0);
-sleep(500ms);
+sleep(3500ms);
 xci.doCommand("Land");
 */
