@@ -25,6 +25,7 @@ if(X_WIN)
   set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
   add_definitions(-D_WIN32_WINNT=0x0501)
 elseif(X_LIN)
+    set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")
   set (CMAKE_CXX_FLAGS "-std=c++11")
 endif()
 

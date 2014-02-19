@@ -7,4 +7,5 @@ include_directories(${Boost_INCLUDE_DIR})
 file(GLOB SOURCES *.cpp)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
+target_link_libraries(${PROJECT_NAME} port boost_system urbi)
 
