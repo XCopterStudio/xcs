@@ -5,6 +5,7 @@ project(xcs)
 # Global configuration
 #
 set(Urbi_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/urbi/include)
+set(Urbi_LIBRARY_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/urbi/lib)
 set(BOOST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/boost)
 set(rapidjson_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/rapidjson)
 
@@ -37,6 +38,7 @@ find_package (Threads)
 add_definitions(-DBOOST_ALL_NO_LIB) # disable autolinking (causing problems in MS VS)
 set(Boost_USE_STATIC_LIBS false)
 find_package(Boost 1.55 REQUIRED COMPONENTS system thread)
+link_directories(${Urbi_LIBRARY_DIRS} ${BOOST_ROOT}/lib)
 
 #
 # Include dirs

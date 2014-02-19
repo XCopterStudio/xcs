@@ -7,5 +7,5 @@ include_directories(${rapidjson_INCLUDE_DIRS})
 
 file(GLOB SOURCES *.cpp)
 
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
+add_library(${PROJECT_NAME} MODULE ${SOURCES})
 

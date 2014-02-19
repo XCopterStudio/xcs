@@ -6,6 +6,6 @@ include_directories(${Boost_INCLUDE_DIR})
 
 file(GLOB SOURCES *.cpp)
 
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
+add_library(${PROJECT_NAME} MODULE ${SOURCES})
 target_link_libraries(${PROJECT_NAME} xcs)
 
