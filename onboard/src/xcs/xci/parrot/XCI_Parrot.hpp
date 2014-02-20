@@ -1,7 +1,6 @@
 #ifndef XCI_PARROT_H
 #define XCI_PARROT_H
 
-#include <boost/asio.hpp>
 #include <thread>
 #include <vector>
 #include <atomic>
@@ -15,6 +14,8 @@
 #include "options_visitor.hpp"
 #include "xcs/xci/ConnectionErrorException.hpp"
 #include "xcs/xci/parrot/xci_parrot_export.h"
+
+#include <boost/asio.hpp>
 
 namespace xcs{
 namespace xci{

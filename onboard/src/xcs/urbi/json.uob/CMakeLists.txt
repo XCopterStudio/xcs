@@ -9,4 +9,5 @@ file(GLOB SOURCES *.cpp)
 
 add_library(${PROJECT_NAME} MODULE ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} port_d boost_system urbi)
+target_link_libraries(${PROJECT_NAME} boost_system)
+target_link_libraries(${PROJECT_NAME} debug port_d debug urbi_d)
