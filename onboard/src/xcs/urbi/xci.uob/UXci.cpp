@@ -59,6 +59,9 @@ void UXci::init(const std::string& driver) {
     SymbolLoader<XciFactoryFunction*> symbolLoader(libraryLoader);
     XciFactoryFunction* factory = symbolLoader.loadSymbol("CreateXci");
     xci_ = factory(dataReceiver_);
+    ::urbi::UBinary bin;
+    ::urbi::UImage img;
+    bin.type;
 
     initOutputs();
 }

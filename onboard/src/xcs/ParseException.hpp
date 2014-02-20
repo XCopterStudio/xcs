@@ -9,9 +9,11 @@
 #define	PARSEEXCEPTION_HPP
 
 #include "Exception.hpp"
+#include "xcs/xcs_export.h"
+
 namespace xcs {
 
-    class ParseException : public Exception {
+    class XCS_EXPORT ParseException : public Exception {
     public:
         ParseException();
         ParseException(const std::string& message);

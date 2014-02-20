@@ -10,4 +10,4 @@ include_directories(${Boost_INCLUDE_DIR})
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} xcs)
+x_target_link_libraries(${PROJECT_NAME} xcs)

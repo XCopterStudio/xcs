@@ -12,6 +12,7 @@
 #include <mutex> 
 
 #include "Multiton.hpp"
+#include "xcs/xcs_export.h"
 
 #ifndef USE_PRECOMPILED_HEADERS
 #ifdef _WIN32
@@ -29,7 +30,7 @@ namespace xcs {
 /*!
  * Class implements multiton pattern -- one instance for each loaded library.
  */
-class LibraryLoader : public Multiton<LibraryLoader, std::string> {
+class XCS_EXPORT LibraryLoader : public Multiton<LibraryLoader, std::string> {
     friend class Multiton<LibraryLoader, std::string>;
 public:
 #ifdef _WIN32

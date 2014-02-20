@@ -10,6 +10,11 @@ set(BOOST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/boost)
 set(rapidjson_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/rapidjson)
 
 #
+# CMake "modules"
+#
+include(GenerateExportHeader)
+
+#
 # Platform dispatch helpers
 #
 if(WIN32)
@@ -21,12 +26,12 @@ elseif(UNIX)
 endif()
 
 if(X_WIN)
-  set (TPN_WIN32 "/EHsc")
-  set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
-  add_definitions(-D_WIN32_WINNT=0x0501)
+    set (TPN_WIN32 "/EHsc")
+    set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+    add_definitions(-D_WIN32_WINNT=0x0501)
 elseif(X_LIN)
     set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")
-  set (CMAKE_CXX_FLAGS "-std=c++11")
+    set (CMAKE_CXX_FLAGS "-std=c++11")
 endif()
 
 #
@@ -47,12 +52,18 @@ link_directories(${Urbi_LIBRARY_DIRS} ${BOOST_ROOT}/lib)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 #
-# Build destination
+# Custom macros
 #
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+function(x_add_library name)
+    add_library(${name} SHARED ${ARGN})
+    GENERATE_EXPORT_HEADER(${name})
+    include_directories(${CMAKE_BINARY_DIR})
+endfunction(x_add_library)
+
+function(x_target_link_libraries target)
+    target_link_libraries(${target} ${ARGN})
+    include_directories(${CMAKE_BINARY_DIR})
+endfunction(x_target_link_libraries)
 
 #
 # Subprojects
