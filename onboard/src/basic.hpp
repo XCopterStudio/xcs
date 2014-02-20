@@ -1,8 +1,6 @@
 #ifndef BASIC_H
 #define BASIC_H
 
-#define _USE_MATH_DEFINES
-
 #include <cmath>
 
 //! Check if value is in interval <-range,range> and if not set value to the limits of the interval.

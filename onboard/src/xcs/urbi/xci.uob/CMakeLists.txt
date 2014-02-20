@@ -10,3 +10,5 @@ add_library(${PROJECT_NAME} MODULE ${SOURCES})
 
 x_target_link_libraries(${PROJECT_NAME} xcs)
 
+target_link_libraries(${PROJECT_NAME} port_d boost_system urbi)
+

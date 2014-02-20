@@ -37,7 +37,7 @@ public:
         if (fn_handle == NULL) {
             throw Exception("Cannot load symbol '" + symbolName + "' from '" + libraryLoader_.libraryName() + "'.");
         }
-        return fn_handle;
+		return reinterpret_cast<SymbolType> (fn_handle);
 #else
         // reset errors
         dlerror();

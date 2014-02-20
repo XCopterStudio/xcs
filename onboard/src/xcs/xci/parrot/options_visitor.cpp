@@ -1,8 +1,7 @@
 #include <iostream>
 
-
-#include "options_visitor.hpp"
 #include "basic.hpp"
+#include "options_visitor.hpp"
 
 
 using namespace xcs::xci::parrot;

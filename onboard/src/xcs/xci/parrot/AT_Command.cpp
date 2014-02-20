@@ -1,7 +1,7 @@
-#include "AT_Command.hpp"
-#include "basic.hpp"
-
 #include <sstream>
+
+#include "basic.hpp"
+#include "AT_Command.hpp"
 
 using namespace xcs::xci::parrot;
 

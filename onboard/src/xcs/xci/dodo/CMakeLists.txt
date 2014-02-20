@@ -8,4 +8,4 @@ file(GLOB SOURCES *.cpp)
 
 x_add_library(${PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} port boost_system urbi)
+target_link_libraries(${PROJECT_NAME} port_d boost_system urbi)
