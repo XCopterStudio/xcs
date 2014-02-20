@@ -90,7 +90,7 @@ var adapter = Adapter.new();
 adapter.start("127.0.0.1", 1234);
 
 // create graph nodes
-var xci = UXci.new("xci-dodo");
+var xci = UXci.new("xci_dodo");
 var semanticSender = SemanticSender.new(adapter, [
     "altitude" => "altitude",
     "phi" => "phi",
