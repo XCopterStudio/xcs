@@ -3,6 +3,8 @@
 # for our own libraries.
 # It's purpose is to correctly add __declspec attributes on Windows.
 #
+# See: http://stackoverflow.com/questions/12738096/generate-export-header-typical-usage
+#
 
 include(GenerateExportHeader)
 
