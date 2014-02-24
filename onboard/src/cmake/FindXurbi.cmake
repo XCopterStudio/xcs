@@ -3,7 +3,7 @@
 #
 
 # Paths
-set(CMAKE_LIBRARY_PATH ${URBI_ROOT}/lib)
+set(CMAKE_LIBRARY_PATH ${URBI_ROOT}/lib;${URBI_D_ROOT}/lib)
 
 set(Port_DIR ${URBI_ROOT}/share/cmake/port)
 find_package(Port)
