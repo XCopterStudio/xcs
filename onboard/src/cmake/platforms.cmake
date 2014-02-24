@@ -21,6 +21,6 @@ if(X_WIN)
     set(PATH_SEPARATOR ";")
 elseif(X_LIN)
     set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined") # show unresolved symbols during link time
-    set(CMAKE_CXX_FLAGS "-std=c++11")
+    set(CMAKE_CXX_FLAGS "-std=c++11 -Wreorder") # initializers list match fields declaration
     set(PATH_SEPARATOR ":")
 endif()

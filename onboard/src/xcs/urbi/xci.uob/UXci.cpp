@@ -30,6 +30,7 @@ UXci::UXci(const std::string& name) :
   pitch_(0),
   yaw_(0),
   gaz_(0),
+  flyParamActive_(false),
   flyParamPersistence_(0) {
     UBindFunction(UXci, init);
     UBindFunction(UXci, xciInit);
@@ -71,12 +72,14 @@ void UXci::xciInit() {
         xci_->init();
         setFlyParamPersistence(stoi(xci_->parameter(xci::XCI_PARAM_FP_PERSISTENCE)));
         flyParamThread_ = move(thread(&UXci::keepFlyParam, this));
+        inited_ = true; // TODO check this variable in all commands to the drone
     } else {
         cerr << "[UXci] already called init." << endl; //TODO general way for runtime warnings
     }
 }
 
 void UXci::doCommand(const std::string& command) {
+    setFlyParamActive(false);
     xci_->command(command);
 }
 
@@ -86,32 +89,31 @@ void UXci::flyParam(double roll, double pitch, double yaw, double gaz) {
     yaw_ = yaw;
     gaz_ = gaz;
     sendFlyParam();
-}
-
-void UXci::setFlyParamPersistence(unsigned int value) {
-    unique_lock<mutex> lock(flyParamMtx_);
-    flyParamPersistence_ = value;
-    flyParamCond_.notify_all();
+    setFlyParamActive();
 }
 
 void UXci::onChangeRoll(double roll) {
     roll_ = roll;
     sendFlyParam();
+    setFlyParamActive();
 }
 
 void UXci::onChangePitch(double pitch) {
     pitch_ = pitch;
     sendFlyParam();
+    setFlyParamActive();
 }
 
 void UXci::onChangeYaw(double yaw) {
     yaw_ = yaw;
     sendFlyParam();
+    setFlyParamActive();
 }
 
 void UXci::onChangeGaz(double gaz) {
     gaz_ = gaz;
     sendFlyParam();
+    setFlyParamActive();
 }
 
 void UXci::initOutputs() {
@@ -123,14 +125,36 @@ void UXci::initOutputs() {
     }
 }
 
+void UXci::setFlyParamPersistence(unsigned int value) {
+    flyParamPersistence_ = value;
+    setFlyParamActive(flyParamActive_); // notifies
+}
+
+void UXci::setFlyParamActive(bool value) {
+    if (!flyParamThread_.joinable()) { // thread haven't started yet
+        flyParamActive_ = value;
+        return;
+    } else {
+        lock_guard<mutex> lock(flyParamMtx_);
+        flyParamActive_ = value;
+    }
+    flyParamCond_.notify_all();
+}
+
 void UXci::keepFlyParam() {
+    unique_lock<mutex> lock(flyParamMtx_, defer_lock_t());
+
     while (1) {
-        unique_lock<mutex> lock(flyParamMtx_);
+        lock.lock();
         flyParamCond_.wait(lock, [this] {
-            return flyParamPersistence_ > 0;
+            return flyParamActive_ && flyParamPersistence_ > 0;
         });
+
+        unsigned int localPersistence(flyParamPersistence_);
+        lock.unlock();
+
         sendFlyParam();
-        this_thread::sleep_for(chrono::milliseconds(flyParamPersistence_));
+        this_thread::sleep_for(chrono::milliseconds(localPersistence));
     }
 }
 

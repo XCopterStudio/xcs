@@ -24,7 +24,7 @@ namespace urbi {
 class UXci : public ::urbi::UObject {
 public:
     ::urbi::UVar flyParamPersistence;
-    
+
     ::urbi::InputPort roll;
     ::urbi::InputPort pitch;
     ::urbi::InputPort yaw;
@@ -70,26 +70,40 @@ private:
     double gaz_;
     void onChangeGaz(double gaz);
 
-    void sendFlyParam();
-
-    void keepFlyParam();
-    
     /*!
      * Setter for flyParam persistence.
-     * It blocks/unblock the persistence thread.
+     * It blocks/unblock the persistence thread (when set to 0).
+     * 
+     * \note It may take up to 'previous value' time until the new persistence
+     * is set.
      */
     void setFlyParamPersistence(unsigned int value);
-    
+
+    /*!
+     * Enables/disables persistence (waking/suspending the thread).
+     */
+    void setFlyParamActive(bool value = true);
+
+    void keepFlyParam();
+
+    void sendFlyParam();
+
+
+    /*!
+     * Whether fly param persistence is active.
+     */
+    bool flyParamActive_;
+
     /*!
      * How often is fly param sent to XCI (in ms).
      * When set to 0, no persistence is enforced.
      */
     unsigned int flyParamPersistence_;
-    
+
     std::thread flyParamThread_;
-    
+
     std::mutex flyParamMtx_;
-    
+
     std::condition_variable flyParamCond_;
 
     void initOutputs();
