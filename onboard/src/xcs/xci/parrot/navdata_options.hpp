@@ -145,7 +145,7 @@ namespace parrot{
         float32_t phi; /*!< UAV's roll  in milli-degrees */
         float32_t psi; /*!< UAV's yaw   in milli-degrees */
 
-        int32_t altitude; /*!< UAV's altitude in centimeters */
+        int32_t altitude; /*!< UAV's altitude in millimeters */
 
         float32_t vx; /*!< UAV's estimated linear velocity */
         float32_t vy; /*!< UAV's estimated linear velocity */
