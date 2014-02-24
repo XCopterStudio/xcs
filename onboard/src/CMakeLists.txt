@@ -26,4 +26,5 @@ add_subdirectory(xcs/xci/dodo)
 # Subprojects (UObjects)
 add_subdirectory(xcs/urbi/xci.uob)
 add_subdirectory(xcs/urbi/json.uob)
+add_subdirectory(xcs/urbi/dummy.uob)
 
