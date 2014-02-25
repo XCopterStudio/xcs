@@ -8,3 +8,7 @@ x_add_library(${PROJECT_NAME} ${SOURCES})
 if(X_LIN)
     target_link_libraries(${PROJECT_NAME} dl)
 endif(X_LIN)
+
+find_package(LibAV)
+include_directories(${LIBAV_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${LIBAV_LIBRARIES})
