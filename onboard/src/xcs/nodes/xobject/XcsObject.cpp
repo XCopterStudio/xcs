@@ -10,7 +10,7 @@ XcsObject::XcsObject(const string& name) :
     //TODO: vhodne zvolit chybovou hlasku
     // Singleton
     if(firstInstance_) {
-        throw exception("Cannot create new XCS instance!!!");
+        throw runtime_error("Cannot create new XCS instance!!!");
     }
     firstInstance_ = true;
 }

@@ -8,7 +8,7 @@
 
 class SimpleXVar {
 public:
-    SimpleXVar(const type_info& synT, const std::string& semT);
+    SimpleXVar(const std::type_info& synT, const std::string& semT);
     virtual ~SimpleXVar();
     urbi::UVar& Data();
     const XType& Type() const;

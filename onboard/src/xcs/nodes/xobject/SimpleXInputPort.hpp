@@ -8,7 +8,7 @@
 
 class SimpleXInputPort {
 public:
-    SimpleXInputPort(const type_info& synT, const std::string& semT);
+    SimpleXInputPort(const std::type_info& synT, const std::string& semT);
     virtual ~SimpleXInputPort();
     urbi::InputPort& Data();
     const XType& Type() const;
