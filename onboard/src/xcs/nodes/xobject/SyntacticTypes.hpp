@@ -8,6 +8,8 @@
 #ifndef SYNTACTICTYPES_HPP
 #define	SYNTACTICTYPES_HPP
 
+#include <cstdint>
+
 namespace xcs {
 namespace nodes {
 
