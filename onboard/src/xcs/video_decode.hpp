@@ -17,16 +17,21 @@ struct XCS_EXPORT VideoParams {
     unsigned int height;
     unsigned int width;
     unsigned int videoCodec;
+    VideoParams(unsigned int height = 0, unsigned int width = 0, unsigned int videoCodec = 0) : height(height), width(width), videoCodec(videoCodec) {};
 };
 
 class XCS_EXPORT VideoDecoder {
-    AVCodec* codec;
-    AVCodecContext * context;
-    AVFrame *frame;
+    AVCodec* codec_;
+    AVCodecContext * context_;
+    AVFrame *frame_;
+    AVPicture* picture_;
+    VideoParams videoParams_;
 public:
+    VideoDecoder() : codec_(nullptr), context_(nullptr), frame_(nullptr), picture_(nullptr) {};
     void init(const AVCodecID avCodec);
     bool decodeVideo(AVPacket* avpacket);
-    AVFrame* decodedFrame();
+    AVPicture* decodedPicture();
+    
     ~VideoDecoder();
 };
 
