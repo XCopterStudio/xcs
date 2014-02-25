@@ -14,7 +14,7 @@ namespace xci {
 struct BitmapType {
     unsigned int width;
     unsigned int height;
-    char *data;
+    uint8_t* data;
 };
 }
 }

@@ -3,6 +3,7 @@
 
 #include "XCI_Parrot.hpp"
 #include "video_encapsulation.h"
+#include "xcs/xci/SyntacticTypes.hpp"
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace std;
@@ -123,6 +124,16 @@ void XCI_Parrot::receiveVideo() {
             packet.size = videoPacket->payload_size;
             packet.data = &message[videoPacket->header_size];
             videoDecoder_.decodeVideo(&packet);
+
+            AVFrame* frame = videoDecoder_.decodedFrame();
+            BitmapType bitmapType;
+            bitmapType.data = frame->data[0];
+            bitmapType.height = frame->height;
+            bitmapType.width = frame->width;
+
+            dataReceiver_.notify("video", bitmapType);
+
+            cerr << "Received video frame " <<  videoPacket->frame_number << endl;
         }
     }
 
