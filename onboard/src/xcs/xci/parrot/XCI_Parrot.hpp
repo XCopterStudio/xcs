@@ -14,8 +14,10 @@
 #include "options_visitor.hpp"
 #include "xcs/xci/ConnectionErrorException.hpp"
 #include "xcs/xci/parrot/xci_parrot_export.h"
+#include "xcs/video_decode.hpp"
 
 #include <boost/asio.hpp>
+#include <boost/asio/deadline_timer.hpp>
 
 namespace xcs{
 namespace xci{
@@ -48,6 +50,9 @@ namespace parrot{
         // actual state of ar.drone 2.0
         ArdroneState state_;
 
+        //video decoder 
+        VideoDecoder videoDecoder_;
+
         // threads
         std::thread threadSendingATCmd_;
         std::thread threadReceiveNavData_;
@@ -60,6 +65,8 @@ namespace parrot{
         boost::asio::io_service io_serviceData_;
         boost::asio::io_service io_serviceVideo_;
 
+        boost::asio::deadline_timer navdataDeadline_;
+
         boost::asio::ip::udp::socket *socketCMD_;
         boost::asio::ip::udp::socket *socketData_;
         boost::asio::ip::tcp::socket *socketVideo_;
@@ -70,6 +77,7 @@ namespace parrot{
         void receiveVideo();
 
         // function for navdata handling
+        void connectNavdata();
         void initNavdataReceive();
         void processState(uint32_t droneState);
         void processNavdata(std::vector<OptionAcceptor*> &options);
@@ -77,7 +85,7 @@ namespace parrot{
         std::string downloadConfiguration() throw (ConnectionErrorException);
 
     public:
-        XCI_Parrot(DataReceiver &dataReceiver) : XCI(dataReceiver) {};
+        XCI_Parrot(DataReceiver &dataReceiver) : XCI(dataReceiver), navdataDeadline_(io_serviceData_) {};
         //! Initialize XCI for use
         void init() throw (ConnectionErrorException);
         //! Resets settings to default values and re-calibrates the sensors (if supported).

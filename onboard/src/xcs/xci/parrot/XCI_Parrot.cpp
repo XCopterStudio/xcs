@@ -40,13 +40,7 @@ void XCI_Parrot::initNetwork() {
         throw new ConnectionErrorException("Cannot connect command port.");
     }
 
-    // connect to navdata port
-    udp::endpoint parrotData(address::from_string("192.168.1.1"), PORT_DATA);
-    socketData_ = new udp::socket(io_serviceData_);
-    socketData_->connect(parrotData, ec);
-    if (ec) {
-        throw new ConnectionErrorException("Cannot connect navigation data port.");
-    }
+    connectNavdata();
 
     // connect to video port
     tcp::endpoint parrotVideo(address::from_string("192.168.1.1"), PORT_VIDEO);
@@ -132,8 +126,19 @@ void XCI_Parrot::receiveVideo() {
     delete message;
 }
 
-// function for navdata handling
+void XCI_Parrot::connectNavdata(){
+    // connect to navdata port
+    udp::endpoint parrotData(address::from_string("192.168.1.1"), PORT_DATA);
+    socketData_ = new udp::socket(io_serviceData_);
 
+    boost::system::error_code ec;
+    socketData_->connect(parrotData, ec);
+    if (ec) {
+        throw new ConnectionErrorException("Cannot connect navigation data port.");
+    }
+};
+
+// function for navdata handling
 void XCI_Parrot::initNavdataReceive() {
     // magic
     int32_t flag = 1; // 1 - unicast, 2 - multicast
@@ -221,6 +226,9 @@ void XCI_Parrot::init() throw (ConnectionErrorException) {
     std::cerr << "Before network" << std::endl;
     initNetwork();
     std::cerr << "After network" << std::endl;
+
+    // init videoDecoder
+    videoDecoder_.init(AV_CODEC_ID_H264);
 
     // start all threads
     threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
