@@ -3,12 +3,14 @@
 
 #include "XCI_Parrot.hpp"
 #include "video_encapsulation.h"
+#include "xcs/nodes/xobject/SyntacticTypes.hpp"
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace std;
 using namespace boost::asio;
 using namespace boost::asio::ip;
 using namespace xcs::xci;
+using namespace xcs::nodes; // because of syntactic types
 using namespace xcs::xci::parrot;
 // ----------------- Constant ----------------------- //
 
@@ -25,7 +27,7 @@ const std::string XCI_Parrot::NAME = "Parrot AR Drone 2.0 XCI";
 
 const int32_t XCI_Parrot::DEFAULT_SEQUENCE_NUMBER = 1;
 
-const unsigned int XCI_Parrot::VIDEO_MAX_SIZE = 3686400;
+const unsigned int XCI_Parrot::VIDEO_MAX_SIZE = 1024*1024;
 
 // ----------------- Private function --------------- //
 
@@ -40,13 +42,7 @@ void XCI_Parrot::initNetwork() {
         throw new ConnectionErrorException("Cannot connect command port.");
     }
 
-    // connect to navdata port
-    udp::endpoint parrotData(address::from_string("192.168.1.1"), PORT_DATA);
-    socketData_ = new udp::socket(io_serviceData_);
-    socketData_->connect(parrotData, ec);
-    if (ec) {
-        throw new ConnectionErrorException("Cannot connect navigation data port.");
-    }
+    connectNavdata();
 
     // connect to video port
     tcp::endpoint parrotVideo(address::from_string("192.168.1.1"), PORT_VIDEO);
@@ -124,16 +120,51 @@ void XCI_Parrot::receiveVideo() {
     while (!endAll_) {
         receivedSize = socketVideo_->receive(boost::asio::buffer(message, VIDEO_MAX_SIZE));
         parrot_video_encapsulation_t* videoPacket = (parrot_video_encapsulation_t*) & message[0];
-        if (videoPacket->signature[0] == 'P' && videoPacket->signature[1] == 'a' && videoPacket->signature[2] == 'V' && videoPacket->signature[3] == 'E') {
-            //TODO: process video data
+        if(checkPaveSignature(videoPacket->signature) && checkFrameNumberAndType(videoPacket->frame_number,videoPacket->frame_type) && videoPacket->payload_size > 0){
+            frameNumber_ = videoPacket->frame_number;
+
+            AVPacket packet;
+            packet.size = videoPacket->payload_size;
+            packet.data = &message[videoPacket->header_size];
+            if (videoDecoder_.decodeVideo(&packet)){
+
+                AVFrame* frame = videoDecoder_.decodedFrame();
+                BitmapType bitmapType;
+                bitmapType.data = frame->data[0];
+                bitmapType.height = frame->height;
+                bitmapType.width = frame->width;
+
+                dataReceiver_.notify("video", bitmapType);
+
+                //cerr << "Decoded video frame " << videoPacket->frame_number << endl;
+            }
         }
     }
 
     delete message;
 }
 
-// function for navdata handling
+bool XCI_Parrot::checkPaveSignature(uint8_t signature[4]){
+    return signature[0] == 'P' && signature[1] == 'a' && signature[2] == 'V' && signature[3] == 'E';
+}
 
+bool XCI_Parrot::checkFrameNumberAndType(uint32_t number, uint8_t frameType){
+    return (frameNumber_+1) == number || frameType == FRAME_TYPE_I_FRAME || frameType == FRAME_TYPE_IDR_FRAME;
+}
+
+void XCI_Parrot::connectNavdata(){
+    // connect to navdata port
+    udp::endpoint parrotData(address::from_string("192.168.1.1"), PORT_DATA);
+    socketData_ = new udp::socket(io_serviceData_);
+
+    boost::system::error_code ec;
+    socketData_->connect(parrotData, ec);
+    if (ec) {
+        throw new ConnectionErrorException("Cannot connect navigation data port.");
+    }
+};
+
+// function for navdata handling
 void XCI_Parrot::initNavdataReceive() {
     // magic
     int32_t flag = 1; // 1 - unicast, 2 - multicast
@@ -215,12 +246,16 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
 void XCI_Parrot::init() throw (ConnectionErrorException) {
     sequenceNumberCMD_ = DEFAULT_SEQUENCE_NUMBER;
     sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
+    frameNumber_ = 0;
 
     endAll_ = false;
 
     std::cerr << "Before network" << std::endl;
     initNetwork();
     std::cerr << "After network" << std::endl;
+
+    // init videoDecoder
+    videoDecoder_.init(AV_CODEC_ID_H264);
 
     // start all threads
     threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
@@ -259,6 +294,7 @@ SensorList XCI_Parrot::sensorList() {
     sensorList.push_back(Sensor("theta","theta"));
     sensorList.push_back(Sensor("psi","psi"));
     sensorList.push_back(Sensor("altitude","altitude"));
+    sensorList.push_back(Sensor("video", "video"));
 
     return sensorList;
 }

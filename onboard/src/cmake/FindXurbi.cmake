@@ -4,7 +4,7 @@
 
 # Paths
 set(CMAKE_LIBRARY_PATH ${URBI_D_ROOT}/lib;${URBI_ROOT}/lib)
-message("Searching Urbi libraries in: ${CMAKE_LIBRARY_PATH}")
+message(STATUS "Searching Urbi libraries in: ${CMAKE_LIBRARY_PATH}")
 
 set(Port_DIR ${URBI_ROOT}/share/cmake/port)
 find_package(Port)
@@ -37,8 +37,6 @@ find_package(Boost 1.55 REQUIRED COMPONENTS system)
 set(Xurbi_INCLUDE_DIRS ${URBI_INCLUDE_DIRS};${PORT_INCLUDE_DIRS};${Boost_INCLUDE_DIRS})
 #set(Xurbi_LIBRARIES ${URBI_LIBRARIES};${PORT_LIBRARIES};${Boost_LIBRARIES})
 set(Xurbi_LIBRARIES ${PORT_LIBRARIES};${QIJPEG_LIBRARIES};${SCHED_LIBRARIES};${SERIALIZE_LIBRARIES};${UOBJECT_LIBRARIES};${Boost_LIBRARIES})
-
-message("Urbi libraries: ${Xurbi_LIBRARIES}")
 
 function(use_urbi TARGET_NAME)
 include_directories(${Xurbi_INCLUDE_DIRS})

@@ -14,12 +14,22 @@
 #include "options_visitor.hpp"
 #include "xcs/xci/ConnectionErrorException.hpp"
 #include "xcs/xci/parrot/xci_parrot_export.h"
+#include "xcs/video_decode.hpp"
 
 #include <boost/asio.hpp>
+#include <boost/asio/deadline_timer.hpp>
 
 namespace xcs{
 namespace xci{
 namespace parrot{
+
+    enum ParrotFrameType{
+        FRAME_TYPE_UNKNNOWN = 0,
+        FRAME_TYPE_IDR_FRAME, /* headers followed by I-frame */
+        FRAME_TYPE_I_FRAME,
+        FRAME_TYPE_P_FRAME,
+        FRAME_TYPE_HEADERS
+    };
 
     class XCI_PARROT_EXPORT XCI_Parrot : public virtual XCI {
         // Constant
@@ -42,11 +52,17 @@ namespace parrot{
         uint32_t sequenceNumberCMD_;
         uint32_t sequenceNumberData_;
 
+        // Last video frame number
+        uint32_t frameNumber_;
+
         // queue for at commands
         Tsqueue<AtCommand*> atCommandQueue_;
 
         // actual state of ar.drone 2.0
         ArdroneState state_;
+
+        //video decoder 
+        VideoDecoder videoDecoder_;
 
         // threads
         std::thread threadSendingATCmd_;
@@ -60,6 +76,8 @@ namespace parrot{
         boost::asio::io_service io_serviceData_;
         boost::asio::io_service io_serviceVideo_;
 
+        boost::asio::deadline_timer navdataDeadline_;
+
         boost::asio::ip::udp::socket *socketCMD_;
         boost::asio::ip::udp::socket *socketData_;
         boost::asio::ip::tcp::socket *socketVideo_;
@@ -69,7 +87,11 @@ namespace parrot{
         void receiveNavData();
         void receiveVideo();
 
+        bool checkPaveSignature(uint8_t signature[4]);
+        bool checkFrameNumberAndType(uint32_t number, uint8_t frameType);
+
         // function for navdata handling
+        void connectNavdata();
         void initNavdataReceive();
         void processState(uint32_t droneState);
         void processNavdata(std::vector<OptionAcceptor*> &options);
@@ -77,7 +99,7 @@ namespace parrot{
         std::string downloadConfiguration() throw (ConnectionErrorException);
 
     public:
-        XCI_Parrot(DataReceiver &dataReceiver) : XCI(dataReceiver) {};
+        XCI_Parrot(DataReceiver &dataReceiver) : XCI(dataReceiver), navdataDeadline_(io_serviceData_) {};
         //! Initialize XCI for use
         void init() throw (ConnectionErrorException);
         //! Resets settings to default values and re-calibrates the sensors (if supported).
