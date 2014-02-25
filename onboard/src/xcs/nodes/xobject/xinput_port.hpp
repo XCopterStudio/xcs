@@ -2,10 +2,14 @@
 #define XINPUTPORT_HPP
 
 #include <string>
-#include "SimpleXInputPort.hpp"
+#include "simple_xinput_port.hpp"
+#include "xcs/nodes/xobject/xobject_export.h"
+
+namespace xcs {
+namespace nodes {
 
 template<class synT>
-class XInputPort : public SimpleXInputPort {
+class XOBJECT_EXPORT XInputPort : public SimpleXInputPort {
 public:
     XInputPort(const std::string& semT);
     virtual ~XInputPort();
@@ -18,6 +22,9 @@ XInputPort<synT>::XInputPort(const std::string& semT) :
 
 template<class synT>
 XInputPort<synT>::~XInputPort() {
+}
+
+}
 }
 
 #endif

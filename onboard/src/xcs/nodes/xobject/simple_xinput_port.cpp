@@ -1,7 +1,9 @@
-#include "SimpleXInputPort.hpp"
+#include "simple_xinput_port.hpp"
+#include "xcs/Exception.hpp"
 
 using namespace urbi;
 using namespace std;
+using namespace xcs::nodes;
 
 SimpleXInputPort::SimpleXInputPort(const type_info& synT, const string& semT) :
     input_(NULL),
@@ -12,7 +14,6 @@ SimpleXInputPort::~SimpleXInputPort() {
 }
 
 void SimpleXInputPort::Init(const UObject& parent, const string& varname) {
-    // TODO: otestovat, co se stane, kdyz se smaze uz nabindovany uvar
     if(input_ != NULL) {
         delete input_;
     }
@@ -24,7 +25,8 @@ const XType& SimpleXInputPort::Type() const {
 }
 
 InputPort& SimpleXInputPort::Data() {
-    // TODO: osetrit neinicializovany inputPort s daty
-    if(input_ == NULL) {}
+    if (input_ == NULL) {
+        throw xcs::Exception("Null reference exception - call XBindVar(...) or Init(...) first");
+    }
     return *input_;
 }

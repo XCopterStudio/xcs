@@ -1,8 +1,9 @@
-#include "SimpleXVar.hpp"
-#include "XcsObject.hpp"
+#include "simple_xvar.hpp"
+#include "xcs/Exception.hpp"
 
 using namespace std;
 using namespace urbi;
+using namespace xcs::nodes;
 
 SimpleXVar::SimpleXVar(const type_info& synT, const string& semT) :
     data_(NULL),
@@ -13,7 +14,6 @@ SimpleXVar::~SimpleXVar() {
 }
 
 void SimpleXVar::Init(const UObject& parent, const string& varname) {
-    // TODO: otestovat, co se stane, kdyz se smaze uz nabindovany uvar
     if(data_ != NULL) {
         delete data_;
     }
@@ -25,7 +25,8 @@ const XType& SimpleXVar::Type() const {
 }
 
 urbi::UVar& SimpleXVar::Data() {
-    // TODO: osetrit neinicializovany uvar s daty
-    if(data_ == NULL) {}
+    if(data_ == NULL) {
+        throw xcs::Exception("Null reference exception - call XBindVar(...) or Init(...) first");
+    }
     return *data_;
 }

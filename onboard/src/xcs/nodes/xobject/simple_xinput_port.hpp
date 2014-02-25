@@ -4,11 +4,15 @@
 #include <string>
 #include <typeinfo>
 #include <urbi/uobject.hh>
-#include "XType.hpp"
+#include "xtype.hpp"
+#include "xcs/nodes/xobject/xobject_export.h"
 
-class SimpleXInputPort {
+namespace xcs {
+namespace nodes {
+
+class XOBJECT_EXPORT SimpleXInputPort {
 public:
-    SimpleXInputPort(const type_info& synT, const std::string& semT);
+    SimpleXInputPort(const std::type_info& synT, const std::string& semT);
     virtual ~SimpleXInputPort();
     urbi::InputPort& Data();
     const XType& Type() const;
@@ -17,5 +21,8 @@ private:
     urbi::InputPort* input_;
     XType xType_;
 };
+
+}
+}
 
 #endif
