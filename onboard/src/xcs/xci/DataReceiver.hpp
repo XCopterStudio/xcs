@@ -3,6 +3,7 @@
 
 #include <map>
 #include <memory>
+#include <iostream>
 
 #include <urbi/uobject.hh>
 
@@ -52,7 +53,7 @@ public:
         bin.image.data = value.data;
         
         *(it->second) = value; // this will do deep copy of the image buffer
-        cerr << "Notified a bitmap." << endl;
+        std::cerr << "Notified a bitmap." << std::endl;
     }
 
     /*!
