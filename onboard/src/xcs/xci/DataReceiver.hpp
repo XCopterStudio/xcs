@@ -6,6 +6,8 @@
 
 #include <urbi/uobject.hh>
 
+#include "xcs/nodes/xobject/SyntacticTypes.hpp"
+
 namespace xcs {
 namespace xci {
 
@@ -30,6 +32,27 @@ public:
             throw std::runtime_error("Unregistered sensor '" + sensorName + "'."); // TODO is it necessary to link with libxcs, therefore std::runtime_error?
         }
         *(it->second) = value;
+    }
+    
+    /*
+     * Specialization for non-urbi and special-memory-managed types.
+     */
+    
+    void notify(const std::string& sensorName, xcs::nodes::BitmapType value) {
+        auto it = outputs_.find(sensorName);
+        if (it == outputs_.end()) {
+            throw std::runtime_error("Unregistered sensor '" + sensorName + "'."); // TODO is it necessary to link with libxcs, therefore std::runtime_error?
+        }
+        urbi::UBinary bin;
+        bin.type = urbi::BINARY_IMAGE;
+        bin.image.width = value.width;
+        bin.image.height = value.height;
+        bin.image.size = value.width * value.height * 3;
+        bin.image.imageFormat = urbi::IMAGE_RGB;
+        bin.image.data = value.data;
+        
+        *(it->second) = value; // this will do deep copy of the image buffer
+        cerr << "Notified a bitmap." << endl;
     }
 
     /*!

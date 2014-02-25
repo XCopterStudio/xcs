@@ -3,13 +3,14 @@
 
 #include "XCI_Parrot.hpp"
 #include "video_encapsulation.h"
-#include "xcs/xci/SyntacticTypes.hpp"
+#include "xcs/nodes/xobject/SyntacticTypes.hpp"
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace std;
 using namespace boost::asio;
 using namespace boost::asio::ip;
 using namespace xcs::xci;
+using namespace xcs::nodes; // because of syntactic types
 using namespace xcs::xci::parrot;
 // ----------------- Constant ----------------------- //
 

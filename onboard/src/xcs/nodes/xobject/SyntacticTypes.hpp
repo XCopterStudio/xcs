@@ -9,7 +9,7 @@
 #define	SYNTACTICTYPES_HPP
 
 namespace xcs {
-namespace xci {
+namespace nodes {
 
 struct BitmapType {
     unsigned int width;
