@@ -31,7 +31,7 @@ void VideoDecoder::init(const AVCodecID avCodec) {
         exit(1);
     }
 
-    frame = av_frame_alloc();
+    frame = avcodec_alloc_frame();
     if (!frame) {
         fprintf(stderr, "Could not allocate video frame\n");
         exit(1);
