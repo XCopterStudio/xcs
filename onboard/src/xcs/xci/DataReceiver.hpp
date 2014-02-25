@@ -49,7 +49,7 @@ public:
         bin.image.width = value.width;
         bin.image.height = value.height;
         bin.image.size = value.width * value.height * 3;
-        bin.image.imageFormat = urbi::IMAGE_RGB;
+        bin.image.imageFormat = urbi::IMAGE_YUV;
         bin.image.data = value.data;
         
         *(it->second) = value; // this will do deep copy of the image buffer
