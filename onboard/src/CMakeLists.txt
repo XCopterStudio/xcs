@@ -33,4 +33,5 @@ add_subdirectory(xcs/xci/dodo)
 add_subdirectory(xcs/urbi/xci.uob)
 add_subdirectory(xcs/urbi/json.uob)
 add_subdirectory(xcs/urbi/dummy.uob)
+add_subdirectory(xcs/urbi/line_finder.uob)
 
