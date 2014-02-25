@@ -8,8 +8,10 @@
 #ifndef SYNTACTICTYPES_HPP
 #define	SYNTACTICTYPES_HPP
 
+#include <cstdint>
+
 namespace xcs {
-namespace xci {
+namespace nodes {
 
 struct BitmapType {
     unsigned int width;

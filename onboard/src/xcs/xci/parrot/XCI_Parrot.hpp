@@ -23,6 +23,14 @@ namespace xcs{
 namespace xci{
 namespace parrot{
 
+    enum ParrotFrameType{
+        FRAME_TYPE_UNKNNOWN = 0,
+        FRAME_TYPE_IDR_FRAME, /* headers followed by I-frame */
+        FRAME_TYPE_I_FRAME,
+        FRAME_TYPE_P_FRAME,
+        FRAME_TYPE_HEADERS
+    };
+
     class XCI_PARROT_EXPORT XCI_Parrot : public virtual XCI {
         // Constant
         static const int PORT_COM;
@@ -43,6 +51,9 @@ namespace parrot{
         // Sequence number for communication with the drone.
         uint32_t sequenceNumberCMD_;
         uint32_t sequenceNumberData_;
+
+        // Last video frame number
+        uint32_t frameNumber_;
 
         // queue for at commands
         Tsqueue<AtCommand*> atCommandQueue_;
@@ -75,6 +86,9 @@ namespace parrot{
         void sendingATCommands();
         void receiveNavData();
         void receiveVideo();
+
+        bool checkPaveSignature(uint8_t signature[4]);
+        bool checkFrameNumberAndType(uint32_t number, uint8_t frameType);
 
         // function for navdata handling
         void connectNavdata();

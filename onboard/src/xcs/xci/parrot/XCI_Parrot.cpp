@@ -3,13 +3,14 @@
 
 #include "XCI_Parrot.hpp"
 #include "video_encapsulation.h"
-#include "xcs/xci/SyntacticTypes.hpp"
+#include "xcs/nodes/xobject/SyntacticTypes.hpp"
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace std;
 using namespace boost::asio;
 using namespace boost::asio::ip;
 using namespace xcs::xci;
+using namespace xcs::nodes; // because of syntactic types
 using namespace xcs::xci::parrot;
 // ----------------- Constant ----------------------- //
 
@@ -26,7 +27,7 @@ const std::string XCI_Parrot::NAME = "Parrot AR Drone 2.0 XCI";
 
 const int32_t XCI_Parrot::DEFAULT_SEQUENCE_NUMBER = 1;
 
-const unsigned int XCI_Parrot::VIDEO_MAX_SIZE = 3686400;
+const unsigned int XCI_Parrot::VIDEO_MAX_SIZE = 1024*1024;
 
 // ----------------- Private function --------------- //
 
@@ -119,25 +120,36 @@ void XCI_Parrot::receiveVideo() {
     while (!endAll_) {
         receivedSize = socketVideo_->receive(boost::asio::buffer(message, VIDEO_MAX_SIZE));
         parrot_video_encapsulation_t* videoPacket = (parrot_video_encapsulation_t*) & message[0];
-        if (videoPacket->signature[0] == 'P' && videoPacket->signature[1] == 'a' && videoPacket->signature[2] == 'V' && videoPacket->signature[3] == 'E') {
+        if(checkPaveSignature(videoPacket->signature) && checkFrameNumberAndType(videoPacket->frame_number,videoPacket->frame_type) && videoPacket->payload_size > 0){
+            frameNumber_ = videoPacket->frame_number;
+
             AVPacket packet;
             packet.size = videoPacket->payload_size;
             packet.data = &message[videoPacket->header_size];
-            videoDecoder_.decodeVideo(&packet);
+            if (videoDecoder_.decodeVideo(&packet)){
 
-            AVFrame* frame = videoDecoder_.decodedFrame();
-            BitmapType bitmapType;
-            bitmapType.data = frame->data[0];
-            bitmapType.height = frame->height;
-            bitmapType.width = frame->width;
+                AVFrame* frame = videoDecoder_.decodedFrame();
+                BitmapType bitmapType;
+                bitmapType.data = frame->data[0];
+                bitmapType.height = frame->height;
+                bitmapType.width = frame->width;
 
-            dataReceiver_.notify("video", bitmapType);
+                dataReceiver_.notify("video", bitmapType);
 
-            cerr << "Received video frame " <<  videoPacket->frame_number << endl;
+                //cerr << "Decoded video frame " << videoPacket->frame_number << endl;
+            }
         }
     }
 
     delete message;
+}
+
+bool XCI_Parrot::checkPaveSignature(uint8_t signature[4]){
+    return signature[0] == 'P' && signature[1] == 'a' && signature[2] == 'V' && signature[3] == 'E';
+}
+
+bool XCI_Parrot::checkFrameNumberAndType(uint32_t number, uint8_t frameType){
+    return (frameNumber_+1) == number || frameType == FRAME_TYPE_I_FRAME || frameType == FRAME_TYPE_IDR_FRAME;
 }
 
 void XCI_Parrot::connectNavdata(){
@@ -234,6 +246,7 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
 void XCI_Parrot::init() throw (ConnectionErrorException) {
     sequenceNumberCMD_ = DEFAULT_SEQUENCE_NUMBER;
     sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
+    frameNumber_ = 0;
 
     endAll_ = false;
 
@@ -281,6 +294,7 @@ SensorList XCI_Parrot::sensorList() {
     sensorList.push_back(Sensor("theta","theta"));
     sensorList.push_back(Sensor("psi","psi"));
     sensorList.push_back(Sensor("altitude","altitude"));
+    sensorList.push_back(Sensor("video", "video"));
 
     return sensorList;
 }
