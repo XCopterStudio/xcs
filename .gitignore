@@ -9,4 +9,6 @@
 # it's site-specific symlink
 3rd-party/boost
 3rd-party/urbi
+3rd-party/urbi_d
 3rd-party/libav
+
