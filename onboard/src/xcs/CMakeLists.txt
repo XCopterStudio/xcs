@@ -11,5 +11,6 @@ endif(X_LIN)
 
 find_package(LibAV)
 message(STATUS "LIBAV: ${LIBAV_INCLUDE_DIRS}")
+message(STATUS "LIBAV libs: ${LIBAV_LIBRARIES}")
 include_directories(${LIBAV_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${LIBAV_LIBRARIES})
