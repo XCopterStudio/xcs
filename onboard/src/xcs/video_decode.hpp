@@ -25,7 +25,7 @@ class XCS_EXPORT VideoDecoder {
     AVFrame *frame;
 public:
     void init(const AVCodecID avCodec);
-    void decodeVideo(AVPacket* avpacket);
+    bool decodeVideo(AVPacket* avpacket);
     AVFrame* decodedFrame();
 };
 
