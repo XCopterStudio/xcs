@@ -27,6 +27,7 @@ public:
     void init(const AVCodecID avCodec);
     bool decodeVideo(AVPacket* avpacket);
     AVFrame* decodedFrame();
+    ~VideoDecoder();
 };
 
 }

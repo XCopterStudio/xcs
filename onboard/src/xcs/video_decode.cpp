@@ -61,3 +61,7 @@ bool VideoDecoder::decodeVideo(AVPacket* avpacket) {
 AVFrame* VideoDecoder::decodedFrame(){
     return frame;
 }
+
+VideoDecoder::~VideoDecoder(){
+    avcodec_free_frame(&frame);
+}
