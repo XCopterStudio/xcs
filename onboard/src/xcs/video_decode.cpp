@@ -39,7 +39,11 @@ void VideoDecoder::init(const AVCodecID avCodec) {
 
 }
 
-void VideoDecoder::decodeVideo(const VideoParams* params, AVPacket* avpacket) {
+void VideoDecoder::decodeVideo(AVPacket* avpacket) {
     int len, gotFrame;
     len = avcodec_decode_video2(context, frame, &gotFrame, avpacket);
+}
+
+AVFrame* VideoDecoder::decodedFrame(){
+    return frame;
 }

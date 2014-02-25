@@ -119,7 +119,10 @@ void XCI_Parrot::receiveVideo() {
         receivedSize = socketVideo_->receive(boost::asio::buffer(message, VIDEO_MAX_SIZE));
         parrot_video_encapsulation_t* videoPacket = (parrot_video_encapsulation_t*) & message[0];
         if (videoPacket->signature[0] == 'P' && videoPacket->signature[1] == 'a' && videoPacket->signature[2] == 'V' && videoPacket->signature[3] == 'E') {
-            //TODO: process video data
+            AVPacket packet;
+            packet.size = videoPacket->payload_size;
+            packet.data = &message[videoPacket->header_size];
+            videoDecoder_.decodeVideo(&packet);
         }
     }
 
