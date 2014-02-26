@@ -66,10 +66,14 @@ bool VideoDecoder::decodeVideo(AVPacket* avpacket) {
 AVFrame* VideoDecoder::decodedFrame(){
     if(frame_->height != frameOut_->height || frame_->width != frameOut_->width){
 
-        unsigned int pictureSize = avpicture_get_size(PIX_FMT_BGR24, frameOut_->width, frameOut_->height);
-        frameOut_->data[0] = (uint8_t*) av_realloc(frameOut_->data[0], pictureSize*sizeof(uint8_t));
+        frameOut_->width = frame_->width;
+        frameOut_->height = frame_->height;
+        frameOut_->format = PIX_FMT_BGR24;
 
-        avpicture_fill((AVPicture *)frameOut_, frameOut_->data[0], PIX_FMT_BGR24,frame_->width, frame_->height);
+        unsigned int pictureSize = avpicture_get_size((AVPixelFormat) frameOut_->format, frameOut_->width, frameOut_->height);
+        bufferFrameOut = (uint8_t*) av_realloc(bufferFrameOut, pictureSize*sizeof(uint8_t));
+
+        avpicture_fill((AVPicture *)frameOut_, bufferFrameOut, (AVPixelFormat) frameOut_->format, frame_->width, frame_->height);
         swsContext_ = sws_getCachedContext(swsContext_, frame_->width, frame_->height, (AVPixelFormat)frame_->format, frameOut_->width, frameOut_->height, (AVPixelFormat)frameOut_->format, SWS_FAST_BILINEAR, NULL, NULL, NULL);
     }
 

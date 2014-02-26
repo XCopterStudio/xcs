@@ -14,16 +14,16 @@ ULineFinder::ULineFinder(const std::string &name) :
 
 void ULineFinder::init() {
     std::cout << "Initing";
-    cv::Mat image;
+    /*cv::Mat image;
     image = cv::imread("/home/maros/projects/drones/xcs/onboard/src/xcs/urbi/line_finder.uob/sample.jpg",1);
     if (!image.data) {
         std::cout << "NO IMAGE DATA";
-    }
+    }*/
 
     cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE);
-    cv::imshow("Display Image", image);
+    //cv::imshow("Display Image", image);
 
-    cv::waitKey(0);
+    cv::waitKey(20);
 }
 
 void ULineFinder::onChangeVideo(::urbi::UImage &image) {
@@ -32,6 +32,7 @@ void ULineFinder::onChangeVideo(::urbi::UImage &image) {
 
     cv::imshow("Display Image", img);
 
+    cv::waitKey(20);
 }
 
 UStart(ULineFinder);

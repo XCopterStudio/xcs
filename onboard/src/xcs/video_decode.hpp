@@ -18,10 +18,11 @@ class XCS_EXPORT VideoDecoder {
     AVCodec* codec_;
     AVCodecContext * context_;
     AVFrame *frame_;
+    uint8_t* bufferFrameOut;
     AVFrame *frameOut_;
     SwsContext* swsContext_;
 public:
-    VideoDecoder() : codec_(nullptr), context_(nullptr), frame_(nullptr), frameOut_(nullptr), swsContext_(nullptr) {};
+    VideoDecoder() : codec_(nullptr), context_(nullptr), frame_(nullptr), frameOut_(nullptr), swsContext_(nullptr), bufferFrameOut(nullptr){};
     void init(const AVCodecID avCodec);
     bool decodeVideo(AVPacket* avpacket);
     AVFrame* decodedFrame();
