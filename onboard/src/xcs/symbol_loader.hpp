@@ -10,7 +10,7 @@
 
 #include <string>
 #include "library_loader.hpp"
-#include "xcs/exception.hpp"
+#include <xcs/exception.hpp>
 
 namespace xcs {
 

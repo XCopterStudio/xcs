@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "xcs/xci/xci.hpp"
+#include <xcs/xci/xci.hpp>
 
 #ifndef USE_PRECOMPILED_HEADERS
 #ifdef _WIN32

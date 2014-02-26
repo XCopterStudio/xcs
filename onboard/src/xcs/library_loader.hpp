@@ -12,7 +12,7 @@
 #include <mutex> 
 
 #include "multiton.hpp"
-#include "xcs/xcs_export.h"
+#include <xcs/xcs_export.h>
 
 #ifndef USE_PRECOMPILED_HEADERS
 #ifdef _WIN32

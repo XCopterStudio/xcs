@@ -1,5 +1,5 @@
 #include "simple_xvar.hpp"
-#include "xcs/exception.hpp"
+#include <xcs/exception.hpp>
 
 using namespace std;
 using namespace urbi;

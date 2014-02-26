@@ -15,8 +15,8 @@
 #include <condition_variable>
 #include <mutex>
 
-#include "xcs/xci/xci.hpp"
-#include "xcs/xci/data_receiver.hpp"
+#include <xcs/xci/xci.hpp>
+#include <xcs/xci/data_receiver.hpp>
 
 namespace xcs {
 namespace urbi {

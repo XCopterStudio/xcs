@@ -9,7 +9,7 @@
 #define	PARSEEXCEPTION_HPP
 
 #include "exception.hpp"
-#include "xcs/xcs_export.h"
+#include <xcs/xcs_export.h>
 
 namespace xcs {
 

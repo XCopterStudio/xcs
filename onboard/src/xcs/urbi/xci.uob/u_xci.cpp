@@ -9,8 +9,8 @@
 
 #include <iostream>
 
-#include "xcs/library_loader.hpp"
-#include "xcs/symbol_loader.hpp"
+#include <xcs/library_loader.hpp>
+#include <xcs/symbol_loader.hpp>
 
 
 using namespace xcs::urbi;

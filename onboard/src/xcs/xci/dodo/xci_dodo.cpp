@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <chrono>
-#include "xcs/xci/data_receiver.hpp"
+#include <xcs/xci/data_receiver.hpp>
 
 using namespace std;
 using namespace xcs::xci;
