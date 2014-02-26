@@ -3,10 +3,11 @@
 
 #include "xcs/xcs_export.h"
 
+extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswscale\swscale.h>
-
+}
 
 //#pragma comment (lib, "avcodec.lib")
 //#pragma comment (lib, "avformat.lib")
