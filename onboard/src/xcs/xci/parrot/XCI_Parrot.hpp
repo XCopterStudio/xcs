@@ -5,16 +5,15 @@
 #include <vector>
 #include <atomic>
 
-#include "xcs/xci/XCI.hpp"
+#include <xcs/xci/xci.hpp>
 #include "AT_Command.hpp"
-#include "xcs/tsqueue.hpp"
+#include <xcs/tsqueue.hpp>
 #include "ardrone_state.hpp"
 #include "navdata_options.hpp"
 #include "navdata_parser.hpp"
 #include "options_visitor.hpp"
-#include "xcs/xci/ConnectionErrorException.hpp"
-#include "xcs/xci/parrot/xci_parrot_export.h"
-#include "xcs/video_decode.hpp"
+#include <xcs/xci/connection_error_exception.hpp>
+#include "video_decode.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/asio/deadline_timer.hpp>
@@ -31,7 +30,7 @@ namespace parrot{
         FRAME_TYPE_HEADERS
     };
 
-    class XCI_PARROT_EXPORT XCI_Parrot : public virtual XCI {
+    class XCI_Parrot : public virtual XCI {
         // Constant
         static const int PORT_COM;
         static const int PORT_CMD;

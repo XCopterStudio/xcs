@@ -7,7 +7,7 @@
 
 #include <urbi/uobject.hh>
 
-#include "xcs/nodes/xobject/SyntacticTypes.hpp"
+#include <xcs/nodes/xobject/SyntacticTypes.hpp>
 
 namespace xcs {
 namespace xci {

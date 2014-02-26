@@ -2,7 +2,7 @@
 #define OPTIONS_VISITOR_H
 
 #include "navdata_options.hpp"
-#include "../DataReceiver.hpp"
+#include <xcs/xci/data_receiver.hpp>
 
 namespace xcs{
 namespace xci{

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <typeinfo>
-#include "xcs/nodes/xobject/xobject_export.h"
+#include <xcs/nodes/xobject/xobject_export.h>
 
 namespace xcs {
 namespace nodes {

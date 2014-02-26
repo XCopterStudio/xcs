@@ -5,7 +5,7 @@
 #include <typeinfo>
 #include <urbi/uobject.hh>
 #include "xtype.hpp"
-#include "xcs/nodes/xobject/xobject_export.h"
+#include <xcs/nodes/xobject/xobject_export.h>
 
 namespace xcs {
 namespace nodes {

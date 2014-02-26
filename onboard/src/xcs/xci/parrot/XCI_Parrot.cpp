@@ -3,7 +3,8 @@
 
 #include "XCI_Parrot.hpp"
 #include "video_encapsulation.h"
-#include "xcs/nodes/xobject/SyntacticTypes.hpp"
+#include "video_decode.hpp"
+#include <xcs/nodes/xobject/SyntacticTypes.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace std;

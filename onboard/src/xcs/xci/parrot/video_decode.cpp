@@ -1,6 +1,6 @@
 #include "video_decode.hpp"
 
-using namespace xcs;
+using namespace xcs::xci::parrot;
 
 void VideoDecoder::init(const AVCodecID avCodec) {
     // register all codecs

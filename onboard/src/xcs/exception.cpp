@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-#include "Exception.hpp"
+#include "exception.hpp"
 
 xcs::Exception::Exception() : std::runtime_error("XCS Exception") {
 }

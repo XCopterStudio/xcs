@@ -3,10 +3,16 @@ project(${PROJECT_NAME})
 
 
 file(GLOB SOURCES *.cpp)
+file(GLOB HEADERS *.hpp)
 
-x_add_library(${PROJECT_NAME} ${SOURCES})
+add_library(${PROJECT_NAME} MODULE ${SOURCES} ${HEADERS})
 
 x_target_link_libraries(${PROJECT_NAME} xcs)
 
-find_package(Xurbi)
+find_package(UrbiAll)
 use_urbi(${PROJECT_NAME})
+
+find_package(LibAV)
+message(STATUS "LIBAV: ${LIBAV_INCLUDE_DIRS}")
+include_directories(${LIBAV_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${LIBAV_LIBRARIES})
