@@ -50,6 +50,11 @@ void VideoDecoder::init(const AVCodecID avCodec) {
         exit(1);
     }
 
+    frameOut_ = avcodec_alloc_frame();
+    if (!frameOut_) {
+        fprintf(stderr, "Could not allocate video frame\n");
+        exit(1);
+    }
 }
 
 bool VideoDecoder::decodeVideo(AVPacket* avpacket) {
@@ -58,29 +63,22 @@ bool VideoDecoder::decodeVideo(AVPacket* avpacket) {
     return gotFrame;
 }
 
-AVPicture* VideoDecoder::decodedPicture(){
-    if(picture_ == nullptr || frame_->height != videoParams_.height || frame_->width != videoParams_.width){
-        videoParams_.height = frame_->height;
-        videoParams_.width = frame_->width;
-        videoParams_.videoCodec = frame_->format;
-        //unsigned int = avpicture_get_size(PIX_FMT_BGR24,)
+AVFrame* VideoDecoder::decodedFrame(){
+    if(frame_->height != frameOut_->height || frame_->width != frameOut_->width){
 
-            /*out->size = avpicture_get_size(cfg->dst_picture.format, cfg->dst_picture.width, cfg->dst_picture.height);
-        cfg->buffer = (uint8_t *)av_realloc(cfg->buffer, out->size * sizeof(uint8_t));
-        out->buffers[0] = cfg->buffer;
+        unsigned int pictureSize = avpicture_get_size(PIX_FMT_BGR24, frameOut_->width, frameOut_->height);
+        frameOut_->data[0] = (uint8_t*) av_realloc(frameOut_->data[0], pictureSize*sizeof(uint8_t));
 
-        avpicture_fill((AVPicture *)pFrameOutput, (uint8_t*)out->buffers[out->indexBuffer], cfg->dst_picture.format,
-            cfg->dst_picture.width, cfg->dst_picture.height);
-
-
-        cfg->img_convert_ctx = sws_getCachedContext(cfg->img_convert_ctx, PaVE.display_width, PaVE.display_height,
-            pCodecCtxH264->pix_fmt, PaVE.display_width, PaVE.display_height,
-            cfg->dst_picture.format, sws_flags, NULL, NULL, NULL);*/
+        avpicture_fill((AVPicture *)frameOut_, frameOut_->data[0], PIX_FMT_BGR24,frame_->width, frame_->height);
+        swsContext_ = sws_getCachedContext(swsContext_, frame_->width, frame_->height, (AVPixelFormat)frame_->format, frameOut_->width, frameOut_->height, (AVPixelFormat)frameOut_->format, SWS_FAST_BILINEAR, NULL, NULL, NULL);
     }
 
-    return picture_;
+    sws_scale(swsContext_, frame_->data, frame_->linesize, 0, frame_->height, frameOut_->data, frameOut_->linesize);
+
+    return frameOut_;
 }
 
 VideoDecoder::~VideoDecoder(){
     avcodec_free_frame(&frame_);
+    avcodec_free_frame(&frameOut_);
 }
