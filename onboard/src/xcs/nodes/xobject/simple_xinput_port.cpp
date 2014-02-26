@@ -1,5 +1,5 @@
 #include "simple_xinput_port.hpp"
-#include "xcs/Exception.hpp"
+#include <xcs/exception.hpp>
 
 using namespace urbi;
 using namespace std;

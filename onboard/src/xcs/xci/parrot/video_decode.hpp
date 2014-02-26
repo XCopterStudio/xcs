@@ -1,8 +1,6 @@
 #ifndef VIDEO_DECODE_H
 #define VIDEO_DECODE_H
 
-#include "xcs/xcs_export.h"
-
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -12,9 +10,11 @@ extern "C" {
 //#pragma comment (lib, "avcodec.lib")
 //#pragma comment (lib, "avformat.lib")
 
-namespace xcs{
+namespace xcs {
+namespace xci {
+namespace parrot {
 
-class XCS_EXPORT VideoDecoder {
+class VideoDecoder {
     AVCodec* codec_;
     AVCodecContext * context_;
     AVFrame *frame_;
@@ -29,5 +29,7 @@ public:
     ~VideoDecoder();
 };
 
+}
+}
 }
 #endif

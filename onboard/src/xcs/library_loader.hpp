@@ -11,8 +11,8 @@
 #include <string>
 #include <mutex> 
 
-#include "Multiton.hpp"
-#include "xcs/xcs_export.h"
+#include "multiton.hpp"
+#include <xcs/xcs_export.h>
 
 #ifndef USE_PRECOMPILED_HEADERS
 #ifdef _WIN32

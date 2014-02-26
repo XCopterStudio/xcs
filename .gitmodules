@@ -1,6 +1,3 @@
-[submodule "3rd-party/ffmpeg"]
-	path = 3rd-party/ffmpeg
-	url = git://source.ffmpeg.org/ffmpeg.git
 [submodule "3rd-party/rapidjson/rapidjson"]
 	path = 3rd-party/rapidjson/rapidjson
 	url = https://github.com/Kanma/rapidjson.git

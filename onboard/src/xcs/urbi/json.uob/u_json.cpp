@@ -1,8 +1,8 @@
-#include "UJson.hpp"
+#include "u_json.hpp"
 
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
-#include "UrbiHandler.hpp"
+#include "urbi_handler.hpp"
 
 using namespace xcs::urbi;
 using namespace xcs::urbi::json;

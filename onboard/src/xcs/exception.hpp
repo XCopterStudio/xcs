@@ -10,7 +10,7 @@
 
 #include <stdexcept>
 #include <string>
-#include "xcs/xcs_export.h"
+#include <xcs/xcs_export.h>
 
 namespace xcs {
 

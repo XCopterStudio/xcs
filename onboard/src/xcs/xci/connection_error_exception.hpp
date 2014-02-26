@@ -1,5 +1,5 @@
-#ifndef XCI_EXCEPTION_H
-#define XCI_EXCEPTION_H
+#ifndef CONNECTION_ERROR_EXCEPTION_H
+#define CONNECTION_ERROR_EXCEPTION_H
 
 #include <exception>
 #include <string>
