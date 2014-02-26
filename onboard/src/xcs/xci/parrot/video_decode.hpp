@@ -1,8 +1,6 @@
 #ifndef VIDEO_DECODE_H
 #define VIDEO_DECODE_H
 
-#include "xcs/xcs_export.h"
-
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
@@ -11,9 +9,11 @@ extern "C" {
 //#pragma comment (lib, "avcodec.lib")
 //#pragma comment (lib, "avformat.lib")
 
-namespace xcs{
+namespace xcs {
+namespace xci {
+namespace parrot {
 
-struct XCS_EXPORT VideoParams {
+struct VideoParams {
     unsigned int height;
     unsigned int width;
     unsigned int videoCodec;
@@ -35,5 +35,7 @@ public:
     ~VideoDecoder();
 };
 
+}
+}
 }
 #endif

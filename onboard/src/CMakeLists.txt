@@ -13,9 +13,6 @@ include(xlibrary)
 # Include dirs
 #
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-find_package(LibAV)
-message(STATUS "LIBAV: ${LIBAV_INCLUDE_DIRS}")
-include_directories(${LIBAV_INCLUDE_DIRS})
 
 #
 # Setting binary variable

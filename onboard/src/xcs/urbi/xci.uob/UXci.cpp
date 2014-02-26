@@ -6,8 +6,6 @@
  */
 
 #include "UXci.hpp"
-#include "xcs/xci/parrot/XCI_Parrot.hpp"
-#include "xcs/xci/dodo/XciDodo.hpp"
 
 #include <iostream>
 
@@ -18,10 +16,6 @@
 using namespace xcs::urbi;
 using namespace xcs::xci;
 using namespace std;
-
-// TODO should be removed when dynamic loading will be solved
-using namespace xcs::xci::parrot;
-using namespace xcs::xci::dodo;
 
 UXci::UXci(const std::string& name) :
   ::urbi::UObject(name),

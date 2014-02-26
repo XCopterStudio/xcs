@@ -14,7 +14,7 @@
 #include "options_visitor.hpp"
 #include "xcs/xci/ConnectionErrorException.hpp"
 #include "xcs/xci/parrot/xci_parrot_export.h"
-#include "xcs/video_decode.hpp"
+#include "video_decode.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/asio/deadline_timer.hpp>
