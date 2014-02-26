@@ -1,6 +1,7 @@
-#include "XType.hpp"
+#include "xtype.hpp"
 
 using namespace std;
+using namespace xcs::nodes;
 
 XType::XType(const string& synT, const string& semT) :
     synType(synT),
@@ -18,6 +19,5 @@ bool XType::operator==(const XType& other) const {
 }
 
 const string XType::toString() const {
-    //TODO: upravit a zoptimalizovat vytvoreni nazvu
     return synType + " - " + semType;
 }

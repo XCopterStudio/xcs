@@ -1,13 +1,16 @@
 #ifndef XOBJECT_HPP
 #define XOBJECT_HPP
 
-// TODO: zkusit nahradit za predeklaraci uobjectu
 #include <urbi/uobject.hh>
 #include <string>
 #include <map>
-#include "XType.hpp"
+#include "xtype.hpp"
+#include "xcs/nodes/xobject/xobject_export.h"
 
-class XObject :	public urbi::UObject {
+namespace xcs {
+namespace nodes {
+
+class XOBJECT_EXPORT XObject : public urbi::UObject {
 public:
     XObject(const std::string& name);
     virtual ~XObject();
@@ -17,6 +20,9 @@ protected:
 private:
     std::map<const std::string, XType*>* xVarsType_;
 };
+
+}
+}
 
 # define XBindVar(x)							\
 	this->RegisterXVar(#x, x.Type().synType, x.Type().semType);	\

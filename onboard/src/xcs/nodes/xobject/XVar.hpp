@@ -2,12 +2,14 @@
 #define XVAR_HPP
 
 #include <string>
+#include "simple_xvar.hpp"
+#include "xcs/nodes/xobject/xobject_export.h"
 
-//TODO: nahradit za "SimpleXVar.hpp"
-#include <urbi/uobject.hh>
+namespace xcs {
+namespace nodes {
 
 template<class synT>
-class XVar : public SimpleXVar {
+class XOBJECT_EXPORT XVar : public SimpleXVar {
 public:
     XVar(const std::string& semT);
     XVar& operator=(const synT&);
@@ -22,6 +24,9 @@ template<class synT>
 XVar<synT>& XVar<synT>::operator=(const synT& val) {
     Data() = val;
     return *this;
+}
+
+}
 }
 
 #endif
