@@ -15,7 +15,7 @@ public:
     void init();
 
 private:
-    void onChangeVideo(::urbi::UImage &image);
+    void onChangeVideo(::urbi::UVar &uvar);
 };
 
 }

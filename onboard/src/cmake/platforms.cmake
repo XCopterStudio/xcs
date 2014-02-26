@@ -19,8 +19,10 @@ if(X_WIN)
     add_definitions(-D_USE_MATH_DEFINES) # workaround for broken cmath in libport + xcs
     add_definitions(-D_WIN32_WINNT=0x0501)
     set(PATH_SEPARATOR ";")
+    set(OpenCV_DIR "${OPENCV_ROOT}")
 elseif(X_LIN)
     set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined") # show unresolved symbols during link time
     set(CMAKE_CXX_FLAGS "-std=c++11 -Wreorder") # initializers list match fields declaration
     set(PATH_SEPARATOR ":")
+    set(OpenCV_DIR "${OPENCV_ROOT}/share/OpenCV")
 endif()
