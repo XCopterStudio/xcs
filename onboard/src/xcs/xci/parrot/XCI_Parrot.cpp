@@ -117,27 +117,44 @@ void XCI_Parrot::receiveNavData() {
 void XCI_Parrot::receiveVideo() {
     uint8_t* message = new uint8_t[VIDEO_MAX_SIZE];
     size_t receivedSize;
+    unsigned int index = 0;
+    unsigned int bufferSize = VIDEO_MAX_SIZE;
+    parrot_video_encapsulation_t* videoPacket = nullptr;
  
-    while (!endAll_) {
-        receivedSize = socketVideo_->receive(boost::asio::buffer(message, VIDEO_MAX_SIZE));
-        parrot_video_encapsulation_t* videoPacket = (parrot_video_encapsulation_t*) & message[0];
-        if(checkPaveSignature(videoPacket->signature) && checkFrameNumberAndType(videoPacket->frame_number,videoPacket->frame_type) && videoPacket->payload_size > 0){
-            frameNumber_ = videoPacket->frame_number;
+    while (!endAll_){
+        receivedSize = socketVideo_->receive(boost::asio::buffer(&message[index], bufferSize));
+        if (index == 0){
+            videoPacket = (parrot_video_encapsulation_t*) & message[0];
+        }
 
-            AVPacket packet;
-            packet.size = videoPacket->payload_size;
-            packet.data = &message[videoPacket->header_size];
-            if (videoDecoder_.decodeVideo(&packet)){
+        if ((index + receivedSize) != (videoPacket->header_size + videoPacket->payload_size)){
+            index += receivedSize;
+            bufferSize -= receivedSize;
 
-                AVFrame* frame = videoDecoder_.decodedFrame();
-                BitmapType bitmapType;
-                bitmapType.data = frame->data[0];
-                bitmapType.height = frame->height;
-                bitmapType.width = frame->width;
+            cerr << "Size of packet " << (int)(videoPacket->header_size + videoPacket->payload_size) << "received size" << receivedSize << endl;
+            cerr << "Video slices " << (int)videoPacket->total_slices << endl;
+        }else{
+            index = 0;
+            bufferSize = VIDEO_MAX_SIZE;
 
-                dataReceiver_.notify("video", bitmapType);
+            if (checkPaveSignature(videoPacket->signature) && checkFrameNumberAndType(videoPacket->frame_number, videoPacket->frame_type) && videoPacket->payload_size > 0){
+                frameNumber_ = videoPacket->frame_number;
 
-                //cerr << "Decoded video frame " << videoPacket->frame_number << endl;
+                AVPacket packet;
+                packet.size = videoPacket->payload_size;
+                packet.data = &message[videoPacket->header_size];
+                if (videoDecoder_.decodeVideo(&packet)){
+
+                    AVFrame* frame = videoDecoder_.decodedFrame();
+                    BitmapType bitmapType;
+                    bitmapType.data = frame->data[0];
+                    bitmapType.height = frame->height;
+                    bitmapType.width = frame->width;
+
+                    dataReceiver_.notify("video", bitmapType);
+
+                    //cerr << "Decoded video frame " << videoPacket->frame_number << endl;
+                }
             }
         }
     }

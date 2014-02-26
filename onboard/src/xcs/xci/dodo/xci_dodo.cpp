@@ -94,7 +94,7 @@ void XciDodo::renderFrames() {
         for (auto x = 0; x < VIDEO_WIDTH_; ++x) {
             auto linepos = VIDEO_WIDTH_ / 2 + frame * speed;
             for (auto y = 0; y < VIDEO_WIDTH_; ++y) {
-                auto color = (x >= linepos && x < linepos + width) ? 0 : 1;
+                auto color = (x >= linepos && x < linepos + width) ? 0 : 255;
                 frames_[frame][x][y][0] = color;
                 frames_[frame][x][y][1] = color;
                 frames_[frame][x][y][2] = color;

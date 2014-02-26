@@ -28,7 +28,7 @@ void ULineFinder::init() {
 
 void ULineFinder::onChangeVideo(::urbi::UImage &image) {
 
-    cv::Mat img(image.width, image.height, CV_8UC3, image.data);
+    cv::Mat img(image.height, image.width, CV_8UC3, image.data);
 
     cv::imshow("Display Image", img);
 
