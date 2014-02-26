@@ -9,7 +9,7 @@ add_library(${PROJECT_NAME} MODULE ${SOURCES} ${HEADERS})
 
 x_target_link_libraries(${PROJECT_NAME} xcs)
 
-find_package(Xurbi)
+find_package(UrbiAll)
 use_urbi(${PROJECT_NAME})
 
 find_package(LibAV)

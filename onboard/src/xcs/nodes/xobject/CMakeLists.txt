@@ -9,7 +9,7 @@ x_add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
 
 x_target_link_libraries(${PROJECT_NAME} xcs)
 
-find_package(Xurbi)
+find_package(UrbiAll)
 use_urbi(${PROJECT_NAME})
 
 

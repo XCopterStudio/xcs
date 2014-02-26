@@ -6,5 +6,5 @@ file(GLOB HEADERS *.hpp)
 
 add_library(${PROJECT_NAME} MODULE ${SOURCES} ${HEADERS})
 
-find_package(Xurbi)
+find_package(UrbiAll)
 use_urbi(${PROJECT_NAME})
