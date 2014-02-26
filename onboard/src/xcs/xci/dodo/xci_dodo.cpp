@@ -7,6 +7,7 @@
 using namespace std;
 using namespace xcs::xci;
 using namespace xcs::xci::dodo;
+using namespace xcs::nodes;
 
 /*
  * Constants
@@ -26,6 +27,7 @@ XciDodo::~XciDodo() {
 
 void XciDodo::init() {
     inited_ = true;
+    renderFrames();
     sensorThread_ = move(thread(&XciDodo::sensorGenerator, this));
 }
 
@@ -35,23 +37,19 @@ std::string XciDodo::name() {
 
 SensorList XciDodo::sensorList() {
     SensorList result;
-    //TODO figure out better initialization of sensor list
-    Sensor sensor;
-    sensor.name = "alive";
-    sensor.semanticType = "alive";
-    result.push_back(sensor);
+    result.push_back(Sensor("alive", "alive"));
+    result.push_back(Sensor("video", "video"));
     return result;
 }
 
 ParameterValueType XciDodo::parameter(ParameterNameType name) {
-    switch(name) {
+    switch (name) {
         case XCI_PARAM_FP_PERSISTENCE:
             return "1000";
         default:
             throw std::runtime_error("Parameter not defined.");
     }
 }
-
 
 void XciDodo::command(const std::string& command) {
     cout << "[dodo] command: " << command << endl;
@@ -62,9 +60,41 @@ void XciDodo::flyParam(float roll, float pitch, float yaw, float gaz) {
 }
 
 void XciDodo::sensorGenerator() {
+    size_t clock = 0;
+    size_t frameNo = 0;
     while (1) {
-        dataReceiver_.notify("alive", true);
-        this_thread::sleep_for(chrono::milliseconds(1000));
+        if (clock % (1000 / ALIVE_FREQ_) == 0) {
+            dataReceiver_.notify("alive", true);
+        }
+        if (clock % (1000 / VIDEO_FPS_) == 0) {
+            BitmapType frame;
+            frame.height = VIDEO_HEIGHT_;
+            frame.width = VIDEO_WIDTH_;
+            frame.data = const_cast<uint8_t *> (reinterpret_cast<const uint8_t *> (frames_ + frameNo));
+
+            dataReceiver_.notify("video", frame);
+            frameNo = (frameNo++) % VIDEO_LENGTH_;
+        }
+
+        clock += SENSOR_PERIOD_;
+        this_thread::sleep_for(chrono::milliseconds(SENSOR_PERIOD_));
+    }
+}
+
+void XciDodo::renderFrames() {
+    static const size_t width = 3;
+    static const size_t speed = 10;
+
+    for (auto frame = 0; frame < VIDEO_LENGTH_; ++frame) {
+        for (auto x = 0; x < VIDEO_WIDTH_; ++x) {
+            auto linepos = VIDEO_WIDTH_ / 2 + frame * speed;
+            for (auto y = 0; y < VIDEO_WIDTH_; ++y) {
+                auto color = (x >= linepos && x < linepos + width) ? 0 : 1;
+                frames_[frame][x][y][0] = color;
+                frames_[frame][x][y][1] = color;
+                frames_[frame][x][y][2] = color;
+            }
+        }
     }
 }
 
@@ -104,7 +134,8 @@ void XciDodo::stop() {
 }
 
 extern "C" {
-    XCI* CreateXci(DataReceiver &dataReceiver) { 
-        return new XciDodo(dataReceiver); 
+
+    XCI* CreateXci(DataReceiver &dataReceiver) {
+        return new XciDodo(dataReceiver);
     }
 }

@@ -3,6 +3,8 @@
 
 #include <xcs/xci/xci.hpp>
 
+#include <cstddef>
+#include <cstdint>
 #include <thread>
 
 namespace xcs {
@@ -56,11 +58,28 @@ public:
     virtual void stop();
 private:
     static const std::string NAME_;
+
+    static const size_t VIDEO_WIDTH_ = 640;
+    static const size_t VIDEO_HEIGHT_ = 480;
+    static const size_t VIDEO_LENGTH_ = 5;
+    //! Video FPS (must divisor of 1000/SENSOR_PERIOD_).
+    static const size_t VIDEO_FPS_ = 10;
+    static uint8_t frames_[VIDEO_LENGTH_][VIDEO_WIDTH_][VIDEO_HEIGHT_][3];
+    
+    //! How often alive signal is sent (in Hz) (must divisor of 1000/SENSOR_PERIOD_).
+    static const size_t ALIVE_FREQ_ = 1;
+    
+    //! Period of sensor thread in ms.
+    static const size_t SENSOR_PERIOD_ = 50;
+
     bool inited_;
     std::thread sensorThread_;
-    
+
     //! Generates dummy data for sensors
     void sensorGenerator();
+    
+    //! Fills frames buffer with dummy frames.
+    void renderFrames();
 };
 }
 }

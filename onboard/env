@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PATH="../3rd-party/urbi/bin:$PATH"
-export LD_LIBRARY_PATH="../3rd-party/boost/lib:build/lib"
-export URBI_UOBJECT_PATH="build/lib"
+export PATH="$PWD/../3rd-party/urbi/bin:$PATH"
+export LD_LIBRARY_PATH="$PWD/../3rd-party/boost/lib:$PWD/build/lib"
+export URBI_UOBJECT_PATH="$PWD/build/lib"
 
