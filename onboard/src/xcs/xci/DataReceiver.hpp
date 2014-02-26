@@ -52,7 +52,7 @@ public:
         bin.image.imageFormat = urbi::IMAGE_RGB;
         bin.image.data = value.data;
         
-        *(it->second) = value; // this will do deep copy of the image buffer
+        *(it->second) = bin; // this will do deep copy of the image buffer
         bin.image.data = nullptr;
         std::cerr << "Notified a bitmap." << std::endl;
     }
