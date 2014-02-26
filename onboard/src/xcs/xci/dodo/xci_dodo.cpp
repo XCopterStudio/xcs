@@ -13,6 +13,11 @@ using namespace xcs::nodes;
  * Constants
  */
 const std::string XciDodo::NAME_ = "Dodo Test Drone";
+uint8_t XciDodo::frames_[XciDodo::VIDEO_LENGTH_][XciDodo::VIDEO_WIDTH_][XciDodo::VIDEO_HEIGHT_][3];
+
+const size_t XciDodo::ALIVE_FREQ_ = 1;
+//
+const size_t XciDodo::SENSOR_PERIOD_ = 50;
 
 /*
  * Implementation
@@ -135,7 +140,7 @@ void XciDodo::stop() {
 
 extern "C" {
 
-    XCI* CreateXci(DataReceiver &dataReceiver) {
-        return new XciDodo(dataReceiver);
-    }
+XCI* CreateXci(DataReceiver &dataReceiver) {
+    return new XciDodo(dataReceiver);
+}
 }
