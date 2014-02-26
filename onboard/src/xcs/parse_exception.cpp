@@ -5,7 +5,7 @@
  * Created on January 26, 2014, 7:11 PM
  */
 
-#include "ParseException.hpp"
+#include "parse_exception.hpp"
 
 xcs::ParseException::ParseException() : xcs::Exception() {
 }

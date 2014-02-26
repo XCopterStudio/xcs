@@ -6,7 +6,7 @@
  */
 
 #include "Adapter.hpp"
-#include "xcs/ParseException.hpp"
+#include "xcs/parse_exception.hpp"
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>

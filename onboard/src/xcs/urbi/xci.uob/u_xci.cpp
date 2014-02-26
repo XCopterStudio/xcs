@@ -5,12 +5,12 @@
  * Created on January 31, 2014, 11:07 PM
  */
 
-#include "UXci.hpp"
+#include "u_xci.hpp"
 
 #include <iostream>
 
-#include "xcs/LibraryLoader.hpp"
-#include "xcs/SymbolLoader.hpp"
+#include "xcs/library_loader.hpp"
+#include "xcs/symbol_loader.hpp"
 
 
 using namespace xcs::urbi;

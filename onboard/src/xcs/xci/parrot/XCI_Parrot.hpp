@@ -5,14 +5,14 @@
 #include <vector>
 #include <atomic>
 
-#include "xcs/xci/XCI.hpp"
+#include "xcs/xci/xci.hpp"
 #include "AT_Command.hpp"
 #include "xcs/tsqueue.hpp"
 #include "ardrone_state.hpp"
 #include "navdata_options.hpp"
 #include "navdata_parser.hpp"
 #include "options_visitor.hpp"
-#include "xcs/xci/ConnectionErrorException.hpp"
+#include "xcs/xci/connection_error_exception.hpp"
 #include "video_decode.hpp"
 
 #include <boost/asio.hpp>

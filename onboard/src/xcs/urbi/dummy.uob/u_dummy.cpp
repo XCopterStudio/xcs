@@ -1,4 +1,4 @@
-#include "UDummy.hpp"
+#include "u_dummy.hpp"
 
 
 using namespace xcs::urbi;

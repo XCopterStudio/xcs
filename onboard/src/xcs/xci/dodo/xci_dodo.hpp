@@ -1,7 +1,7 @@
 #ifndef XCI_DODO_H
 #define XCI_DODO_H
 
-#include "xcs/xci/XCI.hpp"
+#include "xcs/xci/xci.hpp"
 
 #include <thread>
 

@@ -9,8 +9,8 @@
 #define	SYMBOLLOADER_HPP
 
 #include <string>
-#include "LibraryLoader.hpp"
-#include "xcs/Exception.hpp"
+#include "library_loader.hpp"
+#include "xcs/exception.hpp"
 
 namespace xcs {
 

@@ -5,7 +5,7 @@
  * Created on February 17, 2014, 10:14 PM
  */
 
-#include "UrbiHandler.hpp"
+#include "urbi_handler.hpp"
 #include <string>
 
 using namespace xcs::urbi::json;

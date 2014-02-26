@@ -1,8 +1,8 @@
-#include "XciDodo.hpp"
+#include "xci_dodo.hpp"
 
 #include <iostream>
 #include <chrono>
-#include "xcs/xci/DataReceiver.hpp"
+#include "xcs/xci/data_receiver.hpp"
 
 using namespace std;
 using namespace xcs::xci;
