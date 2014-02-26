@@ -4,7 +4,7 @@ project(${PROJECT_NAME})
 
 file(GLOB SOURCES *.cpp)
 
-x_add_library(${PROJECT_NAME} ${SOURCES})
+add_library(${PROJECT_NAME} MODULE ${SOURCES})
 
 x_target_link_libraries(${PROJECT_NAME} xcs)
 

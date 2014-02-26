@@ -2,7 +2,6 @@
 #define XCI_DODO_H
 
 #include "xcs/xci/XCI.hpp"
-#include "xcs/xci/dodo/xci_dodo_export.h"
 
 #include <thread>
 
@@ -10,7 +9,7 @@ namespace xcs {
 namespace xci {
 namespace dodo {
 
-class XCI_DODO_EXPORT XciDodo : public virtual XCI {
+class XciDodo : public virtual XCI {
 public:
     XciDodo(DataReceiver& dataReceiver);
     ~XciDodo();

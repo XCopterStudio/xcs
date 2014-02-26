@@ -13,7 +13,6 @@
 #include "navdata_parser.hpp"
 #include "options_visitor.hpp"
 #include "xcs/xci/ConnectionErrorException.hpp"
-#include "xcs/xci/parrot/xci_parrot_export.h"
 #include "video_decode.hpp"
 
 #include <boost/asio.hpp>
@@ -31,7 +30,7 @@ namespace parrot{
         FRAME_TYPE_HEADERS
     };
 
-    class XCI_PARROT_EXPORT XCI_Parrot : public virtual XCI {
+    class XCI_Parrot : public virtual XCI {
         // Constant
         static const int PORT_COM;
         static const int PORT_CMD;

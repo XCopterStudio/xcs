@@ -20,7 +20,7 @@ struct VideoParams {
     VideoParams(unsigned int height = 0, unsigned int width = 0, unsigned int videoCodec = 0) : height(height), width(width), videoCodec(videoCodec) {};
 };
 
-class XCS_EXPORT VideoDecoder {
+class VideoDecoder {
     AVCodec* codec_;
     AVCodecContext * context_;
     AVFrame *frame_;
