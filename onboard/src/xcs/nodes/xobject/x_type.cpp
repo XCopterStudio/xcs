@@ -1,4 +1,4 @@
-#include "xtype.hpp"
+#include "x_type.hpp"
 
 using namespace std;
 using namespace xcs::nodes;

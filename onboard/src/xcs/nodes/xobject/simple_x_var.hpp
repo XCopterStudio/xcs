@@ -4,7 +4,7 @@
 #include <string>
 #include <typeinfo>
 #include <urbi/uobject.hh>
-#include "xtype.hpp"
+#include "x_type.hpp"
 #include <xcs/nodes/xobject/xobject_export.h>
 
 namespace xcs {

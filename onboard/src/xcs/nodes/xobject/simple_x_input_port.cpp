@@ -1,4 +1,4 @@
-#include "simple_xinput_port.hpp"
+#include "simple_x_input_port.hpp"
 #include <xcs/exception.hpp>
 
 using namespace urbi;

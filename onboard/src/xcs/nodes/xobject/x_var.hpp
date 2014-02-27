@@ -2,7 +2,7 @@
 #define XVAR_HPP
 
 #include <string>
-#include "simple_xvar.hpp"
+#include "simple_x_var.hpp"
 #include <xcs/nodes/xobject/xobject_export.h>
 
 namespace xcs {

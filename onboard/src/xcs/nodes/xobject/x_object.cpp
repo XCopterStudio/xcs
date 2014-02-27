@@ -1,4 +1,4 @@
-#include "xobject.hpp"
+#include "x_object.hpp"
 #include <urbi/uobject.hh>
 #include <boost/algorithm/string.hpp> //NOTE: must be under XVar.hpp and XcsObject.hpp
 

@@ -2,7 +2,7 @@
 #define XINPUTPORT_HPP
 
 #include <string>
-#include "simple_xinput_port.hpp"
+#include "simple_x_input_port.hpp"
 #include <xcs/nodes/xobject/xobject_export.h>
 
 namespace xcs {

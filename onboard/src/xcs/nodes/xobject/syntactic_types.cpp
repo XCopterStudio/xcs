@@ -1,4 +1,4 @@
-#include "SyntacticTypes.hpp"
+#include "syntactic_types.hpp"
 #include <urbi/uobject.hh>
 
 namespace urbi {

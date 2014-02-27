@@ -1,4 +1,4 @@
-#include "simple_xvar.hpp"
+#include "simple_x_var.hpp"
 #include <xcs/exception.hpp>
 
 using namespace std;

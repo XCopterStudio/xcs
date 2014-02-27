@@ -1,5 +1,5 @@
 /* 
- * File:   SyntacticTypes.hpp
+ * File:   syntactic_types.hpp
  * Author: michal
  *
  * Created on February 25, 2014, 11:17 AM
