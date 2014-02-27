@@ -13,7 +13,7 @@ using namespace xcs::nodes;
  * Constants
  */
 const std::string XciDodo::NAME_ = "Dodo Test Drone";
-uint8_t XciDodo::frames_[XciDodo::VIDEO_LENGTH_][XciDodo::VIDEO_WIDTH_][XciDodo::VIDEO_HEIGHT_][3];
+uint8_t XciDodo::frames_[XciDodo::VIDEO_HEIGHT_][XciDodo::VIDEO_WIDTH_][XciDodo::VIDEO_COLORS_];
 
 const size_t XciDodo::ALIVE_FREQ_ = 1;
 //
@@ -32,7 +32,6 @@ XciDodo::~XciDodo() {
 
 void XciDodo::init() {
     inited_ = true;
-    renderFrames();
     sensorThread_ = move(thread(&XciDodo::sensorGenerator, this));
 }
 
@@ -72,34 +71,18 @@ void XciDodo::sensorGenerator() {
             dataReceiver_.notify("alive", true);
         }
         if (clock % (1000 / VIDEO_FPS_) == 0) {
+            renderFrame<VIDEO_NOISE_>(frameNo);
             BitmapType frame;
             frame.height = VIDEO_HEIGHT_;
             frame.width = VIDEO_WIDTH_;
-            frame.data = const_cast<uint8_t *> (reinterpret_cast<const uint8_t *> (frames_ + frameNo));
+            frame.data = const_cast<uint8_t *> (reinterpret_cast<const uint8_t *> (frames_));
 
             dataReceiver_.notify("video", frame);
-            frameNo = (frameNo++) % VIDEO_LENGTH_;
+            frameNo++;
         }
 
         clock += SENSOR_PERIOD_;
         this_thread::sleep_for(chrono::milliseconds(SENSOR_PERIOD_));
-    }
-}
-
-void XciDodo::renderFrames() {
-    static const size_t width = 3;
-    static const size_t speed = 10;
-
-    for (auto frame = 0; frame < VIDEO_LENGTH_; ++frame) {
-        for (auto x = 0; x < VIDEO_WIDTH_; ++x) {
-            auto linepos = VIDEO_WIDTH_ / 2 + frame * speed;
-            for (auto y = 0; y < VIDEO_WIDTH_; ++y) {
-                auto color = (x >= linepos && x < linepos + width) ? 0 : 255;
-                frames_[frame][x][y][0] = color;
-                frames_[frame][x][y][1] = color;
-                frames_[frame][x][y][2] = color;
-            }
-        }
     }
 }
 
@@ -140,7 +123,7 @@ void XciDodo::stop() {
 
 extern "C" {
 
-XCI* CreateXci(DataReceiver &dataReceiver) {
-    return new XciDodo(dataReceiver);
-}
+    XCI* CreateXci(DataReceiver &dataReceiver) {
+        return new XciDodo(dataReceiver);
+    }
 }

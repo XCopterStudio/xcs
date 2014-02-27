@@ -1,0 +1,5 @@
+var xci = UXci.new("xci_dodo");
+var finder = ULineFinder.new();
+xci.&video >> finder.&video;
+
+xci.xciInit();

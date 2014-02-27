@@ -5,7 +5,12 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cmath>
+#include <cstdlib>
 #include <thread>
+
+#include "basic.hpp"
+
 
 namespace xcs {
 namespace xci {
@@ -61,24 +66,52 @@ private:
 
     static const size_t VIDEO_WIDTH_ = 640;
     static const size_t VIDEO_HEIGHT_ = 480;
-    static const size_t VIDEO_LENGTH_ = 5;
+    static const size_t VIDEO_COLORS_ = 3;
     //! Video FPS (must divisor of 1000/SENSOR_PERIOD_).
     static const size_t VIDEO_FPS_ = 10;
-    static uint8_t frames_[][VIDEO_WIDTH_][VIDEO_HEIGHT_][3];
-    
+    //! Random disturbances on each pixel from [0, 255]
+    static const size_t VIDEO_NOISE_ = 64;
+    static uint8_t frames_[VIDEO_HEIGHT_][VIDEO_WIDTH_][VIDEO_COLORS_];
+
     //! How often alive signal is sent (in Hz) (must divisor of 1000/SENSOR_PERIOD_).
     static const size_t ALIVE_FREQ_;
     //! Period of sensor thread in ms.
     static const size_t SENSOR_PERIOD_;
-    
+
     bool inited_;
     std::thread sensorThread_;
 
     //! Generates dummy data for sensors
     void sensorGenerator();
-    
-    //! Fills frames buffer with dummy frames.
-    void renderFrames();
+
+    /*!
+     * Fills buffer with computed video frame.
+     * It's templated via noise parameter becuasue with noise == 0, compiler might optimize the rand call.
+     */
+    template<int16_t noise>
+    void renderFrame(size_t frameNo) {
+        static const size_t width = 10;
+        static const size_t amplitude = 80;
+        static const double speed = 0.2;
+
+
+        for (auto y = 0; y < VIDEO_HEIGHT_; ++y) {
+            size_t seed = rand();
+            auto linepos = (VIDEO_WIDTH_ / 2) + static_cast<size_t> (amplitude * sin(frameNo * speed));
+            for (auto x = 0; x < VIDEO_WIDTH_; ++x) {
+                int16_t color = (x >= linepos && x < linepos + width) ? 0 : 255;
+                if (noise > 0) {
+                    //color += rand() % (2 * noise) - noise;
+                    // calling rand for each pixel is surprisingly CPU expensive, so we use this hand-made low-entropy random number generator
+                    color += ((x * frameNo * seed + x * linepos * y + frameNo) % 7919) % (2 * noise) - noise;
+                }
+                frames_[y][x][0] = static_cast<uint8_t> (valueInRange<int16_t>(color, 0, 255));
+                frames_[y][x][1] = static_cast<uint8_t> (valueInRange<int16_t>(color, 0, 255));
+                frames_[y][x][2] = static_cast<uint8_t> (valueInRange<int16_t>(color, 0, 255));
+            }
+        }
+    }
+
 };
 }
 }
