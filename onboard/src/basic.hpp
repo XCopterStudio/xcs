@@ -3,37 +3,33 @@
 
 #include <cmath>
 
-//! Check if value is in interval <-range,range> and if not set value to the limits of the interval.
-
 /*!
-	\param value is checked on interval <-range,range>
-	\param range set size of interval it should be positive number
-	\return value from interval if input value is outside of the interval then return one of the interval boundary
-*/
-template <class type>
-type valueInRange(const type value,const type range){
-	type absRange = 0;
+        \param value is checked on interval [\param from, \param to]
+        \param range set size of interval it should be positive number
+        \return value from interval if input value is outside of the interval then return one of the interval boundary
+ */
+template <typename T>
+inline T valueInRange(const T value, const T from, const T to) {
+    return (value < from) ? from :
+            (value > to) ? to :
+            value;
 
-	// make from input range positive number
-	if(range < 0)
-		absRange = -range;
-	else
-		absRange = range;
-
-	// value is smaller then -range
-	if(value < -range){
-		return - range;
-	}else{ // value is greater then -range
-		if(value < range){ // value is greater then -range and smaller then range
-			return value;
-		}else{ // value is greater then range
-			return range; 
-		}
-	}
 }
 
-inline double miliDegreesToRadias(int degrees){
-    return (double)( degrees * M_PI / 180000);
+/*!
+ * Check if value is in interval <-range,range> and if not set value to the limits of the interval.
+
+        \param value is checked on interval <-range,range>
+        \param range set size of interval it should be positive number
+        \return value from interval if input value is outside of the interval then return one of the interval boundary
+ */
+template <typename T>
+inline T valueInRange(const T value, const T range) {
+    return valueInRange(value, -range, range);
+}
+
+inline double miliDegreesToRadias(int degrees) {
+    return (double) (degrees * M_PI / 180000);
 }
 
 #endif
