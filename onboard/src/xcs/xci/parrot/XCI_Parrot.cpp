@@ -1,5 +1,6 @@
 #include <array>
 #include <iostream>
+#include <cstring>
 
 #include "XCI_Parrot.hpp"
 #include "video_encapsulation.h"
@@ -28,7 +29,7 @@ const std::string XCI_Parrot::NAME = "Parrot AR Drone 2.0 XCI";
 
 const int32_t XCI_Parrot::DEFAULT_SEQUENCE_NUMBER = 1;
 
-const unsigned int XCI_Parrot::VIDEO_MAX_SIZE = 1024*1024;
+const unsigned int XCI_Parrot::VIDEO_MAX_SIZE = 1024 * 1024;
 
 // ----------------- Private function --------------- //
 
@@ -103,47 +104,79 @@ void XCI_Parrot::receiveNavData() {
         receiveSize = socketData_->receive(boost::asio::buffer(message, NAVDATA_MAX_SIZE));
         if (navdata->sequence > sequenceNumberData_ && navdata->header == 0x55667788) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
             uint32_t navdataCks = NavdataProcess::computeChecksum(navdata, receiveSize);
-            vector<OptionAcceptor*> options = NavdataProcess::parse(navdata, navdataCks ,receiveSize);
-            if (options.size() > 0){
+            vector<OptionAcceptor*> options = NavdataProcess::parse(navdata, navdataCks, receiveSize);
+            if (options.size() > 0) {
                 processState(navdata->ardrone_state);
                 processNavdata(options);
             }
-            
+
             sequenceNumberData_ = navdata->sequence;
         }
     }
 }
 
 void XCI_Parrot::receiveVideo() {
-    uint8_t* message = new uint8_t[VIDEO_MAX_SIZE];
-    size_t receivedSize;
-    unsigned int index = 0;
-    unsigned int bufferSize = VIDEO_MAX_SIZE;
-    parrot_video_encapsulation_t* videoPacket = nullptr;
- 
-    while (!endAll_){
-        receivedSize = socketVideo_->receive(boost::asio::buffer(&message[index], bufferSize));
-        if (index == 0){
-            videoPacket = (parrot_video_encapsulation_t*) & message[0];
+    const size_t accBufferSize = VIDEO_MAX_SIZE * 2; // magic constant
+    uint8_t* accBuffer = new uint8_t[accBufferSize];
+    uint8_t* accDecoded = accBuffer;
+    uint8_t* accFilled = accBuffer;
+    const uint8_t* accEnd = accBuffer + accBufferSize;
+    typedef parrot_video_encapsulation_t pave_t;
+
+    while (!endAll_) {
+        accFilled += socketVideo_->receive(boost::asio::buffer(accFilled, accEnd - accFilled));
+        // cerr << "Filled\t" << (accFilled - accBuffer) << "\tDecoded\t" << (accDecoded - accBuffer) << endl; TODO remove/create debug macro
+
+        // find last I-frame
+        uint8_t *lastIFrame = nullptr;
+        uint8_t *lastFrame = nullptr;
+        auto it = accDecoded;
+        auto pave = reinterpret_cast<pave_t *> (it);
+        bool completePave = checkPaveSignature(pave->signature) && (it + sizeof (*pave) <= accFilled);
+        bool completeFrame = it + (pave->header_size + pave->payload_size) <= accFilled;
+        while (completePave && completeFrame) {
+            if (pave->frame_type == FRAME_TYPE_I_FRAME || pave->frame_type == FRAME_TYPE_IDR_FRAME || pave->frame_type == FRAME_TYPE_P_FRAME) {
+                lastFrame = it;
+            }
+            if (pave->frame_type == FRAME_TYPE_I_FRAME || pave->frame_type == FRAME_TYPE_IDR_FRAME) { //TODO what is the IDR frame?
+                lastIFrame = it;
+            }
+            it += pave->header_size + pave->payload_size;
+            pave = reinterpret_cast<pave_t *> (it);
+            completePave = checkPaveSignature(pave->signature) && (it + sizeof (*pave) <= accFilled);
+            completeFrame = it + (pave->header_size + pave->payload_size) <= accFilled;
         }
 
-        if ((index + receivedSize) != (videoPacket->header_size + videoPacket->payload_size)){
-            index += receivedSize;
-            bufferSize -= receivedSize;
+        // decode last I-frame or all P-frames
+        if (lastIFrame) {
+            auto framePave = reinterpret_cast<pave_t *> (lastIFrame);
+            AVPacket packet;
+            packet.size = framePave->payload_size;
+            packet.data = lastIFrame + framePave->header_size;
+            accDecoded = lastIFrame + framePave->header_size + framePave->payload_size;
+            //            cerr << "Have I-frame at pos " << (lastIFrame - accBuffer) << ", decoded until " << (accDecoded - accBuffer);
+            //            cerr << "\tBTW sizeof: " << sizeof (*framePave) << " and " << framePave->header_size << endl; //TODO remove/create debug macro
+            if (videoDecoder_.decodeVideo(&packet)) {
 
-            cerr << "Size of packet " << (int)(videoPacket->header_size + videoPacket->payload_size) << "received size" << receivedSize << endl;
-            cerr << "Video slices " << (int)videoPacket->total_slices << endl;
-        }else{
-            index = 0;
-            bufferSize = VIDEO_MAX_SIZE;
+                AVFrame* frame = videoDecoder_.decodedFrame();
+                BitmapType bitmapType;
+                bitmapType.data = frame->data[0];
+                bitmapType.height = frame->height;
+                bitmapType.width = frame->width;
 
-            if (checkPaveSignature(videoPacket->signature) && checkFrameNumberAndType(videoPacket->frame_number, videoPacket->frame_type) && videoPacket->payload_size > 0){
-                frameNumber_ = videoPacket->frame_number;
-
+                dataReceiver_.notify("video", bitmapType);
+            }
+        } else if (lastFrame) {
+            pave_t *framePave = nullptr;
+            for (auto frameIt = accDecoded; frameIt <= lastFrame; frameIt += framePave->header_size + framePave->payload_size) {
+                framePave = reinterpret_cast<pave_t *> (frameIt);
                 AVPacket packet;
-                packet.size = videoPacket->payload_size;
-                packet.data = &message[videoPacket->header_size];
-                if (videoDecoder_.decodeVideo(&packet)){
+                packet.size = framePave->payload_size;
+                packet.data = frameIt + framePave->header_size;
+                accDecoded = frameIt + framePave->header_size + framePave->payload_size;
+                //cerr << "Have P-frame at pos " << (frameIt - accBuffer) << ", decoded until " << (accDecoded - accBuffer) << endl;
+
+                if (videoDecoder_.decodeVideo(&packet)) {
 
                     AVFrame* frame = videoDecoder_.decodedFrame();
                     BitmapType bitmapType;
@@ -152,25 +185,33 @@ void XCI_Parrot::receiveVideo() {
                     bitmapType.width = frame->width;
 
                     dataReceiver_.notify("video", bitmapType);
-
-                    //cerr << "Decoded video frame " << videoPacket->frame_number << endl;
                 }
             }
         }
+
+        // refresh accumulator buffer
+        if (accFilled == accEnd) {
+            //cerr << "!!! Acc buffer full" << endl;
+            size_t undecodedSize = accEnd - accDecoded;
+            assert(undecodedSize <= accDecoded - accBuffer); // we'll not overwrite not-decoded data
+            memcpy(accBuffer, accDecoded, undecodedSize);
+            accFilled = accBuffer + undecodedSize;
+            accDecoded = accBuffer;
+        }
     }
 
-    delete message;
+    delete accBuffer;
 }
 
-bool XCI_Parrot::checkPaveSignature(uint8_t signature[4]){
+bool XCI_Parrot::checkPaveSignature(uint8_t signature[4]) {
     return signature[0] == 'P' && signature[1] == 'a' && signature[2] == 'V' && signature[3] == 'E';
 }
 
-bool XCI_Parrot::checkFrameNumberAndType(uint32_t number, uint8_t frameType){
-    return (frameNumber_+1) == number || frameType == FRAME_TYPE_I_FRAME || frameType == FRAME_TYPE_IDR_FRAME;
+bool XCI_Parrot::checkFrameNumberAndType(uint32_t number, uint8_t frameType) {
+    return (frameNumber_ + 1) == number || frameType == FRAME_TYPE_I_FRAME || frameType == FRAME_TYPE_IDR_FRAME; // TODO test only monotonous increment, not particular value
 }
 
-void XCI_Parrot::connectNavdata(){
+void XCI_Parrot::connectNavdata() {
     // connect to navdata port
     udp::endpoint parrotData(address::from_string("192.168.1.1"), PORT_DATA);
     socketData_ = new udp::socket(io_serviceData_);
@@ -183,20 +224,21 @@ void XCI_Parrot::connectNavdata(){
 };
 
 // function for navdata handling
+
 void XCI_Parrot::initNavdataReceive() {
     // magic
     int32_t flag = 1; // 1 - unicast, 2 - multicast
     socketData_->send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)));
 }
 
-void XCI_Parrot::processState(uint32_t droneState){
+void XCI_Parrot::processState(uint32_t droneState) {
     state_.updateState(droneState);
 
     if (state_.getState(FLAG_ARDRONE_NAVDATA_BOOTSTRAP)) { //test if drone is in BOOTSTRAP MODE
         atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
     }
 
-    if (state_.getState(FLAG_ARDRONE_COMMAND_MASK)){
+    if (state_.getState(FLAG_ARDRONE_COMMAND_MASK)) {
         atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
     }
 
@@ -213,7 +255,7 @@ void XCI_Parrot::processState(uint32_t droneState){
 
 void XCI_Parrot::processNavdata(vector<OptionAcceptor*> &options) {
     OptionVisitor visitor(dataReceiver_);
-    for(auto option : options){
+    for (auto option : options) {
         option->accept(visitor);
         delete option;
     }
@@ -254,7 +296,7 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
     std::array<char, 8192> buf;
     size_t size = socketComm.receive(boost::asio::buffer(buf.data(), buf.size()));
 
-    std::string configuration(&buf[0],size);
+    std::string configuration(&buf[0], size);
 
     return configuration;
 }
@@ -308,17 +350,17 @@ std::string XCI_Parrot::name() {
 SensorList XCI_Parrot::sensorList() {
     SensorList sensorList;
 
-    sensorList.push_back(Sensor("phi","phi"));
-    sensorList.push_back(Sensor("theta","theta"));
-    sensorList.push_back(Sensor("psi","psi"));
-    sensorList.push_back(Sensor("altitude","altitude"));
+    sensorList.push_back(Sensor("phi", "phi"));
+    sensorList.push_back(Sensor("theta", "theta"));
+    sensorList.push_back(Sensor("psi", "psi"));
+    sensorList.push_back(Sensor("altitude", "altitude"));
     sensorList.push_back(Sensor("video", "video"));
 
     return sensorList;
 }
 
 ParameterValueType XCI_Parrot::parameter(ParameterNameType name) {
-    switch(name) {
+    switch (name) {
         case XCI_PARAM_FP_PERSISTENCE:
             return "30";
         default:
@@ -371,11 +413,11 @@ void XCI_Parrot::command(const std::string &command) {
             std::this_thread::sleep_for(std::chrono::milliseconds(25));
         }
     } else if (command == "EmegrencyStop") {
-        if (!state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)){
+        if (!state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)) {
             atCommandQueue_.push(new AtCommandRef(STATE_EMERGENCY));
         }
     } else if (command == "Normal") {
-        if (state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)){
+        if (state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)) {
             atCommandQueue_.push(new AtCommandRef(STATE_NORMAL));
         }
     } else if (command == "Reset") {
@@ -387,12 +429,12 @@ void XCI_Parrot::command(const std::string &command) {
 
 void XCI_Parrot::flyParam(float roll, float pitch, float yaw, float gaz) {
     //printf("Roll %f Pitch %f YAW %f GAZ %f \n", roll,pitch,yaw,gaz);
-    if(std::abs(pitch) < EPSILON && std::abs(roll) < EPSILON){
-        atCommandQueue_.push(new AtCommandPCMD(DroneMove(roll, pitch, yaw, gaz)));    
-    }else{
-        atCommandQueue_.push(new AtCommandPCMD(DroneMove(roll, pitch, yaw, gaz),false,false,true));    
+    if (std::abs(pitch) < EPSILON && std::abs(roll) < EPSILON) {
+        atCommandQueue_.push(new AtCommandPCMD(DroneMove(roll, pitch, yaw, gaz)));
+    } else {
+        atCommandQueue_.push(new AtCommandPCMD(DroneMove(roll, pitch, yaw, gaz), false, false, true));
     }
-    
+
 }
 
 XCI_Parrot::~XCI_Parrot() {
@@ -413,7 +455,8 @@ XCI_Parrot::~XCI_Parrot() {
 }
 
 extern "C" {
-    XCI* CreateXci(DataReceiver &dataReceiver) { 
-        return new XCI_Parrot(dataReceiver); 
+
+    XCI* CreateXci(DataReceiver &dataReceiver) {
+        return new XCI_Parrot(dataReceiver);
     }
 }
