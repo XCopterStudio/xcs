@@ -1,5 +1,21 @@
-var xci = UXci.new("xci_dodo");
-var finder = ULineFinder.new();
-xci.&video >> finder.&video;
+var xci = UXci.new("xci_parrot");
+var f = ULineFinder.new();
+xci.&video >> f.&video;
 
 xci.xciInit();
+
+f.print = function () {
+
+    echo("blurRange          : %s # Has to be ODD number." % this.blurRange);
+    echo("hsvValueRange      : %s " % this.hsvValueRange);
+    echo("cannyT1            : %s " % this.cannyT1);
+    echo("cannyT2            : %s " % this.cannyT2);
+    echo("cannyApertureSize  : %s " % this.blurRange);
+    echo("cannyL2Gradient    : %s " % this.cannyL2Gradient);
+    echo("houghRho           : %s # Higher the value, less straight line are to be detected (Distance resolution of the accumulator in pixels)" % this.houghRho);
+    echo("houghTheta         : %s # Angle resolution of the accumulator in radians" % this.houghTheta);
+    echo("houghT             : %s " % this.houghT);
+    echo("houghMinLength     : %s # Minimum length of line in pixels" % this.houghMinLength);
+    echo("houghMaxGap        : %s # Maximum allowed gap between points on the same line to link them" % this.houghMaxGap);
+
+};

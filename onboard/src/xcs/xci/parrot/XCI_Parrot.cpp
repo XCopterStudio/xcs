@@ -176,16 +176,16 @@ void XCI_Parrot::receiveVideo() {
                 accDecoded = frameIt + framePave->header_size + framePave->payload_size;
                 //cerr << "Have P-frame at pos " << (frameIt - accBuffer) << ", decoded until " << (accDecoded - accBuffer) << endl;
 
-                if (videoDecoder_.decodeVideo(&packet)) {
+//                if (videoDecoder_.decodeVideo(&packet)) {
 
-                    AVFrame* frame = videoDecoder_.decodedFrame();
-                    BitmapType bitmapType;
-                    bitmapType.data = frame->data[0];
-                    bitmapType.height = frame->height;
-                    bitmapType.width = frame->width;
+//                    AVFrame* frame = videoDecoder_.decodedFrame();
+//                    BitmapType bitmapType;
+//                    bitmapType.data = frame->data[0];
+//                    bitmapType.height = frame->height;
+//                    bitmapType.width = frame->width;
 
-                    dataReceiver_.notify("video", bitmapType);
-                }
+//                    dataReceiver_.notify("video", bitmapType);
+//                }
             }
         }
 

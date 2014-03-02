@@ -4,12 +4,46 @@
 using namespace xcs::urbi;
 
 ULineFinder::ULineFinder(const std::string &name) :
-    ::urbi::UObject(name) {
+    ::urbi::UObject(name),
+    blurRange_(5),
+    hsvValueRange_(120),
+    cannyT1_(200),
+    cannyT2_(200),
+    cannyApertureSize_(3),
+    cannyL2Gradient_(false),
+    houghRho_(4),
+    houghTheta_(CV_PI/180),
+    houghT_(70),
+    houghMinLength_(100),
+    houghMaxGap_(40) {
 
     UBindFunction(ULineFinder, init);
 
     UBindVar(ULineFinder, video);
     UNotifyChange(video, &ULineFinder::onChangeVideo);
+
+    UBindVar(ULineFinder, blurRange);
+    UBindVar(ULineFinder, hsvValueRange);
+    UBindVar(ULineFinder, cannyT1);
+    UBindVar(ULineFinder, cannyT2);
+    UBindVar(ULineFinder, cannyApertureSize);
+    UBindVar(ULineFinder, cannyL2Gradient);
+    UBindVar(ULineFinder, houghRho);
+    UBindVar(ULineFinder, houghTheta);
+    UBindVar(ULineFinder, houghT);
+    UBindVar(ULineFinder, houghMinLength);
+    UBindVar(ULineFinder, houghMaxGap);
+    UNotifyChange(blurRange, &ULineFinder::onChangeBlurRange);
+    UNotifyChange(hsvValueRange, &ULineFinder::onChangeHsvValueRange);
+    UNotifyChange(cannyT1, &ULineFinder::onChangeCannyT1);
+    UNotifyChange(cannyT2, &ULineFinder::onChangeCannyT2);
+    UNotifyChange(cannyApertureSize, &ULineFinder::onChangeCannyApertureSize);
+    UNotifyChange(cannyL2Gradient, &ULineFinder::onChangeCannyL2Gradient);
+    UNotifyChange(houghRho, &ULineFinder::onChangeHoughRho);
+    UNotifyChange(houghTheta, &ULineFinder::onChangeHoughTheta);
+    UNotifyChange(houghT, &ULineFinder::onChangeHoughT);
+    UNotifyChange(houghMinLength, &ULineFinder::onChangeHoughMinLength);
+    UNotifyChange(houghMaxGap, &ULineFinder::onChangeHoughMaxGap);
 }
 
 void ULineFinder::init() {
@@ -20,9 +54,22 @@ void ULineFinder::init() {
         std::cout << "NO IMAGE DATA";
     }*/
 
+    blurRange = blurRange_;
+    hsvValueRange = hsvValueRange_;
+    cannyT1 = cannyT1_;
+    cannyT2 = cannyT2_;
+    cannyApertureSize = cannyApertureSize_;
+    cannyL2Gradient = cannyL2Gradient_;
+    houghRho = houghRho_;
+    houghTheta = houghTheta_;
+    houghT = houghT_;
+    houghMinLength = houghMinLength_;
+    houghMaxGap = houghMaxGap_;
+
     cv::namedWindow("Source", cv::WINDOW_AUTOSIZE);
     cv::namedWindow("Blured", cv::WINDOW_AUTOSIZE);
-    cv::namedWindow("HSV->InRange->Canny", cv::WINDOW_AUTOSIZE);
+    cv::namedWindow("HSV->InRange", cv::WINDOW_AUTOSIZE);
+    cv::namedWindow("Canny", cv::WINDOW_AUTOSIZE);
     cv::namedWindow("EdgeMap", cv::WINDOW_AUTOSIZE);
 }
 
@@ -36,21 +83,22 @@ void ULineFinder::onChangeVideo(::urbi::UVar &uvar) {
     cv::imshow("Source", src);
 
     // denoise
-    cv::GaussianBlur(src, mid, cv::Size(5,5), 0, 0);
+    cv::GaussianBlur(src, mid, cv::Size(blurRange_, blurRange_), 0, 0);
     cv::imshow("Blured", mid);
 
     // convert to HSV
     cv::cvtColor(mid, mid, CV_BGR2HSV);
     // highlight ROI (region of interest)
     // value between 0-40
-    cv::inRange(mid, cv::Scalar(0,0,0), cv::Scalar(255,255,40), mid);
+    cv::inRange(mid, cv::Scalar(0,0,0), cv::Scalar(255,255,hsvValueRange_), mid);
+    cv::imshow("HSV->InRange", mid);
     // transform to edge map
-    cv::Canny(mid, mid, 200, 200, 3);
-    cv::imshow("HSV->InRange->Canny", mid);
+    cv::Canny(mid, mid, cannyT1_, cannyT2_, cannyApertureSize_, cannyL2Gradient_);
+    cv::imshow("Canny", mid);
 
     // detect rectangle
     cv::vector<cv::Vec4i> lines;
-    cv::HoughLinesP(mid, lines, 1, CV_PI/180, 70, 30, 10);
+    cv::HoughLinesP(mid, lines, houghRho_, houghTheta_, houghT_, houghMinLength_, houghMaxGap_);
 //    if (lines.size() > 0)
 //        cv::line(src, cv::Point(lines[0][0], lines[0][1]), cv::Point(lines[0][2], lines[0][3]), cv::Scalar(255,0,0), 2, CV_AA);
     for (auto l : lines) {
@@ -59,6 +107,50 @@ void ULineFinder::onChangeVideo(::urbi::UVar &uvar) {
     cv::imshow("EdgeMap", src);
 
     cv::waitKey(20);
+}
+
+void ULineFinder::onChangeBlurRange(int range) {
+    blurRange_ = range;
+}
+
+void ULineFinder::onChangeHsvValueRange(double range) {
+    hsvValueRange_ = range;
+}
+
+void ULineFinder::onChangeCannyT1(double treshhold) {
+    cannyT1_ = treshhold;
+}
+
+void ULineFinder::onChangeCannyT2(double treshhold) {
+    cannyT2_ = treshhold;
+}
+
+void ULineFinder::onChangeCannyApertureSize(int size) {
+    cannyApertureSize_ = size;
+}
+
+void ULineFinder::onChangeCannyL2Gradient(bool hasGradient) {
+    cannyL2Gradient_ = hasGradient;
+}
+
+void ULineFinder::onChangeHoughRho(double rho) {
+    houghRho_ = rho;
+}
+
+void ULineFinder::onChangeHoughTheta(double theta) {
+    houghTheta_ = theta;
+}
+
+void ULineFinder::onChangeHoughT(int treshhold) {
+    houghT_ = treshhold;
+}
+
+void ULineFinder::onChangeHoughMinLength(double length) {
+    houghMinLength_ = length;
+}
+
+void ULineFinder::onChangeHoughMaxGap(double length) {
+    houghMaxGap_ = length;
 }
 
 UStart(ULineFinder);
