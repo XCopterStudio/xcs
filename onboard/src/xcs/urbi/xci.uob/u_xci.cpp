@@ -30,6 +30,8 @@ UXci::UXci(const std::string& name) :
     UBindFunction(UXci, xciInit);
     UBindFunction(UXci, doCommand);
     UBindFunction(UXci, flyParam);
+    UBindFunction(UXci, dumpConfiguration);
+    UBindFunction(UXci, setConfiguration);
 
     UBindVar(UXci, flyParamPersistence);
     UNotifyChange(flyParamPersistence, &UXci::setFlyParamPersistence);
@@ -84,6 +86,14 @@ void UXci::flyParam(double roll, double pitch, double yaw, double gaz) {
     gaz_ = gaz;
     sendFlyParam();
     setFlyParamActive();
+}
+
+void UXci::dumpConfiguration() {
+    xci_->configuration();
+}
+
+void UXci::setConfiguration(const std::string& key, const std::string& value) {
+    xci_->configuration(key, value);
 }
 
 void UXci::onChangeRoll(double roll) {

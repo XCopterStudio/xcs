@@ -45,6 +45,10 @@ public:
 
     void flyParam(double roll = 0, double pitch = 0, double yaw = 0, double gaz = 0);
 
+    void dumpConfiguration();
+
+    void setConfiguration(const std::string &key, const std::string &value);
+
     virtual ~UXci();
 private:
     xcs::xci::XCI* xci_;
