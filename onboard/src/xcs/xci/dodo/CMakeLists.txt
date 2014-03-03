@@ -8,3 +8,8 @@ add_library(${PROJECT_NAME} MODULE ${SOURCES} ${HEADERS})
 
 find_package(UrbiAll)
 use_urbi(${PROJECT_NAME})
+
+find_package(LibAV)
+include_directories(${LIBAV_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${LIBAV_LIBRARIES})
+

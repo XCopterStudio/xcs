@@ -17,7 +17,7 @@ uint8_t XciDodo::frames_[XciDodo::VIDEO_HEIGHT_][XciDodo::VIDEO_WIDTH_][XciDodo:
 
 const size_t XciDodo::ALIVE_FREQ_ = 1;
 //
-const size_t XciDodo::SENSOR_PERIOD_ = 50;
+const size_t XciDodo::SENSOR_PERIOD_ = 20;
 
 /*
  * Implementation
@@ -32,6 +32,7 @@ XciDodo::~XciDodo() {
 
 void XciDodo::init() {
     inited_ = true;
+    videoPlayer_.init("/tmp/video.xcs");
     sensorThread_ = move(thread(&XciDodo::sensorGenerator, this));
 }
 
@@ -71,11 +72,7 @@ void XciDodo::sensorGenerator() {
             dataReceiver_.notify("alive", true);
         }
         if (clock % (1000 / VIDEO_FPS_) == 0) {
-            renderFrame<VIDEO_NOISE_>(frameNo);
-            BitmapType frame;
-            frame.height = VIDEO_HEIGHT_;
-            frame.width = VIDEO_WIDTH_;
-            frame.data = const_cast<uint8_t *> (reinterpret_cast<const uint8_t *> (frames_));
+            BitmapType frame = videoPlayer_.getFrame();
 
             dataReceiver_.notify("video", frame);
             frameNo++;
@@ -83,6 +80,33 @@ void XciDodo::sensorGenerator() {
 
         clock += SENSOR_PERIOD_;
         this_thread::sleep_for(chrono::milliseconds(SENSOR_PERIOD_));
+    }
+}
+
+void XciDodo::renderFrame(size_t frameNo, int16_t noise) {
+    static const size_t width = 10;
+    static const size_t amplitude = 80;
+    static const size_t dash = VIDEO_HEIGHT_ / 8;
+    static const double skewAmplitude = 0.2;
+    static const double speed = 0.1;
+    static const double skewSpeed = 0.1;
+
+    auto lineMiddle = (VIDEO_WIDTH_ / 2) + static_cast<size_t> (amplitude * sin(frameNo * speed));
+    auto skew = skewAmplitude * sin(frameNo * skewSpeed);
+    for (auto y = 0; y < VIDEO_HEIGHT_; ++y) {
+        size_t seed = rand();
+        auto linePos = lineMiddle + skew * y;
+        for (auto x = 0; x < VIDEO_WIDTH_; ++x) {
+            int16_t color = (((y / dash) % 2 == 0) && x >= linePos && x < linePos + width) ? 0 : 255;
+            if (noise > 0) {
+                //color += rand() % (2 * noise) - noise;
+                // calling rand for each pixel is surprisingly CPU expensive, so we use this hand-made low-entropy random number generator
+                color += ((x * frameNo * seed + x * lineMiddle * y + frameNo) % 7919) % (2 * noise) - noise;
+            }
+            frames_[y][x][0] = static_cast<uint8_t> (valueInRange<int16_t>(color, 0, 255));
+            frames_[y][x][1] = static_cast<uint8_t> (valueInRange<int16_t>(color, 0, 255));
+            frames_[y][x][2] = static_cast<uint8_t> (valueInRange<int16_t>(color, 0, 255));
+        }
     }
 }
 
