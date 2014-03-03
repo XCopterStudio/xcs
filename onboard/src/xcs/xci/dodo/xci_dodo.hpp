@@ -85,36 +85,10 @@ private:
     void sensorGenerator();
 
     /*!
-     * Fills buffer with computed video frame.
-     * It's templated via noise parameter becuasue with noise == 0, compiler might optimize the rand call.
+     * Fills buffer with computed video frame.     * 
      */
-    template<int16_t noise>
-    void renderFrame(size_t frameNo) {
-        static const size_t width = 10;
-        static const size_t amplitude = 80;
-        static const size_t dash = VIDEO_HEIGHT_ / 8;
-        static const double skewAmplitude = 0.2;
-        static const double speed = 0.1;
-        static const double skewSpeed = 0.1;
+    void renderFrame(size_t frameNo, int16_t noise);
 
-        auto lineMiddle = (VIDEO_WIDTH_ / 2) + static_cast<size_t> (amplitude * sin(frameNo * speed));
-        auto skew = skewAmplitude * sin(frameNo * skewSpeed);
-        for (auto y = 0; y < VIDEO_HEIGHT_; ++y) {
-            size_t seed = rand();
-            auto linePos = lineMiddle + skew * y;
-            for (auto x = 0; x < VIDEO_WIDTH_; ++x) {
-                int16_t color = (((y / dash) % 2 == 0) && x >= linePos && x < linePos + width) ? 0 : 255;
-                if (noise > 0) {
-                    //color += rand() % (2 * noise) - noise;
-                    // calling rand for each pixel is surprisingly CPU expensive, so we use this hand-made low-entropy random number generator
-                    color += ((x * frameNo * seed + x * lineMiddle * y + frameNo) % 7919) % (2 * noise) - noise;
-                }
-                frames_[y][x][0] = static_cast<uint8_t> (valueInRange<int16_t>(color, 0, 255));
-                frames_[y][x][1] = static_cast<uint8_t> (valueInRange<int16_t>(color, 0, 255));
-                frames_[y][x][2] = static_cast<uint8_t> (valueInRange<int16_t>(color, 0, 255));
-            }
-        }
-    }
 
 };
 }
