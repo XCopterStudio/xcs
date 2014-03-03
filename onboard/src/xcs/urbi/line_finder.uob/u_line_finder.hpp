@@ -1,6 +1,7 @@
 #ifndef U_LINE_FINDER_HPP
 #define U_LINE_FINDER_HPP
 
+#include <vector>
 #include <urbi/uobject.hh>
 
 namespace xcs {
@@ -25,6 +26,9 @@ public:
 
     ULineFinder(const std::string &);
     void init();
+
+    std::vector<int> getLine();
+    std::vector<int> getViewCenter();
 
 private:
     void onChangeVideo(::urbi::UVar &uvar);
@@ -51,6 +55,11 @@ private:
     int houghT_;
     double houghMinLength_;
     double houghMaxGap_;
+
+    std::vector<int> line_;
+    std::vector<int> center_;
+    int imageHeight_;
+    int imageWidth_;
 };
 
 }
