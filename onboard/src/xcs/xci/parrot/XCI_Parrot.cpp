@@ -128,7 +128,9 @@ void XCI_Parrot::receiveVideo() {
     typedef parrot_video_encapsulation_t pave_t;
 
     while (!endAll_) {
+        
         accFilled += socketVideo_->receive(boost::asio::buffer(accFilled, accEnd - accFilled));
+        sendConfig("video:video_channel", "1"); // "1": hori camera, "2": vert camera
         // cerr << "Filled\t" << (accFilled - accBuffer) << "\tDecoded\t" << (accDecoded - accBuffer) << endl; TODO remove/create debug macro
 
         // find last I-frame
@@ -323,8 +325,8 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
 // TODO this is here because of debugging configuration settings
 
 void XCI_Parrot::sendConfig(const std::string& key, const std::string& value) {
-    atCommandQueue_.push(new AtCommandCONFIG_IDS(MC_SESSION_ID, MC_USER_ID, MC_APP_ID));
-    std::this_thread::sleep_for(std::chrono::milliseconds(101));
+//    atCommandQueue_.push(new AtCommandCONFIG_IDS(MC_SESSION_ID, MC_USER_ID, MC_APP_ID));
+//    std::this_thread::sleep_for(std::chrono::milliseconds(101));
     atCommandQueue_.push(new AtCommandCONFIG(key, value));
 }
 
@@ -352,17 +354,18 @@ void XCI_Parrot::init() throw (ConnectionErrorException) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100)); // workaround as Parrot needs some time before another command can be send to it
 
     // initiate multiconfiguration
-    sendConfig("custom:session_id", MC_SESSION_ID);
-    sendConfig("custom:profile_id", MC_USER_ID);
-    sendConfig("custom:application_id", MC_APP_ID);
+//    sendConfig("custom:session_id", MC_SESSION_ID);
+//    sendConfig("custom:profile_id", MC_USER_ID);
+//    sendConfig("custom:application_id", MC_APP_ID);
 
     /*
      * Configure video streaming
      * TODO move to common configuration (with properly designed model), now only for the sake of presentation
      */
-    sendConfig("video:codec_fps", "20"); // any number between 15--30
-    sendConfig("video:video_codec", "129"); // 129: H264_360P_CODEC, 131: H264_7101P_CODEC
-    sendConfig("video:video_channel", "2"); // "1": hori camera, "2": vert camera
+    sendConfig("video:video_channel", "1"); // "1": hori camera, "2": vert camera
+//    sendConfig("video:codec_fps", "20"); // any number between 15--30
+//    sendConfig("video:video_codec", "129"); // 129: H264_360P_CODEC, 131: H264_7101P_CODEC
+    
 
     std::cerr << "After configuration" << std::endl;
 
