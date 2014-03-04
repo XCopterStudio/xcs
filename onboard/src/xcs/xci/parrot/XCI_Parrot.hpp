@@ -47,11 +47,6 @@ class XCI_Parrot : public virtual XCI {
 
     static const unsigned int VIDEO_MAX_SIZE;
 
-    /* Multiconfiguration options (TODO refactor) */
-    static const std::string MC_APP_ID;
-    static const std::string MC_USER_ID;
-    static const std::string MC_SESSION_ID;
-
     // Sequence number for communication with the drone.
     uint32_t sequenceNumberCMD_;
     uint32_t sequenceNumberData_;
@@ -101,8 +96,6 @@ class XCI_Parrot : public virtual XCI {
     void processNavdata(std::vector<OptionAcceptor*> &options);
     NavdataOption* getOption(NavdataOption* ptr, NavdataTag tag);
     std::string downloadConfiguration() throw (ConnectionErrorException);
-
-    void sendConfig(const std::string& key, const std::string& value);
 
 public:
 
