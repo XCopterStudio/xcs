@@ -17,7 +17,7 @@ uint8_t XciDodo::frames_[XciDodo::VIDEO_HEIGHT_][XciDodo::VIDEO_WIDTH_][XciDodo:
 
 const size_t XciDodo::ALIVE_FREQ_ = 1;
 //
-const size_t XciDodo::SENSOR_PERIOD_ = 50;
+const size_t XciDodo::SENSOR_PERIOD_ = 20;
 
 /*
  * Implementation
@@ -32,6 +32,7 @@ XciDodo::~XciDodo() {
 
 void XciDodo::init() {
     inited_ = true;
+    videoPlayer_.init("/tmp/video.xcs");
     sensorThread_ = move(thread(&XciDodo::sensorGenerator, this));
 }
 
@@ -71,11 +72,7 @@ void XciDodo::sensorGenerator() {
             dataReceiver_.notify("alive", true);
         }
         if (clock % (1000 / VIDEO_FPS_) == 0) {
-            renderFrame(frameNo, VIDEO_NOISE_);
-            BitmapType frame;
-            frame.height = VIDEO_HEIGHT_;
-            frame.width = VIDEO_WIDTH_;
-            frame.data = const_cast<uint8_t *> (reinterpret_cast<const uint8_t *> (frames_));
+            BitmapType frame = videoPlayer_.getFrame();
 
             dataReceiver_.notify("video", frame);
             frameNo++;

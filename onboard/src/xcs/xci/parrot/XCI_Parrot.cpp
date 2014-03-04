@@ -31,6 +31,10 @@ const int32_t XCI_Parrot::DEFAULT_SEQUENCE_NUMBER = 1;
 
 const unsigned int XCI_Parrot::VIDEO_MAX_SIZE = 1024 * 1024;
 
+const std::string XCI_Parrot::MC_APP_ID = "01234567";
+const std::string XCI_Parrot::MC_USER_ID = "01234568";
+const std::string XCI_Parrot::MC_SESSION_ID = "01234569";
+
 // ----------------- Private function --------------- //
 
 void XCI_Parrot::initNetwork() {
@@ -124,7 +128,9 @@ void XCI_Parrot::receiveVideo() {
     typedef parrot_video_encapsulation_t pave_t;
 
     while (!endAll_) {
+        
         accFilled += socketVideo_->receive(boost::asio::buffer(accFilled, accEnd - accFilled));
+        sendConfig("video:video_channel", "1"); // "1": hori camera, "2": vert camera
         // cerr << "Filled\t" << (accFilled - accBuffer) << "\tDecoded\t" << (accDecoded - accBuffer) << endl; TODO remove/create debug macro
 
         // find last I-frame
@@ -176,16 +182,16 @@ void XCI_Parrot::receiveVideo() {
                 accDecoded = frameIt + framePave->header_size + framePave->payload_size;
                 //cerr << "Have P-frame at pos " << (frameIt - accBuffer) << ", decoded until " << (accDecoded - accBuffer) << endl;
 
-//                if (videoDecoder_.decodeVideo(&packet)) {
+                //                if (videoDecoder_.decodeVideo(&packet)) {
 
-//                    AVFrame* frame = videoDecoder_.decodedFrame();
-//                    BitmapType bitmapType;
-//                    bitmapType.data = frame->data[0];
-//                    bitmapType.height = frame->height;
-//                    bitmapType.width = frame->width;
+                //                    AVFrame* frame = videoDecoder_.decodedFrame();
+                //                    BitmapType bitmapType;
+                //                    bitmapType.data = frame->data[0];
+                //                    bitmapType.height = frame->height;
+                //                    bitmapType.width = frame->width;
 
-//                    dataReceiver_.notify("video", bitmapType);
-//                }
+                //                    dataReceiver_.notify("video", bitmapType);
+                //                }
             }
         }
 
@@ -293,12 +299,35 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
 
     atCommandQueue_.push(new AtCommandCTRL(STATE_CFG_GET_CONTROL_MODE));
 
+    std::string configuration;
     std::array<char, 8192> buf;
-    size_t size = socketComm.receive(boost::asio::buffer(buf.data(), buf.size()));
+    size_t size(0);
+    size_t tries = 2;
 
-    std::string configuration(&buf[0], size);
+    //    socketComm.async_receive(boost::asio::buffer(buf.data(), buf.size()), [buf](const boost::system::error_code& error, size_t bytes_transferred) {
+    //        std::string stringBuffer(buf.data(), bytes_transferred);
+    //        cerr << "[async] " << stringBuffer << endl;
+    //
+    //    });
+    while (tries > 0 && (size = socketComm.receive(boost::asio::buffer(buf.data(), buf.size())))) {
+        std::string stringBuffer(buf.data(), size);
+        cerr << stringBuffer << endl;
+        configuration += stringBuffer;
+        tries--;
+    }
 
+    cerr << "Downloaded config" << endl;
+    cerr << configuration << endl;
+    cerr << "-------" << endl;
     return configuration;
+}
+
+// TODO this is here because of debugging configuration settings
+
+void XCI_Parrot::sendConfig(const std::string& key, const std::string& value) {
+//    atCommandQueue_.push(new AtCommandCONFIG_IDS(MC_SESSION_ID, MC_USER_ID, MC_APP_ID));
+//    std::this_thread::sleep_for(std::chrono::milliseconds(101));
+    atCommandQueue_.push(new AtCommandCONFIG(key, value));
 }
 
 // ----------------- Public function ---------------- //
@@ -321,8 +350,26 @@ void XCI_Parrot::init() throw (ConnectionErrorException) {
     threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
     threadReceiveNavData_ = std::move(std::thread(&XCI_Parrot::receiveNavData, this));
     threadReceiveVideo_ = std::move(std::thread(&XCI_Parrot::receiveVideo, this));
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // workaround as Parrot needs some time before another command can be send to it
     std::cerr << "After threads" << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // workaround as Parrot needs some time before another command can be send to it
+
+    // initiate multiconfiguration
+//    sendConfig("custom:session_id", MC_SESSION_ID);
+//    sendConfig("custom:profile_id", MC_USER_ID);
+//    sendConfig("custom:application_id", MC_APP_ID);
+
+    /*
+     * Configure video streaming
+     * TODO move to common configuration (with properly designed model), now only for the sake of presentation
+     */
+    sendConfig("video:video_channel", "1"); // "1": hori camera, "2": vert camera
+//    sendConfig("video:codec_fps", "20"); // any number between 15--30
+//    sendConfig("video:video_codec", "129"); // 129: H264_360P_CODEC, 131: H264_7101P_CODEC
+    
+
+    std::cerr << "After configuration" << std::endl;
+
+
 }
 
 void XCI_Parrot::reset() {
@@ -392,7 +439,7 @@ SpecialCMDList XCI_Parrot::specialCMD() {
 }
 
 void XCI_Parrot::configuration(const std::string &key, const std::string &value) {
-    atCommandQueue_.push(new AtCommandCONFIG(key, value));
+    sendConfig(key, value);
 }
 
 void XCI_Parrot::configuration(const InformationMap &configuration) {
@@ -456,7 +503,7 @@ XCI_Parrot::~XCI_Parrot() {
 
 extern "C" {
 
-    XCI* CreateXci(DataReceiver &dataReceiver) {
-        return new XCI_Parrot(dataReceiver);
-    }
+XCI* CreateXci(DataReceiver &dataReceiver) {
+    return new XCI_Parrot(dataReceiver);
+}
 }

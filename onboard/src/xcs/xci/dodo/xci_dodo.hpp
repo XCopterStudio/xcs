@@ -10,6 +10,7 @@
 #include <thread>
 
 #include "basic.hpp"
+#include "video_player.hpp"
 
 
 namespace xcs {
@@ -68,7 +69,7 @@ private:
     static const size_t VIDEO_HEIGHT_ = 480;
     static const size_t VIDEO_COLORS_ = 3;
     //! Video FPS (must divisor of 1000/SENSOR_PERIOD_).
-    static const size_t VIDEO_FPS_ = 10;
+    static const size_t VIDEO_FPS_ = 25;
     //! Random disturbances on each pixel from [0, 255]
     static const size_t VIDEO_NOISE_ = 64;
     static uint8_t frames_[VIDEO_HEIGHT_][VIDEO_WIDTH_][VIDEO_COLORS_];
@@ -80,6 +81,8 @@ private:
 
     bool inited_;
     std::thread sensorThread_;
+
+    VideoPlayer videoPlayer_;
 
     //! Generates dummy data for sensors
     void sensorGenerator();
