@@ -34,29 +34,6 @@ public:
 
 private:
     void onChangeVideo(::urbi::UVar &uvar);
-    void onChangeBlurRange(int range);
-    void onChangeHsvValueRange(double range);
-    void onChangeCannyT1(double treshhold);
-    void onChangeCannyT2(double treshhold);
-    void onChangeCannyApertureSize(int size);
-    void onChangeCannyL2Gradient(bool hasGradient);
-    void onChangeHoughRho(double rho);
-    void onChangeHoughTheta(double theta);
-    void onChangeHoughT(int treshhold);
-    void onChangeHoughMinLength(double length);
-    void onChangeHoughMaxGap(double length);
-
-    int blurRange_;
-    double hsvValueRange_;
-    double cannyT1_;
-    double cannyT2_;
-    int cannyApertureSize_;
-    bool cannyL2Gradient_;
-    double houghRho_;
-    double houghTheta_;
-    int houghT_;
-    double houghMinLength_;
-    double houghMaxGap_;
 
     std::vector<int> line_;
     std::vector<int> center_;
