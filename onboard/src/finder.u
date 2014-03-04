@@ -36,14 +36,13 @@ class Aligner {
     function init(xci, finder) {
         this.xci = xci;
         this.finder = finder;
-
         at (this.troll.leave?) xci.roll = 0;
         at (this.tyaw.leave?) xci.yaw = 0;
     };
 
     function adjustYaw() {
         var tmp;
-        this.tyaw: every(1000ms) {
+        this.tyaw: every(200ms) {
             var line = finder.getLine();
             if (line == [0,0,0,0]) {
                 xci.yaw = 0;
@@ -68,7 +67,7 @@ class Aligner {
         var stabilizationTime = 2s;
         var rollTime = 200ms;
         var rollValue = 0.1;
-        var deviationTh = 10;
+        var deviationTh = 30;
         var angleTh = 0.5;
         this.troll: every(stabilizationTime + rollTime) {
             if (normAngle.abs() > angleTh)
