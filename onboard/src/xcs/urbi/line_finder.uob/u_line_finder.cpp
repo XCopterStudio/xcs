@@ -15,12 +15,17 @@ ULineFinder::ULineFinder(const std::string &name) :
     houghTheta_(CV_PI/180),
     houghT_(70),
     houghMinLength_(100),
-    houghMaxGap_(40) {
+    houghMaxGap_(40),
+    line_(4),
+    center_(2,0) {
 
     UBindFunction(ULineFinder, init);
 
     UBindVar(ULineFinder, video);
     UNotifyChange(video, &ULineFinder::onChangeVideo);
+
+    UBindFunction(ULineFinder, getLine);
+    UBindFunction(ULineFinder, getViewCenter);
 
     UBindVar(ULineFinder, blurRange);
     UBindVar(ULineFinder, hsvValueRange);
@@ -73,9 +78,27 @@ void ULineFinder::init() {
     cv::namedWindow("EdgeMap", cv::WINDOW_AUTOSIZE);
 }
 
+std::vector<int> ULineFinder::getLine() {
+    return line_;
+}
+
+std::vector<int> ULineFinder::getViewCenter() {
+    return center_;
+}
 
 void ULineFinder::onChangeVideo(::urbi::UVar &uvar) {
     ::urbi::UImage image = uvar;
+    // set view center
+    if ((imageHeight_ != image.height) || (imageWidth_ != image.width)) {
+        imageHeight_ = image.height;
+        imageWidth_ = image.width;
+        center_[0] = imageWidth_ / 2;
+        center_[1] = imageHeight_ / 2;
+    }
+
+    /*
+     * Image Processing
+     */
     cv::Mat src(image.height, image.width, CV_8UC3, image.data);
     cv::Mat mid, dst;
 
@@ -104,7 +127,16 @@ void ULineFinder::onChangeVideo(::urbi::UVar &uvar) {
     for (auto l : lines) {
         cv::line(src, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(255,0,0), 2, CV_AA);
     }
+    // compute single vector from lines
+    cv::Vec4i avg = cv::mean(lines);
+    cv::line(src, cv::Point(avg[0], avg[1]), cv::Point(avg[2], avg[3]), cv::Scalar(0,0,255), 3, CV_AA);
+    cv::circle(src, cv::Point(avg[2], avg[3]), 5, cv::Scalar(0,0,255), 3, CV_AA);
     cv::imshow("EdgeMap", src);
+
+    line_[0] = avg[0];
+    line_[1] = avg[1];
+    line_[2] = avg[2];
+    line_[3] = avg[3];
 
     cv::waitKey(20);
 }
