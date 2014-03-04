@@ -60,6 +60,7 @@ private:
     std::vector<int> center_;
     int imageHeight_;
     int imageWidth_;
+    double prevDist_;
 };
 
 }
