@@ -29,6 +29,8 @@ public:
 
     std::vector<int> getLine();
     std::vector<int> getViewCenter();
+    int getImageWidth();
+    int getImageHeight();
 
 private:
     void onChangeVideo(::urbi::UVar &uvar);

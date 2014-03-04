@@ -26,6 +26,8 @@ ULineFinder::ULineFinder(const std::string &name) :
 
     UBindFunction(ULineFinder, getLine);
     UBindFunction(ULineFinder, getViewCenter);
+    UBindFunction(ULineFinder, getImageWidth);
+    UBindFunction(ULineFinder, getImageHeight);
 
     UBindVar(ULineFinder, blurRange);
     UBindVar(ULineFinder, hsvValueRange);
@@ -84,6 +86,14 @@ std::vector<int> ULineFinder::getLine() {
 
 std::vector<int> ULineFinder::getViewCenter() {
     return center_;
+}
+
+int ULineFinder::getImageWidth() {
+    return imageWidth_;
+}
+
+int ULineFinder::getImageHeight() {
+    return imageHeight_;
 }
 
 void ULineFinder::onChangeVideo(::urbi::UVar &uvar) {
