@@ -6,8 +6,7 @@ using namespace xcs::urbi;
 ULineFinder::ULineFinder(const std::string &name) :
   ::urbi::UObject(name),
   line_(4),
-  center_(2, 0),
-  prevDist_(0) {
+  deviation_(0) {
 
     UBindFunction(ULineFinder, init);
 
@@ -15,7 +14,6 @@ ULineFinder::ULineFinder(const std::string &name) :
     UNotifyChange(video, &ULineFinder::onChangeVideo);
 
     UBindFunction(ULineFinder, getLine);
-    UBindFunction(ULineFinder, getViewCenter);
     UBindFunction(ULineFinder, getImageWidth);
     UBindFunction(ULineFinder, getImageHeight);
 
@@ -30,6 +28,7 @@ ULineFinder::ULineFinder(const std::string &name) :
     UBindVar(ULineFinder, houghT);
     UBindVar(ULineFinder, houghMinLength);
     UBindVar(ULineFinder, houghMaxGap);
+    UBindVar(ULineFinder, deviationAging);
 }
 
 void ULineFinder::init() {
@@ -48,6 +47,7 @@ void ULineFinder::init() {
     houghT = 70;
     houghMinLength = 100;
     houghMaxGap = 40;
+    deviationAging = 0.5;
 
     cv::namedWindow("Source", cv::WINDOW_AUTOSIZE);
     cv::namedWindow("Blured", cv::WINDOW_AUTOSIZE);
@@ -60,10 +60,6 @@ std::vector<int> ULineFinder::getLine() {
     return line_;
 }
 
-std::vector<int> ULineFinder::getViewCenter() {
-    return center_;
-}
-
 int ULineFinder::getImageWidth() {
     return imageWidth_;
 }
@@ -72,14 +68,18 @@ int ULineFinder::getImageHeight() {
     return imageHeight_;
 }
 
+double ULineFinder::getDeviation() {
+    return deviation_;
+}
+
 void ULineFinder::onChangeVideo(::urbi::UVar &uvar) {
     ::urbi::UImage image = uvar;
     // set view center
+    cv::Point center(image.width / 2, image.height / 2);
     if ((imageHeight_ != image.height) || (imageWidth_ != image.width)) {
         imageHeight_ = image.height;
         imageWidth_ = image.width;
-        center_[0] = imageWidth_ / 2;
-        center_[1] = imageHeight_ / 2;
+        center = cv::Point(image.width / 2, image.height / 2);
     }
 
     /*
@@ -117,20 +117,20 @@ void ULineFinder::onChangeVideo(::urbi::UVar &uvar) {
 
 
     // find distance from the middle
-    cv::Point middle(image.width / 2, image.height / 2);
-    double dist(prevDist_); // use previous dist
+    double dev(deviation_); // use previous deviation
+    double devAging = static_cast<double> (deviationAging);
     cv::Point norm(avg[3] - avg[1], avg[0] - avg[2]);
     cv::Scalar color;
     if (norm.x == 0 && norm.y == 0) {
         color = cv::Scalar(0, 128, 128);
     } else {
-        color = cv::Scalar(0, 255, 255);
         auto c = -norm.dot(cv::Point(avg[0], avg[1]));
-        prevDist_ = dist = 0.2 * dist + 0.8 * (abs(norm.dot(middle) + c) / hypot(norm.x, norm.y)); // weighted average of current and previous dist
+        deviation_ = dev = (1 - devAging) * dev + devAging * ((norm.dot(center) + c) / hypot(norm.x, norm.y)); // weighted average of current and previous deviation
+        color = (dev > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0);
     }
 
 
-    cv::circle(src, middle, dist, color, 3, CV_AA);
+    cv::circle(src, center, abs(dev), color, 3, CV_AA);
     cv::line(src, cv::Point(avg[0], avg[1]), cv::Point(avg[2], avg[3]), cv::Scalar(0, 0, 255), 3, CV_AA);
     cv::circle(src, cv::Point(avg[2], avg[3]), 5, cv::Scalar(0, 0, 255), 3, CV_AA);
     cv::imshow("EdgeMap", src);
