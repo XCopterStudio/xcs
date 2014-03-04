@@ -1,21 +1,108 @@
-var xci = UXci.new("xci_parrot");
-var f = ULineFinder.new();
-xci.&video >> f.&video;
+ULineFinder.print = function () {
 
-xci.xciInit();
-
-f.print = function () {
-
-    echo("blurRange          : %s # Has to be ODD number." % this.blurRange);
+    echo("blurRange          : %s " % this.blurRange +
+         "# Has to be ODD number.");
     echo("hsvValueRange      : %s " % this.hsvValueRange);
     echo("cannyT1            : %s " % this.cannyT1);
     echo("cannyT2            : %s " % this.cannyT2);
     echo("cannyApertureSize  : %s " % this.blurRange);
     echo("cannyL2Gradient    : %s " % this.cannyL2Gradient);
-    echo("houghRho           : %s # Higher the value, less straight line are to be detected (Distance resolution of the accumulator in pixels)" % this.houghRho);
-    echo("houghTheta         : %s # Angle resolution of the accumulator in radians" % this.houghTheta);
+    echo("houghRho           : %s " % this.houghRho +
+         "# Higher the value, less straight line are to be detected (Distance resolution of the accumulator in pixels).");
+    echo("houghTheta         : %s " % this.houghTheta +
+         "# Angle resolution of the accumulator in radians");
     echo("houghT             : %s " % this.houghT);
-    echo("houghMinLength     : %s # Minimum length of line in pixels" % this.houghMinLength);
-    echo("houghMaxGap        : %s # Maximum allowed gap between points on the same line to link them" % this.houghMaxGap);
+    echo("houghMinLength     : %s " % this.houghMinLength +
+         "# Minimum length of line in pixels");
+    echo("houghMaxGap        : %s " % this.houghMaxGap +
+         "# Maximum allowed gap between points on the same line to link them");
 
-};
+}|;
+
+class Aligner {
+
+    var xci;
+    var finder;
+    var center;
+    var thyaw = 5;
+    var kyaw = 0.8;
+    var kroll = 0.002;
+
+    var tyaw = Tag.new("tyaw");
+    var troll = Tag.new("troll");
+
+    var normAngle = 1;
+
+    function init(xci, finder) {
+        this.xci = xci;
+        this.finder = finder;
+        at (this.troll.leave?) xci.roll = 0;
+        at (this.tyaw.leave?) xci.yaw = 0;
+    };
+
+    function adjustYaw() {
+        var tmp;
+        this.tyaw: every(200ms) {
+            var line = finder.getLine();
+            if (line == [0,0,0,0]) {
+                xci.yaw = 0;
+                continue;
+            };
+            var vector = [line[2] - line[0], line[1] - line[3]];
+            //if (vector[0] >= this.thyaw)
+            {
+                if (vector[1] == 0) // fix division by zero
+                    vector[1] = 1;
+                tmp = vector[0] / vector[1];
+                normAngle = tmp.atan() / (Float.pi/2);
+                xci.yaw = kyaw * normAngle;
+                tmp = kyaw * normAngle;
+                echo("YAW : %s" % tmp);
+            };
+        };
+    };
+
+    function adjustRoll() {
+        var tmp;
+        var stabilizationTime = 2s;
+        var rollTime = 200ms;
+        var rollValue = 0.1;
+        var deviationTh = 30;
+        var angleTh = 0.5;
+        this.troll: every(stabilizationTime + rollTime) {
+            if (normAngle.abs() > angleTh)
+                continue;
+            var line = finder.getLine();
+            if (line == [0,0,0,0])
+                continue;
+            var xmid = (line[0]+line[2])/2;
+            var deviation = xmid - this.finder.getViewCenter()[0];
+            if (-deviationTh < deviation && deviation < deviationTh)
+                continue;
+            {
+                xci.roll = rollValue * Math.sign(deviation); //kroll * deviation;
+                tmp = rollValue * Math.sign(deviation); //kroll * (-1) * deviation;
+                echo("ROLL : %s" % tmp);
+                sleep(rollTime);
+                xci.roll = 0;
+            };
+        };
+    };
+}|;
+
+var xci = UXci.new("xci_dodo");
+var f = ULineFinder.new();
+xci.&video >> f.&video;
+
+xci.xciInit();
+
+// Default values for image processing
+f.hsvValueRange = 50; //20;
+f.houghRho = 1;
+
+var ali = Aligner.new(xci, f);
+// Use adjustYaw and adjustRoll function with ',' for parallel jobs.
+//ali.adjustYaw(),
+//ali.adjustRoll(),
+
+

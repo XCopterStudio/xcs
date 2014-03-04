@@ -130,7 +130,7 @@ xcs::nodes::BitmapType VideoPlayer::getFrame() {
             result.height = avFrame_->height;
             result.width = avFrame_->width;
 
-            cerr << "Dodo frame: " << frameCnt_++ << endl;
+            //cerr << "Dodo frame: " << frameCnt_++ << endl;
             //std::this_thread::sleep_for(std::chrono::milliseconds(200));
             return result;
             // TODO            avpicture_free(&pic);
