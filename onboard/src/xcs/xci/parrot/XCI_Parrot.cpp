@@ -124,80 +124,83 @@ void XCI_Parrot::receiveVideo() {
     typedef parrot_video_encapsulation_t pave_t;
 
     while (!endAll_) {
+        try {
+            accFilled += socketVideo_->receive(boost::asio::buffer(accFilled, accEnd - accFilled));
+            // cerr << "Filled\t" << (accFilled - accBuffer) << "\tDecoded\t" << (accDecoded - accBuffer) << endl; TODO remove/create debug macro
 
-        accFilled += socketVideo_->receive(boost::asio::buffer(accFilled, accEnd - accFilled));
-        // cerr << "Filled\t" << (accFilled - accBuffer) << "\tDecoded\t" << (accDecoded - accBuffer) << endl; TODO remove/create debug macro
-
-        // find last I-frame
-        uint8_t *lastIFrame = nullptr;
-        uint8_t *lastFrame = nullptr;
-        auto it = accDecoded;
-        auto pave = reinterpret_cast<pave_t *> (it);
-        bool completePave = checkPaveSignature(pave->signature) && (it + sizeof (*pave) <= accFilled);
-        bool completeFrame = it + (pave->header_size + pave->payload_size) <= accFilled;
-        while (completePave && completeFrame) {
-            if (pave->frame_type == FRAME_TYPE_I_FRAME || pave->frame_type == FRAME_TYPE_IDR_FRAME || pave->frame_type == FRAME_TYPE_P_FRAME) {
-                lastFrame = it;
+            // find last I-frame
+            uint8_t *lastIFrame = nullptr;
+            uint8_t *lastFrame = nullptr;
+            auto it = accDecoded;
+            auto pave = reinterpret_cast<pave_t *> (it);
+            bool completePave = checkPaveSignature(pave->signature) && (it + sizeof (*pave) <= accFilled);
+            bool completeFrame = it + (pave->header_size + pave->payload_size) <= accFilled;
+            while (completePave && completeFrame) {
+                if (pave->frame_type == FRAME_TYPE_I_FRAME || pave->frame_type == FRAME_TYPE_IDR_FRAME || pave->frame_type == FRAME_TYPE_P_FRAME) {
+                    lastFrame = it;
+                }
+                if (pave->frame_type == FRAME_TYPE_I_FRAME || pave->frame_type == FRAME_TYPE_IDR_FRAME) { //TODO what is the IDR frame?
+                    lastIFrame = it;
+                }
+                it += pave->header_size + pave->payload_size;
+                pave = reinterpret_cast<pave_t *> (it);
+                completePave = checkPaveSignature(pave->signature) && (it + sizeof (*pave) <= accFilled);
+                completeFrame = it + (pave->header_size + pave->payload_size) <= accFilled;
             }
-            if (pave->frame_type == FRAME_TYPE_I_FRAME || pave->frame_type == FRAME_TYPE_IDR_FRAME) { //TODO what is the IDR frame?
-                lastIFrame = it;
-            }
-            it += pave->header_size + pave->payload_size;
-            pave = reinterpret_cast<pave_t *> (it);
-            completePave = checkPaveSignature(pave->signature) && (it + sizeof (*pave) <= accFilled);
-            completeFrame = it + (pave->header_size + pave->payload_size) <= accFilled;
-        }
 
-        // decode last I-frame or all P-frames
-        if (lastIFrame) {
-            auto framePave = reinterpret_cast<pave_t *> (lastIFrame);
-            AVPacket packet;
-            packet.size = framePave->payload_size;
-            packet.data = lastIFrame + framePave->header_size;
-            accDecoded = lastIFrame + framePave->header_size + framePave->payload_size;
-            //            cerr << "Have I-frame at pos " << (lastIFrame - accBuffer) << ", decoded until " << (accDecoded - accBuffer);
-            //            cerr << "\tBTW sizeof: " << sizeof (*framePave) << " and " << framePave->header_size << endl; //TODO remove/create debug macro
-            if (videoDecoder_.decodeVideo(&packet)) {
-
-                AVFrame* frame = videoDecoder_.decodedFrame();
-                BitmapType bitmapType;
-                bitmapType.data = frame->data[0];
-                bitmapType.height = frame->height;
-                bitmapType.width = frame->width;
-
-                dataReceiver_.notify("video", bitmapType);
-            }
-        } else if (lastFrame) {
-            pave_t *framePave = nullptr;
-            for (auto frameIt = accDecoded; frameIt <= lastFrame; frameIt += framePave->header_size + framePave->payload_size) {
-                framePave = reinterpret_cast<pave_t *> (frameIt);
+            // decode last I-frame or all P-frames
+            if (lastIFrame) {
+                auto framePave = reinterpret_cast<pave_t *> (lastIFrame);
                 AVPacket packet;
                 packet.size = framePave->payload_size;
-                packet.data = frameIt + framePave->header_size;
-                accDecoded = frameIt + framePave->header_size + framePave->payload_size;
-                //cerr << "Have P-frame at pos " << (frameIt - accBuffer) << ", decoded until " << (accDecoded - accBuffer) << endl;
+                packet.data = lastIFrame + framePave->header_size;
+                accDecoded = lastIFrame + framePave->header_size + framePave->payload_size;
+                //            cerr << "Have I-frame at pos " << (lastIFrame - accBuffer) << ", decoded until " << (accDecoded - accBuffer);
+                //            cerr << "\tBTW sizeof: " << sizeof (*framePave) << " and " << framePave->header_size << endl; //TODO remove/create debug macro
+                if (videoDecoder_.decodeVideo(&packet)) {
 
-                //                if (videoDecoder_.decodeVideo(&packet)) {
+                    AVFrame* frame = videoDecoder_.decodedFrame();
+                    BitmapType bitmapType;
+                    bitmapType.data = frame->data[0];
+                    bitmapType.height = frame->height;
+                    bitmapType.width = frame->width;
 
-                //                    AVFrame* frame = videoDecoder_.decodedFrame();
-                //                    BitmapType bitmapType;
-                //                    bitmapType.data = frame->data[0];
-                //                    bitmapType.height = frame->height;
-                //                    bitmapType.width = frame->width;
+                    dataReceiver_.notify("video", bitmapType);
+                }
+            } else if (lastFrame) {
+                pave_t *framePave = nullptr;
+                for (auto frameIt = accDecoded; frameIt <= lastFrame; frameIt += framePave->header_size + framePave->payload_size) {
+                    framePave = reinterpret_cast<pave_t *> (frameIt);
+                    AVPacket packet;
+                    packet.size = framePave->payload_size;
+                    packet.data = frameIt + framePave->header_size;
+                    accDecoded = frameIt + framePave->header_size + framePave->payload_size;
+                    //cerr << "Have P-frame at pos " << (frameIt - accBuffer) << ", decoded until " << (accDecoded - accBuffer) << endl;
 
-                //                    dataReceiver_.notify("video", bitmapType);
-                //                }
+                    //                if (videoDecoder_.decodeVideo(&packet)) {
+
+                    //                    AVFrame* frame = videoDecoder_.decodedFrame();
+                    //                    BitmapType bitmapType;
+                    //                    bitmapType.data = frame->data[0];
+                    //                    bitmapType.height = frame->height;
+                    //                    bitmapType.width = frame->width;
+
+                    //                    dataReceiver_.notify("video", bitmapType);
+                    //                }
+                }
             }
-        }
 
-        // refresh accumulator buffer
-        if (accFilled == accEnd) {
-            //cerr << "!!! Acc buffer full" << endl;
-            size_t undecodedSize = accEnd - accDecoded;
-            assert(undecodedSize <= accDecoded - accBuffer); // we'll not overwrite not-decoded data
-            memcpy(accBuffer, accDecoded, undecodedSize);
-            accFilled = accBuffer + undecodedSize;
-            accDecoded = accBuffer;
+            // refresh accumulator buffer
+            if (accFilled == accEnd) {
+                //cerr << "!!! Acc buffer full" << endl;
+                size_t undecodedSize = accEnd - accDecoded;
+                assert(undecodedSize <= accDecoded - accBuffer); // we'll not overwrite not-decoded data
+                memcpy(accBuffer, accDecoded, undecodedSize);
+                accFilled = accBuffer + undecodedSize;
+                accDecoded = accBuffer;
+            }
+        } catch (boost::system::system_error& e) {
+            cerr << "Failed video stream." << endl;
         }
     }
 
