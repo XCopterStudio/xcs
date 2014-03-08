@@ -90,7 +90,8 @@ class Aligner {
     };
 }|;
 
-var xci = UXci.new("xci_dodo");
+//var xci = UXci.new("xci_dodo");
+var xci = UXci.new("xci_parrot");
 var f = ULineFinder.new();
 xci.&video >> f.&video;
 
@@ -100,7 +101,7 @@ xci.xciInit();
 f.hsvValueRange = 50; //20;
 f.houghRho = 1;
 
-var ali = Aligner.new(xci, f);
+//var ali = Aligner.new(xci, f);
 // Use adjustYaw and adjustRoll function with ',' for parallel jobs.
 //ali.adjustYaw(),
 //ali.adjustRoll(),

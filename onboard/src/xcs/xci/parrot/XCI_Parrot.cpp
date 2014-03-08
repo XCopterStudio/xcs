@@ -7,6 +7,9 @@
 #include "video_decode.hpp"
 #include <xcs/nodes/xobject/syntactic_types.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
 
 using namespace std;
 using namespace boost::asio;
@@ -126,7 +129,8 @@ void XCI_Parrot::receiveVideo() {
     while (!endAll_) {
 
         accFilled += socketVideo_->receive(boost::asio::buffer(accFilled, accEnd - accFilled));
-        // cerr << "Filled\t" << (accFilled - accBuffer) << "\tDecoded\t" << (accDecoded - accBuffer) << endl; TODO remove/create debug macro
+        BOOST_LOG_TRIVIAL(trace) << "Filled\t" << (accFilled - accBuffer) << "\tDecoded\t" << (accDecoded - accBuffer) << endl;
+
 
         // find last I-frame
         uint8_t *lastIFrame = nullptr;
@@ -177,22 +181,22 @@ void XCI_Parrot::receiveVideo() {
                 accDecoded = frameIt + framePave->header_size + framePave->payload_size;
                 //cerr << "Have P-frame at pos " << (frameIt - accBuffer) << ", decoded until " << (accDecoded - accBuffer) << endl;
 
-                //                if (videoDecoder_.decodeVideo(&packet)) {
-
-                //                    AVFrame* frame = videoDecoder_.decodedFrame();
-                //                    BitmapType bitmapType;
-                //                    bitmapType.data = frame->data[0];
-                //                    bitmapType.height = frame->height;
-                //                    bitmapType.width = frame->width;
-
-                //                    dataReceiver_.notify("video", bitmapType);
-                //                }
+                BOOST_LOG_TRIVIAL(debug) << "BEG decode P frame";
+                if (videoDecoder_.decodeVideo(&packet)) {
+                    BOOST_LOG_TRIVIAL(debug) << "END decode P frame";
+                    AVFrame* frame = videoDecoder_.decodedFrame();
+                    BitmapType bitmapType;
+                    bitmapType.data = frame->data[0];
+                    bitmapType.height = frame->height;
+                    bitmapType.width = frame->width;
+                    dataReceiver_.notify("video", bitmapType);
+                }
             }
         }
 
         // refresh accumulator buffer
         if (accFilled == accEnd) {
-            //cerr << "!!! Acc buffer full" << endl;
+            BOOST_LOG_TRIVIAL(trace) << "!!! Acc buffer full" << endl;
             size_t undecodedSize = accEnd - accDecoded;
             assert(undecodedSize <= accDecoded - accBuffer); // we'll not overwrite not-decoded data
             memcpy(accBuffer, accDecoded, undecodedSize);
@@ -317,6 +321,10 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
 // ----------------- Public function ---------------- //
 
 void XCI_Parrot::init() throw (ConnectionErrorException) {
+    boost::log::core::get()->set_filter
+            (
+            boost::log::trivial::severity >= boost::log::trivial::debug
+            );
     sequenceNumberCMD_ = DEFAULT_SEQUENCE_NUMBER;
     sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
     frameNumber_ = 0;
@@ -477,7 +485,7 @@ XCI_Parrot::~XCI_Parrot() {
 
 extern "C" {
 
-XCI* CreateXci(DataReceiver &dataReceiver) {
-    return new XCI_Parrot(dataReceiver);
-}
+    XCI* CreateXci(DataReceiver &dataReceiver) {
+        return new XCI_Parrot(dataReceiver);
+    }
 }
