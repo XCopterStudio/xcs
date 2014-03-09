@@ -23,12 +23,13 @@ public:
     ::urbi::UVar houghT;
     ::urbi::UVar houghMinLength;
     ::urbi::UVar houghMaxGap;
+    ::urbi::UVar deviationAging;
 
     ULineFinder(const std::string &);
     void init();
 
     std::vector<int> getLine();
-    std::vector<int> getViewCenter();
+    double getDeviation();
     int getImageWidth();
     int getImageHeight();
 
@@ -36,10 +37,9 @@ private:
     void onChangeVideo(::urbi::UVar &uvar);
 
     std::vector<int> line_;
-    std::vector<int> center_;
     int imageHeight_;
     int imageWidth_;
-    double prevDist_;
+    double deviation_;
 };
 
 }
