@@ -2,7 +2,10 @@
 #define U_LINE_FINDER_HPP
 
 #include <vector>
+#include <cstdint>
 #include <urbi/uobject.hh>
+#include <opencv2/opencv.hpp>
+
 
 namespace xcs {
 namespace urbi {
@@ -28,17 +31,29 @@ public:
     ULineFinder(const std::string &);
     void init();
 
-    std::vector<int> getLine();
-    double getDeviation();
-    int getImageWidth();
-    int getImageHeight();
+    std::vector<int> getLine(); // TODO change to angle UVar
+    double getDeviation(); // TODO change to deviation UVar
+    int getImageWidth(); // TODO remove
+    int getImageHeight(); // TODO remove
 
+    /*!
+     * Urbi period handler
+     */
+    virtual int update();
 private:
+    static const size_t REFRESH_PERIOD;
     void onChangeVideo(::urbi::UVar &uvar);
+    void processFrame();
 
+
+    bool hasFrame_;
+    ::urbi::UImage lastFrame_;
+
+    // processing results
     std::vector<int> line_;
-    int imageHeight_;
-    int imageWidth_;
+    size_t imageHeight_;
+    size_t imageWidth_;
+    cv::Point imageCenter_;
     double deviation_;
 };
 

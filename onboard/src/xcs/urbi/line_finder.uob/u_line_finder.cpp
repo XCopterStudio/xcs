@@ -1,14 +1,14 @@
 #include "u_line_finder.hpp"
-#include <opencv2/opencv.hpp>
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/expressions.hpp>
-
+#include <thread>
+#include <chrono>
 
 using namespace xcs::urbi;
 
+const size_t ULineFinder::REFRESH_PERIOD = 200; // ms
+
 ULineFinder::ULineFinder(const std::string &name) :
   ::urbi::UObject(name),
+  hasFrame_(false),
   line_(4),
   deviation_(0) {
 
@@ -58,6 +58,8 @@ void ULineFinder::init() {
     cv::namedWindow("HSV->InRange", cv::WINDOW_AUTOSIZE);
     cv::namedWindow("Canny", cv::WINDOW_AUTOSIZE);
     cv::namedWindow("EdgeMap", cv::WINDOW_AUTOSIZE);
+
+    USetUpdate(REFRESH_PERIOD);
 }
 
 std::vector<int> ULineFinder::getLine() {
@@ -76,22 +78,35 @@ double ULineFinder::getDeviation() {
     return deviation_;
 }
 
+int ULineFinder::update() {
+    const static size_t waitDelay = 20;
+    processFrame();
+    cv::waitKey(waitDelay); // re-render image windows
+    // emulate arbitrary processing time
+    std::this_thread::sleep_for(std::chrono::milliseconds((REFRESH_PERIOD - waitDelay) / 2));
+}
+
 void ULineFinder::onChangeVideo(::urbi::UVar &uvar) {
-    BOOST_LOG_TRIVIAL(trace) << "onChange entry";
-    ::urbi::UImage image = uvar;
-    // set view center
-    cv::Point center(image.width / 2, image.height / 2);
-    if ((imageHeight_ != image.height) || (imageWidth_ != image.width)) {
-        imageHeight_ = image.height;
-        imageWidth_ = image.width;
-        center = cv::Point(image.width / 2, image.height / 2);
+    lastFrame_ = uvar;
+    hasFrame_ = true;
+    // adapt to different size
+    if ((imageHeight_ != lastFrame_.height) || (imageWidth_ != lastFrame_.width)) {
+        imageHeight_ = lastFrame_.height;
+        imageWidth_ = lastFrame_.width;
+        imageCenter_ = cv::Point(lastFrame_.width / 2, lastFrame_.height / 2);
     }
 
+}
+
+void ULineFinder::processFrame() {
+    if (!hasFrame_) {
+        return;
+    }
     /*
      * Image Processing
      */
-    cv::Mat src(image.height, image.width, CV_8UC3, image.data);
-    cv::Mat mid, dst;
+    cv::Mat src(lastFrame_.height, lastFrame_.width, CV_8UC3, lastFrame_.data);
+    cv::Mat mid;
 
     // show original image
     cv::imshow("Source", src);
@@ -130,12 +145,12 @@ void ULineFinder::onChangeVideo(::urbi::UVar &uvar) {
         color = cv::Scalar(0, 128, 128);
     } else {
         auto c = -norm.dot(cv::Point(avg[0], avg[1]));
-        deviation_ = dev = (1 - devAging) * dev + devAging * ((norm.dot(center) + c) / hypot(norm.x, norm.y)); // weighted average of current and previous deviation
+        deviation_ = dev = (1 - devAging) * dev + devAging * ((norm.dot(imageCenter_) + c) / hypot(norm.x, norm.y)); // weighted average of current and previous deviation
         color = (dev > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0);
     }
 
 
-    cv::circle(src, center, abs(dev), color, 3, CV_AA);
+    cv::circle(src, imageCenter_, abs(dev), color, 3, CV_AA);
     cv::line(src, cv::Point(avg[0], avg[1]), cv::Point(avg[2], avg[3]), cv::Scalar(0, 0, 255), 3, CV_AA);
     cv::circle(src, cv::Point(avg[2], avg[3]), 5, cv::Scalar(0, 0, 255), 3, CV_AA);
     cv::imshow("EdgeMap", src);
@@ -144,10 +159,6 @@ void ULineFinder::onChangeVideo(::urbi::UVar &uvar) {
     line_[1] = avg[1];
     line_[2] = avg[2];
     line_[3] = avg[3];
-    BOOST_LOG_TRIVIAL(trace) << "onChange pre-exit";
-
-    cv::waitKey(1);
-    BOOST_LOG_TRIVIAL(trace) << "onChange exit";
 }
 
 UStart(ULineFinder);

@@ -70,7 +70,7 @@ void UXci::xciInit() {
         flyParamThread_ = move(thread(&UXci::keepFlyParam, this));
         inited_ = true; // TODO check this variable in all commands to the drone
     } else {
-        cerr << "[UXci] already called init." << endl; //TODO general way for runtime warnings
+        cerr << "[UXci] already called init." << endl; //TODO general way for runtime warnings (in Urbi)
     }
 }
 

@@ -119,6 +119,7 @@ void XCI_Parrot::receiveNavData() {
 }
 
 void XCI_Parrot::receiveVideo() {
+    // TODO extract body of tihs method to separate compilation unit
     const size_t accBufferSize = VIDEO_MAX_SIZE * 2; // magic constant
     uint8_t* accBuffer = new uint8_t[accBufferSize];
     uint8_t* accDecoded = accBuffer;
@@ -129,7 +130,6 @@ void XCI_Parrot::receiveVideo() {
     while (!endAll_) {
         try {
             accFilled += socketVideo_->receive(boost::asio::buffer(accFilled, accEnd - accFilled));
-            // cerr << "Filled\t" << (accFilled - accBuffer) << "\tDecoded\t" << (accDecoded - accBuffer) << endl; TODO remove/create debug macro
 
             // find last I-frame
             uint8_t *lastIFrame = nullptr;
@@ -158,8 +158,6 @@ void XCI_Parrot::receiveVideo() {
                 packet.size = framePave->payload_size;
                 packet.data = lastIFrame + framePave->header_size;
                 accDecoded = lastIFrame + framePave->header_size + framePave->payload_size;
-                //            cerr << "Have I-frame at pos " << (lastIFrame - accBuffer) << ", decoded until " << (accDecoded - accBuffer);
-                //            cerr << "\tBTW sizeof: " << sizeof (*framePave) << " and " << framePave->header_size << endl; //TODO remove/create debug macro
                 if (videoDecoder_.decodeVideo(&packet)) {
                     BOOST_LOG_TRIVIAL(trace) << "END decoded I frame";
                     AVFrame* frame = videoDecoder_.decodedFrame();
@@ -178,7 +176,6 @@ void XCI_Parrot::receiveVideo() {
                     packet.size = framePave->payload_size;
                     packet.data = frameIt + framePave->header_size;
                     accDecoded = frameIt + framePave->header_size + framePave->payload_size;
-                    //cerr << "Have P-frame at pos " << (frameIt - accBuffer) << ", decoded until " << (accDecoded - accBuffer) << endl;
 
                     if (videoDecoder_.decodeVideo(&packet)) {
                         BOOST_LOG_TRIVIAL(trace) << "END decode P frame";
@@ -193,7 +190,7 @@ void XCI_Parrot::receiveVideo() {
             }
             // refresh accumulator buffer
             if (accFilled == accEnd) {
-                //cerr << "!!! Acc buffer full" << endl;
+                BOOST_LOG_TRIVIAL(debug) << "Accumulator buffer full.";
                 size_t undecodedSize = accEnd - accDecoded;
                 assert(undecodedSize <= accDecoded - accBuffer); // we'll not overwrite not-decoded data
                 memcpy(accBuffer, accDecoded, undecodedSize);
@@ -323,7 +320,7 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
 void XCI_Parrot::init() throw (ConnectionErrorException) {
     boost::log::core::get()->set_filter
             (
-            boost::log::trivial::severity >= boost::log::trivial::trace
+            boost::log::trivial::severity >= boost::log::trivial::debug
             );
     sequenceNumberCMD_ = DEFAULT_SEQUENCE_NUMBER;
     sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
