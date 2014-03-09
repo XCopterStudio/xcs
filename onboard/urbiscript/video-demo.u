@@ -91,6 +91,7 @@ adapter.start("127.0.0.1", 1234);
 
 // create graph nodes
 var xci = UXci.new("xci_dodo");
+//var xci = UXci.new("xci_parrot");
 var semanticSender = SemanticSender.new(adapter, [
     "altitude" => "altitude",
     "phi" => "phi",
@@ -108,6 +109,7 @@ var flyParamReceiver = SemanticReceiver.new(adapter, [
 ], UJson);
 
 var flashSender = FlashSender.new(adapter, UJson);
+var f = ULineFinder.new();
 
 flashSender.send("Created graph nodes.");
 
@@ -124,17 +126,8 @@ flyParamReceiver.&yaw >> xci.&yaw;
 flyParamReceiver.&gaz >> xci.&gaz;
 flyParamReceiver.&command >> xci.&command;
 
+xci.&video >> f.&video;
+
 flashSender.send("Connected graph nodes.");
 
-// enable/start graph nodes
-
-/*
-xci.xciInit();
-xci.doCommand("TakeOff");
-sleep(3000ms);
-xci.flyParam(0, 0, 0.8, 0);
-sleep(4000ms);
-xci.flyParam(0, 0, 0, 0);
-sleep(3500ms);
-xci.doCommand("Land");
-*/
+// call xci.xciInit() manually!
