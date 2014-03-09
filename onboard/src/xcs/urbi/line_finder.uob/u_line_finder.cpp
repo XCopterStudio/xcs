@@ -1,5 +1,9 @@
 #include "u_line_finder.hpp"
 #include <opencv2/opencv.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+
 
 using namespace xcs::urbi;
 
@@ -73,6 +77,7 @@ int ULineFinder::getImageHeight() {
 }
 
 void ULineFinder::onChangeVideo(::urbi::UVar &uvar) {
+    BOOST_LOG_TRIVIAL(trace) << "onChange entry";
     ::urbi::UImage image = uvar;
     // set view center
     if ((imageHeight_ != image.height) || (imageWidth_ != image.width)) {
@@ -139,8 +144,10 @@ void ULineFinder::onChangeVideo(::urbi::UVar &uvar) {
     line_[1] = avg[1];
     line_[2] = avg[2];
     line_[3] = avg[3];
+    BOOST_LOG_TRIVIAL(trace) << "onChange pre-exit";
 
-    cv::waitKey(20);
+    cv::waitKey(1);
+    BOOST_LOG_TRIVIAL(trace) << "onChange exit";
 }
 
 UStart(ULineFinder);

@@ -129,8 +129,6 @@ void XCI_Parrot::receiveVideo() {
     while (!endAll_) {
 
         accFilled += socketVideo_->receive(boost::asio::buffer(accFilled, accEnd - accFilled));
-        BOOST_LOG_TRIVIAL(trace) << "Filled\t" << (accFilled - accBuffer) << "\tDecoded\t" << (accDecoded - accBuffer) << endl;
-
 
         // find last I-frame
         uint8_t *lastIFrame = nullptr;
@@ -162,7 +160,7 @@ void XCI_Parrot::receiveVideo() {
             //            cerr << "Have I-frame at pos " << (lastIFrame - accBuffer) << ", decoded until " << (accDecoded - accBuffer);
             //            cerr << "\tBTW sizeof: " << sizeof (*framePave) << " and " << framePave->header_size << endl; //TODO remove/create debug macro
             if (videoDecoder_.decodeVideo(&packet)) {
-
+                BOOST_LOG_TRIVIAL(trace) << "END decoded I frame";
                 AVFrame* frame = videoDecoder_.decodedFrame();
                 BitmapType bitmapType;
                 bitmapType.data = frame->data[0];
@@ -181,9 +179,8 @@ void XCI_Parrot::receiveVideo() {
                 accDecoded = frameIt + framePave->header_size + framePave->payload_size;
                 //cerr << "Have P-frame at pos " << (frameIt - accBuffer) << ", decoded until " << (accDecoded - accBuffer) << endl;
 
-                BOOST_LOG_TRIVIAL(debug) << "BEG decode P frame";
                 if (videoDecoder_.decodeVideo(&packet)) {
-                    BOOST_LOG_TRIVIAL(debug) << "END decode P frame";
+                    BOOST_LOG_TRIVIAL(trace) << "END decode P frame";
                     AVFrame* frame = videoDecoder_.decodedFrame();
                     BitmapType bitmapType;
                     bitmapType.data = frame->data[0];
@@ -323,7 +320,7 @@ std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException)
 void XCI_Parrot::init() throw (ConnectionErrorException) {
     boost::log::core::get()->set_filter
             (
-            boost::log::trivial::severity >= boost::log::trivial::debug
+            boost::log::trivial::severity >= boost::log::trivial::trace
             );
     sequenceNumberCMD_ = DEFAULT_SEQUENCE_NUMBER;
     sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
