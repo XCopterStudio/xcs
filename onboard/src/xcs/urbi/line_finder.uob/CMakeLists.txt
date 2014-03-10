@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 2.8) # minimum cmake version for opencv
 set(PROJECT_NAME ulinefinder)
 project(${PROJECT_NAME})
 

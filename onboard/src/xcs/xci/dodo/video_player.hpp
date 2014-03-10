@@ -43,13 +43,15 @@ struct Packet {
     }
 
     ~Packet() {
-        if (packet.data)
+        if (packet.data) {
             av_free_packet(&packet);
+        }
     }
 
     void reset(AVFormatContext* ctxt) {
-        if (packet.data)
+        if (packet.data) {
             av_free_packet(&packet);
+        }
         if (av_read_frame(ctxt, &packet) < 0) {
             packet.data = nullptr;
             packet.size = 0;
@@ -72,6 +74,7 @@ private:
     std::shared_ptr<AVFormatContext> avFormat_;
     std::shared_ptr<AVCodecContext> avVideoCodec_;
     std::shared_ptr<AVFrame> avFrame_;
+    SwsContext *swsContext_;
     size_t offsetInData_;
     AVPicture pic_;
     bool hasPic_;
