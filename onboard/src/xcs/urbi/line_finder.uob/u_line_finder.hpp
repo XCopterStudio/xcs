@@ -28,6 +28,8 @@ public:
     ::urbi::UVar houghMaxGap;
     ::urbi::UVar deviationAging;
 
+    ::urbi::UVar distance;
+
     ULineFinder(const std::string &);
     void init();
 

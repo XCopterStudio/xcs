@@ -1,6 +1,7 @@
 #include "u_line_finder.hpp"
 #include <thread>
 #include <chrono>
+#include <cmath>
 
 using namespace xcs::urbi;
 
@@ -33,6 +34,8 @@ ULineFinder::ULineFinder(const std::string& name) :
     UBindVar(ULineFinder, houghMinLength);
     UBindVar(ULineFinder, houghMaxGap);
     UBindVar(ULineFinder, deviationAging);
+
+    UBindVar(ULineFinder, distance);
 }
 
 void ULineFinder::init() {
@@ -53,8 +56,8 @@ void ULineFinder::init() {
     houghMaxGap = 40;
     deviationAging = 0.5;
 
-    cv::namedWindow("Source", cv::WINDOW_AUTOSIZE);
-    cv::namedWindow("Blured", cv::WINDOW_AUTOSIZE);
+    //cv::namedWindow("Source", cv::WINDOW_AUTOSIZE);
+    //cv::namedWindow("Blured", cv::WINDOW_AUTOSIZE);
     cv::namedWindow("HSV->InRange", cv::WINDOW_AUTOSIZE);
     cv::namedWindow("Canny", cv::WINDOW_AUTOSIZE);
     cv::namedWindow("EdgeMap", cv::WINDOW_AUTOSIZE);
@@ -89,6 +92,7 @@ int ULineFinder::update() {
     return -1;
 }
 
+
 void ULineFinder::onChangeVideo(::urbi::UVar& uvar) {
     lastFrame_ = uvar;
     hasFrame_ = true;
@@ -112,11 +116,11 @@ void ULineFinder::processFrame() {
     cv::Mat mid;
 
     // show original image
-    cv::imshow("Source", src);
+    //cv::imshow("Source", src);
 
     // denoise
     cv::GaussianBlur(src, mid, cv::Size(static_cast<int> (blurRange), static_cast<int> (blurRange)), 0, 0);
-    cv::imshow("Blured", mid);
+    //cv::imshow("Blured", mid);
 
     // convert to HSV
     cv::cvtColor(mid, mid, CV_BGR2HSV);
@@ -153,6 +157,18 @@ void ULineFinder::processFrame() {
         color = (dev > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0);
     }
 
+    distance = deviation_;
+
+    //deviation = deviation_;
+//    if (norm.x != 0) {
+//        double tg1 = atan2(norm.y, norm.x);
+//        double tg2 = atan2(-norm.y, norm.x);
+//        std::cerr << norm.x << " : " << norm.y << std::endl;
+//        std::cerr << tg1 << " ~ " << tg2 << std::endl;
+//        std::cerr << ((tg1 <= tg2) ? tg1 : tg2) << std::endl;
+//    }
+    //double tg2 = atan(-norm.x / norm.y);
+    //std::cout << (tg1 <= tg2) ? tg1 : tg2;
 
     cv::circle(src, imageCenter_, abs(dev), color, 3, CV_AA);
     cv::line(src, cv::Point(avg[0], avg[1]), cv::Point(avg[2], avg[3]), cv::Scalar(0, 0, 255), 3, CV_AA);
