@@ -17,6 +17,20 @@ namespace xcs {
 namespace xci {
 namespace dodo {
 
+/*!
+ * Simple XCI implementation for debugging and testing.
+ * 
+ * Available configuration:
+ *     video:filename -- path to video file
+ *     video:fps      -- approximate FPS of the video
+ * 
+ * Special commands
+ *     Load    loads video file
+ *     Play    starts playing video file
+ *     Pause   pauses playing (no video frames are notified)
+ *     Stop    pause playing and rewinds video file
+ * 
+ */
 class XciDodo : public virtual XCI {
 public:
     XciDodo(DataReceiver& dataReceiver);
@@ -63,35 +77,45 @@ public:
     //! Turns off the engines.
     virtual void stop();
 private:
+
+    enum VideoStatus {
+        /*!
+         */
+        VIDEO_UNLOADED, //! No file was loaded
+        VIDEO_PAUSED, //! File loaded, no frames being rendered
+        VIDEO_PLAYING //! File loaded, render frames
+    };
     static const std::string NAME_;
 
-    static const size_t VIDEO_WIDTH_ = 640;
-    static const size_t VIDEO_HEIGHT_ = 480;
-    static const size_t VIDEO_COLORS_ = 3;
-    //! Video FPS (must divisor of 1000/SENSOR_PERIOD_).
-    static const size_t VIDEO_FPS_ = 25;
-    //! Random disturbances on each pixel from [0, 255]
-    static const size_t VIDEO_NOISE_ = 64;
-    static uint8_t frames_[VIDEO_HEIGHT_][VIDEO_WIDTH_][VIDEO_COLORS_];
 
     //! How often alive signal is sent (in Hz) (must divisor of 1000/SENSOR_PERIOD_).
     static const size_t ALIVE_FREQ_;
     //! Period of sensor thread in ms.
     static const size_t SENSOR_PERIOD_;
 
+    static const std::string CMD_VIDEO_LOAD_;
+    static const std::string CMD_VIDEO_PLAY_;
+    static const std::string CMD_VIDEO_PAUSE_;
+    static const std::string CMD_VIDEO_STOP_;
+    
+    static const SpecialCMDList specialCommands_;
+
     bool inited_;
     std::thread sensorThread_;
 
+    //! Video FPS (must divisor of 1000/SENSOR_PERIOD_).
+    size_t videoFps_;
+
     VideoPlayer videoPlayer_;
+
+    VideoStatus videoStatus_;
+
+    static const std::string CONFIG_VIDEO_FILENAME;
+    static const std::string CONFIG_VIDEO_FPS;
+    InformationMap configuration_;
 
     //! Generates dummy data for sensors
     void sensorGenerator();
-
-    /*!
-     * Fills buffer with computed video frame.     * 
-     */
-    void renderFrame(size_t frameNo, int16_t noise);
-
 
 };
 }

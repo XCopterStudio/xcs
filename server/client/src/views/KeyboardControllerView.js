@@ -15,8 +15,8 @@ var KeyboardControllerView = Backbone.View.extend({
 	this.keyMap = {
 		65: { action: this.model.setRoll, value: -0.2 }, // A
 		68: { action: this.model.setRoll, value: 0.2 }, // D
-		83: { action: this.model.setPitch, value: -0.2 }, // S
-		87: { action: this.model.setPitch, value: 0.2 }, // W
+		83: { action: this.model.setPitch, value: 0.2 }, // S
+		87: { action: this.model.setPitch, value: -0.2 }, // W
 		37: { action: this.model.setYaw, value: -1.0 }, // left
 		39: { action: this.model.setYaw, value: 1.0 }, // right
 		38: { action: this.model.setGaz, value: 0.2 }, // up

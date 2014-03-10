@@ -23,7 +23,7 @@ XVar<synT>::XVar(const std::string& semT) :
 template<class synT>
 XVar<synT>::XVar(const std::string& semT, const synT defVal) :
     SimpleXVar(typeid(synT), semT) {
-    XVar::operator= defVal;
+    XVar::operator= (defVal);
 }
 
 template<class synT>
