@@ -80,6 +80,78 @@ class SemanticReceiver {
     };
 }|;
 
+
+class Aligner {
+
+    var xci;
+    var finder;
+    var center;
+    var thyaw = 5;
+    var kyaw = 0.8;
+    var kroll = 0.002;
+
+    var tyaw = Tag.new("tyaw");
+    var troll = Tag.new("troll");
+
+    var normAngle = 1;
+
+    function init(xci, finder) {
+        this.xci = xci;
+        this.finder = finder;
+        at (this.troll.leave?) xci.roll = 0;
+        at (this.tyaw.leave?) xci.yaw = 0;
+    };
+
+    function adjustYaw() {
+        var tmp;
+        this.tyaw: every(200ms) {
+            var line = finder.getLine();
+            if (line == [0,0,0,0]) {
+                xci.yaw = 0;
+                continue;
+            };
+            var vector = [line[2] - line[0], line[1] - line[3]];
+            //if (vector[0] >= this.thyaw)
+            {
+                if (vector[1] == 0) // fix division by zero
+                    vector[1] = 1;
+                tmp = vector[0] / vector[1];
+                normAngle = tmp.atan() / (Float.pi/2);
+                xci.yaw = kyaw * normAngle;
+                tmp = kyaw * normAngle;
+                echo("YAW : %s" % tmp);
+            };
+        };
+    };
+
+    function adjustRoll() {
+        var tmp;
+        var stabilizationTime = 2s;
+        var rollTime = 200ms;
+        var rollValue = 0.1;
+        var deviationTh = 30;
+        var angleTh = 0.5;
+        this.troll: every(stabilizationTime + rollTime) {
+            if (normAngle.abs() > angleTh)
+                continue;
+            var line = finder.getLine();
+            if (line == [0,0,0,0])
+                continue;
+            var deviation = this.finder.getDeviation();
+            if (-deviationTh < deviation && deviation < deviationTh)
+                continue;
+            {
+                xci.roll = rollValue * Math.sign(deviation); //kroll * deviation;
+                tmp = rollValue * Math.sign(deviation); //kroll * (-1) * deviation;
+                echo("ROLL : %s" % tmp);
+                sleep(rollTime);
+                xci.roll = 0;
+            };
+        };
+    };
+}|;
+
+
 /*
  * Dataflow graph
  */
@@ -90,8 +162,8 @@ var adapter = Adapter.new();
 adapter.start("127.0.0.1", 1234);
 
 // create graph nodes
-var xci = UXci.new("xci_dodo");
-//var xci = UXci.new("xci_parrot");
+var xci = XXci.new("xci_dodo");
+//var xci = XXci.new("xci_parrot");
 var semanticSender = SemanticSender.new(adapter, [
     "altitude" => "altitude",
     "phi" => "phi",
@@ -130,4 +202,20 @@ xci.&video >> f.&video;
 
 flashSender.send("Connected graph nodes.");
 
-// call xci.xciInit() manually!
+xci.xciInit();
+// special command of Dodo
+xci.setConfiguration("video:filename", "/tmp/video.xcs");
+xci.doCommand("Load");
+xci.doCommand("Play");
+
+var ali = Aligner.new(xci, f);
+
+//ali.adjustYaw();
+
+
+ttag: every(1000ms) {
+    echo("A: 1000ms");
+};
+
+echo("after");
+

@@ -188,7 +188,7 @@ void XCI_Parrot::receiveVideo() {
                 accDecoded = accBuffer;
             }
         } catch (boost::system::system_error& e) {
-            BOOST_LOG_TRIVIAL(error) << "Failed video stream.";
+            BOOST_LOG_TRIVIAL(error) << "Failed video stream." << endl << e.what();
         }
     }
 

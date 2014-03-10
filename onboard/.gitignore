@@ -2,3 +2,4 @@
 nbproject
 build/*
 !build/.placeholder
+*/CMakeLists.txt.user
