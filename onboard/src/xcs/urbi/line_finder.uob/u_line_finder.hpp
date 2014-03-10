@@ -2,7 +2,10 @@
 #define U_LINE_FINDER_HPP
 
 #include <vector>
+#include <cstdint>
 #include <urbi/uobject.hh>
+#include <opencv2/opencv.hpp>
+
 
 namespace xcs {
 namespace urbi {
@@ -23,45 +26,35 @@ public:
     ::urbi::UVar houghT;
     ::urbi::UVar houghMinLength;
     ::urbi::UVar houghMaxGap;
+    ::urbi::UVar deviationAging;
 
     ULineFinder(const std::string &);
     void init();
 
-    std::vector<int> getLine();
-    std::vector<int> getViewCenter();
-    int getImageWidth();
-    int getImageHeight();
+    std::vector<int> getLine(); // TODO change to angle UVar
+    double getDeviation(); // TODO change to deviation UVar
+    int getImageWidth(); // TODO remove
+    int getImageHeight(); // TODO remove
 
+    /*!
+     * Urbi period handler
+     */
+    virtual int update();
 private:
+    static const size_t REFRESH_PERIOD;
     void onChangeVideo(::urbi::UVar &uvar);
-    void onChangeBlurRange(int range);
-    void onChangeHsvValueRange(double range);
-    void onChangeCannyT1(double treshhold);
-    void onChangeCannyT2(double treshhold);
-    void onChangeCannyApertureSize(int size);
-    void onChangeCannyL2Gradient(bool hasGradient);
-    void onChangeHoughRho(double rho);
-    void onChangeHoughTheta(double theta);
-    void onChangeHoughT(int treshhold);
-    void onChangeHoughMinLength(double length);
-    void onChangeHoughMaxGap(double length);
+    void processFrame();
 
-    int blurRange_;
-    double hsvValueRange_;
-    double cannyT1_;
-    double cannyT2_;
-    int cannyApertureSize_;
-    bool cannyL2Gradient_;
-    double houghRho_;
-    double houghTheta_;
-    int houghT_;
-    double houghMinLength_;
-    double houghMaxGap_;
 
+    bool hasFrame_;
+    ::urbi::UImage lastFrame_;
+
+    // processing results
     std::vector<int> line_;
-    std::vector<int> center_;
-    int imageHeight_;
-    int imageWidth_;
+    size_t imageHeight_;
+    size_t imageWidth_;
+    cv::Point imageCenter_;
+    double deviation_;
 };
 
 }

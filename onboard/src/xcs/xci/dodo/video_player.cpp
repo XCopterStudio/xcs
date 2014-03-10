@@ -91,7 +91,8 @@ void VideoPlayer::init(const string &filename) {
 
 xcs::nodes::BitmapType VideoPlayer::getFrame() {
     Packet packet_;
-
+    size_t failCounter = 0;
+    
     do {
         while (1) {
             packet_.reset(avFormat_.get());
@@ -140,9 +141,13 @@ xcs::nodes::BitmapType VideoPlayer::getFrame() {
             //            const auto msToWait = avVideoCodec_->ticks_per_frame * 1000 * avVideoCodec_->time_base.num / avVideoCodec_->time_base.den;
 
         }
+        failCounter++;
 
         //rewind video
-        av_seek_frame(avFormat_.get(), videoStreamIndex_, 0, 0);
+        if(failCounter > 100) { // workaround for corrupted frames in stream
+            av_seek_frame(avFormat_.get(), videoStreamIndex_, 0, 0);
+            failCounter = 0;
+        }
     } while (1);
 
     assert(false); // we should never get here
