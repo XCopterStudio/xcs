@@ -8,10 +8,11 @@ using namespace xcs::urbi;
 const size_t ULineFinder::REFRESH_PERIOD = 100; // ms
 
 ULineFinder::ULineFinder(const std::string& name) :
-    ::urbi::UObject(name),
-     hasFrame_(false),
-     distance_(0) {
-
+  ::urbi::UObject(name),
+  hasFrame_(false),
+  lastReceivedFrameNo_(1), // must be greater than lastProcessedFrame_ at the beginning
+  lastProcessedFrameNo_(0),
+  distance_(0) {
     UBindFunction(ULineFinder, init);
 
     UBindVar(ULineFinder, video);
@@ -57,7 +58,7 @@ void ULineFinder::init() {
      */
     distance = 0;
     deviation = 0;
-    line = std::vector<int>(4,0);
+    line = std::vector<int>(4, 0);
 
     cv::namedWindow("HSV->InRange", cv::WINDOW_AUTOSIZE);
     cv::namedWindow("Canny", cv::WINDOW_AUTOSIZE);
@@ -80,6 +81,7 @@ int ULineFinder::update() {
 void ULineFinder::onChangeVideo(::urbi::UVar& uvar) {
     lastFrame_ = uvar;
     hasFrame_ = true;
+    lastReceivedFrameNo_ += 1;
     // adapt to different size
     if ((imageHeight_ != lastFrame_.height) || (imageWidth_ != lastFrame_.width)) {
         imageHeight_ = lastFrame_.height;
@@ -90,9 +92,10 @@ void ULineFinder::onChangeVideo(::urbi::UVar& uvar) {
 }
 
 void ULineFinder::processFrame() {
-    if (!hasFrame_) {
+    if (!hasFrame_ || lastProcessedFrameNo_ >= lastReceivedFrameNo_) {
         return;
     }
+    lastProcessedFrameNo_ = lastReceivedFrameNo_;
     /*
      * Image Processing
      */
@@ -137,8 +140,7 @@ void ULineFinder::processFrame() {
     cv::Scalar color;
     if (norm.x == 0 && norm.y == 0) {
         color = cv::Scalar(0, 128, 128);
-    }
-    else {
+    } else {
         auto c = -norm.dot(cv::Point(avg[0], avg[1]));
         distance_ = dev = (1 - devAging) * dev + devAging * ((norm.dot(imageCenter_) + c) / hypot(norm.x, norm.y)); // weighted average of current and previous deviation
         color = (dev > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0);
@@ -157,7 +159,7 @@ void ULineFinder::processFrame() {
     distance = distance_;
 
     if (norm.x != 0) {
-        deviation = atan(norm.y/norm.x);
+        deviation = atan(norm.y / norm.x);
     }
 
 

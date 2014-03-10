@@ -51,6 +51,8 @@ private:
 
     bool hasFrame_;
     ::urbi::UImage lastFrame_;
+    size_t lastReceivedFrameNo_;
+    size_t lastProcessedFrameNo_;
 
     // processing results
     size_t imageHeight_;
