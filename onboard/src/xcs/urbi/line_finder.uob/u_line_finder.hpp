@@ -15,6 +15,9 @@ public:
 
     ::urbi::InputPort video;
 
+    /*!
+     * Image processing params
+     */
     ::urbi::UVar blurRange;
     ::urbi::UVar hsvValueRange;
     ::urbi::UVar cannyT1;
@@ -26,17 +29,16 @@ public:
     ::urbi::UVar houghT;
     ::urbi::UVar houghMinLength;
     ::urbi::UVar houghMaxGap;
-    ::urbi::UVar deviationAging;
-
+    ::urbi::UVar distanceAging;
+    /*!
+     * Output params
+     */
     ::urbi::UVar distance;
+    ::urbi::UVar deviation;
+    ::urbi::UVar line;
 
     ULineFinder(const std::string &);
     void init();
-
-    std::vector<int> getLine(); // TODO change to angle UVar
-    double getDeviation(); // TODO change to deviation UVar
-    int getImageWidth(); // TODO remove
-    int getImageHeight(); // TODO remove
 
     /*!
      * Urbi period handler
@@ -47,16 +49,14 @@ private:
     void onChangeVideo(::urbi::UVar &uvar);
     void processFrame();
 
-
     bool hasFrame_;
     ::urbi::UImage lastFrame_;
 
     // processing results
-    std::vector<int> line_;
     size_t imageHeight_;
     size_t imageWidth_;
     cv::Point imageCenter_;
-    double deviation_;
+    double distance_;
 };
 
 }
