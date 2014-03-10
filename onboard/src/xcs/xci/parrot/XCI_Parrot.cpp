@@ -346,7 +346,7 @@ void XCI_Parrot::init() throw (ConnectionErrorException) {
      * Configure video streaming
      * TODO move to common configuration (with properly designed model), now only for the sake of presentation
      */
-    configuration("video:video_channel", "1"); // "1": hori camera, "2": vert camera !!! hori is bottom camera !!!
+    //configuration("video:video_channel", "1"); // "1": hori camera, "2": vert camera !!! hori is bottom camera !!!
 
     std::cerr << "After configuration" << std::endl;
 }

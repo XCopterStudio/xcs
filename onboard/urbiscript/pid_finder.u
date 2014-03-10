@@ -1,0 +1,84 @@
+class PIDParams{
+    var p = 0.0;
+    var i = 0.0;
+    var d = 0.0;
+    var sumI = 0.0;
+    var lastValue = 0.0;
+  
+    function init(p,i,d){
+        this.p = p;
+        this.i = i;
+        this.d = d;
+    };
+}|;
+
+class Aligner{
+
+    var xci;
+    var finder;
+    var rollPIDParam;
+    var yawPIDParam;
+    var tyaw = Tag.new("tyaw");
+    var troll = Tag.new("troll"); 
+
+    function init(xci, finder, rollPIDParam, yawPIDParam) {
+        this.xci = xci;
+        this.finder = finder;
+        this.rollPIDParam = rollPIDParam;
+        this.yawPIDParam = yawPIDParam;
+    };
+
+    function PIDLoop(pidParams, value){
+    pidParams.sumI += value;
+    var derivation = value - pidParams.lastValue;
+    pidParams.lastValue = value;
+  
+    return pidParams.p*value + pidParams.i*pidParams.sumI + pidParams.d*derivation; 
+    };
+
+    function adjustRoll(){
+        var that = this;
+        this.troll: every(100ms){ 
+            var distance = finder.distance / 640;
+            var roll = PIDLoop(rollPIDParam,distance);
+            echo(roll);
+            //xci.roll = roll; 
+        },
+    };
+
+    function adjustYaw(){
+        this.tyaw: every(100ms){
+           //var deviation = finder.getDeviation();
+           var deviation = 0;
+           var yaw = PIDLoop(yawPIDParam,deviation);
+           echo(yaw);
+           //xci.yaw = yaw; 
+        },
+    };
+}|;
+
+/*
+ * Dataflow graph
+ */
+ 
+//var xci = XXci.new("xci_dodo");
+var xci = XXci.new("xci_parrot");
+var f = ULineFinder.new();
+xci.&video >> f.&video;
+
+// Default values for image processing
+f.hsvValueRange = 50; //20;
+f.houghRho = 1;
+
+xci.xciInit();
+xci.setConfiguration("video:video_channel", "1");
+//xci.command = "TakeOff";
+
+var rollPIDParam = PIDParams.new(1,0,0);
+var yawPIDParam = PIDParams.new(0,0,0);
+var aligner = Aligner.new(xci,f,rollPIDParam,yawPIDParam);
+//aligner.adjustRoll() , aligner.adjustYaw();
+aligner.adjustRoll(),;
+
+
+
