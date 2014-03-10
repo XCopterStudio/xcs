@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <string>
 #include <boost/log/trivial.hpp>
 
 #include <xcs/xci/data_receiver.hpp>
@@ -40,7 +41,7 @@ const SpecialCMDList XciDodo::specialCommands_({
  */
 XciDodo::XciDodo(DataReceiver& dataReceiver) :
   XCI(dataReceiver),
-  videoFps_(15),
+  videoFps_(10),
   videoStatus_(VIDEO_UNLOADED) {
 
 }
@@ -52,6 +53,7 @@ XciDodo::~XciDodo() {
 void XciDodo::init() {
     inited_ = true;
     sensorThread_ = move(thread(&XciDodo::sensorGenerator, this));
+    configuration(CONFIG_VIDEO_FPS, to_string(videoFps_)); // back-propagation of default value
 }
 
 std::string XciDodo::name() {

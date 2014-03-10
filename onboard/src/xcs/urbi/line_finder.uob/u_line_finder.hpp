@@ -19,6 +19,7 @@ public:
      * Image processing params
      */
     ::urbi::UVar blurRange;
+    ::urbi::UVar autoHsvValueRange;
     ::urbi::UVar hsvValueRange;
     ::urbi::UVar cannyT1;
     ::urbi::UVar cannyT2;
@@ -47,6 +48,7 @@ public:
 private:
     static const size_t REFRESH_PERIOD;
     void onChangeVideo(::urbi::UVar &uvar);
+    void adjustFrame(cv::Mat image);
     void processFrame();
 
     bool hasFrame_;
