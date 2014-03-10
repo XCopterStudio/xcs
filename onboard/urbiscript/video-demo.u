@@ -210,12 +210,5 @@ xci.doCommand("Play");
 
 var ali = Aligner.new(xci, f);
 
-//ali.adjustYaw();
 
-
-ttag: every(1000ms) {
-    echo("A: 1000ms");
-};
-
-echo("after");
 

@@ -4,10 +4,11 @@
 #include <cmath>
 
 using namespace xcs::urbi;
+using namespace std;
 
 const size_t ULineFinder::REFRESH_PERIOD = 100; // ms
 
-ULineFinder::ULineFinder(const std::string& name) :
+ULineFinder::ULineFinder(const string& name) :
   ::urbi::UObject(name),
   hasFrame_(false),
   lastReceivedFrameNo_(1), // must be greater than lastProcessedFrame_ at the beginning
@@ -19,6 +20,7 @@ ULineFinder::ULineFinder(const std::string& name) :
     UNotifyChange(video, &ULineFinder::onChangeVideo);
 
     UBindVar(ULineFinder, blurRange);
+    UBindVar(ULineFinder, autoHsvValueRange);
     UBindVar(ULineFinder, hsvValueRange);
     UBindVar(ULineFinder, cannyT1);
     UBindVar(ULineFinder, cannyT2);
@@ -38,11 +40,12 @@ ULineFinder::ULineFinder(const std::string& name) :
 }
 
 void ULineFinder::init() {
-    std::cout << "Initing";
+    cout << "Initing";
     /*
      * Set default parameters
      */
     blurRange = 5;
+    autoHsvValueRange = false; //TODO change to true when debugged
     hsvValueRange = 120;
     cannyT1 = 200;
     cannyT2 = 200;
@@ -59,7 +62,7 @@ void ULineFinder::init() {
      */
     distance = 0;
     deviation = 0;
-    line = std::vector<int>(4, 0);
+    line = vector<int>(4, 0);
     hasLine = false;
 
     cv::namedWindow("HSV->InRange", cv::WINDOW_AUTOSIZE);
@@ -90,6 +93,14 @@ void ULineFinder::onChangeVideo(::urbi::UVar& uvar) {
 
 }
 
+void ULineFinder::adjustFrame(cv::Mat image) {
+    if (!static_cast<bool> (autoHsvValueRange)) {
+        return;
+    }
+    cv::Scalar mean = cv::mean(image);
+    cerr << "Mean: " << mean << ", " << endl;
+}
+
 void ULineFinder::processFrame() {
     if (!hasFrame_ || lastProcessedFrameNo_ >= lastReceivedFrameNo_) {
         return;
@@ -100,6 +111,8 @@ void ULineFinder::processFrame() {
      */
     cv::Mat src(lastFrame_.height, lastFrame_.width, CV_8UC3, lastFrame_.data);
     cv::Mat mid;
+
+    //adjustFrame(src);
 
     /*
      * 1. Denoise

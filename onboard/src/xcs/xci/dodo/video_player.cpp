@@ -20,7 +20,7 @@ using namespace std;
 using namespace xcs::nodes;
 using namespace xcs::xci::dodo;
 
-VideoPlayer::VideoPlayer() : hasPic_(false) {
+VideoPlayer::VideoPlayer() : swsContext_(nullptr), hasPic_(false) {
 
 }
 
@@ -103,11 +103,6 @@ xcs::nodes::BitmapType VideoPlayer::getFrame() {
             }
         }
 
-        // preparing the packet that we will send to libavcodec
-        //        AVPacket packetToSend;
-        //        packetToSend.data = packet_.packet.data + offsetInData_;
-        //        packetToSend.size = packet_.packet.size - offsetInData_;
-        //        cerr << "Sending " << (void*) packetToSend.data << ", size: " << packetToSend.size << endl;
         // sending data to libavcodec
         int isFrameAvailable = 0;
         const auto processedLength = avcodec_decode_video2(avVideoCodec_.get(), avFrame_.get(), &isFrameAvailable, &packet_.packet);
@@ -123,10 +118,12 @@ xcs::nodes::BitmapType VideoPlayer::getFrame() {
                 avpicture_alloc(&pic_, PIX_FMT_RGB24, avFrame_->width, avFrame_->height);
                 hasPic_ = true;
             }
-            auto ctxt = sws_getContext(avFrame_->width, avFrame_->height, static_cast<PixelFormat> (avFrame_->format), avFrame_->width, avFrame_->height, PIX_FMT_RGB24, SWS_BILINEAR, nullptr, nullptr, nullptr);
-            if (ctxt == nullptr)
+            swsContext_ = sws_getCachedContext(swsContext_, avFrame_->width, avFrame_->height, static_cast<PixelFormat> (avFrame_->format), avFrame_->width, avFrame_->height, PIX_FMT_RGB24, SWS_BILINEAR, nullptr, nullptr, nullptr);
+
+            if (swsContext_ == nullptr) {
                 throw std::runtime_error("Error while calling sws_getContext");
-            sws_scale(ctxt, avFrame_->data, avFrame_->linesize, 0, avFrame_->height, pic_.data, pic_.linesize);
+            }
+            sws_scale(swsContext_, avFrame_->data, avFrame_->linesize, 0, avFrame_->height, pic_.data, pic_.linesize);
 
             BitmapType result;
             result.data = pic_.data[0];

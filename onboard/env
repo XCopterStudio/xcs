@@ -3,4 +3,4 @@
 export PATH="$PWD/../3rd-party/urbi/bin:$PATH"
 export LD_LIBRARY_PATH="$PWD/../3rd-party/boost/lib:$PWD/build/lib"
 export URBI_UOBJECT_PATH="$PWD/build/lib"
-
+export URBI_PATH="$PWD/urbiscript/boot"

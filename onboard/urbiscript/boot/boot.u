@@ -1,61 +1,62 @@
 // read all scripts *.u in dirPath
 function readScripts(dirPath = nil) {
-	//set default diractory
-	if(dirPath == nil) {
-		dirPath = System.env["URBI_PATH"].split(";")[0];
-	};
-	
-	// load diractory and read ignore files list
-	var dir = Directory.new(dirPath);
-	var ignoreFiles = File.new(dirPath + ".uignore").asList();
+    //set default diractory
+    if(dirPath == nil) {
+        dirPath = System.env["URBI_PATH"].split(";")[0];
+    };
 
-	// read all files
-	var files = Dictionary.new();
-	for(var f : dir.content) {
-		if (!(f[0] == ".") && f.length > 1 && f[f.length - 2] == "." && f[f.length - 1] == "u"  && ! ignoreFiles.has(f)) {
-			files[dirPath + f] = File.new(dirPath + f).asList();
-		};
-	};
+    // load diractory and read ignore files list
+    var dir = Directory.new(dirPath);
+    var ignoreFiles = File.new(Path.new(dirPath) / Path.new(".uignore")).asList();
 
-	// send all files sorted by priority 2 urbi
-	var contents = [];
-	while(! files.empty()) {
-		var lowerPrior = 100000;
-		var lowerPriorFile = nil;
-		
-		for(var f : files) {
-			if(f.second.size() > 0) {
-				var firstRow = f.second[0].split(" ");
-				if(firstRow.size() > 1 && firstRow[0] == "//PRIORITY") {
-					 if(lowerPrior >= firstRow[1].asFloat()) {
-						lowerPrior = firstRow[1].asFloat();
-						lowerPriorFile = f.first;
-					 };
-				}
-				else if(firstRow.size() > 2 && firstRow[0] == "//" && firstRow[1] == "PRIORITY") {
-					 if(lowerPrior >= firstRow[2].asFloat()) {
-						lowerPrior = firstRow[2].asFloat();
-						lowerPriorFile = f.first;
-					 };
-				};
-			};
-		};
+    // read all files
+    var files = Dictionary.new();
+    for(var f : dir.content) {
+        if (!(f[0] == ".") && f.length > 1 && f[f.length - 2] == "." && f[f.length - 1] == "u"  && ! ignoreFiles.has(f)) {
+            var path = Path.new(dirPath) / Path.new(f);
+            files[path] = File.new(path).asList();
+        };
+    };
 
-		if (lowerPriorFile == nil) {
-			for(var f : files) {
-				contents += f.second;
-				echo("loading file (without priority): " + f.first);
-			};
-			files.clear();
-		}
-		else {
-			contents += files[lowerPriorFile];
-			files.erase(lowerPriorFile);
-			echo("loading file (priority=" + lowerPrior + "): " + lowerPriorFile);
-		};
-	};
+    // send all files sorted by priority 2 urbi
+    var contents = [];
+    while(! files.empty()) {
+        var lowerPrior = 100000;
+        var lowerPriorFile = nil;
 
-	System.eval(contents.join("\n"));
-} |;
+        for(var f : files) {
+            if(f.second.size() > 0) {
+                var firstRow = f.second[0].split(" ");
+                if(firstRow.size() > 1 && firstRow[0] == "//PRIORITY") {
+                    if(lowerPrior >= firstRow[1].asFloat()) {
+                        lowerPrior = firstRow[1].asFloat();
+                        lowerPriorFile = f.first;
+                    };
+                }
+                else if(firstRow.size() > 2 && firstRow[0] == "//" && firstRow[1] == "PRIORITY") {
+                    if(lowerPrior >= firstRow[2].asFloat()) {
+                        lowerPrior = firstRow[2].asFloat();
+                        lowerPriorFile = f.first;
+                    };
+                };
+            };
+        };
+
+        if (lowerPriorFile == nil) {
+            for(var f : files) {
+                contents += f.second;
+                echo("loading file (without priority): " + f.first);
+            };
+            files.clear();
+        }
+        else {
+            contents += files[lowerPriorFile];
+            files.erase(lowerPriorFile);
+            echo("loading file (priority=" + lowerPrior + "): " + lowerPriorFile);
+        };
+    };
+
+    System.eval(contents.join("\n"));
+}|;
 
 readScripts();
