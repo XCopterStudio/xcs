@@ -55,6 +55,7 @@ void ULineFinder::init() {
     houghMinLength = 100;
     houghMaxGap = 40;
     deviationAging = 0.5;
+    distance = 0;
 
     //cv::namedWindow("Source", cv::WINDOW_AUTOSIZE);
     //cv::namedWindow("Blured", cv::WINDOW_AUTOSIZE);

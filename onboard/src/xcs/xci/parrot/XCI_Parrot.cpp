@@ -1,6 +1,7 @@
 #include <array>
 #include <iostream>
 #include <cstring>
+#include <future>
 
 #include "XCI_Parrot.hpp"
 #include "video_encapsulation.h"
@@ -48,6 +49,7 @@ void XCI_Parrot::initNetwork() {
     }
 
     connectNavdata();
+    std::async(std::launch::async, boost::bind(&boost::asio::io_service::run, &io_serviceData_));
 
     // connect to video port
     tcp::endpoint parrotVideo(address::from_string("192.168.1.1"), PORT_VIDEO);
@@ -97,29 +99,17 @@ void XCI_Parrot::sendingATCommands() {
 }
 
 void XCI_Parrot::receiveNavData() {
-    uint8_t message[NAVDATA_MAX_SIZE];
-    Navdata* navdata = (Navdata*) & message[0];
-    size_t receiveSize = 0;
-
-    initNavdataReceive();
-
-    while (!endAll_) {
-        receiveSize = socketData_->receive(boost::asio::buffer(message, NAVDATA_MAX_SIZE));
-        if (navdata->sequence > sequenceNumberData_ && navdata->header == 0x55667788) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
-            uint32_t navdataCks = NavdataProcess::computeChecksum(navdata, receiveSize);
-            vector<OptionAcceptor*> options = NavdataProcess::parse(navdata, navdataCks, receiveSize);
-            if (options.size() > 0) {
-                processState(navdata->ardrone_state);
-                processNavdata(options);
-            }
-
-            sequenceNumberData_ = navdata->sequence;
-        }
+    if (endAll_){
+        return;
     }
+
+    navdataDeadline_.expires_from_now(boost::posix_time::seconds(1));
+
+    socketData_->async_receive(boost::asio::buffer(navdataBuffer,NAVDATA_MAX_SIZE), boost::bind(&XCI_Parrot::handleReceivedNavdata,this,_1,_2));
 }
 
 void XCI_Parrot::receiveVideo() {
-    // TODO extract body of tihs method to separate compilation unit
+    // TODO extract body of this method to separate compilation unit
     const size_t accBufferSize = VIDEO_MAX_SIZE * 2; // magic constant
     uint8_t* accBuffer = new uint8_t[accBufferSize];
     uint8_t* accDecoded = accBuffer;
@@ -209,28 +199,91 @@ bool XCI_Parrot::checkPaveSignature(uint8_t signature[4]) {
     return signature[0] == 'P' && signature[1] == 'a' && signature[2] == 'V' && signature[3] == 'E';
 }
 
-bool XCI_Parrot::checkFrameNumberAndType(uint32_t number, uint8_t frameType) {
-    return (frameNumber_ + 1) == number || frameType == FRAME_TYPE_I_FRAME || frameType == FRAME_TYPE_IDR_FRAME; // TODO test only monotonous increment, not particular value
-}
-
 void XCI_Parrot::connectNavdata() {
     // connect to navdata port
     udp::endpoint parrotData(address::from_string("192.168.1.1"), PORT_DATA);
     socketData_ = new udp::socket(io_serviceData_);
 
-    boost::system::error_code ec;
-    socketData_->connect(parrotData, ec);
-    if (ec) {
-        throw new ConnectionErrorException("Cannot connect navigation data port.");
-    }
+    navdataDeadline_.expires_from_now(boost::posix_time::seconds(1));
+    socketData_->async_connect(parrotData, 
+        boost::bind(&XCI_Parrot::handleConnectedNavdata,this,_1));
+    
+    navdataDeadline_.async_wait(boost::bind(&XCI_Parrot::checkNavdataDeadline, this));
 };
+
+
+void XCI_Parrot::handleConnectedNavdata(const boost::system::error_code& ec){
+    if (endAll_){
+        return;
+    }
+
+    if (socketData_->is_open() && !ec){
+        initNavdataReceive();
+    }
+    else{
+        // cannot open navdata port
+    }
+}
+
+void XCI_Parrot::handleReceivedNavdata(const boost::system::error_code& ec, std::size_t bytes_transferred){
+    if (endAll_){
+        return;
+    }
+
+    if (!ec){
+        //TODO:
+    }
+    
+    navdataDeadline_.expires_from_now(boost::posix_time::pos_infin);
+
+    Navdata* navdata = (Navdata*)& navdataBuffer[0];
+    if (navdata->sequence > sequenceNumberData_ && navdata->header == 0x55667788) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
+        uint32_t navdataCks = NavdataProcess::computeChecksum(navdata, bytes_transferred);
+        vector<OptionAcceptor*> options = NavdataProcess::parse(navdata, navdataCks, bytes_transferred);
+        if (options.size() > 0) {
+            processState(navdata->ardrone_state);
+            processNavdata(options);
+        }
+
+        sequenceNumberData_ = navdata->sequence;
+    }
+
+    receiveNavData();
+}
+
+void XCI_Parrot::checkNavdataDeadline(){
+    if (endAll_)
+        return;
+
+    // Check whether the deadline has passed. We compare the deadline against
+    // the current time since a new asynchronous operation may have moved the
+    // deadline before this actor had a chance to run.
+    if (navdataDeadline_.expires_at() <= deadline_timer::traits_type::now())
+    {
+        // The deadline has passed. The socket is closed so that any outstanding
+        // asynchronous operations are cancelled.
+        socketData_->close();
+        delete socketData_;
+
+        // There is no longer an active deadline. The expiry is set to positive
+        // infinity so that the actor takes no action until a new deadline is set.
+        navdataDeadline_.expires_at(boost::posix_time::pos_infin);
+        connectNavdata();
+    }
+
+    // Put the actor back to sleep.
+    navdataDeadline_.async_wait(boost::bind(&XCI_Parrot::checkNavdataDeadline, this));
+}
 
 // function for navdata handling
 
 void XCI_Parrot::initNavdataReceive() {
+    if (endAll_)
+        return;
     // magic
     int32_t flag = 1; // 1 - unicast, 2 - multicast
-    socketData_->send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)));
+    navdataDeadline_.expires_from_now(boost::posix_time::seconds(1));
+    socketData_->async_send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)),boost::bind(&XCI_Parrot::receiveNavData,this));
 }
 
 void XCI_Parrot::processState(uint32_t droneState) {
@@ -322,6 +375,7 @@ void XCI_Parrot::init() throw (ConnectionErrorException) {
             (
             boost::log::trivial::severity >= boost::log::trivial::debug
             );
+
     sequenceNumberCMD_ = DEFAULT_SEQUENCE_NUMBER;
     sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
     frameNumber_ = 0;
@@ -337,7 +391,7 @@ void XCI_Parrot::init() throw (ConnectionErrorException) {
 
     // start all threads
     threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
-    threadReceiveNavData_ = std::move(std::thread(&XCI_Parrot::receiveNavData, this));
+    //threadReceiveNavData_ = std::move(std::thread(&XCI_Parrot::receiveNavData, this));
     threadReceiveVideo_ = std::move(std::thread(&XCI_Parrot::receiveVideo, this));
     std::cerr << "After threads" << std::endl;
 }
