@@ -11,6 +11,7 @@ function connect(outputXObject, inputXObject, outputXVarAddress, inputXInputPort
 	};
 }|;
 
+/*
 class Global.Point: UValueSerializable {
 	var x;
 	var y;
@@ -32,3 +33,4 @@ connect(s, o, s.&val, o.&input2, "val", "input2");
 s.val = -5;
 o.val;
 o.val2;
+*/

@@ -3,21 +3,27 @@
 
 #include <string>
 #include "simple_x_var.hpp"
-#include <xcs/nodes/xobject/xobject_export.h>
 
 namespace xcs {
 namespace nodes {
 
 template<class synT>
-class XOBJECT_EXPORT XVar : public SimpleXVar {
+class XVar : public SimpleXVar {
 public:
     XVar(const std::string& semT);
+    XVar(const std::string& semT, const synT defVal);
     XVar& operator=(const synT&);
 };
 
 template<class synT>
 XVar<synT>::XVar(const std::string& semT) :
     SimpleXVar(typeid(synT), semT) {
+}
+
+template<class synT>
+XVar<synT>::XVar(const std::string& semT, const synT defVal) :
+    SimpleXVar(typeid(synT), semT) {
+    XVar::operator= defVal;
 }
 
 template<class synT>

@@ -3,13 +3,12 @@
 
 #include <string>
 #include "simple_x_input_port.hpp"
-#include <xcs/nodes/xobject/xobject_export.h>
 
 namespace xcs {
 namespace nodes {
 
 template<class synT>
-class XOBJECT_EXPORT XInputPort : public SimpleXInputPort {
+class XInputPort : public SimpleXInputPort {
 public:
     XInputPort(const std::string& semT);
     virtual ~XInputPort();

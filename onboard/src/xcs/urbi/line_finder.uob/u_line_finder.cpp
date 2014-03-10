@@ -6,11 +6,11 @@ using namespace xcs::urbi;
 
 const size_t ULineFinder::REFRESH_PERIOD = 200; // ms
 
-ULineFinder::ULineFinder(const std::string &name) :
-  ::urbi::UObject(name),
-  hasFrame_(false),
-  line_(4),
-  deviation_(0) {
+ULineFinder::ULineFinder(const std::string& name) :
+    ::urbi::UObject(name),
+     hasFrame_(false),
+     line_(4),
+     deviation_(0) {
 
     UBindFunction(ULineFinder, init);
 
@@ -84,9 +84,12 @@ int ULineFinder::update() {
     cv::waitKey(waitDelay); // re-render image windows
     // emulate arbitrary processing time
     std::this_thread::sleep_for(std::chrono::milliseconds((REFRESH_PERIOD - waitDelay) / 2));
+
+    //TODO: return good value
+    return -1;
 }
 
-void ULineFinder::onChangeVideo(::urbi::UVar &uvar) {
+void ULineFinder::onChangeVideo(::urbi::UVar& uvar) {
     lastFrame_ = uvar;
     hasFrame_ = true;
     // adapt to different size
@@ -143,7 +146,8 @@ void ULineFinder::processFrame() {
     cv::Scalar color;
     if (norm.x == 0 && norm.y == 0) {
         color = cv::Scalar(0, 128, 128);
-    } else {
+    }
+    else {
         auto c = -norm.dot(cv::Point(avg[0], avg[1]));
         deviation_ = dev = (1 - devAging) * dev + devAging * ((norm.dot(imageCenter_) + c) / hypot(norm.x, norm.y)); // weighted average of current and previous deviation
         color = (dev > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0);

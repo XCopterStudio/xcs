@@ -89,8 +89,8 @@ class Aligner {
     };
 }|;
 
-//var xci = UXci.new("xci_dodo");
-var xci = UXci.new("xci_parrot");
+var xci = XXci.new("xci_dodo");
+//var xci = XXci.new("xci_parrot");
 var f = ULineFinder.new();
 xci.&video >> f.&video;
 

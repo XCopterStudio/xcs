@@ -1,55 +1,57 @@
-/* 
- * File:   UXci.hpp
+/*
+ * File:   XXci.hpp
  * Author: michal
  *
  * Created on January 31, 2014, 11:07 PM
  */
 
-#ifndef UXCI_HPP
-#define	UXCI_HPP
+#ifndef XXCI_HPP
+#define	XXCI_HPP
 
-#include <urbi/uobject.hh>
+//#include <urbi/uobject.hh>
 #include <vector>
 #include <memory>
 #include <thread>
 #include <condition_variable>
 #include <mutex>
-
 #include <xcs/xci/xci.hpp>
 #include <xcs/xci/data_receiver.hpp>
+#include <xcs/nodes/xobject/x_object.hpp>
+#include <xcs/nodes/xobject/x_var.hpp>
+#include <xcs/nodes/xobject/x_input_port.hpp>
 
 namespace xcs {
-namespace urbi {
+namespace nodes {
 
-class UXci : public ::urbi::UObject {
+class XXci : public xcs::nodes::XObject {
 public:
-    ::urbi::UVar flyParamPersistence;
+    xcs::nodes::XVar<int> flyParamPersistence;
 
-    ::urbi::InputPort roll;
-    ::urbi::InputPort pitch;
-    ::urbi::InputPort yaw;
-    ::urbi::InputPort gaz;
+    xcs::nodes::XInputPort<double> roll;
+    xcs::nodes::XInputPort<double> pitch;
+    xcs::nodes::XInputPort<double> yaw;
+    xcs::nodes::XInputPort<double> gaz;
 
-    ::urbi::InputPort command;
+    xcs::nodes::XInputPort<std::string> command;
 
-    UXci(const std::string &name);
+    XXci(const std::string& name);
 
     /*!
      * \param driver Name of the library with XCI implementation.
      */
-    void init(const std::string &driver);
+    void init(const std::string& driver);
 
     void xciInit();
 
-    void doCommand(const std::string &command);
+    void doCommand(const std::string& command);
 
     void flyParam(double roll = 0, double pitch = 0, double yaw = 0, double gaz = 0);
 
     void dumpConfiguration();
 
-    void setConfiguration(const std::string &key, const std::string &value);
+    void setConfiguration(const std::string& key, const std::string& value);
 
-    virtual ~UXci();
+    virtual ~XXci();
 private:
     xcs::xci::XCI* xci_;
 
@@ -77,7 +79,7 @@ private:
     /*!
      * Setter for flyParam persistence.
      * It blocks/unblock the persistence thread (when set to 0).
-     * 
+     *
      * \note It may take up to 'previous value' time until the new persistence
      * is set.
      */
@@ -116,5 +118,5 @@ private:
 }
 }
 
-#endif	/* UXCI_HPP */
+#endif	/* XXCI_HPP */
 
