@@ -71,11 +71,8 @@ int ULineFinder::update() {
     const static size_t waitDelay = 20;
     processFrame();
     cv::waitKey(waitDelay); // re-render image windows
-    // emulate arbitrary processing time
-    //std::this_thread::sleep_for(std::chrono::milliseconds((REFRESH_PERIOD - waitDelay) / 2));
 
-    //TODO: return good value
-    return -1;
+    return 0; // Urbi undocumented, return value probably doesn't matter
 }
 
 void ULineFinder::onChangeVideo(::urbi::UVar& uvar) {
