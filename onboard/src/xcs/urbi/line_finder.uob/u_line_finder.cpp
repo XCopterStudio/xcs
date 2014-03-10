@@ -133,6 +133,18 @@ void ULineFinder::processFrame() {
      * Compute output vars
      */
 
+
+
+    /*
+     * Output vars
+     */
+    // set line orientation "to the front"
+    if (avg[1] < avg[3]) {
+        std::swap(avg[0], avg[2]);
+        std::swap(avg[1], avg[3]);
+    }
+    line = avg;
+
     // find distance from the middle
     double dev(distance_); // use previous deviation
     double devAging = static_cast<double> (distanceAging);
@@ -145,19 +157,9 @@ void ULineFinder::processFrame() {
         distance_ = dev = (1 - devAging) * dev + devAging * ((norm.dot(imageCenter_) + c) / hypot(norm.x, norm.y)); // weighted average of current and previous deviation
         color = (dev > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0);
     }
-
-    /*
-     * Output vars
-     */
-    std::vector<int> l = std::vector<int>(4);
-    l[0] = avg[0];
-    l[1] = avg[1];
-    l[2] = avg[2];
-    l[3] = avg[3];
-    line = l;
-
     distance = distance_;
 
+    // deviation angle of computed line and frontal axis
     if (norm.x != 0) {
         deviation = atan(norm.y / norm.x);
     }
