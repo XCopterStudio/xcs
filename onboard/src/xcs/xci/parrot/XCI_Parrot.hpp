@@ -60,6 +60,9 @@ class XCI_Parrot : public virtual XCI {
     // actual state of ar.drone 2.0
     ArdroneState state_;
 
+    // navdata buffer
+    char navdataBuffer[NAVDATA_MAX_SIZE];
+
     //video decoder 
     VideoDecoder videoDecoder_;
 
@@ -87,10 +90,13 @@ class XCI_Parrot : public virtual XCI {
     void receiveVideo();
 
     bool checkPaveSignature(uint8_t signature[4]);
-    bool checkFrameNumberAndType(uint32_t number, uint8_t frameType);
 
     // function for navdata handling
     void connectNavdata();
+    void handleConnectedNavdata(const boost::system::error_code& ec);
+    void handleReceivedNavdata(const boost::system::error_code& ec, std::size_t bytes_transferred);
+    void checkNavdataDeadline();
+
     void initNavdataReceive();
     void processState(uint32_t droneState);
     void processNavdata(std::vector<OptionAcceptor*> &options);

@@ -1,3 +1,5 @@
+//PRIORITY 1
+
 function isSameType(outputXObject, inputXObject, outputXVarName, inputXInputPortName) {
 	return outputXObject.getType(outputXVarName) == inputXObject.getType(inputXInputPortName);
 }|;
@@ -10,7 +12,6 @@ function connect(outputXObject, inputXObject, outputXVarAddress, inputXInputPort
 		echo("Different type - not connected");
 	};
 }|;
-
 /*
 class Global.Point: UValueSerializable {
 	var x;
@@ -25,7 +26,8 @@ class Global.Point: UValueSerializable {
 }|;
 // Add the class to Serializables
 var Serializables.Point = Point;
-
+*/
+/*
 var s = Subject.new();
 var o = Observer.new();
 connect(s, o, s.&val, o.&input, "val", "input");

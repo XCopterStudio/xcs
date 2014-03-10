@@ -36,6 +36,7 @@ ULineFinder::ULineFinder(const string& name) :
     UBindVar(ULineFinder, distance);
     UBindVar(ULineFinder, deviation);
     UBindVar(ULineFinder, line);
+    UBindVar(ULineFinder, hasLine);
 }
 
 void ULineFinder::init() {
@@ -62,6 +63,7 @@ void ULineFinder::init() {
     distance = 0;
     deviation = 0;
     line = vector<int>(4, 0);
+    hasLine = false;
 
     cv::namedWindow("HSV->InRange", cv::WINDOW_AUTOSIZE);
     cv::namedWindow("Canny", cv::WINDOW_AUTOSIZE);
@@ -140,63 +142,56 @@ void ULineFinder::processFrame() {
     cv::Vec4i avg = cv::mean(lines);
 
     /*
-     * Compute output vars
-     */
-
-
-
-    /*
      * Output vars
      */
-    // set line orientation "to the front"
-    if (avg[1] < avg[3]) {
-        std::swap(avg[0], avg[2]);
-        std::swap(avg[1], avg[3]);
+    // are there any line to process?
+    if (cv::countNonZero(avg) > 0) {
+        hasLine = true;
+        // set line orientation "to the front"
+        if (avg[1] < avg[3]) {
+            std::swap(avg[0], avg[2]);
+            std::swap(avg[1], avg[3]);
+        }
+        line = avg;
+
+        // find distance from the middle
+        double dev(distance_); // use previous deviation
+        double devAging = static_cast<double> (distanceAging);
+        cv::Point norm(avg[3] - avg[1], avg[0] - avg[2]);
+        cv::Scalar color;
+        if (norm.x == 0 && norm.y == 0) {
+            color = cv::Scalar(0, 128, 128);
+        } else {
+            auto c = -norm.dot(cv::Point(avg[0], avg[1]));
+            distance_ = dev = (1 - devAging) * dev + devAging * ((norm.dot(imageCenter_) + c) / hypot(norm.x, norm.y)); // weighted average of current and previous deviation
+            color = (dev > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0);
+        }
+        distance = distance_;
+
+        // deviation angle of computed line and frontal axis
+        if (norm.x != 0) {
+            deviation = atan(norm.y / norm.x);
+        }
+
+        // debugging annotations
+        for (auto l : lines) {
+            cv::line(src, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(255, 0, 0), 2, CV_AA);
+        }
+        cv::circle(src, imageCenter_, abs(dev), color, 3, CV_AA);
+        cv::line(src, cv::Point(avg[0], avg[1]), cv::Point(avg[2], avg[3]), cv::Scalar(0, 0, 255), 3, CV_AA);
+        cv::circle(src, cv::Point(avg[2], avg[3]), 5, cv::Scalar(0, 0, 255), 3, CV_AA);
     }
-    line = avg;
-
-    // find distance from the middle
-    double dev(distance_); // use previous deviation
-    double devAging = static_cast<double> (distanceAging);
-    cv::Point norm(avg[3] - avg[1], avg[0] - avg[2]);
-    cv::Scalar color;
-    if (norm.x == 0 && norm.y == 0) {
-        color = cv::Scalar(0, 128, 128);
-    } else {
-        auto c = -norm.dot(cv::Point(avg[0], avg[1]));
-        distance_ = dev = (1 - devAging) * dev + devAging * ((norm.dot(imageCenter_) + c) / hypot(norm.x, norm.y)); // weighted average of current and previous deviation
-        color = (dev > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0);
+    else {
+        hasLine = false;
+        distance = 0;
+        deviation = 0;
+        line = std::vector<int>(4, 0);
     }
-
-    /*
-     * Output vars
-     */
-    vector<int> l = vector<int>(4);
-    l[0] = avg[0];
-    l[1] = avg[1];
-    l[2] = avg[2];
-    l[3] = avg[3];
-    line = l;
-
-    distance = distance_;
-
-    // deviation angle of computed line and frontal axis
-    if (norm.x != 0) {
-        deviation = atan(norm.y / norm.x);
-    }
-
 
     /*
      * Display annotated frame
      */
-    for (auto l : lines) {
-        cv::line(src, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(255, 0, 0), 2, CV_AA);
-    }
-    cv::circle(src, imageCenter_, abs(dev), color, 3, CV_AA);
-    cv::line(src, cv::Point(avg[0], avg[1]), cv::Point(avg[2], avg[3]), cv::Scalar(0, 0, 255), 3, CV_AA);
-    cv::circle(src, cv::Point(avg[2], avg[3]), 5, cv::Scalar(0, 0, 255), 3, CV_AA);
     cv::imshow("Lines", src);
-
 }
 
 UStart(ULineFinder);
