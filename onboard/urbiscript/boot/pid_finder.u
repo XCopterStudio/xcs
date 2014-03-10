@@ -70,6 +70,13 @@ f.hsvValueRange = 6; //20;
 f.houghRho = 1;
 
 xci.xciInit();
+
+// 4 DODO
+//xci.setConfiguration("video:filename", "/tmp/video.xcs");
+//xci.setConfiguration("video:fps", "25");
+//xci.doCommand("Load");
+//xci.doCommand("Play");
+
 xci.setConfiguration("video:video_channel", "1");
 xci.command = "TakeOff";
 xci.setConfiguration("video:video_channel", "1");
