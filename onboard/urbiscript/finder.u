@@ -75,8 +75,7 @@ class Aligner {
             var line = finder.getLine();
             if (line == [0,0,0,0])
                 continue;
-            var xmid = (line[0]+line[2])/2;
-            var deviation = xmid - this.finder.getViewCenter()[0];
+            var deviation = this.finder.getDeviation();
             if (-deviationTh < deviation && deviation < deviationTh)
                 continue;
             {
@@ -90,7 +89,8 @@ class Aligner {
     };
 }|;
 
-var xci = UXci.new("xci_dodo");
+var xci = XXci.new("xci_dodo");
+//var xci = XXci.new("xci_parrot");
 var f = ULineFinder.new();
 xci.&video >> f.&video;
 
@@ -100,7 +100,7 @@ xci.xciInit();
 f.hsvValueRange = 50; //20;
 f.houghRho = 1;
 
-var ali = Aligner.new(xci, f);
+//var ali = Aligner.new(xci, f);
 // Use adjustYaw and adjustRoll function with ',' for parallel jobs.
 //ali.adjustYaw(),
 //ali.adjustRoll(),

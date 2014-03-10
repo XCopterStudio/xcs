@@ -49,10 +49,10 @@ SensorList XciDodo::sensorList() {
 
 ParameterValueType XciDodo::parameter(ParameterNameType name) {
     switch (name) {
-        case XCI_PARAM_FP_PERSISTENCE:
-            return "1000";
-        default:
-            throw std::runtime_error("Parameter not defined.");
+    case XCI_PARAM_FP_PERSISTENCE:
+        return "1000";
+    default:
+        throw std::runtime_error("Parameter not defined.");
     }
 }
 
@@ -125,7 +125,7 @@ void XciDodo::configuration(const std::string& key, const std::string& value) {
 
 }
 
-void XciDodo::configuration(const InformationMap &configuration) {
+void XciDodo::configuration(const InformationMap& configuration) {
 
 }
 
@@ -147,7 +147,7 @@ void XciDodo::stop() {
 
 extern "C" {
 
-    XCI* CreateXci(DataReceiver &dataReceiver) {
+    XCI* CreateXci(DataReceiver& dataReceiver) {
         return new XciDodo(dataReceiver);
     }
 }

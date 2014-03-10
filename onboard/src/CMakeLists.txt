@@ -29,10 +29,13 @@ add_subdirectory(xcs/xci/parrot)
 add_subdirectory(xcs/xci/dodo)
 
 # Subprojects (UObjects)
-add_subdirectory(xcs/urbi/xci.uob)
 add_subdirectory(xcs/urbi/json.uob)
 add_subdirectory(xcs/urbi/dummy.uob)
 add_subdirectory(xcs/urbi/line_finder.uob)
 
 # Subprojects (nodes)
 add_subdirectory(xcs/nodes/xobject)
+add_subdirectory(xcs/nodes/xci.xob)
+
+# Subprojects (urbiscript)
+#add_subdirectory(../urbiscript ./urbiscript)
