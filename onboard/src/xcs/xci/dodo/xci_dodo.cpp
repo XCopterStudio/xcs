@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <chrono>
+#include <boost/log/trivial.hpp>
+
 #include <xcs/xci/data_receiver.hpp>
 
 using namespace std;
@@ -73,7 +75,7 @@ ParameterValueType XciDodo::parameter(ParameterNameType name) {
 }
 
 void XciDodo::command(const std::string& command) {
-    cout << "[dodo] command: " << command << endl;
+    BOOST_LOG_TRIVIAL(info) << "[dodo] command: " << command;
 
     switch (videoStatus_) {
         case VIDEO_UNLOADED:
@@ -81,12 +83,12 @@ void XciDodo::command(const std::string& command) {
                 videoPlayer_.init(configuration(CONFIG_VIDEO_FILENAME));
                 videoStatus_ = VIDEO_PAUSED;
             } else if (command == CMD_VIDEO_PLAY_ || command == CMD_VIDEO_PAUSE_ || command == CMD_VIDEO_STOP_) {
-                //TODO warning
+                throw runtime_error("Cannot execute command in unloaded state.");
             }
             break;
         default:
             if (command == CMD_VIDEO_LOAD_) {
-                //TODO warning
+                throw runtime_error("Cannot execute command in loaded state.");
             } else if (command == CMD_VIDEO_PLAY_) {
                 videoStatus_ = VIDEO_PLAYING;
             } else if (command == CMD_VIDEO_PAUSE_) {
@@ -102,7 +104,7 @@ void XciDodo::command(const std::string& command) {
 }
 
 void XciDodo::flyParam(float roll, float pitch, float yaw, float gaz) {
-    cout << "[dodo] flyParam: " << roll << ", " << pitch << ", " << yaw << ", " << gaz << endl;
+    BOOST_LOG_TRIVIAL(info) << "[dodo] flyParam: " << roll << ", " << pitch << ", " << yaw << ", " << gaz;
 }
 
 void XciDodo::sensorGenerator() {
@@ -135,7 +137,8 @@ void XciDodo::configuration(const std::string& key, const std::string & value) {
     if (key == CONFIG_VIDEO_FPS) {
         size_t fps = stoi(value);
         if ((1000 / SENSOR_PERIOD_) % fps != 0) {
-            cerr << key << " must be divisor of " << (1000 / SENSOR_PERIOD_) << endl; //TODO change to error
+            BOOST_LOG_TRIVIAL(error) << key << " must be divisor of " << (1000 / SENSOR_PERIOD_);
+            throw runtime_error("FPS must be proper divisor."); // stupid urbi... must print error and throw exception as well
         };
         videoFps_ = fps;
     }
