@@ -340,15 +340,6 @@ void XCI_Parrot::init() throw (ConnectionErrorException) {
     threadReceiveNavData_ = std::move(std::thread(&XCI_Parrot::receiveNavData, this));
     threadReceiveVideo_ = std::move(std::thread(&XCI_Parrot::receiveVideo, this));
     std::cerr << "After threads" << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // workaround as Parrot needs some time before another command can be send to it
-
-    /*
-     * Configure video streaming
-     * TODO move to common configuration (with properly designed model), now only for the sake of presentation
-     */
-    //configuration("video:video_channel", "1"); // "1": hori camera, "2": vert camera !!! hori is bottom camera !!!
-
-    std::cerr << "After configuration" << std::endl;
 }
 
 void XCI_Parrot::reset() {
