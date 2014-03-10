@@ -1,0 +1,34 @@
+/*
+ * Dataflow graph
+ */
+ 
+//var xci = XXci.new("xci_dodo");
+var xci = XXci.new("xci_parrot");
+var f = ULineFinder.new();
+xci.&video >> f.&video;
+
+// Default values for image processing
+f.hsvValueRange = 6; //20;
+f.houghRho = 1;
+
+xci.xciInit();
+
+// 4 DODO
+//xci.setConfiguration("video:filename", "/tmp/video.xcs");
+//xci.setConfiguration("video:fps", "25");
+//xci.doCommand("Load");
+//xci.doCommand("Play");
+
+//xci.setConfiguration("video:video_channel", "1");
+xci.command = "TakeOff";
+sleep(3s);
+xci.setConfiguration("video:video_channel", "1");
+
+var rollPIDParam = PIDParams.new(0.25,0,0);
+var yawPIDParam = PIDParams.new(0,0,0);
+//var aligner = Aligner.new(xci,f,rollPIDParam,yawPIDParam);
+//aligner.adjustRoll() , aligner.adjustYaw();
+//aligner.adjustRoll(),;
+
+
+

@@ -1,0 +1,40 @@
+function serverConnect(ip, port, xci) {
+    var adapter = Adapter.new();
+    adapter.start(ip, port);
+
+    // create graph nodes
+    var semanticSender = SemanticSender.new(adapter, [
+        "altitude" => "altitude",
+        "phi" => "phi",
+        "psi" => "psi",
+        "theta" => "theta",
+        "alive" => "alive",
+    ], UJson);
+
+    var flyParamReceiver = SemanticReceiver.new(adapter, [
+        "roll" => "roll",
+        "pitch" => "pitch",
+        "yaw" => "yaw",
+        "gaz" => "gaz",
+        "command" => "command"
+    ], UJson);
+
+    var flashSender = FlashSender.new(adapter, UJson);
+
+    flashSender.send("Created graph nodes.");
+
+    // connect graph nodes
+    xci.&altitude >> semanticSender.&altitude;
+    xci.&phi >> semanticSender.&phi;
+    xci.&psi >> semanticSender.&psi;
+    xci.&theta >> semanticSender.&theta;
+    xci.&alive >> semanticSender.&alive;
+
+    flyParamReceiver.&roll >> xci.&roll;
+    flyParamReceiver.&pitch >> xci.&pitch;
+    flyParamReceiver.&yaw >> xci.&yaw;
+    flyParamReceiver.&gaz >> xci.&gaz;
+    flyParamReceiver.&command >> xci.&command;
+
+    flashSender.send("Connected graph nodes.");
+}|;

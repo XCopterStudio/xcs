@@ -1,0 +1,78 @@
+class Adapter {
+
+    var _socket;
+    var output;
+
+    function init() {
+        output = Object.clone();
+    };
+
+    function start(server, port) {
+        _socket = Socket.new();
+        _socket.connect(server, port);
+        at (_socket.received?(var data)) {
+            echo("Received: " + data);
+            output = data;
+        };
+        clog << "Started adapter %s:%s." % [server, port];
+    };
+
+    function send(data) {
+        assert(_socket != nil);
+        _socket.write(data);
+    };
+}|;
+
+class FlashSender {
+
+    function init(adapter, UJson) {
+        var this.adapter = adapter;
+        var this.ujson = UJson;
+    }|;
+
+    function send(message) {
+        var data = [ => ];
+        data["type"] = "flash";
+        data["data"] = message;
+        this.adapter.send(this.ujson.encode(data) + "\n");
+    }|;
+}|;
+
+
+class SemanticSender {
+
+    function init(adapter, outputs, UJson) {
+        for(var output: outputs) {
+            setSlot(output.first, nil);
+            var slot = getSlot(output.first);
+            var that = this;
+
+            slot.notifyChange(function() {
+                // simple JSON encoder -- no escaping!
+                var data = [ => ];
+                data["type"] = "data";
+                data["data"] = [ output.first => that.getSlotValue(output.first) ];
+                adapter.send(UJson.encode(data) + "\n");
+            });
+        };
+    }|;
+}|;
+
+class SemanticReceiver {
+    function init(adapter, inputs, UJson) { // parseJson as arg, lookup is wierd in this case (package/import?)
+        for(var input: inputs) setSlot(input.first, nil);
+
+        var that = this;
+        at(adapter.output->changed?) {
+            var rawData = UJson.decode(adapter.output);
+            var data = rawData["data"];
+            for(var input: inputs) {
+                var name = input.first;
+                if(name in data) {
+                    echo("updating: " + name);
+                    that.updateSlot(name, data[name]);
+                }
+            };
+        };
+    };
+}|;

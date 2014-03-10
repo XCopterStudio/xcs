@@ -1,17 +1,3 @@
-class PIDParams{
-    var p = 0.0;
-    var i = 0.0;
-    var d = 0.0;
-    var sumI = 0.0;
-    var lastValue = 0.0;
-  
-    function init(p,i,d){
-        this.p = p;
-        this.i = i;
-        this.d = d;
-    };
-}|;
-
 class Aligner{
 
     var xci;
@@ -55,38 +41,3 @@ class Aligner{
         },
     };
 }|;
-
-/*
- * Dataflow graph
- */
- 
-//var xci = XXci.new("xci_dodo");
-var xci = XXci.new("xci_parrot");
-var f = ULineFinder.new();
-xci.&video >> f.&video;
-
-// Default values for image processing
-f.hsvValueRange = 6; //20;
-f.houghRho = 1;
-
-xci.xciInit();
-
-// 4 DODO
-//xci.setConfiguration("video:filename", "/tmp/video.xcs");
-//xci.setConfiguration("video:fps", "25");
-//xci.doCommand("Load");
-//xci.doCommand("Play");
-
-xci.setConfiguration("video:video_channel", "1");
-xci.command = "TakeOff";
-xci.setConfiguration("video:video_channel", "1");
-sleep(3s);
-
-var rollPIDParam = PIDParams.new(1,0,0);
-var yawPIDParam = PIDParams.new(0,0,0);
-//var aligner = Aligner.new(xci,f,rollPIDParam,yawPIDParam);
-//aligner.adjustRoll() , aligner.adjustYaw();
-//aligner.adjustRoll(),;
-
-
-
