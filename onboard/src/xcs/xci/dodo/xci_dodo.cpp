@@ -13,16 +13,33 @@ using namespace xcs::nodes;
  * Constants
  */
 const std::string XciDodo::NAME_ = "Dodo Test Drone";
-uint8_t XciDodo::frames_[XciDodo::VIDEO_HEIGHT_][XciDodo::VIDEO_WIDTH_][XciDodo::VIDEO_COLORS_];
 
 const size_t XciDodo::ALIVE_FREQ_ = 1;
-//
+
 const size_t XciDodo::SENSOR_PERIOD_ = 20;
+
+const std::string XciDodo::CMD_VIDEO_LOAD_ = "Load";
+const std::string XciDodo::CMD_VIDEO_PLAY_ = "Play";
+const std::string XciDodo::CMD_VIDEO_PAUSE_ = "Pause";
+const std::string XciDodo::CMD_VIDEO_STOP_ = "Stop";
+
+const std::string XciDodo::CONFIG_VIDEO_FILENAME = "video:filename";
+const std::string XciDodo::CONFIG_VIDEO_FPS = "video:fps";
+
+const SpecialCMDList XciDodo::specialCommands_({
+    XciDodo::CMD_VIDEO_LOAD_,
+    XciDodo::CMD_VIDEO_PLAY_,
+    XciDodo::CMD_VIDEO_PAUSE_,
+    XciDodo::CMD_VIDEO_STOP_
+});
 
 /*
  * Implementation
  */
-XciDodo::XciDodo(DataReceiver& dataReceiver) : XCI(dataReceiver) {
+XciDodo::XciDodo(DataReceiver& dataReceiver) :
+  XCI(dataReceiver),
+  videoFps_(15),
+  videoStatus_(VIDEO_UNLOADED) {
 
 }
 
@@ -32,7 +49,6 @@ XciDodo::~XciDodo() {
 
 void XciDodo::init() {
     inited_ = true;
-    videoPlayer_.init("/tmp/video.xcs");
     sensorThread_ = move(thread(&XciDodo::sensorGenerator, this));
 }
 
@@ -49,15 +65,40 @@ SensorList XciDodo::sensorList() {
 
 ParameterValueType XciDodo::parameter(ParameterNameType name) {
     switch (name) {
-    case XCI_PARAM_FP_PERSISTENCE:
-        return "1000";
-    default:
-        throw std::runtime_error("Parameter not defined.");
+        case XCI_PARAM_FP_PERSISTENCE:
+            return "1000";
+        default:
+            throw std::runtime_error("Parameter not defined.");
     }
 }
 
 void XciDodo::command(const std::string& command) {
     cout << "[dodo] command: " << command << endl;
+
+    switch (videoStatus_) {
+        case VIDEO_UNLOADED:
+            if (command == CMD_VIDEO_LOAD_) {
+                videoPlayer_.init(configuration(CONFIG_VIDEO_FILENAME));
+                videoStatus_ = VIDEO_PAUSED;
+            } else if (command == CMD_VIDEO_PLAY_ || command == CMD_VIDEO_PAUSE_ || command == CMD_VIDEO_STOP_) {
+                //TODO warning
+            }
+            break;
+        default:
+            if (command == CMD_VIDEO_LOAD_) {
+                //TODO warning
+            } else if (command == CMD_VIDEO_PLAY_) {
+                videoStatus_ = VIDEO_PLAYING;
+            } else if (command == CMD_VIDEO_PAUSE_) {
+                videoStatus_ = VIDEO_PAUSED;
+            } else if (command == CMD_VIDEO_STOP_) {
+                videoStatus_ = VIDEO_PAUSED;
+                videoPlayer_.reset();
+            }
+
+            break;
+
+    }
 }
 
 void XciDodo::flyParam(float roll, float pitch, float yaw, float gaz) {
@@ -71,9 +112,8 @@ void XciDodo::sensorGenerator() {
         if (clock % (1000 / ALIVE_FREQ_) == 0) {
             dataReceiver_.notify("alive", true);
         }
-        if (clock % (1000 / VIDEO_FPS_) == 0) {
+        if (clock % (1000 / videoFps_) == 0 && videoStatus_ == VIDEO_PLAYING) {
             BitmapType frame = videoPlayer_.getFrame();
-
             dataReceiver_.notify("video", frame);
             frameNo++;
         }
@@ -83,58 +123,39 @@ void XciDodo::sensorGenerator() {
     }
 }
 
-void XciDodo::renderFrame(size_t frameNo, int16_t noise) {
-    static const size_t width = 10;
-    static const size_t amplitude = 80;
-    static const size_t dash = VIDEO_HEIGHT_ / 8;
-    static const double skewAmplitude = 0.2;
-    static const double speed = 0.1;
-    static const double skewSpeed = 0.1;
+std::string XciDodo::configuration(const std::string & key) {
+    return configuration_[key];
+}
 
-    auto lineMiddle = (VIDEO_WIDTH_ / 2) + static_cast<size_t> (amplitude * sin(frameNo * speed));
-    auto skew = skewAmplitude * sin(frameNo * skewSpeed);
-    for (auto y = 0; y < VIDEO_HEIGHT_; ++y) {
-        size_t seed = rand();
-        auto linePos = lineMiddle + skew * y;
-        for (auto x = 0; x < VIDEO_WIDTH_; ++x) {
-            int16_t color = (((y / dash) % 2 == 0) && x >= linePos && x < linePos + width) ? 0 : 255;
-            if (noise > 0) {
-                //color += rand() % (2 * noise) - noise;
-                // calling rand for each pixel is surprisingly CPU expensive, so we use this hand-made low-entropy random number generator
-                color += ((x * frameNo * seed + x * lineMiddle * y + frameNo) % 7919) % (2 * noise) - noise;
-            }
-            frames_[y][x][0] = static_cast<uint8_t> (valueInRange<int16_t>(color, 0, 255));
-            frames_[y][x][1] = static_cast<uint8_t> (valueInRange<int16_t>(color, 0, 255));
-            frames_[y][x][2] = static_cast<uint8_t> (valueInRange<int16_t>(color, 0, 255));
-        }
+InformationMap XciDodo::configuration() {
+    return configuration_; // we return copy
+}
+
+void XciDodo::configuration(const std::string& key, const std::string & value) {
+    if (key == CONFIG_VIDEO_FPS) {
+        size_t fps = stoi(value);
+        if ((1000 / SENSOR_PERIOD_) % fps != 0) {
+            cerr << key << " must be divisor of " << (1000 / SENSOR_PERIOD_) << endl; //TODO change to error
+        };
+        videoFps_ = fps;
     }
+
+    configuration_[key] = value;
+}
+
+void XciDodo::configuration(const InformationMap & configuration) {
+    configuration_ = configuration;
 }
 
 /*
  * NOT IMPLEMENTED (only for linker)
  */
-std::string XciDodo::configuration(const std::string& key) {
-    return "";
-}
-
-InformationMap XciDodo::configuration() {
-    return InformationMap();
-}
-
-void XciDodo::configuration(const std::string& key, const std::string& value) {
-
-}
-
-void XciDodo::configuration(const InformationMap& configuration) {
-
-}
-
 void XciDodo::reset() {
 
 }
 
 SpecialCMDList XciDodo::specialCMD() {
-    return SpecialCMDList();
+    return specialCommands_;
 }
 
 void XciDodo::start() {
@@ -147,7 +168,7 @@ void XciDodo::stop() {
 
 extern "C" {
 
-    XCI* CreateXci(DataReceiver& dataReceiver) {
-        return new XciDodo(dataReceiver);
-    }
+XCI* CreateXci(DataReceiver& dataReceiver) {
+    return new XciDodo(dataReceiver);
+}
 }

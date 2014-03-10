@@ -34,7 +34,7 @@ void VideoPlayer::init(const string &filename) {
     // open file
     auto avFormatPtr = avFormat_.get();
     if (avformat_open_input(&avFormatPtr, filename.c_str(), nullptr, nullptr) != 0) {
-        throw std::runtime_error("Error while calling avformat_open_input (probably invalid file format)");
+        throw std::runtime_error("Error while calling avformat_open_input (probably invalid file format, filename '" + filename + "')");
     }
 
     if (avformat_find_stream_info(avFormat_.get(), nullptr) < 0) {
@@ -85,14 +85,16 @@ void VideoPlayer::init(const string &filename) {
     offsetInData_ = 0;
     frameCnt_ = 0;
 
+}
 
-
+void VideoPlayer::reset() {
+    av_seek_frame(avFormat_.get(), videoStreamIndex_, 0, 0);
 }
 
 xcs::nodes::BitmapType VideoPlayer::getFrame() {
     Packet packet_;
     size_t failCounter = 0;
-    
+
     do {
         while (1) {
             packet_.reset(avFormat_.get());
@@ -144,7 +146,7 @@ xcs::nodes::BitmapType VideoPlayer::getFrame() {
         failCounter++;
 
         //rewind video
-        if(failCounter > 100) { // workaround for corrupted frames in stream
+        if (failCounter > 100) { // workaround for corrupted frames in stream
             av_seek_frame(avFormat_.get(), videoStreamIndex_, 0, 0);
             failCounter = 0;
         }

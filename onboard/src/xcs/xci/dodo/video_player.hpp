@@ -63,6 +63,7 @@ class VideoPlayer {
 public:
     VideoPlayer();
     void init(const std::string &filename);
+    void reset();
     xcs::nodes::BitmapType getFrame();
 
 private:
