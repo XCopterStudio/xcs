@@ -71,7 +71,7 @@ class SemanticReceiver {
                 if(name in data) {
                     echo("updating: " + name);
                     that.updateSlot(name, data[name]);
-                }
+                };
             };
         };
     };

@@ -8,8 +8,9 @@ var adapter = Adapter.new();
 adapter.start("127.0.0.1", 1234);
 
 // create graph nodes
-var xci = XXci.new("xci_dodo");
-//var xci = XXci.new("xci_parrot");
+var xciVersion = "xci_dodo";
+//var xciVersion = "xci_parrot";
+var xci = XXci.new(xciVersion);
 var semanticSender = SemanticSender.new(adapter, [
     "altitude" => "altitude",
     "phi" => "phi",
@@ -32,11 +33,15 @@ var f = ULineFinder.new();
 flashSender.send("Created graph nodes.");
 
 // connect graph nodes
-xci.&altitude >> semanticSender.&altitude;
-xci.&phi >> semanticSender.&phi;
-xci.&psi >> semanticSender.&psi;
-xci.&theta >> semanticSender.&theta;
-xci.&alive >> semanticSender.&alive;
+if(xciVersion == "xci_parrot") {
+    xci.&altitude >> semanticSender.&altitude;
+    xci.&phi >> semanticSender.&phi;
+    xci.&psi >> semanticSender.&psi;
+    xci.&theta >> semanticSender.&theta;
+};
+if(xciVersion == "xci_dodo") {
+    xci.&alive >> semanticSender.&alive;
+};
 
 flyParamReceiver.&roll >> xci.&roll;
 flyParamReceiver.&pitch >> xci.&pitch;
