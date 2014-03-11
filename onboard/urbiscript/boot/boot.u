@@ -2,7 +2,14 @@
 function readScripts(dirPath = nil) {
     //set default diractory
     if(dirPath == nil) {
-        dirPath = System.env["URBI_PATH"].split(";")[0];
+        dirPath = System.env["URBI_PATH"];
+        if(dirPath == nil) {
+            dirPath = "./";
+        }
+        else {
+            dirPath = dirPath.split(";")[0];
+        };
+        dirPath = Path.new(dirPath) / Path.new("boot");
     };
 
     // load diractory and read ignore files list
@@ -56,6 +63,7 @@ function readScripts(dirPath = nil) {
         };
     };
 
+    echo("Eval all loaded scripts.");
     System.eval(contents.join("\n"));
 }|;
 

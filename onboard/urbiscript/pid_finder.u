@@ -20,7 +20,7 @@ xci.xciInit();
 //xci.doCommand("Play");
 
 //xci.setConfiguration("video:video_channel", "1");
-xci.command = "TakeOff";
+//xci.command = "TakeOff";
 sleep(3s);
 xci.setConfiguration("video:video_channel", "1");
 
