@@ -2,7 +2,7 @@
 function readScripts(dirPath = nil) {
     //set default diractory
     if(dirPath == nil) {
-        dirPath = System.env["URBI_PATH"].split(";")[0];
+        dirPath = Path.new(System.env["URBI_PATH"].split(";")[0]) / Path.new("boot");
     };
 
     // load diractory and read ignore files list
