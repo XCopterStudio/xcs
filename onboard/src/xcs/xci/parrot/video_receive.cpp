@@ -17,7 +17,8 @@ void VideoReceiver::receiveVideo(const boost::system::error_code& ec){
     }
 
     if (ec){
-    
+        cerr << "Error when try connect to the parrot video socket. -> reconnect " << endl;
+        connect(ipAdress_, port_);
     }else if (socketVideo_.is_open()){
         connected_ = true;
 
@@ -37,8 +38,13 @@ void VideoReceiver::receiveVideo(const boost::system::error_code& ec){
 }
 
 void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std::size_t bytes_transferred){
+    if (end_){
+        return;
+    }
+
     if (ec){
-    
+        cerr << "Error when try receive some video data from parrot. -> reconnect " << endl;
+        connect(ipAdress_, port_);
     }
     else{
         videoDeadline_.expires_from_now(boost::posix_time::pos_infin);
@@ -99,8 +105,9 @@ bool VideoReceiver::isIFrame(uint8_t frameType){
 }
 
 void VideoReceiver::checkVideoDeadline(){
-    if (end_)
+    if (end_){
         return;
+    }
 
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
@@ -132,6 +139,10 @@ VideoReceiver::VideoReceiver(boost::asio::io_service& io_serviceVideo) : videoDe
 }
 
 void VideoReceiver::connect(std::string adress, int port){
+    if (end_){
+        return;
+    }
+
     if (connected_){
         socketVideo_.close();
         connected_ = false;
