@@ -3,3 +3,4 @@ nbproject
 build/*
 !build/.placeholder
 */CMakeLists.txt.user
+urbiscript/log
