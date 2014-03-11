@@ -47,9 +47,10 @@ void XCI_Parrot::initNetwork() {
     if (ec) {
         throw new ConnectionErrorException("Cannot connect command port.");
     }
+    threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
 
     connectNavdata();
-    std::async(std::launch::async, boost::bind(&boost::asio::io_service::run, &io_serviceData_));
+    threadReceiveNavData_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceData_)));
 
     // connect to video port
     tcp::endpoint parrotVideo(address::from_string("192.168.1.1"), PORT_VIDEO);
@@ -58,6 +59,7 @@ void XCI_Parrot::initNetwork() {
     if (ec) {
         throw new ConnectionErrorException("Cannot connect video port.");
     }
+    threadReceiveVideo_ = std::move(std::thread(&XCI_Parrot::receiveVideo, this));
 }
 
 void XCI_Parrot::sendingATCommands() {
@@ -388,12 +390,6 @@ void XCI_Parrot::init() throw (ConnectionErrorException) {
 
     // init videoDecoder
     videoDecoder_.init(AV_CODEC_ID_H264);
-
-    // start all threads
-    threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
-    //threadReceiveNavData_ = std::move(std::thread(&XCI_Parrot::receiveNavData, this));
-    threadReceiveVideo_ = std::move(std::thread(&XCI_Parrot::receiveVideo, this));
-    std::cerr << "After threads" << std::endl;
 }
 
 void XCI_Parrot::reset() {
