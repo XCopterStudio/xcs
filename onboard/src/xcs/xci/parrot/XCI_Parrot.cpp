@@ -177,21 +177,21 @@ void XCI_Parrot::checkNavdataDeadline(){
 }
 
 void XCI_Parrot::processVideoData(){
-    while (endAll_){
-        VideoFramePtr frame;
+    while (!endAll_){
+        VideoFramePtr frame = nullptr;
         if (videoReceiver.tryGetVideoFrame(frame)){
             AVPacket avPacket;
             avPacket.data = &frame->data[frame->payload_offset];
             avPacket.size = frame->payload_size - frame->payload_offset;
             if (videoDecoder_.decodeVideo(&avPacket)){
-                AVFrame* frame = videoDecoder_.decodedFrame();
+                AVFrame* avFrame = videoDecoder_.decodedFrame();
                 BitmapType bitmap;
-                bitmap.data = frame->data[0];
-                bitmap.height = frame->height;
-                bitmap.width = frame->width;
-                cerr << "Decoded frame " << endl;
+                bitmap.data = avFrame->data[0];
+                bitmap.height = avFrame->height;
+                bitmap.width = avFrame->width;
                 dataReceiver_.notify("video",bitmap);
             }
+            delete frame;
         }
         else{
             std::this_thread::sleep_for(std::chrono::milliseconds(1));

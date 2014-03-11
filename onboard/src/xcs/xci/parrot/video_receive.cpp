@@ -12,8 +12,6 @@ using namespace std;
 const unsigned int TIMEOUT = 1000; // ms
 
 void VideoReceiver::receiveVideo(const boost::system::error_code& ec){
-    cerr << "Video receive" << endl;
-
     if (end_){
         return;
     }
@@ -38,7 +36,6 @@ void VideoReceiver::receiveVideo(const boost::system::error_code& ec){
 }
 
 void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std::size_t bytes_transferred){
-    cerr << "Video received" << endl;
     if (ec){
     
     }
@@ -67,8 +64,8 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
                 receiveSize_ = sizeof(parrot_t);
 
                 if (checkPaveSignature(parrotPave_.signature)){
-                    if ((++lastFrameNumber_ != parrotPave_.frame_number) || isIFrame(parrotPave_.frame_type)){
-                        if (isIFrame(parrotPave_.frame_type) && videoFrames_.empty()){
+                    if ((++lastFrameNumber_ == parrotPave_.frame_number) || isIFrame(parrotPave_.frame_type)){
+                        if (isIFrame(parrotPave_.frame_type) && !videoFrames_.empty()){
                             std::vector<VideoFramePtr> frames = videoFrames_.popAll();
                             for (auto i : frames){
                                 delete i;
@@ -156,6 +153,6 @@ void VideoReceiver::connect(std::string adress, int port){
     //videoDeadline_.async_wait(boost::bind(&VideoReceiver::checkVideoDeadline, this));
 }
 
-bool VideoReceiver::tryGetVideoFrame(VideoFramePtr videoFrame){
+bool VideoReceiver::tryGetVideoFrame(VideoFramePtr& videoFrame){
     return videoFrames_.tryPop(videoFrame);
 }

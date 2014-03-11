@@ -70,7 +70,7 @@ class VideoReceiver{
 public:
     VideoReceiver(boost::asio::io_service& io_serviceVideo);
     void connect(std::string adress, int port);
-    bool tryGetVideoFrame(VideoFramePtr videoFrame);
+    bool tryGetVideoFrame(VideoFramePtr& videoFrame);
 };
 
 }}}
