@@ -20,7 +20,9 @@ ULineFinder::ULineFinder(const string& name) :
     UNotifyChange(video, &ULineFinder::onChangeVideo);
 
     UBindVar(ULineFinder, blurRange);
-    UBindVar(ULineFinder, autoHsvValueRange);
+    UBindVar(ULineFinder, autoHsvValueRangeEnabled);
+    UBindVar(ULineFinder, autoHsvValueRangeRatio);
+    UBindVar(ULineFinder, autoHsvValueRangeFreq);
     UBindVar(ULineFinder, hsvValueRange);
     UBindVar(ULineFinder, cannyT1);
     UBindVar(ULineFinder, cannyT2);
@@ -45,7 +47,9 @@ void ULineFinder::init() {
      * Set default parameters
      */
     blurRange = 5;
-    autoHsvValueRange = false; //TODO change to true when debugged
+    autoHsvValueRangeEnabled = true; //whether auto-thresholding is enabled
+    autoHsvValueRangeRatio = 0.25; // what part of min-max value difference is taken into value range
+    autoHsvValueRangeFreq = 30; // how often is autoadjusting done (every n-th frame)
     hsvValueRange = 120;
     cannyT1 = 200;
     cannyT2 = 200;
@@ -93,12 +97,23 @@ void ULineFinder::onChangeVideo(::urbi::UVar& uvar) {
 
 }
 
-void ULineFinder::adjustFrame(cv::Mat image) {
-    if (!static_cast<bool> (autoHsvValueRange)) {
+void ULineFinder::adjustValueRange(cv::Mat hsvImage) {
+    if (!static_cast<bool> (autoHsvValueRangeEnabled)) {
         return;
     }
-    cv::Scalar mean = cv::mean(image);
-    cerr << "Mean: " << mean << ", " << endl;
+
+    cv::Mat hue(hsvImage.rows, hsvImage.cols, CV_8UC1);
+    cv::Mat saturation(hsvImage.rows, hsvImage.cols, CV_8UC1);
+    cv::Mat value(hsvImage.rows, hsvImage.cols, CV_8UC1);
+    cv::Mat splitted[] = {hue, saturation, value};
+    cv::split(hsvImage, splitted);
+
+    double minVal(0), maxVal(0);
+    cv::Point minLoc, maxLoc;
+    cv::minMaxLoc(value, &minVal, &maxVal, &minLoc, &maxLoc);
+    double diff = maxVal - minVal;
+
+    hsvValueRange = static_cast<int> (minVal + diff * static_cast<double> (autoHsvValueRangeRatio));
 }
 
 void ULineFinder::processFrame() {
@@ -112,8 +127,6 @@ void ULineFinder::processFrame() {
     cv::Mat src(lastFrame_.height, lastFrame_.width, CV_8UC3, lastFrame_.data);
     cv::Mat mid;
 
-    //adjustFrame(src);
-
     /*
      * 1. Denoise
      */
@@ -124,6 +137,11 @@ void ULineFinder::processFrame() {
      */
     // convert to HSV
     cv::cvtColor(mid, mid, CV_BGR2HSV);
+
+    if (lastProcessedFrameNo_ % static_cast<int> (autoHsvValueRangeFreq) == 0) {
+        adjustValueRange(mid); // adjusting on blurred and HSV image
+    }
+
     // highlight ROI (region of interest)
     cv::inRange(mid, cv::Scalar(0, 0, 0), cv::Scalar(255, 255, static_cast<double> (hsvValueRange)), mid);
     cv::imshow("HSV->InRange", mid);
@@ -180,8 +198,7 @@ void ULineFinder::processFrame() {
         cv::circle(src, imageCenter_, abs(dev), color, 3, CV_AA);
         cv::line(src, cv::Point(avg[0], avg[1]), cv::Point(avg[2], avg[3]), cv::Scalar(0, 0, 255), 3, CV_AA);
         cv::circle(src, cv::Point(avg[2], avg[3]), 5, cv::Scalar(0, 0, 255), 3, CV_AA);
-    }
-    else {
+    } else {
         hasLine = false;
         distance = 0;
         deviation = 0;
