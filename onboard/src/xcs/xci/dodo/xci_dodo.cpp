@@ -25,6 +25,7 @@ const std::string XciDodo::CMD_VIDEO_LOAD_ = "Load";
 const std::string XciDodo::CMD_VIDEO_PLAY_ = "Play";
 const std::string XciDodo::CMD_VIDEO_PAUSE_ = "Pause";
 const std::string XciDodo::CMD_VIDEO_STOP_ = "Stop";
+const std::string XciDodo::CMD_VIDEO_STEP_ = "Step";
 
 const std::string XciDodo::CONFIG_VIDEO_FILENAME = "video:filename";
 const std::string XciDodo::CONFIG_VIDEO_FPS = "video:fps";
@@ -33,7 +34,8 @@ const SpecialCMDList XciDodo::specialCommands_({
     XciDodo::CMD_VIDEO_LOAD_,
     XciDodo::CMD_VIDEO_PLAY_,
     XciDodo::CMD_VIDEO_PAUSE_,
-    XciDodo::CMD_VIDEO_STOP_
+    XciDodo::CMD_VIDEO_STOP_,
+    XciDodo::CMD_VIDEO_STEP_
 });
 
 /*
@@ -93,6 +95,9 @@ void XciDodo::command(const std::string& command) {
                 throw runtime_error("Cannot execute command in loaded state.");
             } else if (command == CMD_VIDEO_PLAY_) {
                 videoStatus_ = VIDEO_PLAYING;
+            } else if (command == CMD_VIDEO_STEP_) {
+                videoStatus_ = VIDEO_PAUSED;
+                renderFrame();
             } else if (command == CMD_VIDEO_PAUSE_) {
                 videoStatus_ = VIDEO_PAUSED;
             } else if (command == CMD_VIDEO_STOP_) {
@@ -111,20 +116,22 @@ void XciDodo::flyParam(float roll, float pitch, float yaw, float gaz) {
 
 void XciDodo::sensorGenerator() {
     size_t clock = 0;
-    size_t frameNo = 0;
     while (1) {
         if (clock % (1000 / ALIVE_FREQ_) == 0) {
             dataReceiver_.notify("alive", true);
         }
         if (clock % (1000 / videoFps_) == 0 && videoStatus_ == VIDEO_PLAYING) {
-            BitmapType frame = videoPlayer_.getFrame();
-            dataReceiver_.notify("video", frame);
-            frameNo++;
+            renderFrame();
         }
 
         clock += SENSOR_PERIOD_;
         this_thread::sleep_for(chrono::milliseconds(SENSOR_PERIOD_));
     }
+}
+
+void XciDodo::renderFrame() {
+    BitmapType frame = videoPlayer_.getFrame();
+    dataReceiver_.notify("video", frame);
 }
 
 std::string XciDodo::configuration(const std::string & key) {

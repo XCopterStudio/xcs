@@ -97,6 +97,7 @@ private:
     static const std::string CMD_VIDEO_PLAY_;
     static const std::string CMD_VIDEO_PAUSE_;
     static const std::string CMD_VIDEO_STOP_;
+    static const std::string CMD_VIDEO_STEP_;
     
     static const SpecialCMDList specialCommands_;
 
@@ -116,6 +117,8 @@ private:
 
     //! Generates dummy data for sensors
     void sensorGenerator();
+    
+    void renderFrame();
 
 };
 }
