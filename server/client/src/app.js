@@ -6,9 +6,9 @@ gSocket = io.connect('http://localhost:3000');
 
 var router = Backbone.Router.extend({
     routes : {
-	"manual	": "manual"
+        "manual": "manual"
     },
-    
+
     manual : function () {
 	var view = new ManualControl({model: null});
     }
@@ -16,7 +16,7 @@ var router = Backbone.Router.extend({
 
 $(function () {
     'use strict';
-    
+
     app = new AppView();
     app.XcopterState = new XcopterState();
     app.Flash = new FlashMessagesView();
