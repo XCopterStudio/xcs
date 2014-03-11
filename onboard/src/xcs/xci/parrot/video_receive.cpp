@@ -9,7 +9,7 @@ using namespace boost::asio;
 using namespace boost::asio::ip;
 using namespace std;
 
-const unsigned int TIMEOUT = 1000; // ms
+const unsigned int VideoReceiver::TIMEOUT = 1000; // ms
 
 void VideoReceiver::receiveVideo(const boost::system::error_code& ec){
     if (end_){
@@ -21,6 +21,7 @@ void VideoReceiver::receiveVideo(const boost::system::error_code& ec){
     }else if (socketVideo_.is_open()){
         connected_ = true;
 
+        videoDeadline_.expires_from_now(boost::posix_time::millisec(TIMEOUT));
         if (!receivedHeader_){
             int index = sizeof(parrot_t)-receiveSize_;
             socketVideo_.async_receive(boost::asio::buffer(&((uint8_t *)&parrotPave_)[index], receiveSize_), boost::bind(&VideoReceiver::handleReceivedVideo, this, _1, _2));
@@ -40,6 +41,8 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
     
     }
     else{
+        videoDeadline_.expires_from_now(boost::posix_time::pos_infin);
+
         receiveSize_ -= bytes_transferred;
         if (receiveSize_ == 0){
             if (!receivedHeader_){
@@ -145,12 +148,13 @@ void VideoReceiver::connect(std::string adress, int port){
     port_ = port;
 
     tcp::endpoint parrotVideo(address::from_string(ipAdress_), port_);
-    //videoDeadline_.expires_from_now(boost::posix_time::millisec(TIMEOUT));
+    videoDeadline_.expires_from_now(boost::posix_time::millisec(TIMEOUT));
 
+    cerr << "Try connect to the video port" << endl;
     socketVideo_.async_connect(parrotVideo,
         boost::bind(&VideoReceiver::receiveVideo, this, _1));
 
-    //videoDeadline_.async_wait(boost::bind(&VideoReceiver::checkVideoDeadline, this));
+    videoDeadline_.async_wait(boost::bind(&VideoReceiver::checkVideoDeadline, this));
 }
 
 bool VideoReceiver::tryGetVideoFrame(VideoFramePtr& videoFrame){
