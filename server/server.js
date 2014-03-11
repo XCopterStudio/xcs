@@ -27,28 +27,31 @@ http.listen(server.get('port'), function () {
 });
 
 // Listen for Onboard
-var connection;
+var onboard = null;
 var com = net.createServer(function (conn) {
-    if (connection) {
-	console.log('Attempting Onboard connect. There\'s one connection already!');
+    if (onboard) {
+        console.log('Attempting Onboard connect. There\'s one connection already!');
+        return;
     }
-    connection = conn;
+    onboard = conn;
     console.log('Onboard CONNECTED');
     conn.on('end', function () {
-	connection = null;
-	console.log('Onboard DISCONNECTED');
+    	onboard = null;
+    	console.log('Onboard DISCONNECTED');
     });
     // Routing data from onboard to client
     conn.on('data', function (data) {
-	try {
-	    var parsed = JSON.parse(data);
-	} catch (e) {
-	    parsed = null
-	}
-	
-	if (client && parsed)
-	    client.emit('data', parsed);
-        console.log(parsed);
+        try {
+            var parsed = JSON.parse(data);
+        } catch (e) {
+            parsed = null;
+            console.log(e.message);
+        }
+
+        if (client && parsed) {
+            console.log("JSON from onboard parsed.");
+            client.emit('data', parsed);
+        }
     });
 });
 com.listen(1234, function () {
@@ -59,17 +62,20 @@ com.listen(1234, function () {
 var client = null;
 io.sockets.on('connection', function (socket) {
     client = socket;
+    // handling states
+    socket.on('disconnect', function () {
+        client = null;
+    })
     // handling manual control
     socket.on('init_manual', function () {
-	
     });
     socket.on('manual', function (cmd) {
-	if (connection)
-	    connection.write(cmd + '\n');
-	console.log('Client COMMAND: ' + cmd);
+        if (onboard) {
+            onboard.write(cmd + '\n');
+        }
+        console.log('Client COMMAND: ' + cmd);
     });
     socket.on('term_manual', function () {
-	
     });
 });
 
