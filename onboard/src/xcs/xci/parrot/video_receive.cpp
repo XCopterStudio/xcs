@@ -18,7 +18,8 @@ void VideoReceiver::receiveVideo(const boost::system::error_code& ec){
 
     if (ec){
         cerr << "Error when try connect to the parrot video socket. -> reconnect " << endl;
-        connect(ipAdress_, port_);
+        cerr << ec.value() << endl;
+        //connect(ipAdress_, port_);
     }else if (socketVideo_.is_open()){
         connected_ = true;
 
@@ -44,7 +45,8 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
 
     if (ec){
         cerr << "Error when try receive some video data from parrot. -> reconnect " << endl;
-        connect(ipAdress_, port_);
+        cerr << ec.value() << endl;
+        //connect(ipAdress_, port_);
     }
     else{
         videoDeadline_.expires_from_now(boost::posix_time::pos_infin);
