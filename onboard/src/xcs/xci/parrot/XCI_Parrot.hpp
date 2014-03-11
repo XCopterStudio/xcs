@@ -14,6 +14,7 @@
 #include "options_visitor.hpp"
 #include <xcs/xci/connection_error_exception.hpp>
 #include "video_decode.hpp"
+#include "video_receive.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/asio/deadline_timer.hpp>
@@ -51,9 +52,6 @@ class XCI_Parrot : public virtual XCI {
     uint32_t sequenceNumberCMD_;
     uint32_t sequenceNumberData_;
 
-    // Last video frame number
-    uint32_t frameNumber_;
-
     // queue for at commands
     Tsqueue<AtCommand*> atCommandQueue_;
 
@@ -69,25 +67,24 @@ class XCI_Parrot : public virtual XCI {
     // threads
     std::thread threadSendingATCmd_;
     std::thread threadReceiveNavData_;
-    std::thread threadReceiveVideo_;
+    std::thread threadReadVideoData_;
 
     // end all thread
     volatile std::atomic<bool> endAll_;
 
     boost::asio::io_service io_serviceCMD_;
     boost::asio::io_service io_serviceData_;
-    boost::asio::io_service io_serviceVideo_;
 
     boost::asio::deadline_timer navdataDeadline_;
 
     boost::asio::ip::udp::socket *socketCMD_;
     boost::asio::ip::udp::socket *socketData_;
-    boost::asio::ip::tcp::socket *socketVideo_;
+
+    VideoReceiver videoReceiver;
 
     void initNetwork();
     void sendingATCommands();
     void receiveNavData();
-    void receiveVideo();
 
     bool checkPaveSignature(uint8_t signature[4]);
 
@@ -97,6 +94,8 @@ class XCI_Parrot : public virtual XCI {
     void handleReceivedNavdata(const boost::system::error_code& ec, std::size_t bytes_transferred);
     void checkNavdataDeadline();
 
+    void processVideoData();
+
     void initNavdataReceive();
     void processState(uint32_t droneState);
     void processNavdata(std::vector<OptionAcceptor*> &options);
@@ -105,7 +104,7 @@ class XCI_Parrot : public virtual XCI {
 
 public:
 
-    XCI_Parrot(DataReceiver &dataReceiver) : XCI(dataReceiver), navdataDeadline_(io_serviceData_) {
+    XCI_Parrot(DataReceiver &dataReceiver) : XCI(dataReceiver), navdataDeadline_(io_serviceData_), videoReceiver(io_serviceData_) {
     };
     //! Initialize XCI for use
     void init() throw (ConnectionErrorException);

@@ -58,6 +58,17 @@ public:
 		queue_.push(value); // Push new element to the queue.
 		emptyCondition_.notify_one(); // Wakes up one waiting process on the empty condition.
 	}
+
+    std::vector<T> popAll(){
+        std::lock_guard<std::mutex> lck(lock_); //! Acquire lock for safe access to the STL queue
+        std::vector<T> allData;
+        while (!queue_.empty()){
+            allData.push_back(std::move(queue_.front()));
+            queue_.pop();
+        }
+
+        return allData;
+    }
 };
 
 }
