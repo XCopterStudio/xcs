@@ -140,6 +140,15 @@ VideoReceiver::VideoReceiver(boost::asio::io_service& io_serviceVideo, std::stri
     lastFrameNumber_ = 0;
 }
 
+VideoReceiver::~VideoReceiver(){
+	end_ = true;
+	socketVideo_.close();
+	vector<VideoFramePtr> frames = videoFrames_.popAll();
+	for (auto frame : frames){
+		delete frame;
+	}
+}
+
 void VideoReceiver::connect(){
     if (end_){
         return;
