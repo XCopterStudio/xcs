@@ -44,9 +44,7 @@ class VideoReceiver{
 
     boost::asio::deadline_timer videoDeadline_;
     boost::asio::ip::tcp::socket socketVideo_;
-
-    std::string ipAdress_;
-    unsigned int port_;
+	boost::asio::ip::tcp::endpoint parrotVideo;
 
     Tsqueue<VideoFramePtr> videoFrames_;
 
@@ -68,8 +66,8 @@ class VideoReceiver{
     bool isIFrame(uint8_t frameType);
     void checkVideoDeadline();
 public:
-    VideoReceiver(boost::asio::io_service& io_serviceVideo);
-    void connect(std::string adress, int port);
+    VideoReceiver(boost::asio::io_service& io_serviceVideo, std::string ipAdress, unsigned int port);
+    void connect();
     bool tryGetVideoFrame(VideoFramePtr& videoFrame);
 };
 

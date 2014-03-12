@@ -38,9 +38,8 @@ void XCI_Parrot::initNetwork() {
     boost::system::error_code ec;
 
     // connect to cmd port
-    udp::endpoint parrotCMD(address::from_string("192.168.1.1"), PORT_CMD);
-    socketCMD_ = new udp::socket(io_serviceCMD_);
-    socketCMD_->connect(parrotCMD, ec);
+	socketCMD_.open(udp::v4());
+    socketCMD_.connect(parrotCMD_, ec);
     if (ec) {
         throw new ConnectionErrorException("Cannot connect command port.");
     }
@@ -50,7 +49,7 @@ void XCI_Parrot::initNetwork() {
     threadReceiveNavData_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceData_)));
 
     // connect to video port
-    videoReceiver.connect("192.168.1.1", PORT_VIDEO);    
+    videoReceiver.connect();    
 }
 
 void XCI_Parrot::sendingATCommands() {
@@ -67,7 +66,7 @@ void XCI_Parrot::sendingATCommands() {
 
             unsigned int newSize = packetString.str().size() + cmdString.size() + 1; // one for new line 
             if (newSize > AT_CMD_PACKET_SIZE || atCommandQueue_.empty()) { // send prepared packet
-                socketCMD_->send(boost::asio::buffer(packetString.str(), packetString.str().size()));
+                socketCMD_.send(boost::asio::buffer(packetString.str(), packetString.str().size()));
                 // clear packet string
                 packetString.str(std::string());
                 packetString.clear();
@@ -97,16 +96,15 @@ void XCI_Parrot::receiveNavData() {
     }
 
     navdataDeadline_.expires_from_now(boost::posix_time::seconds(1));
-    socketData_->async_receive(boost::asio::buffer(navdataBuffer,NAVDATA_MAX_SIZE), boost::bind(&XCI_Parrot::handleReceivedNavdata,this,_1,_2));
+    socketData_.async_receive(boost::asio::buffer(navdataBuffer,NAVDATA_MAX_SIZE), boost::bind(&XCI_Parrot::handleReceivedNavdata,this,_1,_2));
 }
 
 void XCI_Parrot::connectNavdata() {
     // connect to navdata port
-    udp::endpoint parrotData(address::from_string("192.168.1.1"), PORT_DATA);
-    socketData_ = new udp::socket(io_serviceData_);
+	socketData_.open(udp::v4());
 
     navdataDeadline_.expires_from_now(boost::posix_time::seconds(1));
-    socketData_->async_connect(parrotData, 
+    socketData_.async_connect(parrotData_, 
         boost::bind(&XCI_Parrot::handleConnectedNavdata,this,_1));
     
     navdataDeadline_.async_wait(boost::bind(&XCI_Parrot::checkNavdataDeadline, this));
@@ -118,7 +116,7 @@ void XCI_Parrot::handleConnectedNavdata(const boost::system::error_code& ec){
         return;
     }
 
-    if (socketData_->is_open() && !ec){
+    if (socketData_.is_open() && !ec){
         initNavdataReceive();
     }
     else{
@@ -163,8 +161,7 @@ void XCI_Parrot::checkNavdataDeadline(){
     {
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled.
-        socketData_->close();
-        delete socketData_;
+        socketData_.close();
 
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
@@ -207,7 +204,7 @@ void XCI_Parrot::initNavdataReceive() {
     // magic
     int32_t flag = 1; // 1 - unicast, 2 - multicast
     navdataDeadline_.expires_from_now(boost::posix_time::seconds(1));
-    socketData_->async_send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)),boost::bind(&XCI_Parrot::receiveNavData,this));
+    socketData_.async_send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)),boost::bind(&XCI_Parrot::receiveNavData,this));
 }
 
 void XCI_Parrot::processState(uint32_t droneState) {
@@ -430,10 +427,8 @@ XCI_Parrot::~XCI_Parrot() {
     endAll_ = true;
 
     //delete all socket
-    socketCMD_->close();
-    socketData_->close();
-    delete socketCMD_;
-    delete socketData_;
+    socketCMD_.close();
+    socketData_.close();
     // wait for atCMDThread end and then clear memory
     threadSendingATCmd_.join();
     threadReceiveNavData_.join();

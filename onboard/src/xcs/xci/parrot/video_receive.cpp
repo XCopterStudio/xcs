@@ -123,7 +123,7 @@ void VideoReceiver::checkVideoDeadline(){
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
         videoDeadline_.expires_at(boost::posix_time::pos_infin);
-        connect(ipAdress_,port_);
+        connect();
     }
 
     // Put the actor back to sleep.
@@ -133,14 +133,14 @@ void VideoReceiver::checkVideoDeadline(){
 
 // ===================== public functions ========================================
 
-VideoReceiver::VideoReceiver(boost::asio::io_service& io_serviceVideo) : videoDeadline_(io_serviceVideo), socketVideo_(io_serviceVideo){
+VideoReceiver::VideoReceiver(boost::asio::io_service& io_serviceVideo, std::string ipAdress, unsigned int port) : videoDeadline_(io_serviceVideo), socketVideo_(io_serviceVideo), parrotVideo(address::from_string(ipAdress),port){
     end_ = false;
     lastFrame_ = nullptr;
     connected_ = false;
     lastFrameNumber_ = 0;
 }
 
-void VideoReceiver::connect(std::string adress, int port){
+void VideoReceiver::connect(){
     if (end_){
         return;
     }
@@ -157,13 +157,10 @@ void VideoReceiver::connect(std::string adress, int port){
     receivedHeader_ = false;
     receiveSize_ = sizeof(parrot_t);
 
-    ipAdress_ = adress;
-    port_ = port;
-
-    tcp::endpoint parrotVideo(address::from_string(ipAdress_), port_);
     videoDeadline_.expires_from_now(boost::posix_time::millisec(TIMEOUT));
 
     cerr << "Try connect to the video port" << endl;
+	socketVideo_.open(tcp::v4());
     socketVideo_.async_connect(parrotVideo,
         boost::bind(&VideoReceiver::receiveVideo, this, _1));
 
