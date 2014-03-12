@@ -53,6 +53,7 @@ function readScripts(dirPath = nil) {
             for(var f : files) {
                 contents += f.second;
                 echo("loading file (without priority): " + f.first);
+                load(f.first);
             };
             files.clear();
         }
@@ -60,11 +61,10 @@ function readScripts(dirPath = nil) {
             contents += files[lowerPriorFile];
             files.erase(lowerPriorFile);
             echo("loading file (priority=" + lowerPrior + "): " + lowerPriorFile);
+            load(lowerPriorFile);
         };
     };
 
-    echo("Eval all loaded scripts.");
-    System.eval(contents.join("\n"));
 }|;
 
 readScripts();
