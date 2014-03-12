@@ -1,9 +1,11 @@
+load("boot/boot.u");
+
 /*
  * Dataflow graph
  */
  
-// var xciVersion = "xci_dodo";
-var xciVersion = "xci_parrot";
+var xciVersion = "xci_dodo";
+//var xciVersion = "xci_parrot";
 var xci = XXci.new(xciVersion);
 var f = ULineFinder.new();
 xci.&video >> f.&video;

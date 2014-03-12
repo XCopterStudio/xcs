@@ -15,11 +15,11 @@ class Aligner{
     };
 
     function pidLoop(pidParams, value){
-    pidParams.sumI += value;
-    var derivation = value - pidParams.lastValue;
-    pidParams.lastValue = value;
-  
-    return pidParams.p*value + pidParams.i*pidParams.sumI + pidParams.d*derivation; 
+        pidParams.sumI += value;
+        var derivation = value - pidParams.lastValue;
+        pidParams.lastValue = value;
+
+        return pidParams.p*value + pidParams.i*pidParams.sumI + pidParams.d*derivation; 
     };
 
     function adjustRoll(){
