@@ -67,6 +67,7 @@ class XCI_Parrot : public virtual XCI {
     // threads
     std::thread threadSendingATCmd_;
     std::thread threadReceiveNavData_;
+	std::thread threadReadVideoReceiver_;
     std::thread threadReadVideoData_;
 
     // end all thread
@@ -74,6 +75,7 @@ class XCI_Parrot : public virtual XCI {
 
     boost::asio::io_service io_serviceCMD_;
     boost::asio::io_service io_serviceData_;
+	boost::asio::io_service io_serviceVideo_;
 
     boost::asio::deadline_timer navdataDeadline_;
 
@@ -113,7 +115,7 @@ public:
       parrotData_(boost::asio::ip::address::from_string(ipAddress), PORT_DATA),
       socketCMD_(io_serviceCMD_),
       socketData_(io_serviceData_),
-      videoReceiver(io_serviceData_, ipAddress, PORT_VIDEO) {
+	  videoReceiver(io_serviceVideo_, ipAddress, PORT_VIDEO) {
     };
     //! Initialize XCI for use
     void init() throw (ConnectionErrorException);

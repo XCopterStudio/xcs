@@ -46,11 +46,12 @@ void XCI_Parrot::initNetwork() {
     threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
 
     connectNavdata();
-	navdataDeadline_.async_wait(boost::bind(&XCI_Parrot::checkNavdataDeadline, this));
-    threadReceiveNavData_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceData_)));
+	// connect to video port
+	videoReceiver.connect();
 
-    // connect to video port
-    videoReceiver.connect();    
+	threadReadVideoReceiver_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceVideo_)));
+	threadReceiveNavData_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceData_)));
+	navdataDeadline_.async_wait(boost::bind(&XCI_Parrot::checkNavdataDeadline, this));
 }
 
 void XCI_Parrot::sendingATCommands() {
