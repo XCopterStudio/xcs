@@ -17,8 +17,7 @@ void VideoReceiver::receiveVideo(const boost::system::error_code& ec){
     }
 
     if (ec){
-        cerr << "Error when try connect to the parrot video socket. -> reconnect " << endl;
-        cerr << ec.value() << endl;
+		cerr << "Error " << ec.value() << " cannot connect to the parrot video socket." << endl;
         //connect(ipAdress_, port_);
     }else if (socketVideo_.is_open()){
         connected_ = true;
@@ -44,8 +43,7 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
     }
 
     if (ec){
-        cerr << "Error when try receive some video data from parrot. -> reconnect " << endl;
-        cerr << ec.value() << endl;
+		cerr << "Error " << ec.value() << " cannot receive some video data from parrot." << endl;
         //connect(ipAdress_, port_);
     }
     else{
@@ -77,6 +75,7 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
                 if (checkPaveSignature(parrotPave_.signature)){
                     if ((++lastFrameNumber_ == parrotPave_.frame_number) || isIFrame(parrotPave_.frame_type)){
                         if (isIFrame(parrotPave_.frame_type) && !videoFrames_.empty()){
+							cerr << "Delete frames from video queue." << endl;
                             std::vector<VideoFramePtr> frames = videoFrames_.popAll();
                             for (auto i : frames){
                                 delete i;
