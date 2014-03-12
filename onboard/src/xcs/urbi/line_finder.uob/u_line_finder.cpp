@@ -50,7 +50,6 @@ ULineFinder::ULineFinder(const string& name) :
 
     UBindVarRename(ULineFinder, distanceUVar, "distance");
     UBindVarRename(ULineFinder, deviationUVar, "deviation");
-    UBindVar(ULineFinder, line);
     UBindVar(ULineFinder, hasLine);
 }
 
@@ -73,8 +72,8 @@ void ULineFinder::init() {
     houghT = 70;
     houghMinLength = 100;
     houghMaxGap = 40;
-    distanceAging = 0.05;       // how much previous distance is taken into account
-    deviationAging = 0.2;       // how much previous deviation is taken into account
+    distanceAging = 0.05; // how much previous distance is taken into account
+    deviationAging = 0.2; // how much previous deviation is taken into account
     hystDirThreshold = M_PI / 3; // angle in radians for hysteresis filtering
     hystCenterThreshold = 0.2; // distance in relative units for hysteresis filtering
     hystForgetRatio = 0.9; // forgetting factor (1 = no forgetting factor, 0 = no remembering)
@@ -84,7 +83,6 @@ void ULineFinder::init() {
      */
     distanceUVar = 0;
     deviationUVar = 0;
-    line = vector<int>(4, 0);
     hasLine = lineType_ != LINE_NONE;
 
     cv::namedWindow("HSV->InRange", cv::WINDOW_AUTOSIZE);
@@ -293,7 +291,6 @@ void ULineFinder::useRememberedLine() {
         case LINE_NONE:// when nothing present even death rejects (how to write this in English?)
             distance_ = DEFAULT_DISTANCE;
             deviation_ = DEFAULT_DEVIATION;
-            line = RawLineType(4, 0);
             break;
         case LINE_VISUAL:
             hystStrength_ = 1; // fresh memory is 100%
@@ -334,8 +331,9 @@ cv::vector<ULineFinder::RawLineType> ULineFinder::useOnlyGoodLines(cv::vector<UL
         centerDiff = abs(centerDiff);
         centerDiff /= distanceUnit_; // normalize for relative units
 
-        // TODO involve hystStrength in thresholding
-        if (dirDiff <= static_cast<double> (hystDirThreshold) && centerDiff <= static_cast<double> (hystCenterThreshold)) {
+        // hystStrength effectively broadens search region
+        auto factor = (lineType_ == LINE_VISUAL) ? 1 : hystStrength_;
+        if (factor * dirDiff <= static_cast<double> (hystDirThreshold) && factor * centerDiff <= static_cast<double> (hystCenterThreshold)) {
             result.push_back(lineCandidate);
         }
     }

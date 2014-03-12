@@ -46,7 +46,6 @@ public:
      */
     ::urbi::UVar distanceUVar;
     ::urbi::UVar deviationUVar;
-    ::urbi::UVar line;
     ::urbi::UVar hasLine;
 
     ULineFinder(const std::string &);
