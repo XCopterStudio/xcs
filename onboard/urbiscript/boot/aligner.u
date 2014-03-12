@@ -2,19 +2,19 @@ class Aligner{
 
     var xci;
     var finder;
-    var rollPIDParam;
-    var yawPIDParam;
+    var rollPidParam;
+    var yawPidParam;
     var tyaw = Tag.new("tyaw");
     var troll = Tag.new("troll"); 
 
-    function init(xci, finder, rollPIDParam, yawPIDParam) {
+    function init(xci, finder, rollPidParam, yawPidParam) {
         this.xci = xci;
         this.finder = finder;
-        this.rollPIDParam = rollPIDParam;
-        this.yawPIDParam = yawPIDParam;
+        this.rollPidParam = rollPidParam;
+        this.yawPidParam = yawPidParam;
     };
 
-    function PIDLoop(pidParams, value){
+    function pidLoop(pidParams, value){
     pidParams.sumI += value;
     var derivation = value - pidParams.lastValue;
     pidParams.lastValue = value;
@@ -25,7 +25,7 @@ class Aligner{
     function adjustRoll(){
         this.troll: every(100ms){ 
             var distance = finder.distance / 640;
-            var roll = PIDLoop(rollPIDParam,distance);
+            var roll = pidLoop(rollPidParam,distance);
             echo(roll);
             xci.roll = roll; 
         },
@@ -35,7 +35,7 @@ class Aligner{
         this.tyaw: every(100ms){
            //var deviation = finder.getDeviation();
            var deviation = 0;
-           var yaw = PIDLoop(yawPIDParam,deviation);
+           var yaw = pidLoop(yawPidParam,deviation);
            echo(yaw);
            //xci.yaw = yaw; 
         },

@@ -1,11 +1,11 @@
-class PIDParams{
+class PidParams {
     var p = 0.0;
     var i = 0.0;
     var d = 0.0;
     var sumI = 0.0;
     var lastValue = 0.0;
 
-    function init(p,i,d){
+    function init(p,i,d) {
         this.p = p;
         this.i = i;
         this.d = d;
