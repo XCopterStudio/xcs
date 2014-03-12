@@ -14,6 +14,8 @@ xci.&video >> f.&video;
 f.hsvValueRange = 6; //20;
 f.houghRho = 1;
 
+serverConnect("127.0.0.1", 1234, xci, xciVersion);
+
 xci.xciInit();
 
 // 4 DODO
@@ -31,7 +33,7 @@ if(xciVersion == "xci_parrot") {
     xci.setConfiguration("video:video_channel", "1");
 };
 
-var rollPidParam = PidParams.new(0.25,0,0);
+var rollPidParam = PidParams.new(0.3,0,-0.8);
 var yawPidParam = PidParams.new(0,0,0);
 var aligner = Aligner.new(xci,f,rollPidParam,yawPidParam);
 //aligner.adjustRoll() , aligner.adjustYaw();
