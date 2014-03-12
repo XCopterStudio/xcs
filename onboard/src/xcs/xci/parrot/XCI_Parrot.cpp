@@ -168,9 +168,6 @@ void XCI_Parrot::checkNavdataDeadline(){
         navdataDeadline_.expires_at(boost::posix_time::pos_infin);
         connectNavdata();
     }
-
-    // Put the actor back to sleep.
-    navdataDeadline_.async_wait(boost::bind(&XCI_Parrot::checkNavdataDeadline, this));
 }
 
 void XCI_Parrot::processVideoData(){
