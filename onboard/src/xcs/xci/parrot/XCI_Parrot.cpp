@@ -46,6 +46,7 @@ void XCI_Parrot::initNetwork() {
     threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
 
     connectNavdata();
+	navdataDeadline_.async_wait(boost::bind(&XCI_Parrot::checkNavdataDeadline, this));
     threadReceiveNavData_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceData_)));
 
     // connect to video port
@@ -106,8 +107,6 @@ void XCI_Parrot::connectNavdata() {
     navdataDeadline_.expires_from_now(boost::posix_time::seconds(1));
     socketData_.async_connect(parrotData_, 
         boost::bind(&XCI_Parrot::handleConnectedNavdata,this,_1));
-    
-    navdataDeadline_.async_wait(boost::bind(&XCI_Parrot::checkNavdataDeadline, this));
 };
 
 
@@ -117,7 +116,9 @@ void XCI_Parrot::handleConnectedNavdata(const boost::system::error_code& ec){
     }
 
     if (socketData_.is_open() && !ec){
-        initNavdataReceive();
+		int32_t flag = 1; // 1 - unicast, 2 - multicast
+		navdataDeadline_.expires_from_now(boost::posix_time::seconds(1));
+		socketData_.async_send(boost::asio::buffer((uint8_t*)(&flag), sizeof (int32_t)), boost::bind(&XCI_Parrot::receiveNavData, this));
     }
     else{
         // cannot open navdata port
@@ -133,7 +134,7 @@ void XCI_Parrot::handleReceivedNavdata(const boost::system::error_code& ec, std:
         //TODO:
     }
     
-    navdataDeadline_.expires_from_now(boost::posix_time::pos_infin);
+    navdataDeadline_.expires_at(boost::posix_time::pos_infin);
 
     Navdata* navdata = (Navdata*)& navdataBuffer[0];
     if (navdata->sequence > sequenceNumberData_ && navdata->header == 0x55667788) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
@@ -168,6 +169,8 @@ void XCI_Parrot::checkNavdataDeadline(){
         navdataDeadline_.expires_at(boost::posix_time::pos_infin);
         connectNavdata();
     }
+
+	navdataDeadline_.async_wait(boost::bind(&XCI_Parrot::checkNavdataDeadline, this));
 }
 
 void XCI_Parrot::processVideoData(){
@@ -193,17 +196,6 @@ void XCI_Parrot::processVideoData(){
     }
 }
 
-// function for navdata handling
-
-void XCI_Parrot::initNavdataReceive() {
-    if (endAll_)
-        return;
-    // magic
-    int32_t flag = 1; // 1 - unicast, 2 - multicast
-    navdataDeadline_.expires_from_now(boost::posix_time::seconds(1));
-    socketData_.async_send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)),boost::bind(&XCI_Parrot::receiveNavData,this));
-}
-
 void XCI_Parrot::processState(uint32_t droneState) {
     state_.updateState(droneState);
 
@@ -222,7 +214,7 @@ void XCI_Parrot::processState(uint32_t droneState) {
 
     if (state_.getState(FLAG_ARDRONE_COM_LOST_MASK)) { // TODO: check what exactly mean reinitialize the communication with the drone
         sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
-        initNavdataReceive();
+        //initNavdataReceive();
     }
 }
 

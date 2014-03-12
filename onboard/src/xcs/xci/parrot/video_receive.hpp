@@ -47,8 +47,6 @@ class VideoReceiver{
 	boost::asio::ip::tcp::endpoint parrotVideo;
 
     Tsqueue<VideoFramePtr> videoFrames_;
-
-    bool connected_;
   
     bool receivedHeader_;
     bool differentHeaderSize_;
