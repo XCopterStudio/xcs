@@ -42,3 +42,7 @@ function serverConnect(ip, port, xci, xciVersion = "xci_parrot") {
 
     flashSender.send("Connected graph nodes.");
 }|;
+
+function Global.crop(value, max) {
+    if(value.abs() > max) value.sign() * max else value; // pseudo-ternary operator
+}|;

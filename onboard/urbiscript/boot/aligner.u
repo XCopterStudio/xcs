@@ -25,7 +25,7 @@ class Aligner{
     function adjustRoll(){
         this.troll: every(100ms){ 
             var distance = finder.distance / 640;
-            var roll = pidLoop(rollPidParam,distance);
+            var roll = Global.crop(pidLoop(rollPidParam,distance), 1);
             echo(roll);
             xci.roll = roll; 
         },
