@@ -116,6 +116,7 @@ void VideoReceiver::checkVideoDeadline(){
     {
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled.
+		cerr << "Close VideoReceiver socket" << endl;
         socketVideo_.close();
 
         // There is no longer an active deadline. The expiry is set to positive
