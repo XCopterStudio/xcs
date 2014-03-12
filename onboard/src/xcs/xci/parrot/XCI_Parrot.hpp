@@ -77,8 +77,8 @@ class XCI_Parrot : public virtual XCI {
 
     boost::asio::deadline_timer navdataDeadline_;
 
-	boost::asio::ip::udp::endpoint parrotCMD_;
-	boost::asio::ip::udp::endpoint parrotData_;
+    boost::asio::ip::udp::endpoint parrotCMD_;
+    boost::asio::ip::udp::endpoint parrotData_;
 
     boost::asio::ip::udp::socket socketCMD_;
     boost::asio::ip::udp::socket socketData_;
@@ -107,14 +107,14 @@ class XCI_Parrot : public virtual XCI {
 
 public:
 
-	XCI_Parrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1")
-		: XCI(dataReceiver),
-		navdataDeadline_(io_serviceData_),
-		videoReceiver(io_serviceData_, ipAddress, PORT_VIDEO),
-		socketData_(io_serviceData_),
-		socketCMD_(io_serviceCMD_),
-		parrotData_(boost::asio::ip::address::from_string(ipAddress), PORT_DATA),
-		parrotCMD_(boost::asio::ip::address::from_string(ipAddress), PORT_CMD){
+    XCI_Parrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1")
+      : XCI(dataReceiver),
+      navdataDeadline_(io_serviceData_),
+      parrotCMD_(boost::asio::ip::address::from_string(ipAddress), PORT_CMD),
+      parrotData_(boost::asio::ip::address::from_string(ipAddress), PORT_DATA),
+      socketCMD_(io_serviceCMD_),
+      socketData_(io_serviceData_),
+      videoReceiver(io_serviceData_, ipAddress, PORT_VIDEO) {
     };
     //! Initialize XCI for use
     void init() throw (ConnectionErrorException);
