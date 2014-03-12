@@ -28,14 +28,16 @@ if(xciVersion == "xci_dodo") {
 
 // 4 parrot
 if(xciVersion == "xci_parrot") {
-    sleep(2s);
-    //xci.command = "TakeOff";
+    sleep(1s);
+    xci.command = "TakeOff";
+    sleep(4s);
     xci.setConfiguration("video:video_channel", "1");
 };
 
 var rollPidParam = PidParams.new(0.3,0,-0.8);
-var yawPidParam = PidParams.new(0,0,0);
+var yawPidParam = PidParams.new(0.1,0,0);
 var aligner = Aligner.new(xci,f,rollPidParam,yawPidParam);
+aligner.adjustYaw(),;
 //aligner.adjustRoll() , aligner.adjustYaw();
 //aligner.adjustRoll(),;
 

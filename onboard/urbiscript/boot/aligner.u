@@ -26,18 +26,17 @@ class Aligner{
         this.troll: every(50ms){ 
             var distance = finder.distance;
             var roll = Global.crop(pidLoop(rollPidParam,distance), 1);
-            echo(roll);
+            //echo(roll);
             xci.roll = roll; 
         },
     };
 
     function adjustYaw(){
         this.tyaw: every(100ms){
-           //var deviation = finder.getDeviation();
-           var deviation = 0;
+           var deviation = finder.deviation;
            var yaw = pidLoop(yawPidParam,deviation);
            echo(yaw);
-           //xci.yaw = yaw; 
+           xci.yaw = yaw; 
         },
     };
 }|;
