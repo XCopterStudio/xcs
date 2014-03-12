@@ -23,6 +23,8 @@ namespace dodo {
  * Available configuration:
  *     video:filename -- path to video file
  *     video:fps      -- approximate FPS of the video
+ *     log:fp         -- 0|1 whether to log fly params
+ *     log:command    -- 0|1 whether to log fly commands
  * 
  * Special commands
  *     Load    loads video file
@@ -113,6 +115,9 @@ private:
 
     static const std::string CONFIG_VIDEO_FILENAME;
     static const std::string CONFIG_VIDEO_FPS;
+    static const std::string CONFIG_LOG_FP;
+    static const std::string CONFIG_LOG_COMMAND;
+    
     InformationMap configuration_;
 
     //! Generates dummy data for sensors

@@ -29,6 +29,8 @@ const std::string XciDodo::CMD_VIDEO_STEP_ = "Step";
 
 const std::string XciDodo::CONFIG_VIDEO_FILENAME = "video:filename";
 const std::string XciDodo::CONFIG_VIDEO_FPS = "video:fps";
+const std::string XciDodo::CONFIG_LOG_FP = "log:fp";
+const std::string XciDodo::CONFIG_LOG_COMMAND = "log:command";
 
 const SpecialCMDList XciDodo::specialCommands_({
     XciDodo::CMD_VIDEO_LOAD_,
@@ -56,6 +58,8 @@ void XciDodo::init() {
     inited_ = true;
     sensorThread_ = move(thread(&XciDodo::sensorGenerator, this));
     configuration(CONFIG_VIDEO_FPS, to_string(videoFps_)); // back-propagation of default value
+    configuration(CONFIG_LOG_FP, "0");
+    configuration(CONFIG_LOG_COMMAND, "1");
 }
 
 std::string XciDodo::name() {
@@ -79,7 +83,9 @@ ParameterValueType XciDodo::parameter(ParameterNameType name) {
 }
 
 void XciDodo::command(const std::string& command) {
-    BOOST_LOG_TRIVIAL(info) << "[dodo] command: " << command;
+    if (stoi(configuration(CONFIG_LOG_COMMAND))) {
+        BOOST_LOG_TRIVIAL(info) << "[dodo] command: " << command;
+    }
 
     switch (videoStatus_) {
         case VIDEO_UNLOADED:
@@ -111,7 +117,9 @@ void XciDodo::command(const std::string& command) {
 }
 
 void XciDodo::flyParam(float roll, float pitch, float yaw, float gaz) {
-    BOOST_LOG_TRIVIAL(info) << "[dodo] flyParam: " << roll << ", " << pitch << ", " << yaw << ", " << gaz;
+    if (stoi(configuration(CONFIG_LOG_FP))) {
+        BOOST_LOG_TRIVIAL(info) << "[dodo] flyParam: " << roll << ", " << pitch << ", " << yaw << ", " << gaz;
+    }
 }
 
 void XciDodo::sensorGenerator() {
