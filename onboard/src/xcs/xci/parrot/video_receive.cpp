@@ -118,6 +118,7 @@ void VideoReceiver::checkVideoDeadline(){
     {
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled.
+		cerr << "Close VideoReceiver socket" << endl;
         socketVideo_.close();
 
         // There is no longer an active deadline. The expiry is set to positive
@@ -125,9 +126,6 @@ void VideoReceiver::checkVideoDeadline(){
         videoDeadline_.expires_at(boost::posix_time::pos_infin);
         connect();
     }
-
-    // Put the actor back to sleep.
-    videoDeadline_.async_wait(boost::bind(&VideoReceiver::checkVideoDeadline, this));
 }
 
 
