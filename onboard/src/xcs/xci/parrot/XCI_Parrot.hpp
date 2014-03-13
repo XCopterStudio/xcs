@@ -1,23 +1,20 @@
 #ifndef XCI_PARROT_H
 #define XCI_PARROT_H
 
-#include <thread>
-#include <vector>
-#include <atomic>
-
+#include "navdata_receiver.hpp"
 #include <xcs/xci/xci.hpp>
 #include "AT_Command.hpp"
 #include <xcs/tsqueue.hpp>
 #include "ardrone_state.hpp"
-#include "navdata_options.hpp"
-#include "navdata_parser.hpp"
-#include "options_visitor.hpp"
 #include <xcs/xci/connection_error_exception.hpp>
 #include "video_decode.hpp"
 #include "video_receive.hpp"
 
+#include <thread>
+#include <vector>
+#include <atomic>
+
 #include <boost/asio.hpp>
-#include <boost/asio/deadline_timer.hpp>
 
 namespace xcs {
 namespace xci {
@@ -30,6 +27,8 @@ enum ParrotFrameType {
     FRAME_TYPE_P_FRAME,
     FRAME_TYPE_HEADERS
 };
+
+typedef xcs::Tsqueue< AtCommand* > AtCommandQueue;
 
 class XCI_Parrot : public virtual XCI {
     // Constant
@@ -50,16 +49,12 @@ class XCI_Parrot : public virtual XCI {
 
     // Sequence number for communication with the drone.
     uint32_t sequenceNumberCMD_;
-    uint32_t sequenceNumberData_;
 
     // queue for at commands
-    Tsqueue<AtCommand*> atCommandQueue_;
+    AtCommandQueue atCommandQueue_;
 
     // actual state of ar.drone 2.0
     ArdroneState state_;
-
-    // navdata buffer
-    char navdataBuffer[NAVDATA_MAX_SIZE];
 
     //video decoder 
     VideoDecoder videoDecoder_;
@@ -85,37 +80,30 @@ class XCI_Parrot : public virtual XCI {
     boost::asio::ip::udp::socket socketCMD_;
     boost::asio::ip::udp::socket socketData_;
 
-    VideoReceiver videoReceiver;
+    VideoReceiver videoReceiver_;
+    NavdataReceiver navdataReceiver_;
 
     void initNetwork();
     void sendingATCommands();
-    void receiveNavData();
 
     bool checkPaveSignature(uint8_t signature[4]);
 
-    // function for navdata handling
-    void connectNavdata();
-    void handleConnectedNavdata(const boost::system::error_code& ec);
-    void handleReceivedNavdata(const boost::system::error_code& ec, std::size_t bytes_transferred);
-    void checkNavdataDeadline();
-
     void processVideoData();
 
-    void processState(uint32_t droneState);
-    void processNavdata(std::vector<OptionAcceptor*> &options);
-    NavdataOption* getOption(NavdataOption* ptr, NavdataTag tag);
     std::string downloadConfiguration() throw (ConnectionErrorException);
 
 public:
 
     XCI_Parrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1")
-      : XCI(dataReceiver),
-      navdataDeadline_(io_serviceData_),
-      parrotCMD_(boost::asio::ip::address::from_string(ipAddress), PORT_CMD),
-      parrotData_(boost::asio::ip::address::from_string(ipAddress), PORT_DATA),
-      socketCMD_(io_serviceCMD_),
-      socketData_(io_serviceData_),
-	  videoReceiver(io_serviceVideo_, ipAddress, PORT_VIDEO) {
+        : XCI(dataReceiver),
+        navdataDeadline_(io_serviceData_),
+        parrotCMD_(boost::asio::ip::address::from_string(ipAddress), PORT_CMD),
+        parrotData_(boost::asio::ip::address::from_string(ipAddress), PORT_DATA),
+        socketCMD_(io_serviceCMD_),
+        socketData_(io_serviceData_),
+        videoReceiver_(io_serviceVideo_, ipAddress, PORT_VIDEO),
+        navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceVideo_, ipAddress, PORT_DATA)
+      {
     };
     //! Initialize XCI for use
     void init() throw (ConnectionErrorException);

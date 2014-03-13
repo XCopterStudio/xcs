@@ -45,13 +45,12 @@ void XCI_Parrot::initNetwork() {
     }
     threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
 
-    connectNavdata();
 	// connect to video port
-	videoReceiver.connect();
+    navdataReceiver_.connect();
+	videoReceiver_.connect();
 
 	threadReadVideoReceiver_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceVideo_)));
 	threadReceiveNavData_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceData_)));
-	navdataDeadline_.async_wait(boost::bind(&XCI_Parrot::checkNavdataDeadline, this));
 }
 
 void XCI_Parrot::sendingATCommands() {
@@ -92,92 +91,10 @@ void XCI_Parrot::sendingATCommands() {
     // end thread
 }
 
-void XCI_Parrot::receiveNavData() {
-    if (endAll_){
-        return;
-    }
-
-    navdataDeadline_.expires_from_now(boost::posix_time::seconds(1));
-    socketData_.async_receive(boost::asio::buffer(navdataBuffer,NAVDATA_MAX_SIZE), boost::bind(&XCI_Parrot::handleReceivedNavdata,this,_1,_2));
-}
-
-void XCI_Parrot::connectNavdata() {
-    // connect to navdata port
-	socketData_.open(udp::v4());
-
-    navdataDeadline_.expires_from_now(boost::posix_time::seconds(1));
-    socketData_.async_connect(parrotData_, 
-        boost::bind(&XCI_Parrot::handleConnectedNavdata,this,_1));
-};
-
-
-void XCI_Parrot::handleConnectedNavdata(const boost::system::error_code& ec){
-    if (endAll_){
-        return;
-    }
-
-    if (socketData_.is_open() && !ec){
-		int32_t flag = 1; // 1 - unicast, 2 - multicast
-		navdataDeadline_.expires_from_now(boost::posix_time::seconds(1));
-		socketData_.async_send(boost::asio::buffer((uint8_t*)(&flag), sizeof (int32_t)), boost::bind(&XCI_Parrot::receiveNavData, this));
-    }
-    else{
-        // cannot open navdata port
-    }
-}
-
-void XCI_Parrot::handleReceivedNavdata(const boost::system::error_code& ec, std::size_t bytes_transferred){
-    if (endAll_){
-        return;
-    }
-
-    if (!ec){
-        //TODO:
-    }
-    
-    navdataDeadline_.expires_at(boost::posix_time::pos_infin);
-
-    Navdata* navdata = (Navdata*)& navdataBuffer[0];
-    if (navdata->sequence > sequenceNumberData_ && navdata->header == 0x55667788) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
-        uint32_t navdataCks = NavdataProcess::computeChecksum(navdata, bytes_transferred);
-        vector<OptionAcceptor*> options = NavdataProcess::parse(navdata, navdataCks, bytes_transferred);
-        if (options.size() > 0) {
-            processState(navdata->ardrone_state);
-            processNavdata(options);
-        }
-
-        sequenceNumberData_ = navdata->sequence;
-    }
-
-    receiveNavData();
-}
-
-void XCI_Parrot::checkNavdataDeadline(){
-    if (endAll_)
-        return;
-
-    // Check whether the deadline has passed. We compare the deadline against
-    // the current time since a new asynchronous operation may have moved the
-    // deadline before this actor had a chance to run.
-    if (navdataDeadline_.expires_at() <= deadline_timer::traits_type::now())
-    {
-        // The deadline has passed. The socket is closed so that any outstanding
-        // asynchronous operations are cancelled.
-        socketData_.close();
-
-        // There is no longer an active deadline. The expiry is set to positive
-        // infinity so that the actor takes no action until a new deadline is set.
-        navdataDeadline_.expires_at(boost::posix_time::pos_infin);
-        connectNavdata();
-    }
-
-	navdataDeadline_.async_wait(boost::bind(&XCI_Parrot::checkNavdataDeadline, this));
-}
-
 void XCI_Parrot::processVideoData(){
     while (!endAll_){
         VideoFramePtr frame = nullptr;
-        if (videoReceiver.tryGetVideoFrame(frame)){
+        if (videoReceiver_.tryGetVideoFrame(frame)){
             AVPacket avPacket;
             avPacket.data = &frame->data[frame->payload_offset];
             avPacket.size = frame->payload_size - frame->payload_offset;
@@ -195,52 +112,6 @@ void XCI_Parrot::processVideoData(){
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     }
-}
-
-void XCI_Parrot::processState(uint32_t droneState) {
-    state_.updateState(droneState);
-
-    if (state_.getState(FLAG_ARDRONE_NAVDATA_BOOTSTRAP)) { //test if drone is in BOOTSTRAP MODE
-        atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
-    }
-
-    if (state_.getState(FLAG_ARDRONE_COMMAND_MASK)) {
-        atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
-    }
-
-    if (state_.getState(FLAG_ARDRONE_COM_WATCHDOG_MASK)) { // reset sequence number
-        sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
-        atCommandQueue_.push(new AtCommandCOMWDG());
-    }
-
-    if (state_.getState(FLAG_ARDRONE_COM_LOST_MASK)) { // TODO: check what exactly mean reinitialize the communication with the drone
-        sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
-        //initNavdataReceive();
-    }
-}
-
-void XCI_Parrot::processNavdata(vector<OptionAcceptor*> &options) {
-    OptionVisitor visitor(dataReceiver_);
-    for (auto option : options) {
-        option->accept(visitor);
-        delete option;
-    }
-}
-
-NavdataOption* XCI_Parrot::getOption(NavdataOption* ptr, NavdataTag tag) {
-    NavdataOption* ptrData = ptr;
-
-    do {
-        if (ptrData->size == 0) {
-            return std::nullptr_t();
-        } else {
-            if (ptrData->tag == tag) {
-                return ptrData;
-            }
-
-            ptrData = (NavdataOption*) (((uint8_t*) ptrData) + ptrData->size);
-        }
-    } while (true);
 }
 
 
@@ -288,7 +159,6 @@ void XCI_Parrot::init() throw (ConnectionErrorException) {
             );
 
     sequenceNumberCMD_ = DEFAULT_SEQUENCE_NUMBER;
-    sequenceNumberData_ = DEFAULT_SEQUENCE_NUMBER - 1;
 
     endAll_ = false;
 

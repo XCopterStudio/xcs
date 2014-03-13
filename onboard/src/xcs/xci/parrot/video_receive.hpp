@@ -1,7 +1,6 @@
 #ifndef VIDEO_RECEIVE_H
 #define VIDEO_RECEIVE_H
 
-#include <thread>
 #include <string>
 #include <atomic>
 #include <cstdint>
@@ -42,7 +41,7 @@ typedef VideoFrame* VideoFramePtr;
 class VideoReceiver{
     static const unsigned int TIMEOUT;
 
-    boost::asio::deadline_timer videoDeadline_;
+    boost::asio::deadline_timer deadlineVideo_;
     boost::asio::ip::tcp::socket socketVideo_;
 	boost::asio::ip::tcp::endpoint parrotVideo;
 

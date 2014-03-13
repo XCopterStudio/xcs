@@ -1,7 +1,6 @@
 #include "video_receive.hpp"
 #include <cassert>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/bind.hpp>
 
 using namespace xcs::xci::parrot;
@@ -20,7 +19,7 @@ void VideoReceiver::receiveVideo(const boost::system::error_code& ec){
 		cerr << "Error " << ec.value() << ec.message() << " cannot connect to the parrot video socket." << endl;
         //connect(ipAdress_, port_);
     }else if (socketVideo_.is_open()){
-        videoDeadline_.expires_from_now(boost::posix_time::millisec(TIMEOUT));
+        deadlineVideo_.expires_from_now(boost::posix_time::millisec(TIMEOUT));
 
         if (!receivedHeader_){
             int index = sizeof(parrot_t)-receiveSize_;
@@ -46,7 +45,7 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
         //connect(ipAdress_, port_);
     }
     else{
-        videoDeadline_.expires_at(boost::posix_time::pos_infin);
+        deadlineVideo_.expires_at(boost::posix_time::pos_infin);
 
         receiveSize_ -= bytes_transferred;
         if (receiveSize_ == 0){
@@ -112,7 +111,7 @@ void VideoReceiver::checkVideoDeadline(){
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
     // deadline before this actor had a chance to run.
-    if (videoDeadline_.expires_at() <= deadline_timer::traits_type::now())
+    if (deadlineVideo_.expires_at() <= deadline_timer::traits_type::now())
     {
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled.
@@ -121,22 +120,26 @@ void VideoReceiver::checkVideoDeadline(){
 
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
-        videoDeadline_.expires_at(boost::posix_time::pos_infin);
+        deadlineVideo_.expires_at(boost::posix_time::pos_infin);
         connect();
     }
 
-	videoDeadline_.async_wait(boost::bind(&VideoReceiver::checkVideoDeadline, this));
+	deadlineVideo_.async_wait(boost::bind(&VideoReceiver::checkVideoDeadline, this));
 }
 
 
 // ===================== public functions ========================================
 
-VideoReceiver::VideoReceiver(boost::asio::io_service& io_serviceVideo, std::string ipAdress, unsigned int port) : videoDeadline_(io_serviceVideo), socketVideo_(io_serviceVideo), parrotVideo(address::from_string(ipAdress),port){
+VideoReceiver::VideoReceiver(boost::asio::io_service& io_serviceVideo, std::string ipAdress, unsigned int port)
+: deadlineVideo_(io_serviceVideo),
+socketVideo_(io_serviceVideo),
+parrotVideo(address::from_string(ipAdress), port){
+
     end_ = false;
     lastFrame_ = nullptr;
     lastFrameNumber_ = 0;
-	videoDeadline_.expires_at(boost::posix_time::pos_infin);
-	videoDeadline_.async_wait(boost::bind(&VideoReceiver::checkVideoDeadline, this));
+	deadlineVideo_.expires_at(boost::posix_time::pos_infin);
+	deadlineVideo_.async_wait(boost::bind(&VideoReceiver::checkVideoDeadline, this));
 }
 
 VideoReceiver::~VideoReceiver(){
@@ -160,7 +163,7 @@ void VideoReceiver::connect(){
     receivedHeader_ = false;
     receiveSize_ = sizeof(parrot_t);
 
-    videoDeadline_.expires_from_now(boost::posix_time::millisec(TIMEOUT));
+    deadlineVideo_.expires_from_now(boost::posix_time::millisec(TIMEOUT));
 
     cerr << "Try connect to the video port" << endl;
 	socketVideo_.open(tcp::v4());

@@ -7,7 +7,7 @@
 namespace xcs{
 namespace xci{
 namespace parrot{
-
+    
     class OptionVisitor{
         DataReceiver& dataReceiver_;
     public:
