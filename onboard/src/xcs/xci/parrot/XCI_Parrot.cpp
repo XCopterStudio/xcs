@@ -26,69 +26,19 @@ const int XCI_Parrot::PORT_DATA = 5554;
 
 const float XCI_Parrot::EPSILON = (float) 1.0e-10;
 
-const unsigned int XCI_Parrot::AT_CMD_PACKET_SIZE = 1024;
-
 const std::string XCI_Parrot::NAME = "Parrot AR Drone 2.0 XCI";
-
-const int32_t XCI_Parrot::DEFAULT_SEQUENCE_NUMBER = 1;
 
 // ----------------- Private function --------------- //
 
 void XCI_Parrot::initNetwork() {
-    boost::system::error_code ec;
-
-    // connect to cmd port
-	socketCMD_.open(udp::v4());
-    socketCMD_.connect(parrotCMD_, ec);
-    if (ec) {
-        throw new ConnectionErrorException("Cannot connect command port.");
-    }
-    threadSendingATCmd_ = std::move(std::thread(&XCI_Parrot::sendingATCommands, this));
-
 	// connect to video port
+    atCommandSender_.connect();
     navdataReceiver_.connect();
 	videoReceiver_.connect();
 
+    threadSendingATCmd_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceCMD_)));
 	threadReadVideoReceiver_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceVideo_)));
-	threadReceiveNavData_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceData_)));
-}
-
-void XCI_Parrot::sendingATCommands() {
-    std::stringstream packetString;
-    unsigned int counter = 0;
-
-    while (!endAll_) { // EndAll is true when instance of XCI_Parrot is in destructor.
-        AtCommand* cmd;
-        if (atCommandQueue_.tryPop(cmd)) {
-            counter = 0;
-            std::string cmdString = cmd->toString(sequenceNumberCMD_++);
-            //printf("%s\n", cmdString.c_str());
-            delete cmd;
-
-            unsigned int newSize = packetString.str().size() + cmdString.size() + 1; // one for new line 
-            if (newSize > AT_CMD_PACKET_SIZE || atCommandQueue_.empty()) { // send prepared packet
-                socketCMD_.send(boost::asio::buffer(packetString.str(), packetString.str().size()));
-                // clear packet string
-                packetString.str(std::string());
-                packetString.clear();
-            }
-
-            // add end of line at the end of each AtCommand
-            if (packetString.str().size() > 0) {
-                packetString << std::endl;
-            }
-
-            packetString << cmdString;
-        } else { // We haven't nothing to send. Put thread to sleep on some time.
-            /*if(++counter > 50){
-                atCommandQueue_.push(new AtCommandCOMWDG());
-                counter=0;
-            }*/
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }
-    }
-
-    // end thread
+	threadReceiveNavData_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceNavdata_)));
 }
 
 void XCI_Parrot::processVideoData(){
@@ -157,8 +107,6 @@ void XCI_Parrot::init() throw (ConnectionErrorException) {
             (
             boost::log::trivial::severity >= boost::log::trivial::debug
             );
-
-    sequenceNumberCMD_ = DEFAULT_SEQUENCE_NUMBER;
 
     endAll_ = false;
 
@@ -286,12 +234,11 @@ void XCI_Parrot::flyParam(float roll, float pitch, float yaw, float gaz) {
 XCI_Parrot::~XCI_Parrot() {
     endAll_ = true;
 
-    //delete all socket
-    socketCMD_.close();
-    socketData_.close();
     // wait for atCMDThread end and then clear memory
     threadSendingATCmd_.join();
     threadReceiveNavData_.join();
+    threadReadVideoData_.join();
+    threadReadVideoReceiver_.join();
 
     // delete all AtCommand in queue
     while (atCommandQueue_.empty())

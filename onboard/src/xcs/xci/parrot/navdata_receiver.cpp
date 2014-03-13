@@ -64,8 +64,9 @@ void NavdataReceiver::handleReceivedNavdata(const boost::system::error_code& ec,
 }
 
 void NavdataReceiver::checkDeadlineNavdata(){
-    if (end_)
+    if (end_){
         return;
+    }
 
     // Check whether the deadline has passed. We compare the deadline against
     // the current time since a new asynchronous operation may have moved the
@@ -117,7 +118,8 @@ void NavdataReceiver::processNavdata(vector<OptionAcceptor*> &options) {
 
 // ========================== public functions ==================================
 
-NavdataReceiver::NavdataReceiver(DataReceiver& dataReceiver, AtCommandQueue& atCommandQueue, ArdroneState& parrotState, boost::asio::io_service& io_serviceNavdata, std::string ipAdress, unsigned int port) : dataReceiver_(dataReceiver),
+NavdataReceiver::NavdataReceiver(DataReceiver& dataReceiver, AtCommandQueue& atCommandQueue, ArdroneState& parrotState, boost::asio::io_service& io_serviceNavdata, std::string ipAdress, unsigned int port) 
+: dataReceiver_(dataReceiver),
 parrotState_(parrotState), 
 atCommandQueue_(atCommandQueue),
 deadlineNavdata_(io_serviceNavdata),
@@ -140,6 +142,10 @@ NavdataReceiver::~NavdataReceiver(){
 
 void NavdataReceiver::connect() {
     // connect to navdata port
+    if (end_){
+        return;
+    }
+
     socketNavdata_.open(udp::v4());
 
     deadlineNavdata_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));

@@ -9,6 +9,7 @@
 #include <xcs/xci/connection_error_exception.hpp>
 #include "video_decode.hpp"
 #include "video_receive.hpp"
+#include "atcommand_sender.hpp"
 
 #include <thread>
 #include <vector>
@@ -39,16 +40,9 @@ class XCI_Parrot : public virtual XCI {
 
     static const float EPSILON;
 
-    static const unsigned int AT_CMD_PACKET_SIZE;
-
     static const std::string NAME;
 
-    static const int32_t DEFAULT_SEQUENCE_NUMBER;
-
     static const unsigned int VIDEO_MAX_SIZE;
-
-    // Sequence number for communication with the drone.
-    uint32_t sequenceNumberCMD_;
 
     // queue for at commands
     AtCommandQueue atCommandQueue_;
@@ -69,24 +63,15 @@ class XCI_Parrot : public virtual XCI {
     volatile std::atomic<bool> endAll_;
 
     boost::asio::io_service io_serviceCMD_;
-    boost::asio::io_service io_serviceData_;
+    boost::asio::io_service io_serviceNavdata_;
 	boost::asio::io_service io_serviceVideo_;
 
-    boost::asio::deadline_timer navdataDeadline_;
-
-    boost::asio::ip::udp::endpoint parrotCMD_;
-    boost::asio::ip::udp::endpoint parrotData_;
-
-    boost::asio::ip::udp::socket socketCMD_;
-    boost::asio::ip::udp::socket socketData_;
-
+    AtCommandSender atCommandSender_;
     VideoReceiver videoReceiver_;
     NavdataReceiver navdataReceiver_;
 
     void initNetwork();
     void sendingATCommands();
-
-    bool checkPaveSignature(uint8_t signature[4]);
 
     void processVideoData();
 
@@ -96,13 +81,9 @@ public:
 
     XCI_Parrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1")
         : XCI(dataReceiver),
-        navdataDeadline_(io_serviceData_),
-        parrotCMD_(boost::asio::ip::address::from_string(ipAddress), PORT_CMD),
-        parrotData_(boost::asio::ip::address::from_string(ipAddress), PORT_DATA),
-        socketCMD_(io_serviceCMD_),
-        socketData_(io_serviceData_),
+        atCommandSender_(atCommandQueue_, io_serviceCMD_ ,ipAddress, PORT_CMD),
         videoReceiver_(io_serviceVideo_, ipAddress, PORT_VIDEO),
-        navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceVideo_, ipAddress, PORT_DATA)
+        navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceNavdata_, ipAddress, PORT_DATA)
       {
     };
     //! Initialize XCI for use
