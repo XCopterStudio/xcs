@@ -57,8 +57,10 @@ class VideoReceiver{
 
     volatile std::atomic<bool> end_;
 
-    void receiveVideo(const boost::system::error_code& ec);
+    void handleConnectedVideo(const boost::system::error_code& ec);
+    void receiveVideo();
     void handleReceivedVideo(const boost::system::error_code& ec, std::size_t bytes_transferred);
+
     bool checkPaveSignature(uint8_t signature[4]);
     bool isIFrame(uint8_t frameType);
     void checkVideoDeadline();

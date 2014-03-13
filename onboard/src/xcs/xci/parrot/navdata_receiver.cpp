@@ -18,12 +18,18 @@ void NavdataReceiver::handleConnectedNavdata(const boost::system::error_code& ec
         return;
     }
 
-    if (socketNavdata_.is_open() && !ec) {
+    if (socketNavdata_.is_open()) {
+        cerr << "Connect Navdata socket timed out." << endl;
+        connect();
+    }
+    else if (ec){
+        cerr << "Connect Navdata socket error: " << ec.message() << endl;
+        socketNavdata_.close();
+        connect();
+    }else{
         int32_t flag = 1; // 1 - unicast, 2 - multicast
         deadlineNavdata_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
         socketNavdata_.async_send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)), boost::bind(&NavdataReceiver::receiveNavdata, this));
-    } else {
-        // cannot open navdata port
     }
 }
 
@@ -41,8 +47,10 @@ void NavdataReceiver::handleReceivedNavdata(const boost::system::error_code& ec,
         return;
     }
 
-    if (!ec) {
-        //TODO:
+    if (ec) {
+        cerr << "Receive Video error: " << ec.message() << endl;
+        socketNavdata_.close();
+        connect();
     }
 
     deadlineNavdata_.expires_at(boost::posix_time::pos_infin);
@@ -79,7 +87,6 @@ void NavdataReceiver::checkDeadlineNavdata() {
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
         deadlineNavdata_.expires_at(boost::posix_time::pos_infin);
-        connect();
     }
 
     deadlineNavdata_.async_wait(boost::bind(&NavdataReceiver::checkDeadlineNavdata, this));

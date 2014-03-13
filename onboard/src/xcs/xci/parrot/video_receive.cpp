@@ -10,29 +10,38 @@ using namespace std;
 
 const unsigned int VideoReceiver::TIMEOUT = 1000; // ms
 
-void VideoReceiver::receiveVideo(const boost::system::error_code& ec){
+void VideoReceiver::handleConnectedVideo(const boost::system::error_code& ec){
+    if (socketVideo_.is_open()){
+        cerr << "Connect Navdata socket timed out." << endl;
+        connect();
+    }
+    else if (ec){
+        cerr << "Receive Navdata error: " << ec.message() << endl;
+        socketVideo_.close();
+        connect();
+    }
+    else{
+        receiveVideo();
+    }
+}
+
+void VideoReceiver::receiveVideo(){
     if (end_){
         return;
     }
 
-    if (ec){
-		cerr << "Error " << ec.value() << ec.message() << " cannot connect to the parrot video socket." << endl;
-        //connect(ipAdress_, port_);
-    }else if (socketVideo_.is_open()){
-        deadlineVideo_.expires_from_now(boost::posix_time::millisec(TIMEOUT));
+    
+    deadlineVideo_.expires_from_now(boost::posix_time::millisec(TIMEOUT));
 
-        if (!receivedHeader_){
-            int index = sizeof(parrot_t)-receiveSize_;
-            socketVideo_.async_receive(boost::asio::buffer(&((uint8_t *)&parrotPave_)[index], receiveSize_), boost::bind(&VideoReceiver::handleReceivedVideo, this, _1, _2));
-        }
-        else{
-            int index = lastFrame_->payload_size - receiveSize_;
-            socketVideo_.async_receive(boost::asio::buffer(&lastFrame_->data[index], receiveSize_), boost::bind(&VideoReceiver::handleReceivedVideo, this, _1, _2));
-        }
+    if (!receivedHeader_){
+        int index = sizeof(parrot_t)-receiveSize_;
+        socketVideo_.async_receive(boost::asio::buffer(&((uint8_t *)&parrotPave_)[index], receiveSize_), boost::bind(&VideoReceiver::handleReceivedVideo, this, _1, _2));
     }
     else{
-        // cannot open video port
+        int index = lastFrame_->payload_size - receiveSize_;
+        socketVideo_.async_receive(boost::asio::buffer(&lastFrame_->data[index], receiveSize_), boost::bind(&VideoReceiver::handleReceivedVideo, this, _1, _2));
     }
+
 }
 
 void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std::size_t bytes_transferred){
@@ -41,8 +50,9 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
     }
 
     if (ec){
-		cerr << "Error " << ec.value() << ec.message()  << " cannot receive some video data from parrot." << endl;
-        //connect(ipAdress_, port_);
+        cerr << "Receive Video data error: " << ec.message() << endl;
+        socketVideo_.close();
+        connect();
     }
     else{
         deadlineVideo_.expires_at(boost::posix_time::pos_infin);
@@ -91,7 +101,7 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
             }
         }
         
-        receiveVideo(boost::system::error_code());
+        receiveVideo();
     }
 }
 
@@ -115,13 +125,11 @@ void VideoReceiver::checkVideoDeadline(){
     {
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled.
-		cerr << "Close VideoReceiver socket" << endl;
         socketVideo_.close();
 
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
         deadlineVideo_.expires_at(boost::posix_time::pos_infin);
-        connect();
     }
 
 	deadlineVideo_.async_wait(boost::bind(&VideoReceiver::checkVideoDeadline, this));
@@ -168,7 +176,7 @@ void VideoReceiver::connect(){
     cerr << "Try connect to the video port" << endl;
 	socketVideo_.open(tcp::v4());
     socketVideo_.async_connect(parrotVideo,
-        boost::bind(&VideoReceiver::receiveVideo, this, _1));
+        boost::bind(&VideoReceiver::handleConnectedVideo, this, _1));
 }
 
 bool VideoReceiver::tryGetVideoFrame(VideoFramePtr& videoFrame){
