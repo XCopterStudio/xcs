@@ -9,14 +9,22 @@
 #define	SYNTACTICTYPES_HPP
 
 #include <cstdint>
+#include <cstddef>
 
 namespace xcs {
 namespace nodes {
 
 struct BitmapType {
-    unsigned int width;
-    unsigned int height;
-    uint8_t* data;
+
+    BitmapType(const size_t width = 0, const size_t height = 0, uint8_t * const data = nullptr) :
+      width(width),
+      height(height),
+      data(data) {
+    };
+    
+    const size_t width;
+    const size_t height;
+    uint8_t * const data;
 };
 }
 }

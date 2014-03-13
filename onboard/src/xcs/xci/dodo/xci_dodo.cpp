@@ -108,7 +108,7 @@ void XciDodo::command(const std::string& command) {
                 videoStatus_ = VIDEO_PAUSED;
             } else if (command == CMD_VIDEO_STOP_) {
                 videoStatus_ = VIDEO_PAUSED;
-                videoPlayer_.reset();
+                videoPlayer_.rewind();
             }
 
             break;

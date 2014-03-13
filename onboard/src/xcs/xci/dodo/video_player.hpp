@@ -35,7 +35,9 @@ struct Packet {
         av_init_packet(&packet);
         packet.data = nullptr;
         packet.size = 0;
-        if (ctxt) reset(ctxt);
+        if (ctxt) {
+            reset(ctxt);
+        }
     }
 
     Packet(Packet&& other) : packet(std::move(other.packet)) {
@@ -65,20 +67,23 @@ class VideoPlayer {
 public:
     VideoPlayer();
     void init(const std::string &filename);
-    void reset();
+    void rewind();
     xcs::nodes::BitmapType getFrame();
 
 private:
+    typedef std::unique_ptr<AVFormatContext, std::function<void (AVFormatContext *) >> AVFormatContextPtr;
+    typedef std::unique_ptr<AVCodecContext, std::function<void (AVCodecContext *) >> AVCodecContextPtr;
+    typedef std::unique_ptr<AVFrame, std::function<void (AVFrame *) >> AVFramePtr;
+
     AVStream* videoStream_;
     size_t videoStreamIndex_;
-    std::shared_ptr<AVFormatContext> avFormat_;
-    std::shared_ptr<AVCodecContext> avVideoCodec_;
-    std::shared_ptr<AVFrame> avFrame_;
+    AVFormatContextPtr avFormat_;
+    AVCodecContextPtr avVideoCodec_;
+    AVFramePtr avFrame_;
     SwsContext *swsContext_;
-    size_t offsetInData_;
     AVPicture pic_;
     bool hasPic_;
-    size_t frameCnt_;
+
 
 
 
