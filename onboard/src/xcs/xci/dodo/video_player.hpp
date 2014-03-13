@@ -73,6 +73,7 @@ public:
     void init(const std::string &filename, const std::string &fontFile);
     void rewind();
     xcs::nodes::BitmapType getFrame();
+    size_t framePeriod();
 
 private:
     typedef std::unique_ptr<AVFormatContext, std::function<void (AVFormatContext *) >> AVFormatContextPtr;

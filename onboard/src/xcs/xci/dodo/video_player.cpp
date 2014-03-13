@@ -163,6 +163,10 @@ xcs::nodes::BitmapType VideoPlayer::getFrame() {
     return BitmapType();
 }
 
+size_t VideoPlayer::framePeriod() {
+    return videoStream_->codec->ticks_per_frame * 1000 * videoStream_->codec->time_base.num / videoStream_->codec->time_base.den;
+}
+
 void VideoPlayer::initFilters(const std::string &filterDescription) {
     avfilter_register_all();
 
@@ -179,7 +183,6 @@ void VideoPlayer::initFilters(const std::string &filterDescription) {
             videoStream_->codec->width, videoStream_->codec->height, videoStream_->codec->pix_fmt,
             videoStream_->codec->time_base.num, videoStream_->codec->time_base.den,
             videoStream_->codec->sample_aspect_ratio.num, videoStream_->codec->sample_aspect_ratio.den);
-
 
     auto srcBufferPtr = bufferSrc_.get();
     if (avfilter_graph_create_filter(&srcBufferPtr, avfilter_get_by_name("buffer"), "src", args, NULL, filterGraph_.get()) < 0) {
@@ -220,8 +223,8 @@ void VideoPlayer::initFilters(const std::string &filterDescription) {
     //TODO don't know why .get() instead of .release() doesn't work... (segfaults at the end)
     if (avfilter_graph_parse(filterGraph_.get(), filterDescription.c_str(), inputs.release(), outputs.release(), NULL) < 0) {
         throw runtime_error("Cannot parse.");
-    }    
-    
+    }
+
     if (avfilter_graph_config(filterGraph_.get(), NULL) < 0) {
         throw runtime_error("Cannot config.");
     }

@@ -19,7 +19,8 @@ const std::string XciDodo::NAME_ = "Dodo Test Drone";
 
 const size_t XciDodo::ALIVE_FREQ_ = 1;
 
-const size_t XciDodo::SENSOR_PERIOD_ = 20;
+const size_t XciDodo::SENSOR_PERIOD_ = 100;
+const size_t XciDodo::VIDEO_IDLE_SLEEP_ = 200;
 
 const std::string XciDodo::CMD_VIDEO_LOAD_ = "Load";
 const std::string XciDodo::CMD_VIDEO_PLAY_ = "Play";
@@ -46,7 +47,8 @@ const SpecialCMDList XciDodo::specialCommands_({
  */
 XciDodo::XciDodo(DataReceiver& dataReceiver) :
   XCI(dataReceiver),
-  videoFps_(10),
+  inited_(false),
+  videoFps_(0),
   videoStatus_(VIDEO_UNLOADED) {
 
 }
@@ -56,12 +58,20 @@ XciDodo::~XciDodo() {
 }
 
 void XciDodo::init() {
+    if (inited_) {
+        return;
+    }
     inited_ = true;
-    sensorThread_ = move(thread(&XciDodo::sensorGenerator, this));
-    configuration(CONFIG_VIDEO_FPS, to_string(videoFps_)); // back-propagation of default value
+    // back-propagation of default values
+    configuration(CONFIG_VIDEO_FPS, to_string(videoFps_));
     configuration(CONFIG_VIDEO_FONT, "/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf");
     configuration(CONFIG_LOG_FP, "0");
     configuration(CONFIG_LOG_COMMAND, "1");
+
+    // start threads
+    sensorThread_ = move(thread(&XciDodo::sensorGenerator, this));
+    videoThread_ = move(thread(&XciDodo::videoPlayer, this));
+
 }
 
 std::string XciDodo::name() {
@@ -130,12 +140,22 @@ void XciDodo::sensorGenerator() {
         if (clock % (1000 / ALIVE_FREQ_) == 0) {
             dataReceiver_.notify("alive", true);
         }
-        if (clock % (1000 / videoFps_) == 0 && videoStatus_ == VIDEO_PLAYING) {
-            renderFrame();
-        }
 
         clock += SENSOR_PERIOD_;
         this_thread::sleep_for(chrono::milliseconds(SENSOR_PERIOD_));
+    }
+}
+
+void XciDodo::videoPlayer() {
+    while (1) {
+        if (videoStatus_ == VIDEO_PLAYING) {
+            renderFrame();
+            auto fps = stoi(configuration(CONFIG_VIDEO_FPS));
+            auto sleep = (fps == 0) ? videoPlayer_.framePeriod() : (1000 / fps);
+            this_thread::sleep_for(chrono::milliseconds(sleep));
+        } else {
+            this_thread::sleep_for(chrono::milliseconds(VIDEO_IDLE_SLEEP_));
+        }
     }
 }
 
@@ -155,10 +175,6 @@ InformationMap XciDodo::configuration() {
 void XciDodo::configuration(const std::string& key, const std::string & value) {
     if (key == CONFIG_VIDEO_FPS) {
         size_t fps = stoi(value);
-        if ((1000 / SENSOR_PERIOD_) % fps != 0) {
-            BOOST_LOG_TRIVIAL(error) << key << " must be divisor of " << (1000 / SENSOR_PERIOD_);
-            throw runtime_error("FPS must be proper divisor."); // stupid urbi... must print error and throw exception as well
-        };
         videoFps_ = fps;
     }
 
@@ -190,7 +206,7 @@ void XciDodo::stop() {
 
 extern "C" {
 
-XCI* CreateXci(DataReceiver& dataReceiver) {
-    return new XciDodo(dataReceiver);
-}
+    XCI* CreateXci(DataReceiver& dataReceiver) {
+        return new XciDodo(dataReceiver);
+    }
 }
