@@ -93,7 +93,9 @@ private:
     //! How often alive signal is sent (in Hz) (must divisor of 1000/SENSOR_PERIOD_).
     static const size_t ALIVE_FREQ_;
     //! Period of sensor thread in ms.
-    static const size_t SENSOR_PERIOD_;
+    static const size_t SENSOR_PERIOD_;    
+    //! Milliseconds for video thread when not playing
+    static const size_t VIDEO_IDLE_SLEEP_;
 
     static const std::string CMD_VIDEO_LOAD_;
     static const std::string CMD_VIDEO_PLAY_;
@@ -105,8 +107,9 @@ private:
 
     bool inited_;
     std::thread sensorThread_;
+    std::thread videoThread_;
 
-    //! Video FPS (must divisor of 1000/SENSOR_PERIOD_).
+    //! Video FPS
     size_t videoFps_;
 
     VideoPlayer videoPlayer_;
@@ -115,6 +118,7 @@ private:
 
     static const std::string CONFIG_VIDEO_FILENAME;
     static const std::string CONFIG_VIDEO_FPS;
+    static const std::string CONFIG_VIDEO_FONT;
     static const std::string CONFIG_LOG_FP;
     static const std::string CONFIG_LOG_COMMAND;
     
@@ -123,8 +127,11 @@ private:
     //! Generates dummy data for sensors
     void sensorGenerator();
     
+    //! Generates frames
+    void videoPlayer();
+    
     void renderFrame();
-
+    
 };
 }
 }
