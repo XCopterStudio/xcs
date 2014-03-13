@@ -29,6 +29,7 @@ const std::string XciDodo::CMD_VIDEO_STEP_ = "Step";
 
 const std::string XciDodo::CONFIG_VIDEO_FILENAME = "video:filename";
 const std::string XciDodo::CONFIG_VIDEO_FPS = "video:fps";
+const std::string XciDodo::CONFIG_VIDEO_FONT = "video:font";
 const std::string XciDodo::CONFIG_LOG_FP = "log:fp";
 const std::string XciDodo::CONFIG_LOG_COMMAND = "log:command";
 
@@ -58,6 +59,7 @@ void XciDodo::init() {
     inited_ = true;
     sensorThread_ = move(thread(&XciDodo::sensorGenerator, this));
     configuration(CONFIG_VIDEO_FPS, to_string(videoFps_)); // back-propagation of default value
+    configuration(CONFIG_VIDEO_FONT, "/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf");
     configuration(CONFIG_LOG_FP, "0");
     configuration(CONFIG_LOG_COMMAND, "1");
 }
@@ -90,7 +92,7 @@ void XciDodo::command(const std::string& command) {
     switch (videoStatus_) {
         case VIDEO_UNLOADED:
             if (command == CMD_VIDEO_LOAD_) {
-                videoPlayer_.init(configuration(CONFIG_VIDEO_FILENAME));
+                videoPlayer_.init(configuration(CONFIG_VIDEO_FILENAME), configuration(CONFIG_VIDEO_FONT));
                 videoStatus_ = VIDEO_PAUSED;
             } else if (command == CMD_VIDEO_PLAY_ || command == CMD_VIDEO_PAUSE_ || command == CMD_VIDEO_STOP_) {
                 throw runtime_error("Cannot execute command in unloaded state.");

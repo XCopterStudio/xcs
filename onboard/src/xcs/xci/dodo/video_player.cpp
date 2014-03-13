@@ -3,6 +3,7 @@
  * Author: michal
  * \see http://blog.tomaka17.com/2012/03/libavcodeclibavformat-tutorial/
  * better \see http://www.sebastianroll.de/TableTopDoc/video_texture_8cpp-source.html#l00302
+ * for filters \see http://www.ffmpeg.org/doxygen/trunk/doc_2examples_2filtering_video_8c-example.html
  * 
  * Created on March 3, 2014, 11:47 AM
  */
@@ -24,7 +25,7 @@ VideoPlayer::VideoPlayer() : swsContext_(nullptr), hasPic_(false) {
 
 }
 
-void VideoPlayer::init(const string &filename) {
+void VideoPlayer::init(const string &filename, const string &fontFile) {
     // register all codecs
     av_register_all();
 
@@ -82,7 +83,7 @@ void VideoPlayer::init(const string &filename) {
     // prepare for decoding
     avFrame_ = AVFramePtr(avcodec_alloc_frame(), &av_free);
 
-
+    initFilters("drawtext=fontcolor=white:fontfile=" + fontFile + ":text='%T'");
 }
 
 void VideoPlayer::rewind() {
@@ -110,6 +111,28 @@ xcs::nodes::BitmapType VideoPlayer::getFrame() {
 
         // processing the image if available
         if (isFrameAvailable) {
+
+            /* push the decoded frame into the filtergraph */
+            av_buffersrc_write_frame(bufferSrc_.get(), avFrame_.get());
+
+            /* pull filtered frames from the filtergraph */
+            while (1) {
+                AVFilterBufferRef *picref;
+                auto ret = av_buffersink_read(bufferSink_.get(), &picref);
+
+                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+                    break;
+                }
+                if (ret < 0) {
+                    break;
+                }
+                avfilter_copy_buf_props(avFrame_.get(), picref);
+                avFrame_.get()->opaque = picref;
+                avfilter_unref_bufferp(&picref);
+            }
+
+
+
             // process image
             if (!hasPic_) {
                 avpicture_alloc(&pic_, PIX_FMT_RGB24, avFrame_->width, avFrame_->height);
@@ -138,6 +161,70 @@ xcs::nodes::BitmapType VideoPlayer::getFrame() {
 
     assert(false); // we should never get here
     return BitmapType();
+}
+
+void VideoPlayer::initFilters(const std::string &filterDescription) {
+    avfilter_register_all();
+
+    filterGraph_ = AVFilterGraphPtr(avfilter_graph_alloc(), [](AVFilterGraph * graph) {
+        avfilter_graph_free(&graph);
+    });
+
+    char args[512];
+
+    /* 
+     * Buffer video source: the decoded frames from the decoder will be inserted here.
+     */
+    snprintf(args, sizeof (args), "%d:%d:%d:%d:%d:%d:%d",
+            videoStream_->codec->width, videoStream_->codec->height, videoStream_->codec->pix_fmt,
+            videoStream_->codec->time_base.num, videoStream_->codec->time_base.den,
+            videoStream_->codec->sample_aspect_ratio.num, videoStream_->codec->sample_aspect_ratio.den);
+
+
+    auto srcBufferPtr = bufferSrc_.get();
+    if (avfilter_graph_create_filter(&srcBufferPtr, avfilter_get_by_name("buffer"), "src", args, NULL, filterGraph_.get()) < 0) {
+        throw runtime_error("Cannot create buffer source.");
+    }
+    bufferSrc_ = AVFilterContextPtr(srcBufferPtr, [](AVFilterContext * filter) {
+    }); // empty body = no deallocation
+
+    /*
+     * Buffer video sink: to terminate the filter chain. 
+     */
+    auto sinkBufferPtr = bufferSink_.get();
+    if (avfilter_graph_create_filter(&sinkBufferPtr, avfilter_get_by_name("buffersink"), "out", NULL, NULL, filterGraph_.get()) < 0) {
+        throw runtime_error("Cannot create buffer sink.");
+    }
+    bufferSink_ = AVFilterContextPtr(sinkBufferPtr, [](AVFilterContext * filter) {
+    }); // empty body = no deallocation
+
+    /*
+     * Endpoints for the filter graph.
+     */
+    AVFilterInOutPtr outputs = AVFilterInOutPtr(avfilter_inout_alloc(), [](AVFilterInOut * inout) {
+        avfilter_inout_free(&inout);
+    });
+    AVFilterInOutPtr inputs = AVFilterInOutPtr(avfilter_inout_alloc(), [](AVFilterInOut * inout) {
+        avfilter_inout_free(&inout);
+    });
+
+    outputs->name = av_strdup("in");
+    outputs->filter_ctx = bufferSrc_.get();
+    outputs->pad_idx = 0;
+    outputs->next = NULL;
+    inputs->name = av_strdup("out");
+    inputs->filter_ctx = bufferSink_.get();
+    inputs->pad_idx = 0;
+    inputs->next = NULL;
+
+    //TODO don't know why .get() instead of .release() doesn't work... (segfaults at the end)
+    if (avfilter_graph_parse(filterGraph_.get(), filterDescription.c_str(), inputs.release(), outputs.release(), NULL) < 0) {
+        throw runtime_error("Cannot parse.");
+    }    
+    
+    if (avfilter_graph_config(filterGraph_.get(), NULL) < 0) {
+        throw runtime_error("Cannot config.");
+    }
 }
 
 

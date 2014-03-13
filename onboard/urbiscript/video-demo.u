@@ -56,6 +56,7 @@ flashSender.send("Connected graph nodes.");
 xci.xciInit();
 // special command of Dodo
 xci.setConfiguration("video:filename", "/tmp/video.xcs");
+xci.setConfiguration("video:font", "/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf");
 xci.doCommand("Load");
 xci.doCommand("Play");
 
