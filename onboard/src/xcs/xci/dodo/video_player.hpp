@@ -11,6 +11,8 @@
 
 #include <string>
 #include <memory>
+#include <functional>
+
 
 #include <xcs/nodes/xobject/syntactic_types.hpp>
 
