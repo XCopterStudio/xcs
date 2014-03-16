@@ -179,7 +179,7 @@ void VideoPlayer::initFilters(const std::string &filterDescription) {
     /* 
      * Buffer video source: the decoded frames from the decoder will be inserted here.
      */
-    snprintf(args, sizeof (args), "%d:%d:%d:%d:%d:%d:%d",
+    _snprintf_s(args, sizeof (args), "%d:%d:%d:%d:%d:%d:%d",
             videoStream_->codec->width, videoStream_->codec->height, videoStream_->codec->pix_fmt,
             videoStream_->codec->time_base.num, videoStream_->codec->time_base.den,
             videoStream_->codec->sample_aspect_ratio.num, videoStream_->codec->sample_aspect_ratio.den);
