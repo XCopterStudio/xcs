@@ -48,7 +48,6 @@ class SemanticSender {
             var that = this;
 
             slot.notifyChange(function() {
-                // simple JSON encoder -- no escaping!
                 var data = [ => ];
                 data["type"] = "data";
                 data["data"] = [ output.first => that.getSlotValue(output.first) ];
