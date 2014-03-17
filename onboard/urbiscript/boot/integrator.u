@@ -1,0 +1,27 @@
+
+
+class Integrator {
+
+    function init(adapter, outputs, UJson) {
+        var this.vx = 0;
+        var this.vy = 0;
+        var this.x = 0;
+        var this.y = 0;
+        var this.xLastTime = System.time();
+        
+        var that = this;
+        getSlot(this.vx).notifyChange(function() {
+            var now = System().time(); 
+            var dt = now - that.xLastTime;
+            that.x += that.vx * dt;
+            that.xLastTime = now;
+        });
+        getSlot(this.vy).notifyChange(function() {
+            var now = System().time(); 
+            var dt = now - that.yLastTime;
+            that.y += that.vy * dt;
+            that.yLastTime = now;            
+        });       
+        
+    }|;
+}|;
