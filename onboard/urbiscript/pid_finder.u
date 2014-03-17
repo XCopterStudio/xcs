@@ -4,8 +4,8 @@ load("boot/boot.u");
  * Dataflow graph
  */
  
-//var xciVersion = "xci_dodo";
-var xciVersion = "xci_parrot";
+var xciVersion = "xci_dodo";
+//var xciVersion = "xci_parrot";
 var xci = XXci.new(xciVersion);
 var f = ULineFinder.new();
 xci.&video >> f.&video;
@@ -17,14 +17,14 @@ f.autoHsvValueRangeRatio = 0.1;
 f.distanceAging = 0.3;
 f.distanceAging = 0.05;
 
-serverConnect("127.0.0.1", 1234, xci, xciVersion);
+//serverConnect("127.0.0.1", 1234, xci, xciVersion);
 
 xci.xciInit();
 
 // 4 DODO
 if(xciVersion == "xci_dodo") {
     xci.setConfiguration("video:filename", "/tmp/video.xcs");
-    xci.setConfiguration("video:fps", "25");
+    //xci.setConfiguration("video:fps", "25");
     xci.doCommand("Load");
     xci.doCommand("Play");
 };
@@ -47,3 +47,11 @@ var aligner = Aligner.new(xci,f,rollPidParam,yawPidParam);
 
 
 
+function s(message) {
+    var data = [ => ];
+    data["type"] = "debug";
+    data["type2"] = "json";
+    data["data"] = message;
+    echo(data);
+    echo(UJson.encode(data));
+}|;

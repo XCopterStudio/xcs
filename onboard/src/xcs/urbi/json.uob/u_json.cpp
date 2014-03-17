@@ -56,7 +56,7 @@ unique_ptr<Value> UJson::fromUValue(const ::urbi::UValue & uvalue, rapidjson::Do
             (*result).SetDouble(uvalue.val);
             break;
         case ::urbi::DATA_STRING:
-            (*result).SetString(uvalue.stringValue->c_str(), uvalue.stringValue->size());
+            (*result).SetString(uvalue.stringValue->c_str(), uvalue.stringValue->size(), allocator);
             break;
         case ::urbi::DATA_LIST:
             (*result).SetArray();
@@ -69,7 +69,7 @@ unique_ptr<Value> UJson::fromUValue(const ::urbi::UValue & uvalue, rapidjson::Do
             (*result).SetObject();
             for (auto pair : *uvalue.dictionary) {
                 unique_ptr<Value> mappedItemPtr(fromUValue(pair.second, allocator));
-                (*result).AddMember(pair.first.c_str(), *mappedItemPtr, allocator);
+                (*result).AddMember(Value().SetString(pair.first.c_str(), pair.first.size(), allocator), *mappedItemPtr, allocator);
             }
             break;
         default:

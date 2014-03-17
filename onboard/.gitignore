@@ -4,3 +4,5 @@ build/*
 !build/.placeholder
 */CMakeLists.txt.user
 urbiscript/log
+urbiscript/_log.bat
+urbiscript/_run.bat
