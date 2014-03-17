@@ -65,7 +65,7 @@ class VideoReceiver{
     bool isIFrame(uint8_t frameType);
     void checkVideoDeadline();
 public:
-    VideoReceiver(boost::asio::io_service& io_serviceVideo, std::string ipAdress, unsigned int port);
+    VideoReceiver(boost::asio::io_service& io_serviceVideo, std::string ipAdress = "192.168.1.1", unsigned int port = 5555);
 	~VideoReceiver();
     void connect();
     bool tryGetVideoFrame(VideoFramePtr& videoFrame);

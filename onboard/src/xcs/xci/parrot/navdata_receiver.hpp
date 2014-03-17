@@ -40,14 +40,14 @@ namespace parrot{
 
         // function for navdata handling
         void handleConnectedNavdata(const boost::system::error_code& ec);
-        void receiveNavdata();
+        void receiveNavdata(const boost::system::error_code& ec);
         void handleReceivedNavdata(const boost::system::error_code& ec, std::size_t bytes_transferred);
         void checkDeadlineNavdata();
 
         void processState(uint32_t droneState);
         void processNavdata(std::vector<OptionAcceptor*> &options);
     public:
-        NavdataReceiver(DataReceiver& dataReceiver, AtCommandQueue& atCommandQueue, ArdroneState& parrotState, boost::asio::io_service& io_serviceNavdata, std::string ipAdress, unsigned int port);
+        NavdataReceiver(DataReceiver& dataReceiver, AtCommandQueue& atCommandQueue, ArdroneState& parrotState, boost::asio::io_service& io_serviceNavdata, std::string ipAdress = "192.168.1.1", unsigned int port = 5554);
         ~NavdataReceiver();
         void connect();
     };

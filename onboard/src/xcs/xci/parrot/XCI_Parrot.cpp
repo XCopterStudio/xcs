@@ -20,9 +20,6 @@ using namespace xcs::xci::parrot;
 // ----------------- Constant ----------------------- //
 
 const int XCI_Parrot::PORT_COM = 5559;
-const int XCI_Parrot::PORT_CMD = 5556;
-const int XCI_Parrot::PORT_VIDEO = 5555;
-const int XCI_Parrot::PORT_DATA = 5554;
 
 const float XCI_Parrot::EPSILON = (float) 1.0e-10;
 
@@ -33,8 +30,8 @@ const std::string XCI_Parrot::NAME = "Parrot AR Drone 2.0 XCI";
 void XCI_Parrot::initNetwork() {
 	// connect to video port
     atCommandSender_.connect();
+    videoReceiver_.connect();
     navdataReceiver_.connect();
-	videoReceiver_.connect();
 
     threadSendingATCmd_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceCMD_)));
 	threadReadVideoReceiver_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceVideo_)));
@@ -60,9 +57,6 @@ void XCI_Parrot::processVideoData(){
         }
     }
 }
-
-
-// TODO: set timeout for receive!!!
 
 std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException) {
     boost::system::error_code ec;

@@ -39,7 +39,7 @@ namespace parrot{
         void checkDeadlineAtCommand();
 
     public:
-        AtCommandSender(AtCommandQueue& atCommandQueue, boost::asio::io_service& io_serviceAtCommand, std::string ipAdress, unsigned int port);
+        AtCommandSender(AtCommandQueue& atCommandQueue, boost::asio::io_service& io_serviceAtCommand, std::string ipAdress = "192.168.1.1", unsigned int port = 5556);
         ~AtCommandSender();
         void connect();
     };

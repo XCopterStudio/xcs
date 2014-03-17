@@ -34,15 +34,10 @@ typedef xcs::Tsqueue< AtCommand* > AtCommandQueue;
 class XCI_Parrot : public virtual XCI {
     // Constant
     static const int PORT_COM;
-    static const int PORT_CMD;
-    static const int PORT_VIDEO;
-    static const int PORT_DATA;
 
     static const float EPSILON;
 
     static const std::string NAME;
-
-    static const unsigned int VIDEO_MAX_SIZE;
 
     // queue for at commands
     AtCommandQueue atCommandQueue_;
@@ -81,9 +76,9 @@ public:
 
     XCI_Parrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1")
         : XCI(dataReceiver),
-        atCommandSender_(atCommandQueue_, io_serviceCMD_ ,ipAddress, PORT_CMD),
-        videoReceiver_(io_serviceVideo_, ipAddress, PORT_VIDEO),
-        navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceNavdata_, ipAddress, PORT_DATA)
+        atCommandSender_(atCommandQueue_, io_serviceCMD_ ,ipAddress),
+        videoReceiver_(io_serviceVideo_, ipAddress),
+        navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceNavdata_, ipAddress)
       {
     };
     //! Initialize XCI for use

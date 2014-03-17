@@ -1,6 +1,7 @@
 #include "atcommand_sender.hpp"
 
 #include <string>
+#include <iostream>
 
 #include <boost/bind.hpp>
 
@@ -21,12 +22,12 @@ void AtCommandSender::handleConnectedAtCommand(const boost::system::error_code& 
 
     if (!socket_.is_open()){
         cerr << "Connect atCommand socket timed out." << endl;
-        connect();
+        //connect();
     }
     else if (ec){
         cerr << "Connect atCommand socket error: " << ec.message() << endl;
-        socket_.close();
-        connect();
+        //socket_.close();
+        //connect();
     }
     else{
         sendAtCommand();
@@ -43,7 +44,7 @@ void AtCommandSender::sendAtCommand(){
         if (atCommandQueue_.tryPop(atCommand)){
             std::string atCommandString = atCommand->toString(sequenceNumber_++);
             delete atCommand;
-
+            
             unsigned int packetSize = packetString_.str().size() + atCommandString.size(); // one for new line 
             if (packetSize > AT_CMD_PACKET_SIZE || atCommandQueue_.empty()) { // send prepared packet
                 deadline_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
@@ -71,8 +72,8 @@ void AtCommandSender::handleWritedAtCommand(const boost::system::error_code& ec)
 
     if (ec){
         cerr << "Send atCommand data error: " << ec.message() << endl;
-        socket_.close();
-        connect();
+        //socket_.close();
+        //connect();
     }
     else{
         sendAtCommand();
@@ -92,7 +93,7 @@ void AtCommandSender::checkDeadlineAtCommand(){
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled.
         socket_.close();
-
+        connect();
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
         deadline_.expires_at(boost::posix_time::pos_infin);
@@ -129,10 +130,11 @@ void AtCommandSender::connect(){
         return;
     }
 
+    cerr << "Try connect atCommand sender." << endl;
     socket_.open(udp::v4());
 
     deadline_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
 
     socket_.async_connect(parrot_,
-        boost::bind(&AtCommandSender::sendAtCommand, this));
+        boost::bind(&AtCommandSender::handleConnectedAtCommand, this,_1));
 }

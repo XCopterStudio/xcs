@@ -2,6 +2,7 @@
 #include <cassert>
 
 #include <boost/bind.hpp>
+#include <iostream>
 
 using namespace xcs::xci::parrot;
 using namespace boost::asio;
@@ -11,14 +12,14 @@ using namespace std;
 const unsigned int VideoReceiver::TIMEOUT = 1000; // ms
 
 void VideoReceiver::handleConnectedVideo(const boost::system::error_code& ec){
-    if (socketVideo_.is_open()){
-        cerr << "Connect Navdata socket timed out." << endl;
-        connect();
+    if (!socketVideo_.is_open()){
+        cerr << "Connect video socket timed out." << endl;
+        //connect();
     }
     else if (ec){
-        cerr << "Receive Navdata error: " << ec.message() << endl;
-        socketVideo_.close();
-        connect();
+        cerr << "Receive video error: " << ec.message() << endl;
+        //socketVideo_.close();
+        //connect();
     }
     else{
         receiveVideo();
@@ -51,8 +52,8 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
 
     if (ec){
         cerr << "Receive Video data error: " << ec.message() << endl;
-        socketVideo_.close();
-        connect();
+        //socketVideo_.close();
+        //connect();
     }
     else{
         deadlineVideo_.expires_at(boost::posix_time::pos_infin);
@@ -126,7 +127,7 @@ void VideoReceiver::checkVideoDeadline(){
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled.
         socketVideo_.close();
-
+        connect();
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
         deadlineVideo_.expires_at(boost::posix_time::pos_infin);
@@ -168,12 +169,13 @@ void VideoReceiver::connect(){
         lastFrame_ = nullptr;
     }
 
+    cerr << "Try connect video receiver." << endl;
+
     receivedHeader_ = false;
     receiveSize_ = sizeof(parrot_t);
 
     deadlineVideo_.expires_from_now(boost::posix_time::millisec(TIMEOUT));
 
-    cerr << "Try connect to the video port" << endl;
 	socketVideo_.open(tcp::v4());
     socketVideo_.async_connect(parrotVideo,
         boost::bind(&VideoReceiver::handleConnectedVideo, this, _1));

@@ -10,7 +10,7 @@ using namespace xcs::xci::parrot;
 using namespace boost::asio;
 using namespace boost::asio::ip;
 
-const unsigned int NavdataReceiver::TIMEOUT = 1000; // ms
+const unsigned int NavdataReceiver::TIMEOUT = 2000; // ms
 const int32_t NavdataReceiver::DEFAULT_SEQUENCE_NUMBER = 1;
 
 void NavdataReceiver::handleConnectedNavdata(const boost::system::error_code& ec) {
@@ -18,28 +18,34 @@ void NavdataReceiver::handleConnectedNavdata(const boost::system::error_code& ec
         return;
     }
 
-    if (socketNavdata_.is_open()) {
+    if (!socketNavdata_.is_open()) {
         cerr << "Connect Navdata socket timed out." << endl;
-        connect();
+        //connect();
     }
     else if (ec){
         cerr << "Connect Navdata socket error: " << ec.message() << endl;
-        socketNavdata_.close();
-        connect();
+        //socketNavdata_.close();
+        //connect();
     }else{
         int32_t flag = 1; // 1 - unicast, 2 - multicast
         deadlineNavdata_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
-        socketNavdata_.async_send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)), boost::bind(&NavdataReceiver::receiveNavdata, this));
+        socketNavdata_.async_send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)), boost::bind(&NavdataReceiver::receiveNavdata, this, _1));
     }
 }
 
-void NavdataReceiver::receiveNavdata() {
+void NavdataReceiver::receiveNavdata(const boost::system::error_code& ec) {
     if (end_) {
         return;
     }
 
-    deadlineNavdata_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
-    socketNavdata_.async_receive(boost::asio::buffer(navdataBuffer, NAVDATA_MAX_SIZE), boost::bind(&NavdataReceiver::handleReceivedNavdata, this, _1, _2));
+    if (ec){
+        cerr << "Navdata receive error: " << ec.message() << endl;
+        //socketNavdata_.close();
+        //connect();
+    }else{
+        deadlineNavdata_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
+        socketNavdata_.async_receive(boost::asio::buffer(navdataBuffer, NAVDATA_MAX_SIZE), boost::bind(&NavdataReceiver::handleReceivedNavdata, this, _1, _2));
+    }
 }
 
 void NavdataReceiver::handleReceivedNavdata(const boost::system::error_code& ec, std::size_t bytes_transferred) {
@@ -48,26 +54,27 @@ void NavdataReceiver::handleReceivedNavdata(const boost::system::error_code& ec,
     }
 
     if (ec) {
-        cerr << "Receive Video error: " << ec.message() << endl;
-        socketNavdata_.close();
-        connect();
-    }
+        cerr << "Navdata receive error: " << ec.message() << endl;
+        //socketNavdata_.close();
+        //connect();
+    }else{
 
-    deadlineNavdata_.expires_at(boost::posix_time::pos_infin);
+        deadlineNavdata_.expires_at(boost::posix_time::pos_infin);
 
-    Navdata* navdata = (Navdata*) & navdataBuffer[0];
-    if (navdata->sequence > sequenceNumberNavdata_ && navdata->header == 0x55667788) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
-        uint32_t navdataCks = NavdataProcess::computeChecksum(navdata, bytes_transferred);
-        vector<OptionAcceptor*> options = NavdataProcess::parse(navdata, navdataCks, bytes_transferred);
-        if (options.size() > 0) {
-            processState(navdata->ardrone_state);
-            processNavdata(options);
+        Navdata* navdata = (Navdata*)& navdataBuffer[0];
+        if (navdata->sequence > sequenceNumberNavdata_ && navdata->header == 0x55667788) { // all received data with sequence number lower then sequenceNumberData_ will be skipped.
+            uint32_t navdataCks = NavdataProcess::computeChecksum(navdata, bytes_transferred);
+            vector<OptionAcceptor*> options = NavdataProcess::parse(navdata, navdataCks, bytes_transferred);
+            if (options.size() > 0) {
+                processState(navdata->ardrone_state);
+                processNavdata(options);
+            }
+
+            sequenceNumberNavdata_ = navdata->sequence;
         }
 
-        sequenceNumberNavdata_ = navdata->sequence;
+        receiveNavdata(boost::system::error_code());
     }
-
-    receiveNavdata();
 }
 
 
@@ -83,7 +90,7 @@ void NavdataReceiver::checkDeadlineNavdata() {
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled.
         socketNavdata_.close();
-
+        connect();
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
         deadlineNavdata_.expires_at(boost::posix_time::pos_infin);
@@ -152,6 +159,7 @@ void NavdataReceiver::connect() {
         return;
     }
 
+    cerr << "Try connect navdata receiver." << endl;
     socketNavdata_.open(udp::v4());
 
     deadlineNavdata_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
