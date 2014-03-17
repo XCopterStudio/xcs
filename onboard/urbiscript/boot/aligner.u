@@ -10,6 +10,7 @@ class Aligner{
     var troll = Tag.new("troll"); 
     var tpitch = Tag.new("tpitch"); 
     var tgaz = Tag.new("tgaz"); 
+    var gazAltitude = 1.5;
 
     function init(xci, finder, rollPidParam, yawPidParam, pitchPidParam, gazPidParam) {
         this.xci = xci;
@@ -42,7 +43,7 @@ class Aligner{
     function adjustYaw(){
         this.tyaw: every(100ms){
             var deviation = finder.deviation;
-            var yaw = pidLoop(yawPidParam,deviation);
+            var yaw = Global.crop(pidLoop(yawPidParam,deviation), 1);
             echo("yaw: " + yaw);
             xci.yaw = yaw; 
         },
@@ -54,7 +55,7 @@ class Aligner{
             var distance = finder.distance;
             echo("deviation/distance: " + deviation + "/" + distance);
             if(deviation < pitchPidParam.p && distance < pitchPidParam.i) {
-                xci.pitch = pitchPidParam.d;
+                xci.pitch = Global.crop(pitchPidParam.d, 1);
                 echo("pitch: " + pitchPidParam.d);
            }
            else {
@@ -65,8 +66,8 @@ class Aligner{
 
     function adjustGaz(){
         this.tgaz: every(100ms){
-            var altDif = xci.altitude - 1.5;
-            var gaz = pidLoop(gazPidParam, altDif);
+            var altDif = gazAltitude - xci.altitude;
+            var gaz = Global.crop(pidLoop(gazPidParam, altDif), 1);
             echo("gaz: " + gaz);
             xci.gaz = gaz; 
         },
