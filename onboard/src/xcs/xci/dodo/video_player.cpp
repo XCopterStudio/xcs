@@ -169,7 +169,7 @@ xcs::nodes::BitmapType VideoPlayer::getFrame() {
 }
 
 size_t VideoPlayer::framePeriod() {
-    return videoStream_->codec->ticks_per_frame * 1000 * videoStream_->codec->time_base.num / videoStream_->codec->time_base.den;
+    return 1000 * videoStream_->codec->time_base.num / videoStream_->codec->time_base.den;
 }
 
 bool VideoPlayer::timestamps() const {
