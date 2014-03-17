@@ -10,6 +10,9 @@ void OptionVisitor::visit(NavdataDemo* demo){
     dataReceiver_.notify("psi", miliDegreesToRadias(demo->psi));
     dataReceiver_.notify("theta", miliDegreesToRadias(demo->theta));
     dataReceiver_.notify("phi", miliDegreesToRadias(demo->phi));
+    dataReceiver_.notify("vx", demo->vx);
+    dataReceiver_.notify("vy", demo->vy);
+    dataReceiver_.notify("vz", demo->vz);
     dataReceiver_.notify("altitude", demo->altitude / 1000.0);
 }
 

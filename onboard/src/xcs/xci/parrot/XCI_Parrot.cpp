@@ -139,6 +139,9 @@ SensorList XCI_Parrot::sensorList() {
     sensorList.push_back(Sensor("phi", "phi"));
     sensorList.push_back(Sensor("theta", "theta"));
     sensorList.push_back(Sensor("psi", "psi"));
+    sensorList.push_back(Sensor("velocityX", "vx"));
+    sensorList.push_back(Sensor("velocityY", "vy"));
+    sensorList.push_back(Sensor("velocityZ", "vz"));
     sensorList.push_back(Sensor("altitude", "altitude"));
     sensorList.push_back(Sensor("video", "video"));
 
