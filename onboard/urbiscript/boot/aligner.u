@@ -47,7 +47,7 @@ class Aligner{
         this.tyaw: every(100ms){
             var deviation = finder.deviation;
             var yaw = Global.crop(pidLoop(yawPidParam,deviation), 1);
-            echo("yaw: " + yaw);
+            echo("yaw: \t\t" + yaw);
             xci.yaw = yaw; 
         },
     };
@@ -59,7 +59,7 @@ class Aligner{
             echo("deviation/distance: " + deviation + "/" + distance);
             if(deviation < pitchPidParam.p && distance < pitchPidParam.i) {
                 xci.pitch = Global.crop(pitchPidParam.d, 1);
-                echo("pitch: " + pitchPidParam.d);
+                echo("pitch: \t\t\t\t" + pitchPidParam.d);
            }
            else {
                 xci.pitch = 0; 
@@ -71,7 +71,7 @@ class Aligner{
         this.tgaz: every(100ms){
             var altDif = gazAltitude - xci.altitude;
             var gaz = Global.crop(pidLoop(gazPidParam, altDif), 1);
-            echo("gaz: " + gaz);
+            echo("gaz: \t\t\t\t\t\t" + gaz);
             xci.gaz = gaz; 
         },
     };
