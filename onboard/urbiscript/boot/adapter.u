@@ -69,7 +69,7 @@ class SemanticReceiver {
             for(var input: inputs) {
                 var name = input.first;
                 if(name in data) {
-                    echo("updating: " + name);
+                    //echo("updating: " + name);
                     that.updateSlot(name, data[name]);
                 };
             };

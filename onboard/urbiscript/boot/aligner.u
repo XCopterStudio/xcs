@@ -4,14 +4,17 @@ class Aligner{
     var finder;
     var rollPidParam;
     var yawPidParam;
+    var pitchPidParam;
     var tyaw = Tag.new("tyaw");
     var troll = Tag.new("troll"); 
+    var tpitch = Tag.new("tpitch"); 
 
-    function init(xci, finder, rollPidParam, yawPidParam) {
+    function init(xci, finder, rollPidParam, yawPidParam, pitchPidParam) {
         this.xci = xci;
         this.finder = finder;
         this.rollPidParam = rollPidParam;
         this.yawPidParam = yawPidParam;
+        this.pitchPidParam = pitchPidParam;
     };
 
     function pidLoop(pidParams, value){
@@ -23,11 +26,13 @@ class Aligner{
     };
 
     function adjustRoll(){
-        this.troll: every(50ms){ 
+        this.troll: every(500ms){ 
             var distance = finder.distance;
             var roll = Global.crop(pidLoop(rollPidParam,distance), 1);
-            //echo(roll);
+            echo("roll: " + roll);
             xci.roll = roll; 
+            sleep(50ms);
+            xci.roll = 0;
         },
     };
 
@@ -35,8 +40,23 @@ class Aligner{
         this.tyaw: every(100ms){
            var deviation = finder.deviation;
            var yaw = pidLoop(yawPidParam,deviation);
-           echo(yaw);
+           echo("yaw: " + yaw);
            xci.yaw = yaw; 
+        },
+    };
+
+    function adjustPitch(){
+        this.tpitch: every(100ms){
+           var deviation = finder.deviation;
+           var distance = finder.distance;
+           echo("deviation/distance: " + pitchPidParam.p + "/" + pitchPidParam.i);
+           if(deviation < pitchPidParam.p && distance < pitchPidParam.i) {
+                xci.pitch = pitchPidParam.d;
+                echo("pitch: " + pitchPidParam.d);
+           }
+           else {
+                xci.pitch = 0; 
+           };
         },
     };
 }|;

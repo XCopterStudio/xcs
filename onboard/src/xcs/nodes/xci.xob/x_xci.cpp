@@ -122,6 +122,7 @@ void XXci::onChangeGaz(double gaz) {
 
 void XXci::initOutputs() {
     for (auto sensor : xci_->sensorList()) {
+        // todo: xvar and uBindVarRename
         ::urbi::UVar* uvar = new ::urbi::UVar();
         UBindVarRename(XXci, *uvar, sensor.name);
         cout << "Registered sensor " << sensor.name << endl;
