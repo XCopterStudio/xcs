@@ -92,6 +92,7 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
                         }
 
                         lastFrameNumber_ = parrotPave_.frame_number;
+                        //cerr << "Push video frame" << endl;
                         videoFrames_.push(lastFrame_);
                     }
                     else{
