@@ -31,6 +31,7 @@ const std::string XciDodo::CMD_VIDEO_STEP_ = "Step";
 const std::string XciDodo::CONFIG_VIDEO_FILENAME = "video:filename";
 const std::string XciDodo::CONFIG_VIDEO_FPS = "video:fps";
 const std::string XciDodo::CONFIG_VIDEO_FONT = "video:font";
+const std::string XciDodo::CONFIG_VIDEO_TIMESTAMPS = "video:timestamps";
 const std::string XciDodo::CONFIG_LOG_FP = "log:fp";
 const std::string XciDodo::CONFIG_LOG_COMMAND = "log:command";
 
@@ -65,6 +66,7 @@ void XciDodo::init() {
     // back-propagation of default values
     configuration(CONFIG_VIDEO_FPS, to_string(videoFps_));
     configuration(CONFIG_VIDEO_FONT, "/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf");
+    configuration(CONFIG_VIDEO_TIMESTAMPS, "0");
     configuration(CONFIG_LOG_FP, "0");
     configuration(CONFIG_LOG_COMMAND, "1");
 
@@ -88,7 +90,7 @@ SensorList XciDodo::sensorList() {
 ParameterValueType XciDodo::parameter(ParameterNameType name) {
     switch (name) {
         case XCI_PARAM_FP_PERSISTENCE:
-            return "1000";
+            return "30";
         default:
             throw std::runtime_error("Parameter not defined.");
     }
@@ -177,6 +179,9 @@ void XciDodo::configuration(const std::string& key, const std::string & value) {
         size_t fps = stoi(value);
         videoFps_ = fps;
     }
+    if (key == CONFIG_VIDEO_TIMESTAMPS) {
+        videoPlayer_.timestamps(stoi(value));
+    }
 
     configuration_[key] = value;
 }
@@ -206,7 +211,7 @@ void XciDodo::stop() {
 
 extern "C" {
 
-    XCI* CreateXci(DataReceiver& dataReceiver) {
-        return new XciDodo(dataReceiver);
-    }
+XCI* CreateXci(DataReceiver& dataReceiver) {
+    return new XciDodo(dataReceiver);
+}
 }

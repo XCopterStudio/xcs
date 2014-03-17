@@ -115,24 +115,25 @@ xcs::nodes::BitmapType VideoPlayer::getFrame() {
 
         // processing the image if available
         if (isFrameAvailable) {
+            if (timestamps_) {
+                /* push the decoded frame into the filtergraph */
+                av_buffersrc_write_frame(bufferSrc_.get(), avFrame_.get());
 
-            /* push the decoded frame into the filtergraph */
-            av_buffersrc_write_frame(bufferSrc_.get(), avFrame_.get());
+                /* pull filtered frames from the filtergraph */
+                while (1) {
+                    AVFilterBufferRef *picref;
+                    auto ret = av_buffersink_read(bufferSink_.get(), &picref);
 
-            /* pull filtered frames from the filtergraph */
-            while (1) {
-                AVFilterBufferRef *picref;
-                auto ret = av_buffersink_read(bufferSink_.get(), &picref);
-
-                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-                    break;
+                    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+                        break;
+                    }
+                    if (ret < 0) {
+                        break;
+                    }
+                    avfilter_copy_buf_props(avFrame_.get(), picref);
+                    avFrame_.get()->opaque = picref;
+                    avfilter_unref_bufferp(&picref);
                 }
-                if (ret < 0) {
-                    break;
-                }
-                avfilter_copy_buf_props(avFrame_.get(), picref);
-                avFrame_.get()->opaque = picref;
-                avfilter_unref_bufferp(&picref);
             }
 
 
@@ -169,6 +170,14 @@ xcs::nodes::BitmapType VideoPlayer::getFrame() {
 
 size_t VideoPlayer::framePeriod() {
     return videoStream_->codec->ticks_per_frame * 1000 * videoStream_->codec->time_base.num / videoStream_->codec->time_base.den;
+}
+
+bool VideoPlayer::timestamps() const {
+    return timestamps_;
+}
+
+void VideoPlayer::timestamps(bool value) {
+    timestamps_ = value;
 }
 
 void VideoPlayer::initFilters(const std::string &filterDescription) {

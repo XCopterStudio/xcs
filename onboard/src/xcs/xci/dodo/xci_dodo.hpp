@@ -119,6 +119,7 @@ private:
     static const std::string CONFIG_VIDEO_FILENAME;
     static const std::string CONFIG_VIDEO_FPS;
     static const std::string CONFIG_VIDEO_FONT;
+    static const std::string CONFIG_VIDEO_TIMESTAMPS;
     static const std::string CONFIG_LOG_FP;
     static const std::string CONFIG_LOG_COMMAND;
     

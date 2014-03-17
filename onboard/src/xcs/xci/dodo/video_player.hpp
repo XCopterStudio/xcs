@@ -76,6 +76,8 @@ public:
     void rewind();
     xcs::nodes::BitmapType getFrame();
     size_t framePeriod();
+    bool timestamps() const;
+    void timestamps(bool value);
 
 private:
     typedef std::unique_ptr<AVFormatContext, std::function<void (AVFormatContext *) >> AVFormatContextPtr;
@@ -101,6 +103,7 @@ private:
     SwsContext *swsContext_;
     AVPicture pic_;
     bool hasPic_;
+    bool timestamps_;
 
     /*
      * Filters
