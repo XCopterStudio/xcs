@@ -38,6 +38,7 @@ void AtCommandSender::sendAtCommand(){
     AtCommand* atCommand = nullptr;
     if (atCommandQueue_.tryPop(atCommand)){
         lastAtcommand_ = atCommand->toString(sequenceNumber_++);
+        cerr << lastAtcommand_ << endl;
         delete atCommand;
 
         deadline_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));

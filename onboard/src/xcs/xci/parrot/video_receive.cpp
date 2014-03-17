@@ -9,7 +9,7 @@ using namespace boost::asio;
 using namespace boost::asio::ip;
 using namespace std;
 
-const unsigned int VideoReceiver::TIMEOUT = 1000; // ms
+const unsigned int VideoReceiver::TIMEOUT = 2000; // ms
 
 void VideoReceiver::handleConnectedVideo(const boost::system::error_code& ec){
     if (!socketVideo_.is_open()){

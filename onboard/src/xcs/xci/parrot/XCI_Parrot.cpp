@@ -189,21 +189,27 @@ void XCI_Parrot::configuration(const InformationMap &configuration) {
 void XCI_Parrot::command(const std::string &command) {
     unsigned int i;
     if (command == "TakeOff") {
-        for (i = 0; i < TRY_COUNT; ++i) {
+        if (!state_.getState(FLAG_ARDRONE_FLY_MASK)){
             atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
-            std::this_thread::sleep_for(std::chrono::milliseconds(25));
+        }
+        /*for (i = 0; i < TRY_COUNT; ++i) {
+            atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
             if (state_.getState(FLAG_ARDRONE_FLY_MASK)){
                 break;
             }
-        }
+        }*/
     } else if (command == "Land") {
-        for (i = 0; i < TRY_COUNT; ++i) {
+        if (state_.getState(FLAG_ARDRONE_FLY_MASK)){
             atCommandQueue_.push(new AtCommandRef(STATE_LAND));
-            std::this_thread::sleep_for(std::chrono::milliseconds(25));
+        }
+        /*for (i = 0; i < TRY_COUNT; ++i) {
+            atCommandQueue_.push(new AtCommandRef(STATE_LAND));
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
             if (!state_.getState(FLAG_ARDRONE_FLY_MASK)) {
                 break;
             }
-        }
+        }*/
     } else if (command == "EmegrencyStop") {
         if (!state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)) {
             atCommandQueue_.push(new AtCommandRef(STATE_EMERGENCY));
