@@ -1,0 +1,75 @@
+load("boot/boot.u");
+
+/*
+ * Dataflow graph
+ */
+ 
+//var xciVersion = "xci_dodo";
+var xciVersion = "xci_parrot";
+var xci = XXci.new(xciVersion);
+var f = ULineFinder.new();
+var i = Integrator.new();
+
+xci.&video >> f.&video;
+xci.&velocityX >> i.&vx;
+xci.&velocityY >> i.&vy;
+
+// Default values for image processing
+f.hsvValueRange = 6; //20;
+f.houghRho = 1;
+f.autoHsvValueRangeRatio = 0.1;
+f.distanceAging = 0.5;
+
+
+serverConnect("127.0.0.1", 1234, xci, xciVersion);
+
+xci.xciInit();
+
+// 4 DODO
+if(xciVersion == "xci_dodo") {
+    xci.setConfiguration("video:filename", "/tmp/video.xcs");
+    //xci.setConfiguration("video:fps", "25");
+    xci.doCommand("Load");
+    xci.doCommand("Play");
+};
+
+// 4 parrot
+if(xciVersion == "xci_parrot") {
+    sleep(1s);
+    xci.flyParamPersistence = 0;
+    xci.setConfiguration("video:video_channel", "1");
+    //xci.command = "TakeOff";
+    //sleep(4s);
+};
+
+var rollPidParam = PidParams.new(0.4, 0, 0);
+var yawPidParam = PidParams.new(0.5, 0, 0);
+var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
+var gazPidParam = PidParams.new(0.2, 0, 0);
+var a = Aligner.new(xci, f, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
+//a.adjustYaw(),;
+//a.adjustRoll(), a.adjustYaw(), a.adjustPitch(), a.adjustGaz(), ;
+//a.adjustRoll(),;
+
+//every(500ms) {
+//    echo("x: " + i.x + ", y: " + i.y + ", vx: " + i.vx);
+//},;
+
+function s(message) {
+    var data = [ => ];
+    data["type"] = "debug";
+    data["type2"] = "json";
+    data["data"] = message;
+    echo(data);
+    echo(UJson.encode(data));
+}|;
+
+
+/*
+var x;
+setSlot("x" nil);
+var slot = getSlot("x");
+slot.notifyChange(function() {
+    echo("asdfasdf");
+});
+*/
