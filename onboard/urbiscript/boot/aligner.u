@@ -5,16 +5,19 @@ class Aligner{
     var rollPidParam;
     var yawPidParam;
     var pitchPidParam;
+    var gazPidParam;
     var tyaw = Tag.new("tyaw");
     var troll = Tag.new("troll"); 
     var tpitch = Tag.new("tpitch"); 
+    var tgaz = Tag.new("tgaz"); 
 
-    function init(xci, finder, rollPidParam, yawPidParam, pitchPidParam) {
+    function init(xci, finder, rollPidParam, yawPidParam, pitchPidParam, gazPidParam) {
         this.xci = xci;
         this.finder = finder;
         this.rollPidParam = rollPidParam;
         this.yawPidParam = yawPidParam;
         this.pitchPidParam = pitchPidParam;
+        this.gazPidParam = gazPidParam;
     };
 
     function pidLoop(pidParams, value){
@@ -38,25 +41,34 @@ class Aligner{
 
     function adjustYaw(){
         this.tyaw: every(100ms){
-           var deviation = finder.deviation;
-           var yaw = pidLoop(yawPidParam,deviation);
-           echo("yaw: " + yaw);
-           xci.yaw = yaw; 
+            var deviation = finder.deviation;
+            var yaw = pidLoop(yawPidParam,deviation);
+            echo("yaw: " + yaw);
+            xci.yaw = yaw; 
         },
     };
 
     function adjustPitch(){
         this.tpitch: every(100ms){
-           var deviation = finder.deviation;
-           var distance = finder.distance;
-           echo("deviation/distance: " + pitchPidParam.p + "/" + pitchPidParam.i);
-           if(deviation < pitchPidParam.p && distance < pitchPidParam.i) {
+            var deviation = finder.deviation;
+            var distance = finder.distance;
+            echo("deviation/distance: " + deviation + "/" + distance);
+            if(deviation < pitchPidParam.p && distance < pitchPidParam.i) {
                 xci.pitch = pitchPidParam.d;
                 echo("pitch: " + pitchPidParam.d);
            }
            else {
                 xci.pitch = 0; 
            };
+        },
+    };
+
+    function adjustGaz(){
+        this.tgaz: every(100ms){
+            var altDif = xci.altitude - 1.5;
+            var gaz = pidLoop(gazPidParam, altDif);
+            echo("gaz: " + gaz);
+            xci.gaz = gaz; 
         },
     };
 }|;
