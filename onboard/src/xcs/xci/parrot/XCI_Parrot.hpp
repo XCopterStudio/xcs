@@ -34,7 +34,7 @@ typedef xcs::Tsqueue< AtCommand* > AtCommandQueue;
 class XCI_Parrot : public virtual XCI {
     // Constant
     static const int PORT_COM;
-
+    static const unsigned int TRY_COUNT;
     static const float EPSILON;
 
     static const std::string NAME;

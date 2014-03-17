@@ -35,34 +35,18 @@ void AtCommandSender::handleConnectedAtCommand(const boost::system::error_code& 
 }
 
 void AtCommandSender::sendAtCommand(){
-    if (end_){
-        return;
+    AtCommand* atCommand = nullptr;
+    if (atCommandQueue_.tryPop(atCommand)){
+        lastAtcommand_ = atCommand->toString(sequenceNumber_++);
+        delete atCommand;
+
+        deadline_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
+        socket_.async_send(boost::asio::buffer(lastAtcommand_, lastAtcommand_.length()), boost::bind(&AtCommandSender::handleWritedAtCommand, this, _1));
     }
-
-    do{
-        AtCommand* atCommand = nullptr;
-        if (atCommandQueue_.tryPop(atCommand)){
-            std::string atCommandString = atCommand->toString(sequenceNumber_++);
-            delete atCommand;
-            
-            unsigned int packetSize = packetString_.str().size() + atCommandString.size(); // one for new line 
-            if (packetSize > AT_CMD_PACKET_SIZE || atCommandQueue_.empty()) { // send prepared packet
-                deadline_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
-                socket_.async_send(boost::asio::buffer(packetString_.str(), packetString_.str().size()), boost::bind(&AtCommandSender::handleWritedAtCommand, this, _1));
-                // clear packet string
-                packetString_.str(std::string());
-                packetString_.clear();
-            }
-
-            packetString_ << atCommandString;
-            break;
-        }
-        else{
-            wait_.expires_from_now(boost::posix_time::milliseconds(1));
-            wait_.async_wait(boost::bind(&AtCommandSender::sendAtCommand, this));
-            break;
-        }
-    } while (true);
+    else{
+        wait_.expires_from_now(boost::posix_time::milliseconds(1));
+        wait_.async_wait(boost::bind(&AtCommandSender::sendAtCommand, this));
+    }
 }
 
 void AtCommandSender::handleWritedAtCommand(const boost::system::error_code& ec){

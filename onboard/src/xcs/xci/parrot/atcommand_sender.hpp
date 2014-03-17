@@ -3,6 +3,7 @@
 
 #include <atomic>
 #include <sstream>
+#include <string>
 
 #include <xcs/tsqueue.hpp>
 #include "AT_Command.hpp"
@@ -27,7 +28,7 @@ namespace parrot{
         boost::asio::ip::udp::endpoint parrot_;
 
         AtCommandQueue& atCommandQueue_;
-        std::stringstream packetString_;
+        std::string lastAtcommand_;
 
         uint32_t sequenceNumber_;
 

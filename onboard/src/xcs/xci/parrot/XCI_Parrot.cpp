@@ -20,7 +20,7 @@ using namespace xcs::xci::parrot;
 // ----------------- Constant ----------------------- //
 
 const int XCI_Parrot::PORT_COM = 5559;
-
+const unsigned int XCI_Parrot::TRY_COUNT = 10;
 const float XCI_Parrot::EPSILON = (float) 1.0e-10;
 
 const std::string XCI_Parrot::NAME = "Parrot AR Drone 2.0 XCI";
@@ -187,15 +187,22 @@ void XCI_Parrot::configuration(const InformationMap &configuration) {
 }
 
 void XCI_Parrot::command(const std::string &command) {
+    unsigned int i;
     if (command == "TakeOff") {
-        while (!state_.getState(FLAG_ARDRONE_FLY_MASK)) {
+        for (i = 0; i < TRY_COUNT; ++i) {
             atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
             std::this_thread::sleep_for(std::chrono::milliseconds(25));
+            if (state_.getState(FLAG_ARDRONE_FLY_MASK)){
+                break;
+            }
         }
     } else if (command == "Land") {
-        while (state_.getState(FLAG_ARDRONE_FLY_MASK)) {
+        for (i = 0; i < TRY_COUNT; ++i) {
             atCommandQueue_.push(new AtCommandRef(STATE_LAND));
             std::this_thread::sleep_for(std::chrono::milliseconds(25));
+            if (!state_.getState(FLAG_ARDRONE_FLY_MASK)) {
+                break;
+            }
         }
     } else if (command == "EmegrencyStop") {
         if (!state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)) {
