@@ -22,11 +22,14 @@ class Aligner{
     };
 
     function pidLoop(pidParams, value){
-        pidParams.sumI += value;
-        var derivation = value - pidParams.lastValue;
-        pidParams.lastValue = value;
+        var correctedValue = value + pidParams.lastDerivation * pidParams.timeDelay;
+        
+        pidParams.sumI += correctedValue;
+        var derivation = correctedValue - pidParams.lastValue;
+        pidParams.lastValue = correctedValue;
+        pidParams.lastDerivation = derivation;
 
-        return pidParams.p*value + pidParams.i*pidParams.sumI + pidParams.d*derivation; 
+        return pidParams.p*correctedValue + pidParams.i*pidParams.sumI + pidParams.d*derivation; 
     };
 
     function adjustRoll(){
