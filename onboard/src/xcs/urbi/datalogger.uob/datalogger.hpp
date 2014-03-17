@@ -10,7 +10,7 @@ namespace nodes{
 
     class Datalogger : public xcs::nodes::XObject {
     public:
-    }
+    };
 
 }}
 
