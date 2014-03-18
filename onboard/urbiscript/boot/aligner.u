@@ -18,7 +18,11 @@ class Aligner{
     var rollSleep = 0.05;
     var yawInterval = 0.1;
     var pitchInterval = 0.1;
+    var pitchSleep = 0.05;
+    var pitchDistance = 0.1;
+    var pitchDeviation = 0.1;
     var gazInterval = 0.2;
+    
 
 
     function init(xci, finder, rollPidParam, yawPidParam, pitchPidParam, gazPidParam) {
@@ -63,16 +67,15 @@ class Aligner{
 
     function adjustPitch(){
         this.tpitch: every(this.pitchInterval){
-            var deviation = finder.deviation;
             var distance = finder.distance;
-            echo("deviation/distance: " + deviation + "/" + distance);
-            if(deviation < pitchPidParam.p && distance < pitchPidParam.i) {
-                xci.pitch = Global.crop(pitchPidParam.d, 1);
-                echo("pitch: \t\t\t\t" + pitchPidParam.d);
-           }
-           else {
-                xci.pitch = 0; 
-           };
+            var deviation = finder.deviation;
+            var enabled = Global.inRangeBool(distance, this.pitchDistance) * Global.inRangeBool(deviation, this.pitchDeviation);
+            var error = enabled; // simple solution
+            var pitch = Global.crop(pidLoop(pitchPidParam,enabled), 1);
+            echo("pitch: \t\t\t\t\t\t\t\t" + pitch);
+            xci.pitch = pitch; 
+            sleep(this.pitchSleep);
+            xci.pitch = 0;
         },
     };
 

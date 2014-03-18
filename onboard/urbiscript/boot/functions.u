@@ -47,3 +47,7 @@ function serverConnect(ip, port, xci, xciVersion = "xci_parrot") {
 function Global.crop(value, max) {
     if(value.abs() > max) value.sign() * max else value; // pseudo-ternary operator
 }|;
+
+function Global.inRangeBool(value, range) {
+     if (value.abs() <= max) 1 else 0; // pseudo-ternary operator
+}| ;
