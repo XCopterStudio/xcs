@@ -48,6 +48,10 @@ function Global.crop(value, max) {
     if(value.abs() > max) value.sign() * max else value; // pseudo-ternary operator
 }|;
 
+function Global.ground(value, min) {
+    if(value.abs() > min) value else 0; // pseudo-ternary operator
+}|;
+
 function Global.inRangeBool(value, range) {
      if (value.abs() <= max) 1 else 0; // pseudo-ternary operator
 }| ;

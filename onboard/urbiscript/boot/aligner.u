@@ -16,6 +16,7 @@ class Aligner{
     // ! most likely to be overwritten !
     var rollInterval = 0.1;
     var rollSleep = 0.05;
+    var tollThreshold = 0.02;
     var yawInterval = 0.1;
     var pitchInterval = 0.1;
     var pitchSleep = 0.05;
@@ -47,7 +48,7 @@ class Aligner{
 
     function adjustRoll(){
         this.troll: every(this.rollInterval){
-            var distance = finder.distance;
+            var distance = Global.ground(finder.distance, this.rollThreshold);
             var roll = Global.crop(pidLoop(rollPidParam,distance), 1);
             echo("roll: " + roll);
             xci.roll = roll; 
