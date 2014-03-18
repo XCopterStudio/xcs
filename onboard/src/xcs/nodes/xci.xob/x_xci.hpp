@@ -48,6 +48,7 @@ public:
     void flyParam(double roll = 0, double pitch = 0, double yaw = 0, double gaz = 0);
 
     std::string getConfiguration(const std::string& key);
+    xcs::xci::InformationMap dumpConfiguration();
 
     void setConfiguration(const std::string& key, const std::string& value);
 

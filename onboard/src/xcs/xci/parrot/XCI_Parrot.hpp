@@ -10,6 +10,7 @@
 #include "video_decode.hpp"
 #include "video_receive.hpp"
 #include "atcommand_sender.hpp"
+#include "configuration_receiver.hpp"
 
 #include <thread>
 #include <vector>
@@ -33,8 +34,6 @@ typedef xcs::Tsqueue< AtCommand* > AtCommandQueue;
 
 class XCI_Parrot : public virtual XCI {
     // Constant
-    static const int PORT_COM;
-    static const unsigned int TRY_COUNT;
     static const float EPSILON;
 
     static const std::string NAME;
@@ -64,13 +63,10 @@ class XCI_Parrot : public virtual XCI {
     AtCommandSender atCommandSender_;
     VideoReceiver videoReceiver_;
     NavdataReceiver navdataReceiver_;
+    //ConfigurationReceiver configurationReceiver_;
 
     void initNetwork();
-    void sendingATCommands();
-
     void processVideoData();
-
-    std::string downloadConfiguration() throw (ConnectionErrorException);
 
 public:
 
@@ -79,10 +75,11 @@ public:
         atCommandSender_(atCommandQueue_, io_serviceCMD_ ,ipAddress),
         videoReceiver_(io_serviceVideo_, ipAddress),
         navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceNavdata_, ipAddress)
+        //configurationReceiver_(atCommandQueue_,io_serviceCMD_,ipAddress)
       {
     };
     //! Initialize XCI for use
-    void init() throw (ConnectionErrorException);
+    void init();
     //! Resets settings to default values and re-calibrates the sensors (if supported).
     void reset();
     //! Turns on the engines.

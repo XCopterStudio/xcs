@@ -37,6 +37,7 @@ XXci::XXci(const std::string& name) :
     XBindFunction(XXci, doCommand);
     XBindFunction(XXci, flyParam);
     XBindFunction(XXci, getConfiguration);
+    XBindFunction(XXci, dumpConfiguration);
     XBindFunction(XXci, setConfiguration);
 
     XBindVarF(flyParamPersistence, &XXci::setFlyParamPersistence);
@@ -90,6 +91,10 @@ void XXci::flyParam(double roll, double pitch, double yaw, double gaz) {
 
 std::string XXci::getConfiguration(const std::string &key) {
     return xci_->configuration(key);
+}
+
+InformationMap XXci::dumpConfiguration() {
+    return xci_->configuration();
 }
 
 void XXci::setConfiguration(const std::string& key, const std::string& value) {

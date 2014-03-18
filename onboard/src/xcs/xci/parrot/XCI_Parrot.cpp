@@ -19,8 +19,6 @@ using namespace xcs::nodes; // because of syntactic types
 using namespace xcs::xci::parrot;
 // ----------------- Constant ----------------------- //
 
-const int XCI_Parrot::PORT_COM = 5559;
-const unsigned int XCI_Parrot::TRY_COUNT = 10;
 const float XCI_Parrot::EPSILON = (float) 1.0e-10;
 
 const std::string XCI_Parrot::NAME = "Parrot AR Drone 2.0 XCI";
@@ -59,42 +57,9 @@ void XCI_Parrot::processVideoData(){
     }
 }
 
-std::string XCI_Parrot::downloadConfiguration() throw (ConnectionErrorException) {
-    boost::system::error_code ec;
-
-    boost::asio::io_service io_service;
-    tcp::socket socketComm(io_service);
-    tcp::endpoint parrotComm(address::from_string("192.168.1.1"), PORT_COM);
-    socketComm.connect(parrotComm, ec);
-    if (ec) {
-        throw new ConnectionErrorException("Cannot connect communication port.");
-    }
-
-    atCommandQueue_.push(new AtCommandCTRL(STATE_CFG_GET_CONTROL_MODE));
-
-    std::string configuration;
-    std::array<char, 8192> buf;
-    size_t size(0);
-    size_t tries = 2;
-
-    // TODO doesn't work
-    //    socketComm.async_receive(boost::asio::buffer(buf.data(), buf.size()), [buf](const boost::system::error_code& error, size_t bytes_transferred) {
-    //        std::string stringBuffer(buf.data(), bytes_transferred);
-    //        cerr << "[async] " << stringBuffer << endl;
-    //
-    //    });
-    while (tries > 0 && (size = socketComm.receive(boost::asio::buffer(buf.data(), buf.size())))) {
-        std::string stringBuffer(buf.data(), size);
-        cerr << stringBuffer << endl;
-        configuration += stringBuffer;
-        tries--;
-    }
-    return configuration;
-}
-
 // ----------------- Public function ---------------- //
 
-void XCI_Parrot::init() throw (ConnectionErrorException) {
+void XCI_Parrot::init(){
     boost::log::core::get()->set_filter
             (
             boost::log::trivial::severity >= boost::log::trivial::debug
@@ -166,7 +131,8 @@ std::string XCI_Parrot::configuration(const std::string &key) {
 }
 
 InformationMap XCI_Parrot::configuration() {
-    downloadConfiguration();
+    //configurationReceiver_.getConfiguration();
+
     return InformationMap();
 }
 
