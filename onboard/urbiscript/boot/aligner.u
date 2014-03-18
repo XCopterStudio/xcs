@@ -12,6 +12,15 @@ class Aligner{
     var tgaz = Tag.new("tgaz"); 
     var gazAltitude = 1.5;
 
+    // Default values in seconds
+    // ! most likely to be overwritten !
+    var rollInterval = 0.1;
+    var rollSleep = 0.05;
+    var yawInterval = 0.1;
+    var pitchInterval = 0.1;
+    var gazInterval = 0.2;
+
+
     function init(xci, finder, rollPidParam, yawPidParam, pitchPidParam, gazPidParam) {
         this.xci = xci;
         this.finder = finder;
@@ -33,18 +42,18 @@ class Aligner{
     };
 
     function adjustRoll(){
-        this.troll: every(500ms){ 
+        this.troll: every(this.rollInterval){
             var distance = finder.distance;
             var roll = Global.crop(pidLoop(rollPidParam,distance), 1);
             echo("roll: " + roll);
             xci.roll = roll; 
-            sleep(50ms);
+            sleep(this.rollSleep);
             xci.roll = 0;
         },
     };
 
     function adjustYaw(){
-        this.tyaw: every(100ms){
+        this.tyaw: every(this.yawInterval){
             var deviation = finder.deviation;
             var yaw = Global.crop(pidLoop(yawPidParam,deviation), 1);
             echo("yaw: \t\t" + yaw);
@@ -53,7 +62,7 @@ class Aligner{
     };
 
     function adjustPitch(){
-        this.tpitch: every(100ms){
+        this.tpitch: every(this.pitchInterval){
             var deviation = finder.deviation;
             var distance = finder.distance;
             echo("deviation/distance: " + deviation + "/" + distance);
@@ -68,7 +77,7 @@ class Aligner{
     };
 
     function adjustGaz(){
-        this.tgaz: every(100ms){
+        this.tgaz: every(this.gazInterval){
             var altDif = gazAltitude - xci.altitude;
             var gaz = Global.crop(pidLoop(gazPidParam, altDif), 1);
             echo("gaz: \t\t\t\t\t\t" + gaz);

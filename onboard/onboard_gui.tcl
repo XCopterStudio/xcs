@@ -7,6 +7,12 @@ pack .takeoff
 button .land -text "Land" -command { setParam "xci.command" "\"Land\"" }
 pack .land
 
+button .startall -text "Start ALL" -command { cmd "a.adjustGaz(),a.adjustRoll(),a.adjustYaw(),a.adjustPitch()," }
+pack .startall
+
+button .stopall -text "Stop ALL" -command { cmd "a.tpitch.stop();a.tyaw.stop();a.troll.stop();a.tgaz.stop();" }
+pack .stopall
+
 ### ROLL ###
 
 frame .roll -borderwidth 5 -relief raised
@@ -46,6 +52,24 @@ button .roll.start -text "Start" -command { cmd "a.adjustRoll()," }
 pack .roll.start
 button .roll.stop -text "Stop" -command { cmd "a.troll.stop()" }
 pack .roll.stop
+
+scale .roll.int -label "roll interval" \
+-length 400 -from 0 -to 2 \
+-command { setParam "a.rollInterval" } \
+-resolution 0.05 \
+-digits 3 \
+-variable rollint \
+-showvalue 1 -orient horizontal
+pack .roll.int
+
+scale .roll.sleep -label "roll sleep" \
+-length 400 -from 0 -to 1 \
+-command { setParam "a.rollSleep" } \
+-resolution 0.01 \
+-digits 3 \
+-variable rollsleep \
+-showvalue 1 -orient horizontal
+pack .roll.sleep
 
 ### YAW ###
 
@@ -167,14 +191,71 @@ pack .gaz.start
 button .gaz.stop -text "Stop" -command { cmd "a.tgaz.stop()" }
 pack .gaz.stop
 
+### MIscellaneous ###
+
 scale .distaging -label "Distance Aging" \
--length 400 -from 0 -to 1 \
+-length 300 -from 0 -to 1 \
 -command { setParam "f.distanceAging" } \
 -resolution 0.05 \
 -digits 3 \
 -variable distagingval \
 -showvalue 1 -orient horizontal
-pack .distaging -side left
+pack .distaging
+
+scale .devaging -label "Deviation Aging" \
+-length 300 -from 0 -to 1 \
+-command { setParam "f.deviationAging" } \
+-resolution 0.05 \
+-digits 3 \
+-variable devaging \
+-showvalue 1 -orient horizontal
+pack .devaging
+
+scale .hsvratio -label "Auto HSV Range Ratio" \
+-length 300 -from 0 -to 0.5 \
+-command { setParam "f.autoHsvValueRangeRatio" } \
+-resolution 0.005 \
+-digits 3 \
+-variable hsvratio \
+-showvalue 1 -orient horizontal
+pack .hsvratio
+
+scale .houghminlenght -label "Hough Min Length" \
+-length 300 -from 0 -to 200 \
+-command { setParam "f.houghMinLength" } \
+-resolution 1 \
+-digits 3 \
+-variable houghminlenght \
+-showvalue 1 -orient horizontal
+pack .houghminlenght
+
+scale .houghmaxgap -label "Hough Max Gap" \
+-length 300 -from 0 -to 200 \
+-command { setParam "f.houghMaxGap" } \
+-resolution 1 \
+-digits 3 \
+-variable houghmaxgap \
+-showvalue 1 -orient horizontal
+pack .houghmaxgap
+
+scale .houghrho -label "Hough Rho" \
+-length 300 -from 0 -to 10 \
+-command { setParam "f.houghRho" } \
+-resolution 0.5 \
+-digits 3 \
+-variable houghrho \
+-showvalue 1 -orient horizontal
+pack .houghrho
+
+scale .hystcenterthresh -label "Hystersis Center Threshhold" \
+-length 300 -from 0 -to 1 \
+-command { setParam "f.hystCenterThreshold" } \
+-resolution 0.05 \
+-digits 3 \
+-variable hystcenterthresh \
+-showvalue 1 -orient horizontal
+pack .hystcenterthresh
+
 
 #label .lbl -textvariable val 
 #pack .lbl
@@ -182,24 +263,31 @@ pack .distaging -side left
 ##################
 # Default values #
 ##################
-set rollpval 0.4
+set rollpval 1
 set rollival 0
 set rolldval 0
+set rollint 1
+set rollsleep 0.4
 
-set yawpval 0.5
+set yawpval 0.9
 set yawival 0
 set yawdval 0
 
 set pitchpval 0.1
 set pitchival 0.1
-set pitchdval -0.02
+set pitchdval -0.03
 
 set gazpval 0.5
 set gazival 0
 set gazdval 0
 
-set distagingval 0.5
-
+set distagingval 0.1
+set devaging 0.2
+set hsvratio 0.0
+set houghminlenght 50
+set houghmaxgap 40
+set houghrho 3
+set hystcenterthresh 0.2
 
 #############
 # functions #
