@@ -32,6 +32,7 @@ function serverConnect(ip, port, xci, xciVersion = "xci_parrot") {
     };
     if(xciVersion == "xci_dodo") {
         xci.&alive >> semanticSender.&alive;
+        xci.&altitude >> semanticSender.&altitude;
     };
 
     flyParamReceiver.&roll >> xci.&roll;

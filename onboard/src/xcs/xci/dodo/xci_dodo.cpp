@@ -18,8 +18,9 @@ using namespace xcs::nodes;
 const std::string XciDodo::NAME_ = "Dodo Test Drone";
 
 const size_t XciDodo::ALIVE_FREQ_ = 1;
+const size_t XciDodo::ALTITUDE_FREQ_ = 100;
 
-const size_t XciDodo::SENSOR_PERIOD_ = 100;
+const size_t XciDodo::SENSOR_PERIOD_ = 10;
 const size_t XciDodo::VIDEO_IDLE_SLEEP_ = 200;
 
 const std::string XciDodo::CMD_VIDEO_LOAD_ = "Load";
@@ -63,6 +64,9 @@ void XciDodo::init() {
         return;
     }
     inited_ = true;
+    // reset sensors (pseudophysical state)
+    altitude_ = 0;
+
     // back-propagation of default values
     configuration(CONFIG_VIDEO_FPS, to_string(videoFps_));
     configuration(CONFIG_VIDEO_FONT, "/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf");
@@ -84,13 +88,14 @@ SensorList XciDodo::sensorList() {
     SensorList result;
     result.push_back(Sensor("alive", "alive"));
     result.push_back(Sensor("video", "video"));
+    result.push_back(Sensor("altitude", "altitude"));
     return result;
 }
 
 ParameterValueType XciDodo::parameter(ParameterNameType name) {
     switch (name) {
         case XCI_PARAM_FP_PERSISTENCE:
-            return "30";
+            return "50";
         default:
             throw std::runtime_error("Parameter not defined.");
     }
@@ -134,6 +139,8 @@ void XciDodo::flyParam(float roll, float pitch, float yaw, float gaz) {
     if (stoi(configuration(CONFIG_LOG_FP))) {
         BOOST_LOG_TRIVIAL(info) << "[dodo] flyParam: " << roll << ", " << pitch << ", " << yaw << ", " << gaz;
     }
+
+    altitude_ += valueInRange<double>(gaz, 1.0) * 0.05; // very simple
 }
 
 void XciDodo::sensorGenerator() {
@@ -141,6 +148,10 @@ void XciDodo::sensorGenerator() {
     while (1) {
         if (clock % (1000 / ALIVE_FREQ_) == 0) {
             dataReceiver_.notify("alive", true);
+        }
+        if (clock % (1000 / ALTITUDE_FREQ_) == 0) {
+            cerr << "Alti: " << altitude_ << endl;
+            dataReceiver_.notify("altitude", altitude_);
         }
 
         clock += SENSOR_PERIOD_;

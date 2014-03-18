@@ -81,8 +81,6 @@ public:
 private:
 
     enum VideoStatus {
-        /*!
-         */
         VIDEO_UNLOADED, //! No file was loaded
         VIDEO_PAUSED, //! File loaded, no frames being rendered
         VIDEO_PLAYING //! File loaded, render frames
@@ -92,8 +90,10 @@ private:
 
     //! How often alive signal is sent (in Hz) (must divisor of 1000/SENSOR_PERIOD_).
     static const size_t ALIVE_FREQ_;
+    //! How often altitude data is sent (in Hz) (must divisor of 1000/SENSOR_PERIOD_).
+    static const size_t ALTITUDE_FREQ_;
     //! Period of sensor thread in ms.
-    static const size_t SENSOR_PERIOD_;    
+    static const size_t SENSOR_PERIOD_;
     //! Milliseconds for video thread when not playing
     static const size_t VIDEO_IDLE_SLEEP_;
 
@@ -102,7 +102,7 @@ private:
     static const std::string CMD_VIDEO_PAUSE_;
     static const std::string CMD_VIDEO_STOP_;
     static const std::string CMD_VIDEO_STEP_;
-    
+
     static const SpecialCMDList specialCommands_;
 
     bool inited_;
@@ -122,17 +122,22 @@ private:
     static const std::string CONFIG_VIDEO_TIMESTAMPS;
     static const std::string CONFIG_LOG_FP;
     static const std::string CONFIG_LOG_COMMAND;
-    
+
     InformationMap configuration_;
+
+    /*! Pseudophysical state */
+
+    /*! Altitude */
+    double altitude_;
 
     //! Generates dummy data for sensors
     void sensorGenerator();
-    
+
     //! Generates frames
     void videoPlayer();
-    
+
     void renderFrame();
-    
+
 };
 }
 }
