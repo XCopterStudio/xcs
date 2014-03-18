@@ -8,7 +8,11 @@ load("boot/boot.u");
 var xciVersion = "xci_parrot";
 var xci = XXci.new(xciVersion);
 var f = ULineFinder.new();
+var i = Integrator.new();
+
 xci.&video >> f.&video;
+xci.&velocityX >> i.&vx;
+xci.&velocityY >> i.&vy;
 
 // Default values for image processing
 f.hsvValueRange = 6; //20;
@@ -34,25 +38,22 @@ if(xciVersion == "xci_parrot") {
     sleep(1s);
     xci.flyParamPersistence = 0;
     xci.setConfiguration("video:video_channel", "1");
-    xci.command = "TakeOff";
-    sleep(4s);
+    //xci.command = "TakeOff";
+    //sleep(4s);
 };
 
 var rollPidParam = PidParams.new(0.4, 0, 0);
 var yawPidParam = PidParams.new(0.5, 0, 0);
 var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
-var gazPidParam = PidParams.new(0.5, 0, 0);
+var gazPidParam = PidParams.new(0.2, 0, 0);
 var a = Aligner.new(xci, f, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
-
-echo("adjust GAZ");
-a.adjustGaz(), while((xci.altitude - a.gazAltitude).abs() > 0.1) { sleep(100ms) };
-echo("adjust ROLL, PITCH, YAW");
-a.adjustRoll(), a.adjustYaw(), a.adjustPitch(),;
-
 //a.adjustYaw(),;
 //a.adjustRoll(), a.adjustYaw(), a.adjustPitch(), a.adjustGaz(), ;
 //a.adjustRoll(),;
 
+//every(500ms) {
+//    echo("x: " + i.x + ", y: " + i.y + ", vx: " + i.vx);
+//},;
 
 function s(message) {
     var data = [ => ];

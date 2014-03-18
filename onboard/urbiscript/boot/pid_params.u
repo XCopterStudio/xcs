@@ -4,6 +4,8 @@ class PidParams {
     var d = 0.0;
     var sumI = 0.0;
     var lastValue = 0.0;
+    var lastDerivation = 0.0;
+    var timeDelay = 0.0;
 
     function init(p,i,d) {
         this.p = p;
