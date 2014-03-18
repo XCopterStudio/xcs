@@ -16,7 +16,7 @@ class Aligner{
     // ! most likely to be overwritten !
     var rollInterval = 0.1;
     var rollSleep = 0.05;
-    var tollThreshold = 0.02;
+    var rollThreshold = 0.02;
     var yawInterval = 0.1;
     var pitchInterval = 0.1;
     var pitchSleep = 0.05;
@@ -72,7 +72,7 @@ class Aligner{
             var deviation = finder.deviation;
             var enabled = Global.inRangeBool(distance, this.pitchDistance) * Global.inRangeBool(deviation, this.pitchDeviation);
             var error = enabled; // simple solution
-            var pitch = Global.crop(pidLoop(pitchPidParam,enabled), 1);
+            var pitch = -1 * Global.crop(pidLoop(pitchPidParam, error), 1);
             echo("pitch: \t\t\t\t\t\t\t\t" + pitch);
             xci.pitch = pitch; 
             sleep(this.pitchSleep);

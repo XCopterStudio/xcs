@@ -71,6 +71,15 @@ scale .roll.sleep -label "roll sleep" \
 -showvalue 1 -orient horizontal
 pack .roll.sleep
 
+scale .roll.threshold -label "roll threshold" \
+-length 400 -from 0 -to 0.5 \
+-command { setParam "a.rollThreshold" } \
+-resolution 0.05 \
+-digits 3 \
+-variable rollthreshold \
+-showvalue 1 -orient horizontal
+pack .roll.threshold
+
 ### YAW ###
 
 frame .yaw -borderwidth 5 -relief raised
@@ -150,6 +159,42 @@ button .pitch.start -text "Start" -command { cmd "a.adjustPitch()," }
 pack .pitch.start
 button .pitch.stop -text "Stop" -command { cmd "a.tpitch.stop()" }
 pack .pitch.stop
+
+scale .pitch.int -label "pitch interval" \
+-length 400 -from 0 -to 2 \
+-command { setParam "a.pitchInterval" } \
+-resolution 0.05 \
+-digits 3 \
+-variable pitchint \
+-showvalue 1 -orient horizontal
+pack .pitch.int
+
+scale .pitch.sleep -label "pitch sleep" \
+-length 400 -from 0 -to 1 \
+-command { setParam "a.pitchSleep" } \
+-resolution 0.01 \
+-digits 3 \
+-variable pitchsleep \
+-showvalue 1 -orient horizontal
+pack .pitch.sleep
+
+scale .pitch.distance -label "pitch distance" \
+-length 400 -from 0 -to 0.5 \
+-command { setParam "a.pitchDistance" } \
+-resolution 0.05 \
+-digits 3 \
+-variable pitchdistance \
+-showvalue 1 -orient horizontal
+pack .pitch.distance
+
+scale .pitch.deviation -label "pitch deviation" \
+-length 400 -from 0 -to 0.5 \
+-command { setParam "a.pitchDeviation" } \
+-resolution 0.05 \
+-digits 3 \
+-variable pitchdeviation \
+-showvalue 1 -orient horizontal
+pack .pitch.deviation
 
 ### GAZ ###
 
@@ -256,6 +301,14 @@ scale .hystcenterthresh -label "Hystersis Center Threshhold" \
 -showvalue 1 -orient horizontal
 pack .hystcenterthresh
 
+scale .hystdirthresh -label "Hystersis Direction Threshhold" \
+-length 300 -from 0 -to 1 \
+-command { setParam "f.hystDirThreshold" } \
+-resolution 0.05 \
+-digits 3 \
+-variable hystdirthresh \
+-showvalue 1 -orient horizontal
+pack .hystdirthresh
 
 #label .lbl -textvariable val 
 #pack .lbl
@@ -268,14 +321,19 @@ set rollival 0
 set rolldval 0
 set rollint 1
 set rollsleep 0.4
+set rollthreshold 0.1
 
 set yawpval 0.9
 set yawival 0
 set yawdval 0
 
-set pitchpval 0.1
-set pitchival 0.1
-set pitchdval -0.03
+set pitchpval 0.17
+set pitchival 0
+set pitchdval 0
+set pitchint 1
+set pitchsleep 0.6
+set pitchdistance 0.2
+set pitchdeviation 0.1
 
 set gazpval 0.5
 set gazival 0
@@ -288,6 +346,7 @@ set houghminlenght 50
 set houghmaxgap 40
 set houghrho 3
 set hystcenterthresh 0.2
+set hystdirthresh 0.35
 
 #############
 # functions #

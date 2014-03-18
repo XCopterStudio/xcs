@@ -53,5 +53,5 @@ function Global.ground(value, min) {
 }|;
 
 function Global.inRangeBool(value, range) {
-     if (value.abs() <= max) 1 else 0; // pseudo-ternary operator
+     if (value.abs() <= range) 1 else 0; // pseudo-ternary operator
 }| ;
