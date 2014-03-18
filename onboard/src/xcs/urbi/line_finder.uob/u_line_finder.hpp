@@ -12,8 +12,12 @@ namespace urbi {
 
 class ULineFinder : public ::urbi::UObject {
 public:
-
+    /*!
+     * Inputs
+     */
     ::urbi::InputPort video;
+    ::urbi::InputPort refDistace;
+    ::urbi::InputPort refDeviation;
 
     /*!
      * Image processing params
@@ -41,6 +45,10 @@ public:
 
     ::urbi::UVar hystForgetRatio;
     ::urbi::UVar hystForgetThreshold;
+
+    ::urbi::UVar hystForgetDerRatio;
+    ::urbi::UVar hystForgetDerThreshold;
+
     /*!
      * Output params
      */
@@ -75,6 +83,7 @@ private:
     void processFrame();
     void useRememberedLine();
     cv::vector<RawLineType> useOnlyGoodLines(cv::vector<RawLineType> lines);
+    void calculateExpectedLine();
 
     bool hasFrame_;
     ::urbi::UImage lastFrame_;
@@ -88,8 +97,13 @@ private:
     cv::Point imageCenter_;
     double distance_;
     double deviation_;
+    double distanceDer_;
+    double deviationDer_;
+    double expectedDistance_;
+    double expectedDeviation_;
     LineType lineType_;
     double hystStrength_;
+    double hystDerStrength_;
 
     /*!
      * When line has zero legth, distance between its beginning and the point is returned.
@@ -124,6 +138,19 @@ private:
     inline double lineDirection(RawLineType line) {
         cv::Point dir(line[2] - line[0], line[1] - line[3]);
         return atan2(dir.x, dir.y);
+    }
+
+    /*!
+     * Very ugly geometry.
+     */
+    inline void drawFullLine(cv::Mat image, double distance, double deviation, cv::Scalar color, size_t width = 3) {
+        cv::Point deltaPoint(distanceUnit_ * distance * cos(deviation), distanceUnit_ * distance * sin(deviation));
+        deltaPoint += imageCenter_;
+        cv::Point bottomPoint(deltaPoint.x - tan(deviation) * (0.5 * image.rows - distance * sin(deviation) * distanceUnit_), image.rows);
+        cv::Point topPoint(deltaPoint.x + tan(deviation) * (0.5 * image.rows + distance * sin(deviation) * distanceUnit_), 0);
+
+        cv::line(image, bottomPoint, topPoint, color, width, CV_AA);
+        cv::circle(image, deltaPoint, width + 2, color, width, CV_AA);
     }
 };
 
