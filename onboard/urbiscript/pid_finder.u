@@ -11,10 +11,14 @@ var f = ULineFinder.new();
 xci.&video >> f.&video;
 
 // Default values for image processing
-f.hsvValueRange = 6; //20;
-f.houghRho = 1;
-f.autoHsvValueRangeRatio = 0.1;
+f.houghRho = 5;
+f.houghtMinLength = 20; // for Parrot resolution should be larger
+f.autoHsvValueRangeEnabled = true;
+f.autoHsvValueRangeRatio = 0.4; // for Parrot the less the better probably
 f.distanceAging = 0.5;
+f.hystDirThreshold = 0.3;
+f.hystForgetRatio = 0.7;
+f.hystCenterThreshold = 0.1;
 
 
 serverConnect("127.0.0.1", 1234, xci, xciVersion);
@@ -34,7 +38,7 @@ if(xciVersion == "xci_parrot") {
     sleep(1s);
     xci.flyParamPersistence = 0;
     xci.setConfiguration("video:video_channel", "1");
-    xci.command = "TakeOff";
+    //xci.command = "TakeOff";
     sleep(4s);
 };
 
