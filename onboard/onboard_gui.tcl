@@ -1,28 +1,31 @@
 #!/usr/bin/tclsh
 package require Tk
 
-button .takeoff -text "TakeOff" -command { setParam "xci.command" "\"TakeOff\"" }
-pack .takeoff
+frame .buttons -borderwidth 0 -relief flat
+pack .buttons
 
-button .land -text "Land" -command { setParam "xci.command" "\"Land\"" }
-pack .land
+button .buttons.takeoff -text "TakeOff" -command { setParam "xci.command" "\"TakeOff\"" }
+pack .buttons.takeoff -side left
 
-button .startall -text "Start ALL" -command { cmd "a.adjustGaz(),a.adjustRoll(),a.adjustYaw(),a.adjustPitch()," }
-pack .startall
+button .buttons.land -text "Land" -command { setParam "xci.command" "\"Land\"" }
+pack .buttons.land -side left
 
-button .stopall -text "Stop ALL" -command { cmd "a.tpitch.stop();a.tyaw.stop();a.troll.stop();a.tgaz.stop();" }
-pack .stopall
+button .buttons.startall -text "Start ALL" -command { cmd "a.adjustGaz(),a.adjustRoll(),a.adjustYaw(),a.adjustPitch()," }
+pack .buttons.startall -side left
+
+button .buttons.stopall -text "Stop ALL" -command { cmd "a.tpitch.stop();a.tyaw.stop();a.troll.stop();a.tgaz.stop();" }
+pack .buttons.stopall -side left
 
 ### ROLL ###
 
-frame .roll -borderwidth 5 -relief raised
+frame .roll -borderwidth 3 -relief raised
 pack .roll -side left
 
 label .roll.lbl -text "ROLL"
 pack .roll.lbl
 
 scale .roll.p  -label "roll P" \
--length 400 -from 0 -to 2 \
+-length 240 -from 0 -to 2 \
 -command { setParam "a.rollPidParam.p" } \
 -resolution 0.01 \
 -digits 3 \
@@ -31,7 +34,7 @@ scale .roll.p  -label "roll P" \
 pack .roll.p
 
 scale .roll.i  -label "roll I" \
--length 400 -from 0 -to 2 \
+-length 240 -from 0 -to 2 \
 -command { setParam "a.rollPidParam.i" } \
 -resolution 0.01 \
 -digits 3 \
@@ -40,7 +43,7 @@ scale .roll.i  -label "roll I" \
 pack .roll.i
 
 scale .roll.d -label "roll D" \
--length 400 -from -2 -to 2 \
+-length 240 -from -2 -to 2 \
 -command { setParam "a.rollPidParam.d" } \
 -resolution 0.01 \
 -digits 3 \
@@ -54,7 +57,7 @@ button .roll.stop -text "Stop" -command { cmd "a.troll.stop()" }
 pack .roll.stop
 
 scale .roll.int -label "roll interval" \
--length 400 -from 0 -to 2 \
+-length 240 -from 0 -to 2 \
 -command { setParam "a.rollInterval" } \
 -resolution 0.05 \
 -digits 3 \
@@ -63,7 +66,7 @@ scale .roll.int -label "roll interval" \
 pack .roll.int
 
 scale .roll.sleep -label "roll sleep" \
--length 400 -from 0 -to 1 \
+-length 240 -from 0 -to 1 \
 -command { setParam "a.rollSleep" } \
 -resolution 0.01 \
 -digits 3 \
@@ -72,7 +75,7 @@ scale .roll.sleep -label "roll sleep" \
 pack .roll.sleep
 
 scale .roll.threshold -label "roll threshold" \
--length 400 -from 0 -to 0.5 \
+-length 240 -from 0 -to 0.5 \
 -command { setParam "a.rollThreshold" } \
 -resolution 0.05 \
 -digits 3 \
@@ -82,14 +85,14 @@ pack .roll.threshold
 
 ### YAW ###
 
-frame .yaw -borderwidth 5 -relief raised
+frame .yaw -borderwidth 3 -relief raised
 pack .yaw -side left
 
 label .yaw.lbl -text "YAW"
 pack .yaw.lbl
 
 scale .yaw.p  -label "yaw P" \
--length 400 -from 0 -to 2 \
+-length 240 -from 0 -to 2 \
 -command { setParam "a.yawPidParam.p" } \
 -resolution 0.01 \
 -digits 3 \
@@ -98,7 +101,7 @@ scale .yaw.p  -label "yaw P" \
 pack .yaw.p
 
 scale .yaw.i  -label "yaw I" \
--length 400 -from 0 -to 2 \
+-length 240 -from 0 -to 2 \
 -command { setParam "a.yawPidParam.i" } \
 -resolution 0.01 \
 -digits 3 \
@@ -107,7 +110,7 @@ scale .yaw.i  -label "yaw I" \
 pack .yaw.i
 
 scale .yaw.d -label "yaw D" \
--length 400 -from -2 -to 2 \
+-length 240 -from -2 -to 2 \
 -command { setParam "a.yawPidParam.d" } \
 -resolution 0.01 \
 -digits 3 \
@@ -122,14 +125,14 @@ pack .yaw.stop
 
 ### PITCH ###
 
-frame .pitch -borderwidth 5 -relief raised
+frame .pitch -borderwidth 3 -relief raised
 pack .pitch -side left
 
 label .pitch.lbl -text "PITCH"
 pack .pitch.lbl
 
 scale .pitch.p  -label "pitch P" \
--length 400 -from 0 -to 2 \
+-length 240 -from 0 -to 2 \
 -command { setParam "a.pitchPidParam.p" } \
 -resolution 0.01 \
 -digits 3 \
@@ -138,7 +141,7 @@ scale .pitch.p  -label "pitch P" \
 pack .pitch.p
 
 scale .pitch.i  -label "pitch I" \
--length 400 -from 0 -to 2 \
+-length 240 -from 0 -to 2 \
 -command { setParam "a.pitchPidParam.i" } \
 -resolution 0.01 \
 -digits 3 \
@@ -147,7 +150,7 @@ scale .pitch.i  -label "pitch I" \
 pack .pitch.i
 
 scale .pitch.d -label "pitch D" \
--length 400 -from -2 -to 2 \
+-length 240 -from -2 -to 2 \
 -command { setParam "a.pitchPidParam.d" } \
 -resolution 0.01 \
 -digits 3 \
@@ -161,7 +164,7 @@ button .pitch.stop -text "Stop" -command { cmd "a.tpitch.stop()" }
 pack .pitch.stop
 
 scale .pitch.int -label "pitch interval" \
--length 400 -from 0 -to 2 \
+-length 240 -from 0 -to 2 \
 -command { setParam "a.pitchInterval" } \
 -resolution 0.05 \
 -digits 3 \
@@ -170,7 +173,7 @@ scale .pitch.int -label "pitch interval" \
 pack .pitch.int
 
 scale .pitch.sleep -label "pitch sleep" \
--length 400 -from 0 -to 1 \
+-length 240 -from 0 -to 1 \
 -command { setParam "a.pitchSleep" } \
 -resolution 0.01 \
 -digits 3 \
@@ -179,7 +182,7 @@ scale .pitch.sleep -label "pitch sleep" \
 pack .pitch.sleep
 
 scale .pitch.distance -label "pitch distance" \
--length 400 -from 0 -to 0.5 \
+-length 240 -from 0 -to 0.5 \
 -command { setParam "a.pitchDistance" } \
 -resolution 0.05 \
 -digits 3 \
@@ -188,7 +191,7 @@ scale .pitch.distance -label "pitch distance" \
 pack .pitch.distance
 
 scale .pitch.deviation -label "pitch deviation" \
--length 400 -from 0 -to 0.5 \
+-length 240 -from 0 -to 0.5 \
 -command { setParam "a.pitchDeviation" } \
 -resolution 0.05 \
 -digits 3 \
@@ -198,14 +201,14 @@ pack .pitch.deviation
 
 ### GAZ ###
 
-frame .gaz -borderwidth 5 -relief raised
+frame .gaz -borderwidth 3 -relief raised
 pack .gaz -side left
 
 label .gaz.lbl -text "GAZ"
 pack .gaz.lbl
 
 scale .gaz.p  -label "gaz P" \
--length 400 -from 0 -to 2 \
+-length 240 -from 0 -to 2 \
 -command { setParam "a.gazPidParam.p" } \
 -resolution 0.01 \
 -digits 3 \
@@ -214,7 +217,7 @@ scale .gaz.p  -label "gaz P" \
 pack .gaz.p
 
 scale .gaz.i  -label "gaz I" \
--length 400 -from 0 -to 2 \
+-length 240 -from 0 -to 2 \
 -command { setParam "a.gazPidParam.i" } \
 -resolution 0.01 \
 -digits 3 \
@@ -223,7 +226,7 @@ scale .gaz.i  -label "gaz I" \
 pack .gaz.i
 
 scale .gaz.d -label "gaz D" \
--length 400 -from -2 -to 2 \
+-length 240 -from -2 -to 2 \
 -command { setParam "a.gazPidParam.d" } \
 -resolution 0.01 \
 -digits 3 \
@@ -239,7 +242,7 @@ pack .gaz.stop
 ### MIscellaneous ###
 
 scale .distaging -label "Distance Aging" \
--length 300 -from 0 -to 1 \
+-length 240 -from 0 -to 1 \
 -command { setParam "f.distanceAging" } \
 -resolution 0.05 \
 -digits 3 \
@@ -248,7 +251,7 @@ scale .distaging -label "Distance Aging" \
 pack .distaging
 
 scale .devaging -label "Deviation Aging" \
--length 300 -from 0 -to 1 \
+-length 240 -from 0 -to 1 \
 -command { setParam "f.deviationAging" } \
 -resolution 0.05 \
 -digits 3 \
@@ -257,7 +260,7 @@ scale .devaging -label "Deviation Aging" \
 pack .devaging
 
 scale .hsvratio -label "Auto HSV Range Ratio" \
--length 300 -from 0 -to 0.5 \
+-length 240 -from 0 -to 0.5 \
 -command { setParam "f.autoHsvValueRangeRatio" } \
 -resolution 0.005 \
 -digits 3 \
@@ -266,7 +269,7 @@ scale .hsvratio -label "Auto HSV Range Ratio" \
 pack .hsvratio
 
 scale .houghminlenght -label "Hough Min Length" \
--length 300 -from 0 -to 200 \
+-length 240 -from 0 -to 200 \
 -command { setParam "f.houghMinLength" } \
 -resolution 1 \
 -digits 3 \
@@ -275,7 +278,7 @@ scale .houghminlenght -label "Hough Min Length" \
 pack .houghminlenght
 
 scale .houghmaxgap -label "Hough Max Gap" \
--length 300 -from 0 -to 200 \
+-length 240 -from 0 -to 200 \
 -command { setParam "f.houghMaxGap" } \
 -resolution 1 \
 -digits 3 \
@@ -284,7 +287,7 @@ scale .houghmaxgap -label "Hough Max Gap" \
 pack .houghmaxgap
 
 scale .houghrho -label "Hough Rho" \
--length 300 -from 0 -to 10 \
+-length 240 -from 0 -to 10 \
 -command { setParam "f.houghRho" } \
 -resolution 0.5 \
 -digits 3 \
@@ -293,7 +296,7 @@ scale .houghrho -label "Hough Rho" \
 pack .houghrho
 
 scale .hystcenterthresh -label "Hystersis Center Threshhold" \
--length 300 -from 0 -to 1 \
+-length 240 -from 0 -to 1 \
 -command { setParam "f.hystCenterThreshold" } \
 -resolution 0.05 \
 -digits 3 \
@@ -302,7 +305,7 @@ scale .hystcenterthresh -label "Hystersis Center Threshhold" \
 pack .hystcenterthresh
 
 scale .hystdirthresh -label "Hystersis Direction Threshhold" \
--length 300 -from 0 -to 1 \
+-length 240 -from 0 -to 1 \
 -command { setParam "f.hystDirThreshold" } \
 -resolution 0.05 \
 -digits 3 \
