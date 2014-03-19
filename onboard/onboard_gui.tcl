@@ -327,7 +327,7 @@ set rollsleep 0.4
 set rollthreshold 0.1
 
 set yawpval 0.9
-set yawival 0
+set yawival 0.05
 set yawdval 0
 
 set pitchpval 0.17
@@ -343,13 +343,13 @@ set gazival 0
 set gazdval 0
 
 set distagingval 0.1
-set devaging 0.2
+set devaging 0.5
 set hsvratio 0.0
 set houghminlenght 50
 set houghmaxgap 40
 set houghrho 3
 set hystcenterthresh 0.2
-set hystdirthresh 0.35
+set hystdirthresh 0.45
 
 #############
 # functions #
