@@ -100,6 +100,11 @@ private:
      * Whether fly param persistence is active.
      */
     bool flyParamActive_;
+    
+    /*!
+     * Variable that controls fly param keeping thread.
+     */
+    volatile bool flyParamAlive_;
 
     /*!
      * How often is fly param sent to XCI (in ms).
@@ -114,6 +119,11 @@ private:
     std::condition_variable flyParamCond_;
 
     void initOutputs();
+    
+    /*!
+     * Correctly terminates keep fly params thread.
+     */
+    void stopFlyParamsThread();
 };
 
 }

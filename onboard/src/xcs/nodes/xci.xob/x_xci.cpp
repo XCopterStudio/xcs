@@ -18,20 +18,21 @@ using namespace xcs::xci;
 using namespace std;
 
 XXci::XXci(const std::string& name) :
-    xcs::nodes::XObject(name),
-    flyParamPersistence("FLY_PARAM_PERSISTENCE"),
-    roll("ROLL"),
-    pitch("PITCH"),
-    yaw("YAW"),
-    gaz("GAZ"),
-    command("COMMAND"),
-    inited_(false),
-    roll_(0),
-    pitch_(0),
-    yaw_(0),
-    gaz_(0),
-    flyParamActive_(false),
-    flyParamPersistence_(0) {
+  xcs::nodes::XObject(name),
+  flyParamPersistence("FLY_PARAM_PERSISTENCE"),
+  roll("ROLL"),
+  pitch("PITCH"),
+  yaw("YAW"),
+  gaz("GAZ"),
+  command("COMMAND"),
+  inited_(false),
+  roll_(0),
+  pitch_(0),
+  yaw_(0),
+  gaz_(0),
+  flyParamActive_(false),
+  flyParamAlive_(false),
+  flyParamPersistence_(0) {
     XBindFunction(XXci, init);
     XBindFunction(XXci, xciInit);
     XBindFunction(XXci, doCommand);
@@ -67,10 +68,10 @@ void XXci::xciInit() {
     if (!inited_) {
         xci_->init();
         setFlyParamPersistence(stoi(xci_->parameter(xci::XCI_PARAM_FP_PERSISTENCE)));
+        flyParamAlive_ = true;
         flyParamThread_ = move(thread(&XXci::keepFlyParam, this));
         inited_ = true; // TODO check this variable in all commands to the drone
-    }
-    else {
+    } else {
         cerr << "[XXci] already called init." << endl; //TODO general way for runtime warnings (in Urbi)
     }
 }
@@ -135,6 +136,12 @@ void XXci::initOutputs() {
     }
 }
 
+void XXci::stopFlyParamsThread() {
+    flyParamAlive_ = false;
+    flyParamCond_.notify_one();
+    flyParamThread_.join();
+}
+
 void XXci::setFlyParamPersistence(unsigned int value) {
     flyParamPersistence_ = value;
     setFlyParamActive(flyParamActive_); // notifies
@@ -144,25 +151,27 @@ void XXci::setFlyParamActive(bool value) {
     if (!flyParamThread_.joinable()) { // thread haven't started yet
         flyParamActive_ = value;
         return;
-    }
-    else {
+    } else {
         lock_guard<mutex> lock(flyParamMtx_);
         flyParamActive_ = value;
     }
-    flyParamCond_.notify_all();
+    flyParamCond_.notify_one();
 }
 
 void XXci::keepFlyParam() {
     unique_lock<mutex> lock(flyParamMtx_, defer_lock_t());
 
-    while (1) {
+    while (flyParamAlive_) {
         lock.lock();
         flyParamCond_.wait(lock, [this] {
-            return flyParamActive_ && flyParamPersistence_ > 0;
+            return !flyParamAlive_ || (flyParamActive_ && flyParamPersistence_ > 0);
         });
 
         unsigned int localPersistence(flyParamPersistence_);
         lock.unlock();
+        if (!flyParamAlive_) {
+            break;
+        }
 
         sendFlyParam();
         this_thread::sleep_for(chrono::milliseconds(localPersistence));
@@ -174,7 +183,7 @@ void XXci::sendFlyParam() {
 }
 
 XXci::~XXci() {
-
+    stopFlyParamsThread();
 }
 
 XStart(XXci);
