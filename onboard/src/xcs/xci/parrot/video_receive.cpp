@@ -11,8 +11,8 @@ using namespace std;
 
 const unsigned int VideoReceiver::TIMEOUT = 2000; // ms
 
-const unsigned int VideoReceiver::BUFFER_COUNT = 50;
-const unsigned int VideoReceiver::BUFFER_SIZE = 1000000;
+const unsigned int VideoReceiver::BUFFER_COUNT = 20;
+const unsigned int VideoReceiver::BUFFER_SIZE = 25000;
 
 void VideoReceiver::handleConnectedVideo(const boost::system::error_code& ec){
     if (!socketVideo_.is_open()){
@@ -80,6 +80,10 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
                 lastFrame_->timestamp = parrotPave_.timestamp;
                 lastFrame_->data = (uint8_t*)&buffer[index*BUFFER_SIZE + sizeof(VideoFrame)];
                 index = (index + 1) % BUFFER_COUNT;
+                if (frameSize < lastFrame_->payload_size){
+                    frameSize = lastFrame_->payload_size;
+                    cerr << "Max payload size" << frameSize + sizeof(VideoFrame) << endl;
+                }
                 //cerr << "index " << index << endl;
                 //lastFrame_->data = new uint8_t[lastFrame_->payload_size];
 
@@ -153,6 +157,8 @@ VideoReceiver::VideoReceiver(boost::asio::io_service& io_serviceVideo, std::stri
 socketVideo_(io_serviceVideo),
 parrotVideo(address::from_string(ipAdress), port){
     end_ = false;
+
+    frameSize = 0;
 
     index = 0;
     buffer = new char[BUFFER_COUNT*BUFFER_SIZE];

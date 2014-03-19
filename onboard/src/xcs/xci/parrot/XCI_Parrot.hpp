@@ -15,6 +15,7 @@
 #include <thread>
 #include <vector>
 #include <atomic>
+#include <memory>
 
 #include <boost/asio.hpp>
 
