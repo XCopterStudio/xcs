@@ -48,6 +48,8 @@ class VideoReceiver{
     int index;
     char* buffer;
 
+    unsigned int frameSize;
+
     boost::asio::deadline_timer deadlineVideo_;
     boost::asio::ip::tcp::socket socketVideo_;
 	boost::asio::ip::tcp::endpoint parrotVideo;
