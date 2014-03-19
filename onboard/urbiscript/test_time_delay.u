@@ -1,0 +1,27 @@
+
+function init(){
+
+  var timeData = 0;
+
+  var xci = XXci.new("xci_parrot");  
+  //xci.&timeVideo.notifyChange(function() {
+  //        var delay = xci.timeVideo - timeData; 
+  //        echo("Video delay: " + delay);
+  //        //echo("Video delay: " + xci.timeVideo);
+  //    });
+      
+  //xci.&timeData.notifyChange(function() {
+  //        timeData = xci.timeData;
+  //        echo("Data time: " + xci.timeData);
+  //    });
+      
+  //xci.&battery.notifyChange(function() {
+  //  echo("Battery: " + xci.battery);
+  //});
+      
+  xci.xciInit();
+      
+}|;
+
+
+init();
