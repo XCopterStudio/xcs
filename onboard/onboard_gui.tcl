@@ -313,6 +313,15 @@ scale .hystdirthresh -label "Hystersis Direction Threshhold" \
 -showvalue 1 -orient horizontal
 pack .hystdirthresh
 
+scale .gazaltitude -label "Altitude" \
+-length 240 -from 1 -to 2 \
+-command { setParam "a.gazAltitude" } \
+-resolution 0.05 \
+-digits 3 \
+-variable gazaltitude \
+-showvalue 1 -orient horizontal
+pack .gazaltitude
+
 #label .lbl -textvariable val 
 #pack .lbl
 
@@ -330,13 +339,13 @@ set yawpval 0.9
 set yawival 0.05
 set yawdval 0
 
-set pitchpval 0.17
+set pitchpval 0.35
 set pitchival 0
 set pitchdval 0
-set pitchint 1
+set pitchint 0.9
 set pitchsleep 0.6
 set pitchdistance 0.2
-set pitchdeviation 0.1
+set pitchdeviation 0.15
 
 set gazpval 0.5
 set gazival 0
@@ -349,7 +358,8 @@ set houghminlenght 50
 set houghmaxgap 40
 set houghrho 3
 set hystcenterthresh 0.2
-set hystdirthresh 0.45
+set hystdirthresh 0.60
+set gazaltitude 1.5
 
 #############
 # functions #
