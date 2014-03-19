@@ -12,7 +12,7 @@ xci.&video >> f.&video;
 
 // Default values for image processing
 f.houghRho = 5;
-f.houghtMinLength = 20; // for Parrot resolution should be larger
+f.houghMinLength = 20; // for Parrot resolution should be larger
 f.autoHsvValueRangeEnabled = true;
 f.autoHsvValueRangeRatio = 0.4; // for Parrot the less the better probably
 f.distanceAging = 0.5;
@@ -20,15 +20,15 @@ f.hystDirThreshold = 0.3;
 f.hystForgetRatio = 0.7;
 f.hystCenterThreshold = 0.1;
 
-
-serverConnect("127.0.0.1", 1234, xci, xciVersion);
+serverConnect("127.0.0.1", 1234, xci, xciVersion),; // beware the comma
 
 xci.xciInit();
 
 // 4 DODO
 if(xciVersion == "xci_dodo") {
     xci.setConfiguration("video:filename", "/tmp/video.xcs");
-    //xci.setConfiguration("video:fps", "25");
+    /xci.setConfiguration("video:fps", "25");
+    //xci.setConfiguration("video:timestamps", "1");
     xci.doCommand("Load");
     xci.doCommand("Play");
 };
@@ -48,31 +48,13 @@ var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
 var gazPidParam = PidParams.new(0.5, 0, 0);
 var a = Aligner.new(xci, f, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
 
-echo("adjust GAZ");
-a.adjustGaz(), while((xci.altitude - a.gazAltitude).abs() > 0.1) { sleep(100ms) };
-echo("adjust ROLL, PITCH, YAW");
-a.adjustRoll(), a.adjustYaw(), a.adjustPitch(),;
+//echo("adjust GAZ");
+//a.adjustGaz(), while((xci.altitude - a.gazAltitude).abs() > 0.1) { sleep(100ms) };
+//echo("adjust ROLL, PITCH, YAW");
+//a.adjustRoll(), a.adjustYaw(), a.adjustPitch(),;
 
 //a.adjustYaw(),;
 //a.adjustRoll(), a.adjustYaw(), a.adjustPitch(), a.adjustGaz(), ;
 //a.adjustRoll(),;
 
 
-function s(message) {
-    var data = [ => ];
-    data["type"] = "debug";
-    data["type2"] = "json";
-    data["data"] = message;
-    echo(data);
-    echo(UJson.encode(data));
-}|;
-
-
-/*
-var x;
-setSlot("x" nil);
-var slot = getSlot("x");
-slot.notifyChange(function() {
-    echo("asdfasdf");
-});
-*/
