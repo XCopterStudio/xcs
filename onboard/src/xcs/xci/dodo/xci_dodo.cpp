@@ -150,7 +150,7 @@ void XciDodo::sensorGenerator() {
             dataReceiver_.notify("alive", true);
         }
         if (clock % (1000 / ALTITUDE_FREQ_) == 0) {
-            cerr << "Alti: " << altitude_ << endl;
+            //cerr << "Alti: " << altitude_ << endl;
             dataReceiver_.notify("altitude", altitude_);
         }
 

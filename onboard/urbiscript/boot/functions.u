@@ -9,7 +9,7 @@ function serverConnect(ip, port, xci, xciVersion = "xci_parrot") {
         "psi" => "psi",
         "theta" => "theta",
         "alive" => "alive",
-    ], UJson);
+    ], UJson, 8); // frequency in Hz of refresh frequency for web GUI
 
     var flyParamReceiver = SemanticReceiver.new(adapter, [
         "roll" => "roll",
@@ -42,6 +42,7 @@ function serverConnect(ip, port, xci, xciVersion = "xci_parrot") {
     flyParamReceiver.&command >> xci.&command;
 
     flashSender.send("Connected graph nodes.");
+    semanticSender.start(); // this is blocking call, so its at the end
 }|;
 
 function Global.crop(value, max) {

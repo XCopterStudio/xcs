@@ -37,28 +37,49 @@ class FlashSender {
         this.adapter.send(this.ujson.encode(data) + "\n");
     }|;
 }|;
-
+//TODO rename inputs to outputs in receiver
+//TODO rename outputs to inputs in sender
 
 class SemanticSender {
 
-    function init(adapter, outputs, UJson) {
-        for(var output: outputs) {
-            setSlot(output.first, nil);
-            var slot = getSlot(output.first);
-            var that = this;
+    function init(adapter, outputs, UJson, refreshFrequency) {
+        var that = this;
+        var this._outputs = [ => ];
+        var this.adapter = adapter;
+        var this.period = 1 / refreshFrequency;
 
+        for(var output: outputs) {
+            setSlot(output.first, nil); // slot for outer "writers"
+            _outputs[output.first] = nil; // last stored value
+            var slot = getSlot(output.first);
             slot.notifyChange(function() {
-                var data = [ => ];
-                data["type"] = "data";
-                data["data"] = [ output.first => that.getSlotValue(output.first) ];
-                adapter.send(UJson.encode(data) + "\n");
+                that._outputs[output.first] = that.getSlotValue(output.first);
             });
+        };
+    }|;
+    
+    function start() {
+        every(this.period) {
+                var dataToSend = [ => ];
+                for(var output: _outputs) {
+                    if(!this._outputs[output.first].isNil) {
+                        dataToSend[output.first] = this.getSlotValue(output.first);
+                    }
+                };
+                if(dataToSend.size > 0) {
+                    var serialized = UJson.encode([
+                        "type" => "data",
+                        "data" => dataToSend
+                    ]);
+
+                    this.adapter.send(serialized + "\n");                    
+                }
         };
     }|;
 }|;
 
 class SemanticReceiver {
-    function init(adapter, inputs, UJson) { // parseJson as arg, lookup is wierd in this case (package/import?)
+    function init(adapter, inputs, UJson) { // parseJson as arg, lookup is wierd in this case (TODO package/import? or Global) 
         for(var input: inputs) setSlot(input.first, nil);
 
         var that = this;
