@@ -13,6 +13,7 @@ void OptionVisitor::visit(NavdataDemo* demo){
     dataReceiver_.notify("velocityX", demo->vx);
     dataReceiver_.notify("velocityY", demo->vy);
     dataReceiver_.notify("velocityZ", demo->vz);
+    dataReceiver_.notify("battery", demo->vbat_flying_percentage / 100.0);
     dataReceiver_.notify("altitude", demo->altitude / 1000.0);
 }
 
@@ -20,9 +21,12 @@ void OptionVisitor::visit(NavdataCks* cks){
 
 }
 
-void OptionVisitor::visit(NavdataTime* time){}
+void OptionVisitor::visit(NavdataTime* time){
 
-void OptionVisitor::visit(NavdataRawMeasures* rawMeasures){}
+}
+
+void OptionVisitor::visit(NavdataRawMeasures* rawMeasures){
+}
 
 void OptionVisitor::visit(NavdataPressureRaw* pressureRaw){}
 

@@ -29,6 +29,7 @@ struct VideoFrame{
     uint32_t frame_number;
     uint8_t frame_type;
     uint32_t payload_offset;
+    uint32_t timestamp;
 
     uint8_t *data; 
 

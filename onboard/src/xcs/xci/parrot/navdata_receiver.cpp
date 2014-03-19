@@ -103,7 +103,7 @@ void NavdataReceiver::processState(uint32_t parrotState) {
     parrotState_.updateState(parrotState);
 
     if (parrotState_.getState(FLAG_ARDRONE_NAVDATA_BOOTSTRAP)) { //test if drone is in BOOTSTRAP MODE
-        atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
+        atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "FALSE")); // exit bootstrap mode and drone will send the demo navdata
     }
 
     if (parrotState_.getState(FLAG_ARDRONE_COMMAND_MASK)) {

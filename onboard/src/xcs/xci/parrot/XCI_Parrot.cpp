@@ -37,6 +37,7 @@ void XCI_Parrot::initNetwork() {
 }
 
 void XCI_Parrot::processVideoData(){
+    auto lastTime = std::chrono::high_resolution_clock::now();
     while (!endAll_){
         VideoFramePtr frame = nullptr;
         if (videoReceiver_.tryGetVideoFrame(frame)){
@@ -46,7 +47,11 @@ void XCI_Parrot::processVideoData(){
             if (videoDecoder_.decodeVideo(&avPacket)){
                 AVFrame* avFrame = videoDecoder_.decodedFrame();
                 BitmapType bitmap(avFrame->width, avFrame->height, avFrame->data[0]);
-                //cerr << "Call data receiver with video" << endl;
+                cerr << "Call data receiver with video" << endl;
+                auto time = std::chrono::high_resolution_clock::now();
+                auto elapsed = time - lastTime;
+                lastTime = time;
+                cerr << "Received video time: " << elapsed.count() << endl;
                 dataReceiver_.notify("video",bitmap);
             }
             delete frame;
@@ -104,10 +109,15 @@ SensorList XCI_Parrot::sensorList() {
     sensorList.push_back(Sensor("phi", "phi"));
     sensorList.push_back(Sensor("theta", "theta"));
     sensorList.push_back(Sensor("psi", "psi"));
-    sensorList.push_back(Sensor("velocityX", "vx"));
-    sensorList.push_back(Sensor("velocityY", "vy"));
-    sensorList.push_back(Sensor("velocityZ", "vz"));
+
+    sensorList.push_back(Sensor("velocityX", "velocityX"));
+    sensorList.push_back(Sensor("velocityY", "velocityY"));
+    sensorList.push_back(Sensor("velocityZ", "velocityY"));
+
     sensorList.push_back(Sensor("altitude", "altitude"));
+
+    sensorList.push_back(Sensor("battery", "battery"));
+
     sensorList.push_back(Sensor("video", "video"));
 
     return sensorList;

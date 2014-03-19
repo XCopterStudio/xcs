@@ -93,8 +93,8 @@ namespace parrot{
     };
 
     struct Vector21{
-            float32_t x;
-            float32_t y;
+        float32_t x;
+        float32_t y;
     };
 
     struct ScreenPoint{
