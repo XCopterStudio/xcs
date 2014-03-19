@@ -4,8 +4,8 @@ load("boot/boot.u");
  * Dataflow graph
  */
  
-var xciVersion = "xci_dodo";
-//var xciVersion = "xci_parrot";
+//var xciVersion = "xci_dodo";
+var xciVersion = "xci_parrot";
 var xci = XXci.new(xciVersion);
 var f = ULineFinder.new();
 xci.&video >> f.&video;
@@ -27,8 +27,8 @@ xci.xciInit();
 // 4 DODO
 if(xciVersion == "xci_dodo") {
     xci.setConfiguration("video:filename", "/tmp/video.xcs");
-    //xci.setConfiguration("video:fps", "25");
-    xci.setConfiguration("video:timestamps", "1");
+    /xci.setConfiguration("video:fps", "25");
+    //xci.setConfiguration("video:timestamps", "1");
     xci.doCommand("Load");
     xci.doCommand("Play");
 };
@@ -45,7 +45,7 @@ if(xciVersion == "xci_parrot") {
 var rollPidParam = PidParams.new(0.4, 0, 0);
 var yawPidParam = PidParams.new(0.5, 0, 0);
 var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
-var gazPidParam = PidParams.new(0.02, 0, 0);
+var gazPidParam = PidParams.new(0.5, 0, 0);
 var a = Aligner.new(xci, f, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
 
 //echo("adjust GAZ");
