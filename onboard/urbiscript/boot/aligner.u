@@ -72,7 +72,7 @@ class Aligner{
             var deviation = finder.deviation;
             var enabled = Global.inRangeBool(distance, this.pitchDistance) * Global.inRangeBool(deviation, this.pitchDeviation);
             var error = enabled; // simple solution
-            var pitch = -1 * Global.crop(pidLoop(pitchPidParam, error), 1);
+            var pitch = -1 * Global.crop(pidLoop(pitchPidParam, error), 1) * Math.abs(0.5 - distance);
             echo("pitch: \t\t\t\t\t\t\t\t" + pitch);
             xci.pitch = pitch; 
             sleep(this.pitchSleep);

@@ -26,9 +26,9 @@ xci.xciInit();
 
 // 4 DODO
 if(xciVersion == "xci_dodo") {
-    xci.setConfiguration("video:filename", "/tmp/video.xcs");
-    //xci.setConfiguration("video:fps", "25");
     //xci.setConfiguration("video:timestamps", "1");
+    xci.setConfiguration("video:filename", "video.mp4");
+    xci.setConfiguration("video:fps", "25");
     xci.doCommand("Load");
     xci.doCommand("Play");
 };
@@ -36,7 +36,7 @@ if(xciVersion == "xci_dodo") {
 // 4 parrot
 if(xciVersion == "xci_parrot") {
     sleep(1s);
-    xci.flyParamPersistence = 0;
+    xci.flyParamPersistence = 25;
     xci.setConfiguration("video:video_channel", "1");
     //xci.command = "TakeOff";
     sleep(4s);
