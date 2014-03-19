@@ -42,6 +42,12 @@ typedef VideoFrame* VideoFramePtr;
 class VideoReceiver{
     static const unsigned int TIMEOUT;
 
+    static const unsigned int BUFFER_COUNT;
+    static const unsigned int BUFFER_SIZE;
+
+    int index;
+    char* buffer;
+
     boost::asio::deadline_timer deadlineVideo_;
     boost::asio::ip::tcp::socket socketVideo_;
 	boost::asio::ip::tcp::endpoint parrotVideo;

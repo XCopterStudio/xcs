@@ -37,7 +37,6 @@ void XCI_Parrot::initNetwork() {
 }
 
 void XCI_Parrot::processVideoData(){
-    auto lastTime = std::chrono::high_resolution_clock::now();
     while (!endAll_){
         VideoFramePtr frame = nullptr;
         if (videoReceiver_.tryGetVideoFrame(frame)){
@@ -47,14 +46,9 @@ void XCI_Parrot::processVideoData(){
             if (videoDecoder_.decodeVideo(&avPacket)){
                 AVFrame* avFrame = videoDecoder_.decodedFrame();
                 BitmapType bitmap(avFrame->width, avFrame->height, avFrame->data[0]);
-                cerr << "Call data receiver with video" << endl;
-                auto time = std::chrono::high_resolution_clock::now();
-                auto elapsed = time - lastTime;
-                lastTime = time;
-                cerr << "Received video time: " << elapsed.count() << endl;
                 dataReceiver_.notify("video",bitmap);
             }
-            delete frame;
+            //delete frame;
         }
         else{
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
