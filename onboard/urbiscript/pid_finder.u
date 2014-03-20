@@ -4,11 +4,23 @@ load("boot/boot.u");
  * Dataflow graph
  */
  
-//var xciVersion = "xci_dodo";
-var xciVersion = "xci_parrot";
+var xciVersion = "xci_dodo";
+//var xciVersion = "xci_parrot";
 var xci = XXci.new(xciVersion);
 var f = ULineFinder.new();
 xci.&video >> f.&video;
+xci.&theta >> f.&theta;
+xci.&phi >> f.&phi;
+xci.&psi >> f.&psi;
+f.cameraParam = 0.73;
+
+var d = ULineDrawer.new();
+xci.&video >> d.&video;
+xci.&theta >> d.&theta;
+xci.&phi >> d.&phi;
+d.cameraParam = 0.73;
+
+f.setLineDrawer(d);
 
 // Default values for image processing
 f.houghRho = 5;
@@ -27,7 +39,7 @@ xci.xciInit();
 // 4 DODO
 if(xciVersion == "xci_dodo") {
     //xci.setConfiguration("video:timestamps", "1");
-    xci.setConfiguration("video:filename", "video.mp4");
+    xci.setConfiguration("video:filename", "/tmp/video.xcs");
     xci.setConfiguration("video:fps", "25");
     xci.doCommand("Load");
     xci.doCommand("Play");
@@ -48,9 +60,7 @@ var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
 var gazPidParam = PidParams.new(0.5, 0, 0);
 var a = Aligner.new(xci, f, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
 
-xci.&theta >> f.&theta;
-xci.&phi >> f.&phi;
-f.cameraParam = 0.1;
+
 
 //echo("adjust GAZ");
 //a.adjustGaz(), while((xci.altitude - a.gazAltitude).abs() > 0.1) { sleep(100ms) };

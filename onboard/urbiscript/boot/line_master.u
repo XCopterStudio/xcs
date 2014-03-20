@@ -1,0 +1,32 @@
+
+
+class LineMaster {
+    var distance;
+    var deviation;
+    var hasLine;
+    
+    function init(lineFinder, lineKeeper) {
+        hasLine = false;
+        var _lineFinder = lineFinder;
+        var _lineKeeper = lineKeeper;
+    }|;
+    
+    function start() {
+        at(_lineFinder.hasLine) {
+            // connect to line finder
+            _lineFinder.&distance >> getSlot("distance");
+            _lineFinder.&deviation >> getSlot("deviation");
+            hasLine = true;
+        } onleave {
+            _lineKeeper.lastDistance = distance;
+            _lineKeeper.lastDeviation = deviation;
+            // connect to line keeper
+            _lineKeeper.&distance >> getSlot("distance");
+            _lineKeeper.&deviation >> getSlot("deviation");
+            hasLine = true;
+            sleep(5s); // magneto timeout
+            echo("Magneto line expired"); //TODO
+            //hasLine = false;            
+        },; // TODO this shouldn't be blocking        
+    }
+}|;
