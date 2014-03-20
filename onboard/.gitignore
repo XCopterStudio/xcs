@@ -6,3 +6,4 @@ build/*
 urbiscript/log
 urbiscript/_log.bat
 urbiscript/_run.bat
+tmp
