@@ -48,6 +48,10 @@ var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
 var gazPidParam = PidParams.new(0.5, 0, 0);
 var a = Aligner.new(xci, f, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
 
+xci.&theta >> f.&theta;
+xci.&phi >> f.&phi;
+f.cameraParam = 0.1;
+
 //echo("adjust GAZ");
 //a.adjustGaz(), while((xci.altitude - a.gazAltitude).abs() > 0.1) { sleep(100ms) };
 //echo("adjust ROLL, PITCH, YAW");

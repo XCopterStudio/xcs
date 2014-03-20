@@ -16,8 +16,8 @@ public:
      * Inputs
      */
     ::urbi::InputPort video;
-    ::urbi::InputPort refDistace;
-    ::urbi::InputPort refDeviation;
+    ::urbi::UVar theta; // intentionally UVar
+    ::urbi::UVar phi; // intentionally UVar
 
     /*!
      * Image processing params
@@ -48,6 +48,8 @@ public:
 
     ::urbi::UVar hystForgetDerRatio;
     ::urbi::UVar hystForgetDerThreshold;
+    
+    ::urbi::UVar cameraParam;
 
     /*!
      * Output params
@@ -84,6 +86,7 @@ private:
     void useRememberedLine();
     cv::vector<RawLineType> useOnlyGoodLines(cv::vector<RawLineType> lines);
     void calculateExpectedLine();
+    void calculateReferencePoint();
 
     bool hasFrame_;
     ::urbi::UImage lastFrame_;
@@ -95,6 +98,7 @@ private:
     size_t imageHeight_;
     size_t imageWidth_;
     cv::Point imageCenter_;
+    cv::Point referencePoint_;
     double distance_;
     double deviation_;
     double distanceDer_;
@@ -145,7 +149,7 @@ private:
      */
     inline void drawFullLine(cv::Mat image, double distance, double deviation, cv::Scalar color, size_t width = 3) {
         cv::Point deltaPoint(distanceUnit_ * distance * cos(deviation), distanceUnit_ * distance * sin(deviation));
-        deltaPoint += imageCenter_;
+        deltaPoint += referencePoint_;
         cv::Point bottomPoint(deltaPoint.x - tan(deviation) * (0.5 * image.rows - distance * sin(deviation) * distanceUnit_), image.rows);
         cv::Point topPoint(deltaPoint.x + tan(deviation) * (0.5 * image.rows + distance * sin(deviation) * distanceUnit_), 0);
 

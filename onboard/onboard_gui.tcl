@@ -313,6 +313,15 @@ scale .hystdirthresh -label "Hystersis Direction Threshhold" \
 -showvalue 1 -orient horizontal
 pack .hystdirthresh
 
+scale .cameraparam -label "Camera param" \
+-length 240 -from 0.01 -to 2 \
+-command { setParam "f.cameraParam" } \
+-resolution 0.025 \
+-digits 3 \
+-variable cameraparam \
+-showvalue 1 -orient horizontal
+pack .cameraparam
+
 scale .gazaltitude -label "Altitude" \
 -length 240 -from 1 -to 2 \
 -command { setParam "a.gazAltitude" } \
@@ -360,6 +369,8 @@ set houghrho 3
 set hystcenterthresh 0.2
 set hystdirthresh 0.60
 set gazaltitude 1.5
+
+set cameraparam 0.78
 
 #############
 # functions #

@@ -31,6 +31,9 @@ ULineFinder::ULineFinder(const string& name) :
 
     UBindVar(ULineFinder, video);
     UNotifyChange(video, &ULineFinder::onChangeVideo);
+    
+    UBindVar(ULineFinder, theta);
+    UBindVar(ULineFinder, phi);
 
     UBindVar(ULineFinder, blurRange);
     UBindVar(ULineFinder, autoHsvValueRangeEnabled);
@@ -54,6 +57,8 @@ ULineFinder::ULineFinder(const string& name) :
     UBindVar(ULineFinder, hystForgetThreshold);
     UBindVar(ULineFinder, hystForgetDerRatio);
     UBindVar(ULineFinder, hystForgetDerThreshold);
+    
+    UBindVar(ULineFinder, cameraParam);    
 
     UBindVarRename(ULineFinder, distanceUVar, "distance");
     UBindVarRename(ULineFinder, deviationUVar, "deviation");
@@ -87,6 +92,7 @@ void ULineFinder::init() {
     hystForgetThreshold = 0.1; // threshold of forgotten line
     hystForgetDerRatio = 0.5; // derivative forgetting factor (1 = no forgetting factor, 0 = no remembering; used for scaling)
     hystForgetDerThreshold = 0.1; // derivative forgetting threshold (1 = no forgetting factor, 0 = no remembering; used "zeroing" the derivative)
+    cameraParam = 0.78;    // experimentally determined camera intrinsic
     /*
      * Output vars
      */
@@ -188,6 +194,7 @@ void ULineFinder::processFrame() {
     RawLineType avg;
     bool hasAvg(false);
     calculateExpectedLine();
+    calculateReferencePoint();
 
     if (lines.size() == 0) { // no line detected
         useRememberedLine();
@@ -219,7 +226,7 @@ void ULineFinder::processFrame() {
             normalizeOrientation(avg);
 
 
-            double newDistance(pointLineDistance(imageCenter_, avg) / distanceUnit_);
+            double newDistance(pointLineDistance(referencePoint_, avg) / distanceUnit_);
             double newDeviation = lineDirection(avg); // TODO check orientation and shift
 
             /*
@@ -244,7 +251,7 @@ void ULineFinder::processFrame() {
     /*
      * Draw output
      */
-    // debugging annotations
+    // mean line
     if (cv::countNonZero(avg)) {
         cv::line(src, cv::Point(avg[0], avg[1]), cv::Point(avg[2], avg[3]), cv::Scalar(128, 128, 255), 3, CV_AA);
         cv::circle(src, cv::Point(avg[2], avg[3]), 5, cv::Scalar(128, 128, 255), 3, CV_AA);
@@ -253,11 +260,11 @@ void ULineFinder::processFrame() {
     if (lineType_ != LINE_NONE) {
         // distance circle
         cv::Scalar distanceColor((distance_ > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0));
-        cv::circle(src, imageCenter_, abs(distance_) * distanceUnit_, distanceColor, 3, CV_AA);
+        cv::circle(src, referencePoint_, abs(distance_) * distanceUnit_, distanceColor, 3, CV_AA);
 
         // central deviation line
-        cv::Point heading(imageCenter_.x + 50 * sin(deviation_), imageCenter_.y - 50 * cos(deviation_));
-        cv::line(src, imageCenter_, heading, cv::Scalar(128, 128, 128), 1, CV_AA);
+        cv::Point heading(referencePoint_.x + 50 * sin(deviation_), referencePoint_.y - 50 * cos(deviation_));
+        cv::line(src, referencePoint_, heading, cv::Scalar(128, 128, 128), 1, CV_AA);
 
         // followed line
 
@@ -275,9 +282,6 @@ void ULineFinder::processFrame() {
 
         // followed line
         drawFullLine(src, distance_, deviation_, hystColor);
-
-
-
     }
 
     // detected lines are last (top layer)    
@@ -288,6 +292,8 @@ void ULineFinder::processFrame() {
         cv::line(src, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), cv::Scalar(255, 0, 0), 2, CV_AA);
     }
 
+    // reference point
+    cv::circle(src, referencePoint_, 5, cv::Scalar(255, 255, 255), 3, CV_AA);
 
 
     /*
@@ -338,7 +344,7 @@ cv::vector<ULineFinder::RawLineType> ULineFinder::useOnlyGoodLines(cv::vector<UL
     cv::vector<ULineFinder::RawLineType> result;
 
     cv::Point deltaPoint(distanceUnit_ * expectedDistance * cos(expectedDeviation), distanceUnit_ * expectedDistance * sin(expectedDeviation));
-    deltaPoint += imageCenter_; //TODO reference point
+    deltaPoint += referencePoint_;
 
     for (auto lineCandidate : lines) {
         normalizeOrientation(lineCandidate);
@@ -374,7 +380,17 @@ void ULineFinder::calculateExpectedLine() {
 
     expectedDistance_ = distance_ + distanceDer_ * REFRESH_PERIOD * hystDerStrength_;
     expectedDeviation_ = deviation_ + deviationDer_ * REFRESH_PERIOD* hystDerStrength_;
+}
 
+void ULineFinder::calculateReferencePoint() {
+    auto tanTheta = tan(static_cast<double> (theta));
+    auto tanPhi = tan(static_cast<double> (phi));
+    auto camParam = static_cast<double> (cameraParam);
+
+    auto refDistance = camParam * hypot(tanTheta, tanPhi);
+    auto refDeviation = atan2(tanPhi, tanTheta);
+
+    referencePoint_ = imageCenter_ + cv::Point(distanceUnit_ * refDistance * sin(refDeviation), distanceUnit_ * refDistance * cos(refDeviation));
 }
 
 UStart(ULineFinder);
