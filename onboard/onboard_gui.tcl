@@ -370,7 +370,7 @@ set hystcenterthresh 0.2
 set hystdirthresh 0.60
 set gazaltitude 1.5
 
-set cameraparam 0.78
+set cameraparam 0.74
 
 #############
 # functions #
