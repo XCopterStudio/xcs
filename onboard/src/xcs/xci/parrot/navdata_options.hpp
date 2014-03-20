@@ -147,9 +147,9 @@ namespace parrot{
 
         int32_t altitude; /*!< UAV's altitude in millimeters */
 
-        float32_t vx; /*!< UAV's estimated linear velocity */
-        float32_t vy; /*!< UAV's estimated linear velocity */
-        float32_t vz; /*!< UAV's estimated linear velocity */
+        float32_t vx; /*!< UAV's estimated linear velocity (mm/s) */
+        float32_t vy; /*!< UAV's estimated linear velocity (mm/s) */
+        float32_t vz; /*!< UAV's estimated linear velocity (mm/s) */
 
         uint32_t num_frames; /*!< streamed frame index */ // Not used -> To integrate in video stage.
 
