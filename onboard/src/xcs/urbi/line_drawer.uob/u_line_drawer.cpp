@@ -23,28 +23,34 @@ ULineDrawer::DrawTask::DrawTask(const DrawTask &drawTask) {
     }
 }
 
-const size_t ULineDrawer::REFRESH_PERIOD = 100; // ms
-
 ULineDrawer::ULineDrawer(const string& name) :
   ::urbi::UObject(name),
   hasFrame_(false) {
     UBindFunction(ULineDrawer, init);
     UBindFunctionRename(ULineDrawer, drawFullLineU, "drawFullLine"); //TODO better casting of cv::Scalar
-    
 
+    /*
+     * Inputs
+     */
     UBindVar(ULineDrawer, video);
     UNotifyChange(video, &ULineDrawer::onChangeVideo);
 
     UBindVar(ULineDrawer, theta);
     UBindVar(ULineDrawer, phi);
+
+    /*
+     * Parameters
+     */
     UBindVar(ULineDrawer, cameraParam);
+    UBindVar(ULineDrawer, fps);
+    UNotifyChange(fps, &ULineDrawer::onChangeFps);
 
 }
 
 void ULineDrawer::init() {
     cv::namedWindow("Lines", cv::WINDOW_AUTOSIZE);
 
-    USetUpdate(REFRESH_PERIOD);
+    onChangeFps(10); // default FPS
 }
 
 int ULineDrawer::update() {
@@ -80,8 +86,14 @@ void ULineDrawer::onChangeVideo(::urbi::UVar& uvar) {
     hasFrame_ = true;
     lineUtils_.setDimensions(lastFrame_.width, lastFrame_.height);
     lineUtils_.updateReferencePoint(theta, phi, cameraParam);
+}
 
-
+void ULineDrawer::onChangeFps(int value) {
+    if (value <= 0) {
+        USetUpdate(-1); // disabled timer
+    } else {
+        USetUpdate(1000 / value);
+    }
 }
 
 void ULineDrawer::drawLine(cv::Point begin, cv::Point end, cv::Scalar color, size_t width) {

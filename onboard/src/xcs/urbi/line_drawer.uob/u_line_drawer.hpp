@@ -25,6 +25,7 @@ public:
      * Params
      */
     ::urbi::UVar cameraParam;
+    ::urbi::UVar fps;
 
 
     ULineDrawer(const std::string &);
@@ -85,14 +86,15 @@ private:
         };
     };
 
-    static const size_t REFRESH_PERIOD;
     xcs::urbi::line_finder::LineUtils lineUtils_;
-    void onChangeVideo(::urbi::UVar &uvar);
     ::urbi::UImage lastFrame_;
     bool hasFrame_;
     
     std::vector<DrawTask> drawTasks_;
     std::mutex drawTasksMtx_;
+    
+    void onChangeVideo(::urbi::UVar &uvar);
+    void onChangeFps(int value);
 
 };
 
