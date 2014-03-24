@@ -1,0 +1,7 @@
+var logger = Datalogger.new("pokus.txt");
+var xci = XXci.new("xci_parrot");
+
+logger.registerData("altitude","altitude","double",xci.&altitude);
+logger.registerData("battery","battery","double",xci.&battery);
+
+xci.xciInit();
