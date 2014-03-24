@@ -81,6 +81,10 @@ void XXci::xciInit() {
 
 void XXci::doCommand(const std::string& command) {
     setFlyParamActive(false);
+    roll_ = 0;
+    pitch_ = 0;
+    yaw_ = 0;
+    gaz_= 0;
     xci_->command(command);
 }
 
