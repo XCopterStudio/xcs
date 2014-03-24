@@ -9,6 +9,11 @@ var xciVersion = "xci_parrot";
 var xci = XXci.new(xciVersion);
 var f = ULineFinder.new();
 xci.&video >> f.&video;
+var logger = Datalogger.new("pokus.txt");
+
+logger.registerData("theta","theta","double",xci.&theta);
+logger.registerData("psi","psi","double",xci.&psi);
+logger.registerData("phi","phi","double",xci.&phi);
 
 // Default values for image processing
 f.houghRho = 5;

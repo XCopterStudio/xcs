@@ -12,16 +12,25 @@
 
 namespace xcs{
 namespace nodes{
-    class FileWriterFunction : public ::urbi::UObject{
+    class DataWriter : public xcs::nodes::XObject{
+    protected:
         std::string dataName_;
         std::ofstream *file_;
     public:
-        FileWriterFunction(const std::string &name);
+        DataWriter(const std::string &name);
         void init(const std::string &dataName, std::ofstream* file, ::urbi::UVar &uvar);
-        void write(::urbi::UVar &uvar);
+        virtual void write(::urbi::UVar &uvar);
     };
 
-    typedef std::list<std::unique_ptr<FileWriterFunction> > WriterList;
+    class VideoWriter : public DataWriter{
+
+    public:
+        VideoWriter(const std::string &name);
+        void init(const std::string &dataName, std::ofstream* file, ::urbi::UVar &uvar);
+        virtual void write(::urbi::UVar &uvar);
+    };
+
+    typedef std::list<std::unique_ptr<DataWriter> > WriterList;
 
     class Datalogger : public xcs::nodes::XObject {
         static const char* REGISTER;

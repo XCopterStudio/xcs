@@ -12,22 +12,44 @@ const char* Datalogger::REGISTER = "register";
 
 // =================================== public functions ====================
 
-FileWriterFunction::FileWriterFunction(const std::string &name) :
-UObject(name)
+DataWriter::DataWriter(const std::string &name) :
+XObject(name)
 {
-    UBindFunction(FileWriterFunction, init);
+    
 }
 
-void FileWriterFunction::init(const std::string &dataName, std::ofstream* file, ::urbi::UVar &uvar){
+void DataWriter::init(const std::string &dataName, std::ofstream* file, ::urbi::UVar &uvar){
     file_ = file;
     dataName_ = dataName;
-    UNotifyChange(uvar, &FileWriterFunction::write);
+    UNotifyChange(uvar, &DataWriter::write);
 }
 
-void FileWriterFunction::write(urbi::UVar &uvar){
-    cerr << dataName_ << " " << uvar.val() << endl;
+void DataWriter::write(urbi::UVar &uvar){
+    //cerr << dataName_ << " " << uvar.val() << endl;
     *file_ << dataName_ << " " << uvar.val() << endl;
 }
+
+// ========
+
+VideoWriter::VideoWriter(const std::string &name) :
+DataWriter(name)
+{
+    
+}
+
+void VideoWriter::init(const std::string &dataName, std::ofstream* file, ::urbi::UVar &uvar){
+    file_ = file;
+    dataName_ = dataName;
+    UNotifyChange(uvar, &VideoWriter::write);
+}
+
+void VideoWriter::write(urbi::UVar &uvar){
+    cerr << "Log image" << endl;
+    UImage frame = uvar;
+    
+}
+
+// ========
 
 Datalogger::Datalogger(const std::string& name) :
 xcs::nodes::XObject(name)
@@ -55,11 +77,20 @@ void Datalogger::registerData(const std::string &name, const std::string &semant
     }
     else{
         file_ << REGISTER << " " << name << " " << semanticType << " " << syntacticType << endl;
-        FileWriterFunction* function = new FileWriterFunction(std::string());
-        function->init(name, &file_, uvar);
-        writerList_.push_back(std::unique_ptr<FileWriterFunction>(function));
+
+        if (semanticType == "video"){
+            VideoWriter* function = new VideoWriter(std::string());
+            function->init(name, &file_, uvar);
+            writerList_.push_back(std::unique_ptr<DataWriter>(function));
+        }
+        else{
+            DataWriter* function = new DataWriter(std::string());
+            function->init(name, &file_, uvar);
+            writerList_.push_back(std::unique_ptr<DataWriter>(function));
+        }
     }
 }
 
-XStart(FileWriterFunction);
+XStart(DataWriter);
+XStart(VideoWriter);
 XStart(Datalogger);
