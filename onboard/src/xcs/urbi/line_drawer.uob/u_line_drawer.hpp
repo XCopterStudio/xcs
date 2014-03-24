@@ -42,13 +42,15 @@ public:
      * Very ugly geometry.
      */
     void drawFullLine(double distance, double deviation, cv::Scalar color, size_t width = 3);
+    
+    /*!
+     * Wrapper for Urbi until struct casting is ready.
+     */
+    void drawFullLineU(double distance, double deviation, size_t color = 0, size_t width = 3);
 
     void drawLine(xcs::urbi::line_finder::LineUtils::RawLineType line, cv::Scalar color, size_t width = 2);
 
     void drawCircle(cv::Point center, cv::Scalar color, size_t radius = 3);
-
-    void beginDrawTransaction();
-    void endDrawTransaction();
 
 private:
 
@@ -88,11 +90,9 @@ private:
     void onChangeVideo(::urbi::UVar &uvar);
     ::urbi::UImage lastFrame_;
     bool hasFrame_;
-    cv::Mat canvas_;
-
+    
     std::vector<DrawTask> drawTasks_;
     std::mutex drawTasksMtx_;
-    bool inTransaction_;
 
 };
 

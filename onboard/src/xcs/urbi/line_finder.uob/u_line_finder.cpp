@@ -64,7 +64,7 @@ ULineFinder::ULineFinder(const string& name) :
     UBindVarRename(ULineFinder, distanceUVar, "distance");
     UBindVarRename(ULineFinder, deviationUVar, "deviation");
     UBindVar(ULineFinder, hasLine);
-    
+
     UBindFunction(ULineFinder, setLineDrawer);
 }
 
@@ -109,8 +109,15 @@ void ULineFinder::init() {
 }
 
 int ULineFinder::update() {
-    const static size_t waitDelay = 20;
+    //TODO fallback to lost line when video is stucked
+    if (!hasFrame_ || lastProcessedFrameNo_ >= lastReceivedFrameNo_) {
+        return 0;
+    }
+    lastProcessedFrameNo_ = lastReceivedFrameNo_;
+
     processFrame();
+
+    const static size_t waitDelay = 20;
     cv::waitKey(waitDelay); // re-render image windows
 
     return 0; // Urbi undocumented, return value probably doesn't matter
@@ -118,7 +125,7 @@ int ULineFinder::update() {
 
 void ULineFinder::setLineDrawer(UObject *drawer) {
     //lineDrawer_ = dynamic_cast<ULineDrawer *>(drawer);
-    lineDrawer_ = (ULineDrawer *)(drawer); //TODO missing typeinfo when linking
+    lineDrawer_ = (ULineDrawer *) (drawer); //TODO missing typeinfo when linking
 }
 
 void ULineFinder::onChangeVideo(::urbi::UVar& uvar) {
@@ -150,10 +157,6 @@ void ULineFinder::adjustValueRange(cv::Mat hsvImage) {
 }
 
 void ULineFinder::processFrame() {
-    if (!hasFrame_ || lastProcessedFrameNo_ >= lastReceivedFrameNo_) {
-        return;
-    }
-    lastProcessedFrameNo_ = lastReceivedFrameNo_;
     /*
      * Image Processing
      */

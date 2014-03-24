@@ -29,6 +29,8 @@ ULineDrawer::ULineDrawer(const string& name) :
   ::urbi::UObject(name),
   hasFrame_(false) {
     UBindFunction(ULineDrawer, init);
+    UBindFunctionRename(ULineDrawer, drawFullLineU, "drawFullLine"); //TODO better casting of cv::Scalar
+    
 
     UBindVar(ULineDrawer, video);
     UNotifyChange(video, &ULineDrawer::onChangeVideo);
@@ -50,9 +52,24 @@ int ULineDrawer::update() {
     if (!hasFrame_) {
         return 0;
     }
-    
+
     cv::Mat src(lastFrame_.height, lastFrame_.width, CV_8UC3, lastFrame_.data);
-    cv::imshow("Lines", canvas_);
+    {
+        lock_guard<mutex> lock(drawTasksMtx_);
+        for (auto drawTask : drawTasks_) {
+            switch (drawTask.type) {
+                case TASK_LINE:
+                    cv::line(src, drawTask.dataLine.begin, drawTask.dataLine.end, drawTask.dataLine.color, drawTask.dataLine.width);
+                    break;
+                case TASK_CIRCLE:
+                    cv::circle(src, drawTask.dataCircle.center, drawTask.dataCircle.radius, drawTask.dataCircle.color, 3);
+                    break;
+            }
+        }
+        drawTasks_.clear();
+    }
+
+    cv::imshow("Lines", src);
     cv::waitKey(waitDelay); // re-render image windows
 
     return 0; // Urbi undocumented, return value probably doesn't matter
@@ -61,33 +78,10 @@ int ULineDrawer::update() {
 void ULineDrawer::onChangeVideo(::urbi::UVar& uvar) {
     lastFrame_ = uvar;
     hasFrame_ = true;
-    canvas_ = cv::Mat(lastFrame_.height, lastFrame_.width, CV_8UC3, lastFrame_.data);
     lineUtils_.setDimensions(lastFrame_.width, lastFrame_.height);
     lineUtils_.updateReferencePoint(theta, phi, cameraParam);
 
-    // if in transaction wait with redrawing for the next round
-    /*if (!inTransaction_)*/ { // this may work poorly ?!?...
-        lock_guard<mutex> lock(drawTasksMtx_);
-        for (auto drawTask : drawTasks_) {
-            switch (drawTask.type) {
-                case TASK_LINE:
-                    cv::line(canvas_, drawTask.dataLine.begin, drawTask.dataLine.end, drawTask.dataLine.color, drawTask.dataLine.width);
-                    break;
-                case TASK_CIRCLE:
-                    cv::circle(canvas_, drawTask.dataCircle.center, drawTask.dataCircle.radius, drawTask.dataCircle.color, 3);
-                    break;
-            }
-        }
-        drawTasks_.clear();
-    }
-}
 
-void ULineDrawer::beginDrawTransaction() {
-    inTransaction_ = true;
-}
-
-void ULineDrawer::endDrawTransaction() {
-    inTransaction_ = false;
 }
 
 void ULineDrawer::drawLine(cv::Point begin, cv::Point end, cv::Scalar color, size_t width) {
@@ -127,6 +121,25 @@ void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar col
     //    } else {
     //        cv::circle(image, topPoint, width + 2, color, width, CV_AA);
     //    }
+}
+
+void ULineDrawer::drawFullLineU(double distance, double deviation, size_t color, size_t width) {
+    cv::Scalar cvColor;
+    switch (color) {
+        case 1:
+            cvColor = cv::Scalar(255, 128, 0);
+            break;
+        case 2:
+            cvColor = cv::Scalar(255, 0, 128);
+            break;
+        case 3:
+            cvColor = cv::Scalar(0, 128, 255);
+            break;
+        default:
+            cvColor = cv::Scalar(0, 0, 0);
+            break;
+    }
+    drawFullLine(distance, deviation, cvColor, width);
 }
 
 void ULineDrawer::drawLine(xcs::urbi::line_finder::LineUtils::RawLineType line, cv::Scalar color, size_t width) {

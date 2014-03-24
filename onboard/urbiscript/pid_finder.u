@@ -40,7 +40,7 @@ xci.xciInit();
 if(xciVersion == "xci_dodo") {
     //xci.setConfiguration("video:timestamps", "1");
     xci.setConfiguration("video:filename", "/tmp/video.xcs");
-    xci.setConfiguration("video:fps", "25");
+    //xci.setConfiguration("video:fps", "4");
     xci.doCommand("Load");
     xci.doCommand("Play");
 };
@@ -70,5 +70,4 @@ var a = Aligner.new(xci, f, rollPidParam, yawPidParam, pitchPidParam, gazPidPara
 //a.adjustYaw(),;
 //a.adjustRoll(), a.adjustYaw(), a.adjustPitch(), a.adjustGaz(), ;
 //a.adjustRoll(),;
-
 
