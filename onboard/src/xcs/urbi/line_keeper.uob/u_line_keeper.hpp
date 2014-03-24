@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <chrono>
 #include <urbi/uobject.hh>
+#include <xcs/urbi/line_drawer.uob/u_line_drawer.hpp>
 
 
 namespace xcs {
@@ -31,14 +32,19 @@ public:
     ::urbi::UVar deviationUVar;
 
     ULineKeeper(const std::string &);
+    
     void init();
 
     void start(double distance, double deviation);
+    
+    void stop();
 
     /*!
      * Urbi period handler
      */
     virtual int update();
+
+    void setLineDrawer(UObject *drawer);
 private:
 
     struct Point2f {
@@ -54,6 +60,8 @@ private:
 
     const static size_t REFRESH_PERIOD;
 
+    xcs::urbi::ULineDrawer *lineDrawer_;
+
     VectorType positionShift_;
     TimePoint lastTimeVx_;
     TimePoint lastTimeVy_;
@@ -61,6 +69,8 @@ private:
     double initialDistance_;
     double initialDeviation_;
     double initialDevOffset_;
+    
+    bool isKeeping_;
 
     void onChangeVx(double vx);
     void onChangeVy(double vy);

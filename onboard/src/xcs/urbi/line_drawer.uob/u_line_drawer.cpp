@@ -121,13 +121,19 @@ void ULineDrawer::drawCircle(cv::Point center, cv::Scalar color, size_t radius) 
  * Very ugly geometry.
  */
 void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar color, size_t width) {
+    if (cos(deviation) < 1e-6) {
+        cv::Point leftPoint(0, lineUtils_.referencePoint.y + distance * lineUtils_.distanceUnit);
+        cv::Point rightPoint(lineUtils_.width, lineUtils_.referencePoint.y + distance * lineUtils_.distanceUnit);
+        drawLine(leftPoint, rightPoint, color, width);
+    } else {
+        auto horizOffset = distance * lineUtils_.distanceUnit / cos(deviation);
+        cv::Point bottomPoint(lineUtils_.referencePoint.x + horizOffset - tan(deviation) * (lineUtils_.height - lineUtils_.referencePoint.y), lineUtils_.height);
+        cv::Point topPoint(lineUtils_.referencePoint.x + horizOffset + tan(deviation) * lineUtils_.referencePoint.y, 0);
+        drawLine(bottomPoint, topPoint, color, width);
+    }
+
     cv::Point deltaPoint = lineUtils_.getDeltaPoint(distance, deviation);
-    cv::Point bottomPoint(deltaPoint.x - tan(deviation) * (0.5 * lineUtils_.height - distance * sin(deviation) * lineUtils_.distanceUnit), lineUtils_.height);
-    cv::Point topPoint(deltaPoint.x + tan(deviation) * (0.5 * lineUtils_.height + distance * sin(deviation) * lineUtils_.distanceUnit), 0);
-
-    drawLine(bottomPoint, topPoint, color, width);
     drawCircle(deltaPoint, color, width + 3);
-
     //    if (abs(deviation) > M_PI / 2) {
     //        cv::circle(image, bottomPoint, width + 2, color, width, CV_AA);
     //    } else {

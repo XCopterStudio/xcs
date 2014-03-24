@@ -1,4 +1,5 @@
 #include "u_line_keeper.hpp"
+#include "xcs/urbi/line_drawer.uob/u_line_drawer.hpp"
 #include <chrono>
 #include <cmath>
 
@@ -9,8 +10,12 @@ using namespace std::chrono;
 const size_t ULineKeeper::REFRESH_PERIOD = 100; // ms
 
 ULineKeeper::ULineKeeper(const string& name) :
-  ::urbi::UObject(name) {
+  ::urbi::UObject(name),
+  isKeeping_(false) {
     UBindFunction(ULineKeeper, init);
+    UBindFunction(ULineKeeper, setLineDrawer);
+    UBindFunction(ULineKeeper, start);
+    UBindFunction(ULineKeeper, stop);
 
     UBindVar(ULineKeeper, vx);
     UNotifyChange(vx, &ULineKeeper::onChangeVx);
@@ -38,12 +43,15 @@ void ULineKeeper::init() {
 }
 
 int ULineKeeper::update() {
+    if (!isKeeping_) {
+        return 0;
+    }
     /*
      * Calculate distance
      */
-    auto distance = 0;
+    double distance = 0;
     VectorType deviationVector(cos(initialDeviation_), sin(initialDeviation_));
-    auto scale = static_cast<double> (cameraScale) / static_cast<double> (altitude);
+    auto scale = static_cast<double> (cameraScale) / (static_cast<double> (altitude) + 1e-9);
     VectorType scaledPositionShift;
     /*
      * drone coordinates: x (forward), y (leftward)
@@ -66,7 +74,17 @@ int ULineKeeper::update() {
     distanceUVar = distance;
     deviationUVar = deviation;
 
+    /*
+     * Debug draw
+     */
+    lineDrawer_->drawFullLine(distance, deviation, cv::Scalar(0, 255, 255), 3);
+
     return 0; // Urbi undocumented, return value probably doesn't matter
+}
+
+void ULineKeeper::setLineDrawer(UObject *drawer) {
+    //lineDrawer_ = dynamic_cast<ULineDrawer *>(drawer);
+    lineDrawer_ = (ULineDrawer *) (drawer); //TODO missing typeinfo when linking
 }
 
 void ULineKeeper::start(double distance, double deviation) {
@@ -78,10 +96,15 @@ void ULineKeeper::start(double distance, double deviation) {
     positionShift_.y = 0;
 
     lastTimeVx_ = lastTimeVy_ = high_resolution_clock::now();
+    isKeeping_ = true;
+}
+
+void ULineKeeper::stop() {
+    isKeeping_ = false;
 }
 
 void ULineKeeper::onChangeVx(double vx) {
-    auto now = high_resolution_clock::now();    
+    auto now = high_resolution_clock::now();
     auto elapsed = duration<double, seconds::period>(now - lastTimeVx_).count();
     positionShift_.x += vx * elapsed;
     lastTimeVx_ = now;

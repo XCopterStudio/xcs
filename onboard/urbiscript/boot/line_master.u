@@ -7,26 +7,34 @@ class LineMaster {
     
     function init(lineFinder, lineKeeper) {
         hasLine = false;
-        var _lineFinder = lineFinder;
-        var _lineKeeper = lineKeeper;
+        var this._lineFinder = lineFinder;
+        var this._lineKeeper = lineKeeper;
+        var this.imuExpiration = 5s;
+        var this.tKeeper = Tag.new("tKeeper");
     }|;
     
     function start() {
         at(_lineFinder.hasLine) {
+            echo("Visual line found");
+            this.tKeeper.stop();
             // connect to line finder
+            _lineKeeper.stop();
             _lineFinder.&distance >> getSlot("distance");
             _lineFinder.&deviation >> getSlot("deviation");
-            hasLine = true;
+            hasLine = true;            
         } onleave {
-            _lineKeeper.lastDistance = distance;
-            _lineKeeper.lastDeviation = deviation;
+            echo("Visual line lost, started keeper");
+            _lineKeeper.start(distance, deviation);
             // connect to line keeper
             _lineKeeper.&distance >> getSlot("distance");
             _lineKeeper.&deviation >> getSlot("deviation");
             hasLine = true;
-            sleep(5s); // magneto timeout
-            echo("Magneto line expired"); //TODO
-            //hasLine = false;            
+            this.tKeeper: {
+                sleep(this.imuExpiration); // keeper timeout
+                hasLine = false;            
+                echo("Keeper line expired"); //TODO
+            },
+            
         },; // TODO this shouldn't be blocking        
     }
 }|;

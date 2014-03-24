@@ -23,7 +23,6 @@ public:
     ::urbi::InputPort video;
     ::urbi::UVar theta; // intentionally UVar
     ::urbi::UVar phi; // intentionally UVar
-    ::urbi::UVar psi; // intentionally UVar
 
     /*!
      * Image processing params

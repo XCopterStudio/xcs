@@ -1,26 +1,52 @@
 load("boot/boot.u");
+// TODO make platform independent function (or cmake macro to compile UObjects w/out lib-)
+System.loadModule("libujson");
+System.loadModule("libxxci");
+System.loadModule("libulinefinder");
+System.loadModule("libulinedrawer");
+System.loadModule("libulinekeeper");
 
 /*
  * Dataflow graph
  */
  
-var xciVersion = "xci_dodo";
-//var xciVersion = "xci_parrot";
+//var xciVersion = "xci_dodo";
+var xciVersion = "xci_parrot";
+
+/*
+ * Initialize nodes
+ */
 var xci = XXci.new(xciVersion);
+
 var f = ULineFinder.new();
-xci.&video >> f.&video;
-xci.&theta >> f.&theta;
-xci.&phi >> f.&phi;
-xci.&psi >> f.&psi;
 f.cameraParam = 0.73;
 
 var d = ULineDrawer.new();
+d.cameraParam = f.cameraParam;
+f.setLineDrawer(d);
+
+var k = ULineKeeper.new();
+//k.cameraScale = 0.73; // TODO optimize
+k.setLineDrawer(d);
+
+var m = LineMaster.new(f, k);
+
+
+/*
+ * Connect nodes
+ */
+xci.&video >> f.&video;
+xci.&theta >> f.&theta;
+xci.&phi >> f.&phi;
+
 xci.&video >> d.&video;
 xci.&theta >> d.&theta;
 xci.&phi >> d.&phi;
-d.cameraParam = 0.73;
 
-f.setLineDrawer(d);
+xci.&velocityX >> k.&vx;
+xci.&velocityY >> k.&vy;
+xci.&altitude >> k.&altitude;
+xci.&psi >> k.&psi;
 
 // Default values for image processing
 f.houghRho = 5;
@@ -32,15 +58,20 @@ f.hystDirThreshold = 0.3;
 f.hystForgetRatio = 0.7;
 f.hystCenterThreshold = 0.1;
 
+/*
+ * Start dataflow
+ */
 serverConnect("127.0.0.1", 1234, xci, xciVersion),; // beware the comma
 
 xci.xciInit();
+//m.start(),; // would block
+k.start(0,0);
 
 // 4 DODO
 if(xciVersion == "xci_dodo") {
     //xci.setConfiguration("video:timestamps", "1");
     xci.setConfiguration("video:filename", "/tmp/video.xcs");
-    //xci.setConfiguration("video:fps", "4");
+    xci.setConfiguration("video:fps", "4");
     xci.doCommand("Load");
     xci.doCommand("Play");
 };
@@ -70,4 +101,3 @@ var a = Aligner.new(xci, f, rollPidParam, yawPidParam, pitchPidParam, gazPidPara
 //a.adjustYaw(),;
 //a.adjustRoll(), a.adjustYaw(), a.adjustPitch(), a.adjustGaz(), ;
 //a.adjustRoll(),;
-

@@ -16,6 +16,9 @@ pack .buttons.startall -side left
 button .buttons.stopall -text "Stop ALL" -command { cmd "a.tpitch.stop();a.tyaw.stop();a.troll.stop();a.tgaz.stop();" }
 pack .buttons.stopall -side left
 
+button .buttons.resetimu -text "Reset IMU" -command { cmd "k.stop();k.start(0,0.8);" }
+pack .buttons.resetimu -side left
+
 ### ROLL ###
 
 frame .roll -borderwidth 3 -relief raised
@@ -313,6 +316,15 @@ scale .hystdirthresh -label "Hystersis Direction Threshhold" \
 -showvalue 1 -orient horizontal
 pack .hystdirthresh
 
+scale .imuexp -label "IMU expiration (s)" \
+-length 240 -from 0 -to 10 \
+-command { setParam "m.imuExpiration" } \
+-resolution 0.5 \
+-digits 3 \
+-variable imuexp \
+-showvalue 1 -orient horizontal
+pack .imuexp
+
 scale .cameraparam -label "Camera param" \
 -length 240 -from 0.01 -to 2 \
 -command { setParam "f.cameraParam" } \
@@ -321,6 +333,15 @@ scale .cameraparam -label "Camera param" \
 -variable cameraparam \
 -showvalue 1 -orient horizontal
 pack .cameraparam
+
+scale .camerascale -label "Camera scale" \
+-length 240 -from 0.000 -to 0.03 \
+-command { setParam "k.cameraScale" } \
+-resolution 0.0003 \
+-digits 4 \
+-variable camerascale \
+-showvalue 1 -orient horizontal
+pack .camerascale
 
 scale .gazaltitude -label "Altitude" \
 -length 240 -from 1 -to 2 \
@@ -368,9 +389,13 @@ set houghmaxgap 40
 set houghrho 3
 set hystcenterthresh 0.2
 set hystdirthresh 0.60
+set imuexp 5
 set gazaltitude 1.5
 
+# value determined by measurement (more precise experiment)
 set cameraparam 0.74
+# value determined by experiment
+set camerascale 0.0012
 
 #############
 # functions #
