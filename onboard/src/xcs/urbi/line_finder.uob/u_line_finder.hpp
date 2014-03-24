@@ -23,6 +23,8 @@ public:
     ::urbi::InputPort video;
     ::urbi::UVar theta; // intentionally UVar
     ::urbi::UVar phi; // intentionally UVar
+    ::urbi::UVar expectedDistanceUVar; // intentionally UVar
+    ::urbi::UVar expectedDeviationUVar; // intentionally UVar
 
     /*!
      * Image processing params
@@ -75,12 +77,13 @@ public:
 private:
 
     enum LineType {
-        LINE_NONE,
-        LINE_VISUAL,
-        LINE_REMEMBERED
+        LINE_NONE, //! No visible line.
+        LINE_VISUAL, //! Visible line.
+        LINE_REMEMBERED //! Line not visible but remembered.
     };
 
     static const size_t REFRESH_PERIOD;
+    static const size_t STUCK_TOLERANCE;
 
 
     static const double DEFAULT_DEVIATION; //! deviation set when no clues are present
@@ -99,6 +102,7 @@ private:
     ::urbi::UImage lastFrame_;
     size_t lastReceivedFrameNo_;
     size_t lastProcessedFrameNo_;
+    size_t stuckCounter_;
 
     // processing results
     double distance_;

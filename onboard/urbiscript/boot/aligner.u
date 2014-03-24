@@ -48,8 +48,8 @@ class Aligner{
 
     function adjustRoll(){
         this.troll: every(this.rollInterval){
-            var distance = Global.ground(finder.distance, this.rollThreshold);
-            var roll = Global.crop(pidLoop(rollPidParam,distance), 1);
+            var effectiveDistance = Global.ground(finder.distance, this.rollThreshold) * finder.deviation.cos();
+            var roll = Global.crop(pidLoop(rollPidParam,effectiveDistance), 1);
             echo("roll: " + roll);
             xci.roll = roll; 
             sleep(this.rollSleep);
@@ -67,12 +67,18 @@ class Aligner{
     };
 
     function adjustPitch(){
+        var avgDistance = 1;
         this.tpitch: every(this.pitchInterval){
             var distance = finder.distance;
             var deviation = finder.deviation;
-            var enabled = Global.inRangeBool(distance, this.pitchDistance) * Global.inRangeBool(deviation, this.pitchDeviation);
-            var error = enabled; // simple solution
-            var pitch = -1 * Global.crop(pidLoop(pitchPidParam, error), 1) * Math.abs(0.5 - distance);
+            //avgDistance = {if(distance.abs() >= avgDistance.abs()) distance else (0.8 * avgDistance + 0.2 * distance)};
+            avgDistance = distance;
+            var enabled = Global.inRangeBool(avgDistance, this.pitchDistance) * Global.inRangeBool(deviation, this.pitchDeviation);
+            var error = deviation.cos() * enabled * 0.max(1 - avgDistance.abs()); // simple solution
+            var pitch = 0;
+            if(finder.hasLine) {
+                pitch = -1 * Global.crop(pidLoop(pitchPidParam, error), 1);
+            };
             echo("pitch: \t\t\t\t\t\t\t\t" + pitch);
             xci.pitch = pitch; 
             sleep(this.pitchSleep);

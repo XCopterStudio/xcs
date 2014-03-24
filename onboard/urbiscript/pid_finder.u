@@ -64,14 +64,16 @@ f.hystCenterThreshold = 0.1;
 serverConnect("127.0.0.1", 1234, xci, xciVersion),; // beware the comma
 
 xci.xciInit();
-//m.start(),; // would block
-k.start(0,0);
+m.start(),; // would block
 
 // 4 DODO
 if(xciVersion == "xci_dodo") {
     //xci.setConfiguration("video:timestamps", "1");
     xci.setConfiguration("video:filename", "/tmp/video.xcs");
-    xci.setConfiguration("video:fps", "4");
+    //xci.setConfiguration("video:filename", "/home/michal/Videos/Paris, je t'aime (2006)/Paris, je t'aime 2.avi");
+    
+    //xci.setConfiguration("video:fps", "4");
+    //xci.setConfiguration("video:fps", "50");
     xci.doCommand("Load");
     xci.doCommand("Play");
 };
@@ -89,9 +91,12 @@ var rollPidParam = PidParams.new(0.4, 0, 0);
 var yawPidParam = PidParams.new(0.5, 0, 0);
 var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
 var gazPidParam = PidParams.new(0.5, 0, 0);
-var a = Aligner.new(xci, f, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
+var a = Aligner.new(xci, m, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
 
-
+k.start(f.distance, f.deviation);
+every(100ms) {
+   d.drawFullLine(m.distance, m.deviation, 2, 3); 
+},;
 
 //echo("adjust GAZ");
 //a.adjustGaz(), while((xci.altitude - a.gazAltitude).abs() > 0.1) { sleep(100ms) };

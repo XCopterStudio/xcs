@@ -7,7 +7,7 @@ pack .buttons
 button .buttons.takeoff -text "TakeOff" -command { setParam "xci.command" "\"TakeOff\"" }
 pack .buttons.takeoff -side left
 
-button .buttons.land -text "Land" -command { setParam "xci.command" "\"Land\"" }
+button .buttons.land -text "Land" -command { cmd "a.tpitch.stop();a.tyaw.stop();a.troll.stop();a.tgaz.stop();xci.command=\"Land\";" }
 pack .buttons.land -side left
 
 button .buttons.startall -text "Start ALL" -command { cmd "a.adjustGaz(),a.adjustRoll(),a.adjustYaw(),a.adjustPitch()," }
@@ -16,8 +16,11 @@ pack .buttons.startall -side left
 button .buttons.stopall -text "Stop ALL" -command { cmd "a.tpitch.stop();a.tyaw.stop();a.troll.stop();a.tgaz.stop();" }
 pack .buttons.stopall -side left
 
-button .buttons.resetimu -text "Reset IMU" -command { cmd "k.stop();k.start(0,0.8);" }
+button .buttons.resetimu -text "Reset IMU" -command { cmd "k.stop();k.start(0,0);" }
 pack .buttons.resetimu -side left
+
+button .buttons.resetimuvis -text "Reset IMU (visual)" -command { cmd "k.stop();k.start(f.distance, f.deviation);" }
+pack .buttons.resetimuvis -side left
 
 ### ROLL ###
 
@@ -316,6 +319,15 @@ scale .hystdirthresh -label "Hystersis Direction Threshhold" \
 -showvalue 1 -orient horizontal
 pack .hystdirthresh
 
+scale .hystforgetthresh -label "Hystersis forget Threshhold" \
+-length 240 -from 0 -to 1 \
+-command { setParam "f.hystForgetThreshold" } \
+-resolution 0.025 \
+-digits 3 \
+-variable hystforgetthresh \
+-showvalue 1 -orient horizontal
+pack .hystforgetthresh
+
 scale .imuexp -label "IMU expiration (s)" \
 -length 240 -from 0 -to 10 \
 -command { setParam "m.imuExpiration" } \
@@ -366,14 +378,14 @@ set rollsleep 0.4
 set rollthreshold 0.1
 
 set yawpval 0.9
-set yawival 0.05
+set yawival 0.0
 set yawdval 0
 
 set pitchpval 0.35
 set pitchival 0
 set pitchdval 0
 set pitchint 0.9
-set pitchsleep 0.6
+set pitchsleep 0.5
 set pitchdistance 0.2
 set pitchdeviation 0.15
 
@@ -388,7 +400,8 @@ set houghminlenght 50
 set houghmaxgap 40
 set houghrho 3
 set hystcenterthresh 0.2
-set hystdirthresh 0.60
+set hystdirthresh 0.50
+set hystforgetthresh 0.1
 set imuexp 5
 set gazaltitude 1.5
 

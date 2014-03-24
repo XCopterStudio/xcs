@@ -1,8 +1,8 @@
 
 
 class LineMaster {
-    var distance;
-    var deviation;
+    var distance = 0;
+    var deviation = 0;
     var hasLine;
     
     function init(lineFinder, lineKeeper) {
@@ -14,27 +14,17 @@ class LineMaster {
     }|;
     
     function start() {
-        at(_lineFinder.hasLine) {
-            echo("Visual line found");
-            this.tKeeper.stop();
-            // connect to line finder
-            _lineKeeper.stop();
-            _lineFinder.&distance >> getSlot("distance");
-            _lineFinder.&deviation >> getSlot("deviation");
-            hasLine = true;            
-        } onleave {
-            echo("Visual line lost, started keeper");
-            _lineKeeper.start(distance, deviation);
-            // connect to line keeper
-            _lineKeeper.&distance >> getSlot("distance");
-            _lineKeeper.&deviation >> getSlot("deviation");
-            hasLine = true;
-            this.tKeeper: {
-                sleep(this.imuExpiration); // keeper timeout
-                hasLine = false;            
-                echo("Keeper line expired"); //TODO
-            },
-            
-        },; // TODO this shouldn't be blocking        
+        var that = this;
+        _lineKeeper.&distance.notifyChange(function(){
+            that.distance = 0.5 * that._lineKeeper.distance + 0.5 * that._lineFinder.distance;
+            that._lineFinder.expectedDistance = that.distance;
+            that._lineKeeper.start(that.distance, that.deviation);
+        });
+        _lineKeeper.&deviation.notifyChange(function(){
+            that.deviation = 0.5 * that._lineKeeper.deviation + 0.5 * that._lineFinder.deviation;
+            that._lineFinder.expectedDeviation = that.deviation;
+            that._lineKeeper.start(that.distance, that.deviation);
+        });
+        this.hasLine = true;
     }
 }|;

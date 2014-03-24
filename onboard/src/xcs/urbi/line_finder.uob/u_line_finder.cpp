@@ -7,7 +7,8 @@ using namespace xcs::urbi;
 using namespace xcs::urbi::line_finder;
 using namespace std;
 
-const size_t ULineFinder::REFRESH_PERIOD = 100; // ms
+const size_t ULineFinder::REFRESH_PERIOD = 66; // ms
+const size_t ULineFinder::STUCK_TOLERANCE = 2; // timer periods
 
 
 const double ULineFinder::DEFAULT_DEVIATION = 0;
@@ -19,6 +20,7 @@ ULineFinder::ULineFinder(const string& name) :
   hasFrame_(false),
   lastReceivedFrameNo_(1), // must be greater than lastProcessedFrame_ at the beginning
   lastProcessedFrameNo_(0),
+  stuckCounter_(0),
   distance_(DEFAULT_DISTANCE),
   deviation_(DEFAULT_DEVIATION),
   distanceDer_(0),
@@ -36,6 +38,9 @@ ULineFinder::ULineFinder(const string& name) :
     UBindVar(ULineFinder, theta);
     UBindVar(ULineFinder, phi);
     UBindVar(ULineFinder, cameraParam);
+    UBindVarRename(ULineFinder, expectedDistanceUVar, "expectedDistance");
+    UBindVarRename(ULineFinder, expectedDeviationUVar, "expectedDeviation");
+            
 
     UBindVar(ULineFinder, blurRange);
     UBindVar(ULineFinder, autoHsvValueRangeEnabled);
@@ -111,6 +116,10 @@ void ULineFinder::init() {
 int ULineFinder::update() {
     //TODO fallback to lost line when video is stucked
     if (!hasFrame_ || lastProcessedFrameNo_ >= lastReceivedFrameNo_) {
+        if (++stuckCounter_ > STUCK_TOLERANCE) {
+            lineType_ = LINE_REMEMBERED;
+            hasLine = false;
+        }
         return 0;
     }
     lastProcessedFrameNo_ = lastReceivedFrameNo_;
@@ -132,6 +141,7 @@ void ULineFinder::onChangeVideo(::urbi::UVar& uvar) {
     lastFrame_ = uvar;
     hasFrame_ = true;
     lastReceivedFrameNo_ += 1;
+    stuckCounter_ = 0;
     // adapt to different size
     lineUtils_.setDimensions(lastFrame_.width, lastFrame_.height);
     lineUtils_.updateReferencePoint(theta, phi, cameraParam);
@@ -209,7 +219,8 @@ void ULineFinder::processFrame() {
                 // line type is unchanged
                 break;
             case LINE_NONE:
-                filteredLines = lines; // without previous line assume all lines are correct
+                filteredLines = useOnlyGoodLines(lines);
+                //filteredLines = lines; // without previous line assume all lines are correct
                 lineType_ = LINE_VISUAL;
                 break;
             default:
@@ -371,15 +382,23 @@ cv::vector<LineUtils::RawLineType> ULineFinder::useOnlyGoodLines(cv::vector<Line
 }
 
 void ULineFinder::calculateExpectedLine() {
-    auto factor = static_cast<double> (hystForgetDerRatio);
-    auto threshold = static_cast<double> (hystForgetDerThreshold);
-    if (hystDerStrength_ *= factor < threshold) {
-        distanceDer_ = 0;
-        deviationDer_ = 0;
-    }
+    switch (lineType_) {
+        case LINE_NONE:
+            expectedDistance_ = static_cast<double>(expectedDistanceUVar);
+            expectedDeviation_ = static_cast<double>(expectedDeviationUVar);
+            break;
+        default:
+            auto factor = static_cast<double> (hystForgetDerRatio);
+            auto threshold = static_cast<double> (hystForgetDerThreshold);
+            if (hystDerStrength_ *= factor < threshold) {
+                distanceDer_ = 0;
+                deviationDer_ = 0;
+            }
 
-    expectedDistance_ = distance_ + distanceDer_ * REFRESH_PERIOD * hystDerStrength_;
-    expectedDeviation_ = deviation_ + deviationDer_ * REFRESH_PERIOD* hystDerStrength_;
+            expectedDistance_ = distance_ + distanceDer_ * REFRESH_PERIOD * hystDerStrength_;
+            expectedDeviation_ = deviation_ + deviationDer_ * REFRESH_PERIOD* hystDerStrength_;
+            break;
+    }
 }
 
 UStart(ULineFinder);
