@@ -163,9 +163,10 @@ void XCI_Parrot::configuration(const InformationMap &configuration) {
 void XCI_Parrot::command(const std::string &command) {
     unsigned int i;
     if (command == "TakeOff") {
-        if (!state_.getState(FLAG_ARDRONE_FLY_MASK)){
+        atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
+        /*if (!state_.getState(FLAG_ARDRONE_FLY_MASK)){
             atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
-        }
+        }*/
         /*for (i = 0; i < TRY_COUNT; ++i) {
             atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -174,9 +175,10 @@ void XCI_Parrot::command(const std::string &command) {
             }
         }*/
     } else if (command == "Land") {
-        if (state_.getState(FLAG_ARDRONE_FLY_MASK)){
+        atCommandQueue_.push(new AtCommandRef(STATE_LAND));
+       /* if (state_.getState(FLAG_ARDRONE_FLY_MASK)){
             atCommandQueue_.push(new AtCommandRef(STATE_LAND));
-        }
+        }*/
         /*for (i = 0; i < TRY_COUNT; ++i) {
             atCommandQueue_.push(new AtCommandRef(STATE_LAND));
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
