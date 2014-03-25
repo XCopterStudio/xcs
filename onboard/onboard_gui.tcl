@@ -391,7 +391,6 @@ set gazaltitude 1.5
 set cameraparam 0.74
 # value determined by experiment
 set camerascale 0.0012
-=======
 
 #############
 # functions #

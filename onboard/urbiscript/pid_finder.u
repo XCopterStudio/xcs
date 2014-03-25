@@ -1,10 +1,13 @@
-load("boot/boot.u");
 // TODO make platform independent function (or cmake macro to compile UObjects w/out lib-)
 System.loadModule("libujson");
 System.loadModule("libxxci");
 System.loadModule("libulinefinder");
 System.loadModule("libulinedrawer");
 System.loadModule("libulinekeeper");
+System.loadModule("libdatalogger");
+System.loadModule("libxobject");
+
+load("boot/boot.u");
 
 /*
  * Static parameters
@@ -13,13 +16,14 @@ var rollPidParam = PidParams.new(0.4, 0, 0);
 var yawPidParam = PidParams.new(0.5, 0, 0);
 var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
 var gazPidParam = PidParams.new(0.5, 0, 0);
+ 
+//var xciVersion = "xci_dodo";
+var xciVersion = "xci_parrot";
+var logging = false;
 
 /*
  * Dataflow graph
  */
- 
-var xciVersion = "xci_dodo";
-//var xciVersion = "xci_parrot";
 
 /*
  * Initialize nodes
@@ -47,6 +51,7 @@ var a = Aligner.new(xci, lineProvider, rollPidParam, yawPidParam, pitchPidParam,
 
 var logger = Datalogger.new("pokus.txt");
 
+var xci.psi = 0;
 
 /*
  * Connect nodes
@@ -64,9 +69,12 @@ xci.&velocityY >> k.&vy;
 xci.&altitude >> k.&altitude;
 xci.&psi >> k.&psi;
 
-logger.registerData("theta","theta","double",xci.&theta);
-logger.registerData("psi","psi","double",xci.&psi);
-logger.registerData("phi","phi","double",xci.&phi);
+if(logging) {
+    logger.registerData("theta","theta","double",xci.&theta);
+    logger.registerData("psi","psi","double",xci.&psi);
+    logger.registerData("phi","phi","double",xci.&phi);
+    logger.registerVideo("video.avi","video","video","video",xci.&video);
+};
 
 // Default values for image processing (not set in Tcl GUI)
 f.autoHsvValueRangeEnabled = true;
@@ -89,20 +97,19 @@ if(xciVersion == "xci_dodo") {
     xci.doCommand("Play");
 } else if(xciVersion == "xci_parrot") {
     sleep(1s);
-    xci.flyParamPersistence = 25;
     xci.setConfiguration("video:video_channel", "1");
-    //xci.command = "TakeOff";
-    sleep(4s);
 };
 
 /*
  * Automation
  */
 
-//k.reset(f.distance, f.deviation);
+
 
 // draw the main directing line
-every(100ms) {
+every(250ms) {
     d.drawFullLine(lineProvider.distance, lineProvider.deviation, 2, 3, true); 
 },;
-echo("START");
+
+sleep(4s); k.reset(0, 0);
+echo("STARTED");

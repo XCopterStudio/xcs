@@ -27,7 +27,7 @@ function serverConnect(ip, port, xci, xciVersion = "xci_parrot") {
     if(xciVersion == "xci_parrot") {
         xci.&altitude >> semanticSender.&altitude;
         xci.&phi >> semanticSender.&phi;
-        xci.&battery >> semanticSender.&psi;
+        xci.&psi >> semanticSender.&psi;
         xci.&theta >> semanticSender.&theta;
     };
     if(xciVersion == "xci_dodo") {
@@ -55,4 +55,10 @@ function Global.ground(value, min) {
 
 function Global.inRangeBool(value, range) {
      if (value.abs() <= range) 1 else 0; // pseudo-ternary operator
-}| ;
+}|;
+
+function Global.angleLinComb(alpha, beta, a, b) {
+    var x = a * alpha.cos() + b * beta.cos();
+    var y = a * alpha.sin() + b * beta.sin();
+    y.atan2(x); // result
+}|;

@@ -121,7 +121,7 @@ void ULineDrawer::drawCircle(cv::Point center, cv::Scalar color, size_t radius) 
  * Very ugly geometry.
  */
 void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar color, size_t width, bool withCircle) {
-    if (cos(deviation) < 1e-6) { // TODO general solution for skewed lines would be better
+    if (abs(cos(deviation)) < 1e-6) { // TODO general solution for skewed lines would be better
         cv::Point leftPoint(0, lineUtils_.referencePoint.y + distance * lineUtils_.distanceUnit);
         cv::Point rightPoint(lineUtils_.width, lineUtils_.referencePoint.y + distance * lineUtils_.distanceUnit);
         drawLine(leftPoint, rightPoint, color, width);
@@ -130,22 +130,25 @@ void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar col
         cv::Point bottomPoint(lineUtils_.referencePoint.x + horizOffset - tan(deviation) * (lineUtils_.height - lineUtils_.referencePoint.y), lineUtils_.height);
         cv::Point topPoint(lineUtils_.referencePoint.x + horizOffset + tan(deviation) * lineUtils_.referencePoint.y, 0);
         drawLine(bottomPoint, topPoint, color, width);
+
+        // mark orientation (circle is head)
+        if (cos(deviation) > 0) {
+            drawCircle(topPoint, color, width + 2);
+        } else {
+            drawCircle(bottomPoint, color, width + 2);
+        }
     }
 
     if (withCircle && abs(distance) < 100) { // this prevents fail in OpenCV for very large doubles (which become negative numbers)
         // intersection circle
         cv::Point deltaPoint = lineUtils_.getDeltaPoint(distance, deviation);
         drawCircle(deltaPoint, color, width + 3);
-        
+
         // distance circle
         cv::Scalar distanceColor((distance > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0));
         drawCircle(lineUtils_.referencePoint, distanceColor, abs(distance) * lineUtils_.distanceUnit);
     }
-    //    if (abs(deviation) > M_PI / 2) {
-    //        cv::circle(image, bottomPoint, width + 2, color, width, CV_AA);
-    //    } else {
-    //        cv::circle(image, topPoint, width + 2, color, width, CV_AA);
-    //    }
+
 }
 
 void ULineDrawer::drawFullLineU(double distance, double deviation, size_t color, size_t width, bool withCircle) {

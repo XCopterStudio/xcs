@@ -232,11 +232,15 @@ cv::vector<LineUtils::RawLineType> ULineFinder::useOnlyGoodLines(cv::vector<Line
         cv::Point center((lineCandidate[0] + lineCandidate[2]) / 2, (lineCandidate[3] + lineCandidate[1]) / 2);
         // check line validity
         double devDiff = expectedDeviation - LineUtils::lineDirection(lineCandidate);
+        /* Orientation is ignored */
         devDiff = abs(devDiff);
+        devDiff = fmod(devDiff, M_PI);
 
         double distDiff(LineUtils::pointLineDistance2(center, expectedDeviation, deltaPoint));
         distDiff = abs(distDiff);
         distDiff /= lineUtils_.distanceUnit; // normalize for relative units
+
+        cerr << "dev: " << devDiff << " dist:" << distDiff << endl;
 
         // factors are currently unused
         auto devFactor = 1;
@@ -245,6 +249,7 @@ cv::vector<LineUtils::RawLineType> ULineFinder::useOnlyGoodLines(cv::vector<Line
             result.push_back(lineCandidate);
         }
     }
+    cerr << "----" << endl;
 
     return result;
 
@@ -269,6 +274,7 @@ void ULineFinder::drawDebugLines(const cv::vector<xcs::urbi::line_finder::LineUt
     double devLength = 100; // px        
     cv::Point posVector(devLength * sin(expectedDeviation + devRange), -devLength * cos(expectedDeviation + devRange));
     cv::Point negVector(devLength * sin(expectedDeviation - devRange), -devLength * cos(expectedDeviation - devRange));
+
     lineDrawer_->drawLine(expectedDeltaPoint, expectedDeltaPoint + posVector, cv::Scalar(128, 0, 128), 1);
     lineDrawer_->drawLine(expectedDeltaPoint, expectedDeltaPoint + negVector, cv::Scalar(128, 0, 128), 1);
 

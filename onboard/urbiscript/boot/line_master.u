@@ -30,7 +30,7 @@ class LineMaster {
                 imuWeight = 1;
             };
             that.distance = (1 - imuWeight) * that._lineFinder.distance + imuWeight * that.distance;
-            that.deviation = (1 - imuWeight) * that._lineFinder.deviation + imuWeight * that.deviation;
+            that.deviation = Global.angleLinComb(that._lineFinder.deviation, that.deviation, 1 - imuWeight, imuWeight);
             
             // recalibrate IMU keeper
             that._lineKeeper.reset(that.distance, that.deviation);

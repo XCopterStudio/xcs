@@ -60,6 +60,7 @@ class Aligner{
     function adjustYaw(){
         this.tyaw: every(this.yawInterval){
             var deviation = lineProvider.deviation;
+            //TODO +/- pi
             var yaw = Global.crop(pidLoop(yawPidParam,deviation), 1);
             echo("yaw: \t\t" + yaw);
             xci.yaw = yaw; 
