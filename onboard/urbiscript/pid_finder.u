@@ -39,9 +39,13 @@ k.setLineDrawer(d);
 
 var m = LineMaster.new(f, k);
 
-var a = Aligner.new(xci, m, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
+var s = LineSmoother.new(m);
 
-var lineProvider = m;
+var lineProvider = s;
+
+var a = Aligner.new(xci, lineProvider, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
+
+
 
 /*
  * Connect nodes
@@ -59,15 +63,8 @@ xci.&velocityY >> k.&vy;
 xci.&altitude >> k.&altitude;
 xci.&psi >> k.&psi;
 
-// Default values for image processing
-f.houghRho = 5;
-f.houghMinLength = 20; // for Parrot resolution should be larger
+// Default values for image processing (not set in Tcl GUI)
 f.autoHsvValueRangeEnabled = true;
-f.autoHsvValueRangeRatio = 0.4; // for Parrot the less the better probably
-f.distanceAging = 0.5;
-f.hystDirThreshold = 0.3;
-f.hystForgetRatio = 0.7;
-f.hystCenterThreshold = 0.1;
 
 /*
  * Start dataflow
@@ -105,3 +102,4 @@ if(xciVersion == "xci_dodo") {
 every(100ms) {
     d.drawFullLine(lineProvider.distance, lineProvider.deviation, 2, 3, true); 
 },;
+echo("START");

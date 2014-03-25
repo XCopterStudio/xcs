@@ -1,12 +1,12 @@
 
 
 class LineMaster {
-    var distance = 0;
-    var deviation = 0;
-    var hasLine;
     
     function init(lineFinder, lineKeeper) {
-        hasLine = false;
+        var this.distance = 0;
+        var this.deviation = 0;
+        var this.hasLine = false;
+        
         var this._lineFinder = lineFinder;
         var this._lineKeeper = lineKeeper;
     }|;

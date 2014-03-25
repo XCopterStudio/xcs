@@ -1,7 +1,7 @@
 class Aligner{
 
     var xci;
-    var finder;
+    var lineProvider;
     var rollPidParam;
     var yawPidParam;
     var pitchPidParam;
@@ -26,9 +26,9 @@ class Aligner{
     
 
 
-    function init(xci, finder, rollPidParam, yawPidParam, pitchPidParam, gazPidParam) {
+    function init(xci, lineProvider, rollPidParam, yawPidParam, pitchPidParam, gazPidParam) {
         this.xci = xci;
-        this.finder = finder;
+        this.lineProvider = lineProvider;
         this.rollPidParam = rollPidParam;
         this.yawPidParam = yawPidParam;
         this.pitchPidParam = pitchPidParam;
@@ -48,7 +48,7 @@ class Aligner{
 
     function adjustRoll(){
         this.troll: every(this.rollInterval){
-            var effectiveDistance = Global.ground(finder.distance, this.rollThreshold) * finder.deviation.cos();
+            var effectiveDistance = Global.ground(lineProvider.distance, this.rollThreshold) * lineProvider.deviation.cos();
             var roll = Global.crop(pidLoop(rollPidParam,effectiveDistance), 1);
             echo("roll: " + roll);
             xci.roll = roll; 
@@ -59,7 +59,7 @@ class Aligner{
 
     function adjustYaw(){
         this.tyaw: every(this.yawInterval){
-            var deviation = finder.deviation;
+            var deviation = lineProvider.deviation;
             var yaw = Global.crop(pidLoop(yawPidParam,deviation), 1);
             echo("yaw: \t\t" + yaw);
             xci.yaw = yaw; 
@@ -69,14 +69,14 @@ class Aligner{
     function adjustPitch(){
         var avgDistance = 1;
         this.tpitch: every(this.pitchInterval){
-            var distance = finder.distance;
-            var deviation = finder.deviation;
+            var distance = lineProvider.distance;
+            var deviation = lineProvider.deviation;
             //avgDistance = {if(distance.abs() >= avgDistance.abs()) distance else (0.8 * avgDistance + 0.2 * distance)};
             avgDistance = distance;
             var enabled = Global.inRangeBool(avgDistance, this.pitchDistance) * Global.inRangeBool(deviation, this.pitchDeviation);
             var error = deviation.cos() * enabled * 0.max(1 - avgDistance.abs()); // simple solution
             var pitch = 0;
-            if(finder.hasLine) {
+            if(lineProvider.hasLine) {
                 pitch = -1 * Global.crop(pidLoop(pitchPidParam, error), 1);
             };
             echo("pitch: \t\t\t\t\t\t\t\t" + pitch);

@@ -249,7 +249,7 @@ pack .gaz.stop
 
 scale .distaging -label "Distance Aging" \
 -length 240 -from 0 -to 1 \
--command { setParam "f.distanceAging" } \
+-command { setParam "s.distanceAging" } \
 -resolution 0.05 \
 -digits 3 \
 -variable distagingval \
@@ -258,7 +258,7 @@ pack .distaging
 
 scale .devaging -label "Deviation Aging" \
 -length 240 -from 0 -to 1 \
--command { setParam "f.deviationAging" } \
+-command { setParam "s.deviationAging" } \
 -resolution 0.05 \
 -digits 3 \
 -variable devaging \
@@ -318,24 +318,6 @@ scale .hystdirthresh -label "Hystersis Deviation Threshhold" \
 -variable hystdirthresh \
 -showvalue 1 -orient horizontal
 pack .hystdirthresh
-
-scale .hystforgetthresh -label "Hystersis forget Threshhold" \
--length 240 -from 0 -to 1 \
--command { setParam "f.hystForgetThreshold" } \
--resolution 0.025 \
--digits 3 \
--variable hystforgetthresh \
--showvalue 1 -orient horizontal
-pack .hystforgetthresh
-
-scale .imuexp -label "IMU expiration (s)" \
--length 240 -from 0 -to 10 \
--command { setParam "m.imuExpiration" } \
--resolution 0.5 \
--digits 3 \
--variable imuexp \
--showvalue 1 -orient horizontal
-pack .imuexp
 
 scale .cameraparam -label "Camera param" \
 -length 240 -from 0.01 -to 2 \

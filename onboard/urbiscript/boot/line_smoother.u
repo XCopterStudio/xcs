@@ -1,0 +1,26 @@
+
+
+class LineSmoother {
+    
+    var distanceAging = 0;
+    var deviationAging = 0;
+    
+    function init(lineProvider) {
+        var this.distance = 0;
+        var this.deviation = 0;
+        var this.hasLine = false;
+
+        hasLine = false;
+        var this._lineProvider = lineProvider;
+        // hasLine flag is propagated directly
+        this._lineProvider.getSlot("hasLine") >> getSlot("hasLine");
+        
+        var that = this;
+        // only deviation is observed, it's the second assignee always
+        this._lineProvider.&deviation.notifyChange(function(){
+            that.distance = that.distance * that.distanceAging + (1 - that.distanceAging) * that._lineProvider.distance;
+            that.deviation = that.deviation * that.deviationAging + (1 - that.deviationAging) * that._lineProvider.deviation;
+        });
+        
+    }|;
+}|;
