@@ -252,13 +252,30 @@ cv::vector<LineUtils::RawLineType> ULineFinder::useOnlyGoodLines(cv::vector<Line
 
 void ULineFinder::drawDebugLines(const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& lines, const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& filteredLines) {
 
+    // expected line
+    auto expectedDistance = static_cast<double> (expectedDistanceUVar);
+    auto expectedDeviation = static_cast<double> (expectedDeviationUVar);
+    auto distRange = static_cast<double> (hystDistanceThr);
+    auto devRange = static_cast<double> (hystDeviationThr);
+    auto expectedDeltaPoint = lineUtils_.getDeltaPoint(expectedDistance, expectedDeviation);
+
+    lineDrawer_->drawFullLine(expectedDistance, expectedDeviation, cv::Scalar(128, 0, 128), 2);
+
+    // expected distance range
+    lineDrawer_->drawFullLine(expectedDistance + distRange, expectedDeviation, cv::Scalar(128, 0, 128), 1, false);
+    lineDrawer_->drawFullLine(expectedDistance - distRange, expectedDeviation, cv::Scalar(128, 0, 128), 1, false);
+
+    // expected deviation range
+    double devLength = 100; // px        
+    cv::Point posVector(devLength * sin(expectedDeviation + devRange), -devLength * cos(expectedDeviation + devRange));
+    cv::Point negVector(devLength * sin(expectedDeviation - devRange), -devLength * cos(expectedDeviation - devRange));
+    lineDrawer_->drawLine(expectedDeltaPoint, expectedDeltaPoint + posVector, cv::Scalar(128, 0, 128), 1);
+    lineDrawer_->drawLine(expectedDeltaPoint, expectedDeltaPoint + negVector, cv::Scalar(128, 0, 128), 1);
+
     if (isLineVisual(lineType_)) {
         // distance circle
         cv::Scalar distanceColor((distance_ > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0));
         lineDrawer_->drawCircle(lineUtils_.referencePoint, distanceColor, abs(distance_) * lineUtils_.distanceUnit);
-
-        // expected line
-        lineDrawer_->drawFullLine(static_cast<double> (expectedDistanceUVar), static_cast<double> (expectedDeviationUVar), cv::Scalar(128, 0, 128), 2);
 
         // followed line
         lineDrawer_->drawFullLine(distance_, deviation_, cv::Scalar(0, 0, 255));

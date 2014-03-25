@@ -120,8 +120,8 @@ void ULineDrawer::drawCircle(cv::Point center, cv::Scalar color, size_t radius) 
 /*!
  * Very ugly geometry.
  */
-void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar color, size_t width) {
-    if (cos(deviation) < 1e-6) {
+void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar color, size_t width, bool withPoint) {
+    if (cos(deviation) < 1e-6) { // TODO would be better general solution for skewed lines
         cv::Point leftPoint(0, lineUtils_.referencePoint.y + distance * lineUtils_.distanceUnit);
         cv::Point rightPoint(lineUtils_.width, lineUtils_.referencePoint.y + distance * lineUtils_.distanceUnit);
         drawLine(leftPoint, rightPoint, color, width);
@@ -132,8 +132,10 @@ void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar col
         drawLine(bottomPoint, topPoint, color, width);
     }
 
-    cv::Point deltaPoint = lineUtils_.getDeltaPoint(distance, deviation);
-    drawCircle(deltaPoint, color, width + 3);
+    if (withPoint) {
+        cv::Point deltaPoint = lineUtils_.getDeltaPoint(distance, deviation);
+        drawCircle(deltaPoint, color, width + 3);
+    }
     //    if (abs(deviation) > M_PI / 2) {
     //        cv::circle(image, bottomPoint, width + 2, color, width, CV_AA);
     //    } else {

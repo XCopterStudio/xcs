@@ -42,7 +42,7 @@ public:
     /*!
      * Very ugly geometry.
      */
-    void drawFullLine(double distance, double deviation, cv::Scalar color, size_t width = 3);
+    void drawFullLine(double distance, double deviation, cv::Scalar color, size_t width = 3, bool withPoint = true);
     
     /*!
      * Wrapper for Urbi until struct casting is ready.

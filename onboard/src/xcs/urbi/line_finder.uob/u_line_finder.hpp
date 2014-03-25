@@ -47,8 +47,8 @@ public:
     /*
      * Line finding params
      */
-    ::urbi::UVar hystDeviationThr;
     ::urbi::UVar hystDistanceThr;
+    ::urbi::UVar hystDeviationThr;
 
     ::urbi::UVar cameraParam;
 
