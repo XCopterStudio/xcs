@@ -27,6 +27,8 @@ class FrontierAligner {
 
     var frontierRadius = 0.5; // half of screen diagonal
     var trollpitch = Tag.new("trollpitch");
+    var rollPitchInterval = 1;
+    var rollPitchSleep = 0.5;
 
 
     function init(xci, finder, rollPidParam, yawPidParam, pitchPidParam, gazPidParam) {
@@ -74,7 +76,7 @@ class FrontierAligner {
 
             var l1 = Math.tan(deltaComplement) * D;
             var l2 = Math.sqrt( Math.sqr(R) - Math.sqr(D) );
-            var l = l1 + l2; echo("l1 = " + l1 + " l2 = " + l2);
+            var l = l1 + l2; //echo("l1 = " + l1 + " l2 = " + l2);
 
             var y = Math.sin(deltaComplement) * l;
             var x = (Math.cos(deltaComplement) * l) * Math.sign(finder.deviation);
@@ -106,41 +108,22 @@ class FrontierAligner {
         },
     };
 
-    var adjustRoll = function () {
-        this.troll: every(this.rollInterval) {
-            var distance = Global.ground(finder.distance, this.rollThreshold);
-            var roll = Global.crop(pidLoop(rollPidParam,distance), 1);
-            echo("roll: \t\t\t" + roll);
-            xci.roll = roll;
-            sleep(this.rollSleep);
-            xci.roll = 0;
-        },
-    };
-
     var adjustRollPitch = function () {
-        this.trollpitch: every(500ms) {
+        this.trollpitch: every(this.rollPitchInterval) {
             if (!finder.hasLine) {
                 continue;
-            } // Otherwise input would be dist=0 dev=0 and result error is [0,0.5]
+            }; // Otherwise input would be dist=0 dev=0 and result error is [0,0.5]
             var setPoint = computeSetPoint();
-            echo("[dist,dev] = [" + finder.distance + "," + finder.deviation + "]");
-            echo("[dist,dev] = [" + finder.distance + "," + finder.deviation / (Math.pi/180) + "]");
-            echo("[x,y] = [" + setPoint[0] + "," + setPoint[1] + "]");
-            xci.roll = pidLoop(rollPidParam, setPoint[0]);
-            xci.pitch = pidLoop(pitchPidParam, setPoint[1]);
-        }
-    };
-
-    var adjustPitch = function () {
-        this.tpitch: every(this.pitchInterval) {
-            var distance = finder.distance;
-            var deviation = finder.deviation;
-            var enabled = Global.inRangeBool(distance, this.pitchDistance) * Global.inRangeBool(deviation, this.pitchDeviation);
-            var error = enabled; // simple solution
-            var pitch = -1 * Global.crop(pidLoop(pitchPidParam, error), 1) * Math.abs(0.5 - distance);
-            echo("pitch: \t\t\t\t\t" + pitch);
+            //echo("[dist,dev] = [" + finder.distance + "," + finder.deviation + "]");
+            //echo("[dist,dev] = [" + finder.distance + "," + finder.deviation / (Math.pi/180) + "]");
+            //echo("[x,y] = [" + setPoint[0] + "," + setPoint[1] + "]");
+            var roll = pidLoop(rollPidParam, setPoint[0]);
+            var pitch = -1 * pidLoop(pitchPidParam, setPoint[1]);
+            echo("roll&pitch \t\t\t" + roll + " , " + pitch);
+            xci.roll = roll;
             xci.pitch = pitch;
-            sleep(this.pitchSleep);
+            sleep(this.rollPitchSleep);
+            xci.roll = 0;
             xci.pitch = 0;
         },
     };
@@ -153,4 +136,27 @@ class FrontierAligner {
             xci.gaz = gaz;
         },
     };
+
+    var resetYaw = function () {
+        yawPidParam.reset();
+        xci.yaw = 0;
+    };
+
+    var resetRollPitch = function () {
+        rollPidParam.reset();
+        pitchPidParam.reset();
+        xci.roll = 0;
+        xci.pitch = 0;
+    };
+
+    var resetGaz = function () {
+        gazPidParam.reset();
+        xci.gaz = 0;
+    };
+
+    var resetAll = function () {
+        resetRollPitch();
+        resetYaw();
+        resetGaz();
+    }
 }|;

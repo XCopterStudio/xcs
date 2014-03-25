@@ -13,25 +13,41 @@ pack .buttons.land -side left
 button .buttons.startall -state disabled -text "Start ALL" -command { cmd "a.adjustGaz(),a.adjustRoll(),a.adjustYaw(),a.adjustPitch()," }
 pack .buttons.startall -side left
 
-button .buttons.stopall -state disabled -text "Stop ALL" -command { cmd "a.tpitch.stop();a.tyaw.stop();a.troll.stop();a.tgaz.stop();" }
+button .buttons.stopall -text "Stop ALL" -command { cmd "a.trollpitch.stop();a.tyaw.stop();a.tgaz.stop();a.resetAll()" }
 pack .buttons.stopall -side left
 
 button .buttons.startrollpitch -text "Start Roll&Pitch" -command { cmd "a.adjustRollPitch()," }
 pack .buttons.startrollpitch -side left
 
-button .buttons.stoprollpitch -text "Stop Roll&Pitch" -command { cmd "a.trollpitch.stop();" }
+button .buttons.stoprollpitch -text "Stop Roll&Pitch" -command { cmd "a.trollpitch.stop();a.resetRollPitch()" }
 pack .buttons.stoprollpitch -side left
 
 scale .frontierradius  -label "Frontier Radius" \
 -length 240 -from 0 -to 3 \
 -command { setParam "a.frontierRadius" } \
--resolution 0.05 \
+-resolution 0.02 \
 -digits 3 \
 -variable frontierradius \
 -showvalue 1 -orient horizontal
 pack .frontierradius
 
-set frontierradius 0.5
+scale .rollpitchint -label "rollpitch interval" \
+-length 240 -from 0 -to 2 \
+-command { setParam "a.rollPitchInterval" } \
+-resolution 0.05 \
+-digits 3 \
+-variable rollpitchint \
+-showvalue 1 -orient horizontal
+pack .rollpitchint
+
+scale .rollpitchsleep -label "rollpitch sleep" \
+-length 240 -from 0 -to 2 \
+-command { setParam "a.rollPitchInterval" } \
+-resolution 0.01 \
+-digits 3 \
+-variable rollpitchsleep \
+-showvalue 1 -orient horizontal
+pack .rollpitchsleep
 
 ### YAW ###
 
@@ -70,7 +86,7 @@ pack .yaw.d
 
 button .yaw.start -text "Start" -command { cmd "a.adjustYaw()," }
 pack .yaw.start
-button .yaw.stop -text "Stop" -command { cmd "a.tyaw.stop()" }
+button .yaw.stop -text "Stop" -command { cmd "a.tyaw.stop();a.resetYaw()" }
 pack .yaw.stop
 
 ### ROLL ###
@@ -82,36 +98,31 @@ label .roll.lbl -text "ROLL"
 pack .roll.lbl
 
 scale .roll.p  -label "roll P" \
--length 240 -from 0 -to 2 \
+-length 240 -from 0 -to 1 \
 -command { setParam "a.rollPidParam.p" } \
--resolution 0.01 \
--digits 3 \
+-resolution 0.005 \
+-digits 4 \
 -variable rollpval \
 -showvalue 1 -orient horizontal
 pack .roll.p
 
 scale .roll.i  -label "roll I" \
--length 240 -from 0 -to 2 \
+-length 240 -from 0 -to 1 \
 -command { setParam "a.rollPidParam.i" } \
--resolution 0.01 \
--digits 3 \
+-resolution 0.005 \
+-digits 4 \
 -variable rollival \
 -showvalue 1 -orient horizontal
 pack .roll.i
 
 scale .roll.d -label "roll D" \
--length 240 -from -2 -to 2 \
+-length 240 -from -1 -to 1 \
 -command { setParam "a.rollPidParam.d" } \
--resolution 0.01 \
--digits 3 \
+-resolution 0.005 \
+-digits 4 \
 -variable rolldval \
 -showvalue 1 -orient horizontal
 pack .roll.d
-
-button .roll.start -state disabled -text "Start" -command { cmd "a.adjustRoll()," }
-pack .roll.start
-button .roll.stop -state disabled -text "Stop" -command { cmd "a.troll.stop()" }
-pack .roll.stop
 
 scale .roll.int -state disabled -label "roll interval" \
 -length 240 -from 0 -to 2 \
@@ -131,14 +142,6 @@ scale .roll.sleep -state disabled -label "roll sleep" \
 -showvalue 1 -orient horizontal
 pack .roll.sleep
 
-scale .roll.threshold -state disabled -label "roll threshold" \
--length 240 -from 0 -to 0.5 \
--command { setParam "a.rollThreshold" } \
--resolution 0.05 \
--digits 3 \
--variable rollthreshold \
--showvalue 1 -orient horizontal
-pack .roll.threshold
 
 ### PITCH ###
 
@@ -149,36 +152,31 @@ label .pitch.lbl -text "PITCH"
 pack .pitch.lbl
 
 scale .pitch.p  -label "pitch P" \
--length 240 -from 0 -to 2 \
+-length 240 -from 0 -to 1 \
 -command { setParam "a.pitchPidParam.p" } \
--resolution 0.01 \
--digits 3 \
+-resolution 0.005 \
+-digits 4 \
 -variable pitchpval \
 -showvalue 1 -orient horizontal
 pack .pitch.p
 
 scale .pitch.i  -label "pitch I" \
--length 240 -from 0 -to 2 \
+-length 240 -from 0 -to 1 \
 -command { setParam "a.pitchPidParam.i" } \
--resolution 0.01 \
--digits 3 \
+-resolution 0.005 \
+-digits 4 \
 -variable pitchival \
 -showvalue 1 -orient horizontal
 pack .pitch.i
 
 scale .pitch.d -label "pitch D" \
--length 240 -from -2 -to 2 \
+-length 240 -from -1 -to 1 \
 -command { setParam "a.pitchPidParam.d" } \
--resolution 0.01 \
--digits 3 \
+-resolution 0.005 \
+-digits 4 \
 -variable pitchdval \
 -showvalue 1 -orient horizontal
 pack .pitch.d
-
-button .pitch.start -state disabled -text "Start" -command { cmd "a.adjustPitch()," }
-pack .pitch.start
-button .pitch.stop -state disabled -text "Stop" -command { cmd "a.tpitch.stop()" }
-pack .pitch.stop
 
 scale .pitch.int -state disabled -label "pitch interval" \
 -length 240 -from 0 -to 2 \
@@ -197,24 +195,6 @@ scale .pitch.sleep -state disabled -label "pitch sleep" \
 -variable pitchsleep \
 -showvalue 1 -orient horizontal
 pack .pitch.sleep
-
-scale .pitch.distance -state disabled -label "pitch distance" \
--length 240 -from 0 -to 0.5 \
--command { setParam "a.pitchDistance" } \
--resolution 0.05 \
--digits 3 \
--variable pitchdistance \
--showvalue 1 -orient horizontal
-pack .pitch.distance
-
-scale .pitch.deviation -state disabled -label "pitch deviation" \
--length 240 -from 0 -to 0.5 \
--command { setParam "a.pitchDeviation" } \
--resolution 0.05 \
--digits 3 \
--variable pitchdeviation \
--showvalue 1 -orient horizontal
-pack .pitch.deviation
 
 ### GAZ ###
 
@@ -253,10 +233,11 @@ pack .gaz.d
 
 button .gaz.start -text "Start" -command { cmd "a.adjustGaz()," }
 pack .gaz.start
-button .gaz.stop -text "Stop" -command { cmd "a.tgaz.stop()" }
+button .gaz.stop -text "Stop" -command { cmd "a.tgaz.stop();a.resetGaz()" }
 pack .gaz.stop
 
 ### MIscellaneous ###
+
 
 scale .distaging -label "Distance Aging" \
 -length 240 -from 0 -to 1 \
@@ -354,24 +335,25 @@ pack .gazaltitude
 ##################
 # Default values #
 ##################
-set rollpval 1
-set rollival 0
-set rolldval 0
-set rollint 1
-set rollsleep 0.4
-set rollthreshold 0.1
 
-set yawpval 0.9
+set yawpval 0.5
 set yawival 0.05
 set yawdval 0
 
-set pitchpval 0.35
+set rollpval 0.36
+set rollival 0.005
+set rolldval 0.02
+#set rollint 1
+#set rollsleep 0.4
+#set rollthreshold 0.1
+
+set pitchpval 0.3
 set pitchival 0
-set pitchdval 0
-set pitchint 0.9
-set pitchsleep 0.6
-set pitchdistance 0.2
-set pitchdeviation 0.15
+set pitchdval -0.02
+#set pitchint 0.9
+#set pitchsleep 0.6
+#set pitchdistance 0.2
+#set pitchdeviation 0.15
 
 set gazpval 0.5
 set gazival 0
@@ -388,6 +370,11 @@ set hystdirthresh 0.60
 set gazaltitude 1.5
 
 set cameraparam 0.78
+
+
+set frontierradius 0.7
+set rollpitchint 1.9
+set rollpitchsleep 0.6
 
 #############
 # functions #

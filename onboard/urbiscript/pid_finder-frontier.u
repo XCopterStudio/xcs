@@ -4,8 +4,8 @@ load("boot/boot.u");
  * Dataflow graph
  */
  
-var xciVersion = "xci_dodo";
-//var xciVersion = "xci_parrot";
+//var xciVersion = "xci_dodo";
+var xciVersion = "xci_parrot";
 var xci = XXci.new(xciVersion);
 var f = ULineFinder.new();
 xci.&video >> f.&video;
@@ -36,7 +36,7 @@ if(xciVersion == "xci_dodo") {
 // 4 parrot
 if(xciVersion == "xci_parrot") {
     sleep(1s);
-    xci.flyParamPersistence = 25;
+    //xci.flyParamPersistence = 25;
     xci.setConfiguration("video:video_channel", "1");
     //xci.command = "TakeOff";
     sleep(4s);
