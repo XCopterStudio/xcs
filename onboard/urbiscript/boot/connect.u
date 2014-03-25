@@ -12,21 +12,7 @@ function connect(outputXObject, inputXObject, outputXVarAddress, inputXInputPort
 		echo("Different type - not connected");
 	};
 }|;
-/*
-class Global.Point: UValueSerializable {
-	var x;
-	var y;
-	function init(xx=0, yy=0) {
-		x = xx|
-		y = yy
-	};
-	function asString()	{
-		"<" + x +", " + y + ">"
-	};
-}|;
-// Add the class to Serializables
-var Serializables.Point = Point;
-*/
+
 /*
 var s = Subject.new();
 var o = Observer.new();
