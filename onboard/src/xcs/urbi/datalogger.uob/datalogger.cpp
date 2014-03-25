@@ -5,6 +5,7 @@
 #include <boost/bind.hpp>
 
 using namespace std;
+using namespace std::chrono;
 using namespace ::urbi;
 using namespace xcs::nodes;
 
@@ -15,10 +16,10 @@ const char* Datalogger::REGISTER = "register";
 DataWriter::DataWriter(const std::string &name) :
 XObject(name)
 {
-    
 }
 
-void DataWriter::init(const std::string &dataName, std::ofstream* file, ::urbi::UVar &uvar){
+void DataWriter::init(const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar){
+    startTime_ = startTime;
     file_ = file;
     dataName_ = dataName;
     UNotifyChange(uvar, &DataWriter::write);
@@ -26,7 +27,9 @@ void DataWriter::init(const std::string &dataName, std::ofstream* file, ::urbi::
 
 void DataWriter::write(urbi::UVar &uvar){
     //cerr << dataName_ << " " << uvar.val() << endl;
-    *file_ << dataName_ << " " << uvar.val() << endl;
+    auto time = duration_cast<milliseconds>(highResolutionClock_.now() - startTime_).count();
+    *file_ << dataName_ << " " << uvar.val() ;
+    *file_ << " timestamp " << time << endl ;
 }
 
 // ========
@@ -37,14 +40,17 @@ DataWriter(name)
     
 }
 
-void VideoWriter::init(const std::string &dataName, std::ofstream* file, ::urbi::UVar &uvar){
+void VideoWriter::init(const std::string &videoFile, const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar){
+    startTime_ = startTime;
     file_ = file;
     dataName_ = dataName;
     UNotifyChange(uvar, &VideoWriter::write);
 }
 
 void VideoWriter::write(urbi::UVar &uvar){
-    cerr << "Log image" << endl;
+    auto time = duration_cast<milliseconds>(highResolutionClock_.now() - startTime_).count();
+    *file_ << dataName_ ;
+    *file_ << " timestamp " << time << endl;
     UImage frame = uvar;
     
 }
@@ -52,7 +58,8 @@ void VideoWriter::write(urbi::UVar &uvar){
 // ========
 
 Datalogger::Datalogger(const std::string& name) :
-xcs::nodes::XObject(name)
+xcs::nodes::XObject(name),
+startTime_(Clock().now())
 {
     XBindFunction(Datalogger, init);
     XBindFunction(Datalogger, registerData);
@@ -76,21 +83,36 @@ void Datalogger::registerData(const std::string &name, const std::string &semant
         cerr << "File error" << endl;
     }
     else{
-        file_ << REGISTER << " " << name << " " << semanticType << " " << syntacticType << endl;
-
         if (semanticType == "video"){
-            VideoWriter* function = new VideoWriter(std::string());
-            function->init(name, &file_, uvar);
-            writerList_.push_back(std::unique_ptr<DataWriter>(function));
+            cerr << "Use registerVideo function for video data!." << endl;
         }
         else{
+            file_ << REGISTER << " " << name << " " << semanticType << " " << syntacticType << endl;
+
             DataWriter* function = new DataWriter(std::string());
-            function->init(name, &file_, uvar);
+            function->init(name, startTime_ ,&file_, uvar);
             writerList_.push_back(std::unique_ptr<DataWriter>(function));
         }
     }
 }
 
-XStart(DataWriter);
-XStart(VideoWriter);
+void Datalogger::registerVideo(const std::string &videoFile, const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar){
+    if (!file_.is_open()){
+        cerr << "File error" << endl;
+    }
+    else{
+        if (semanticType == "video"){
+            file_ << REGISTER << " " << name << " " << semanticType << " " << syntacticType << endl;
+            VideoWriter* function = new VideoWriter(std::string());
+            function->init(videoFile, name, startTime_, &file_, uvar);
+            writerList_.push_back(std::unique_ptr<DataWriter>(function));
+        }
+        else{
+            cerr << "Use registerData function for another data than video!" << endl;
+        }
+    }
+}
+
+//XStart(DataWriter);
+//XStart(VideoWriter);
 XStart(Datalogger);

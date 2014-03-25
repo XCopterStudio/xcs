@@ -6,7 +6,7 @@
 #include "video_encapsulation.h"
 #include "video_decode.hpp"
 #include <xcs/nodes/xobject/syntactic_types.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
+//#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
