@@ -17,7 +17,7 @@ namespace urbi {
 
 class ULineFinder : public ::urbi::UObject {
 public:
-    /*!
+    /*
      * Inputs
      */
     ::urbi::InputPort video;
@@ -26,7 +26,7 @@ public:
     ::urbi::UVar expectedDistanceUVar; // intentionally UVar
     ::urbi::UVar expectedDeviationUVar; // intentionally UVar
 
-    /*!
+    /*
      * Image processing params
      */
     ::urbi::UVar blurRange;
@@ -44,17 +44,11 @@ public:
     ::urbi::UVar houghMinLength;
     ::urbi::UVar houghMaxGap;
 
-    ::urbi::UVar distanceAging;
-    ::urbi::UVar deviationAging;
-
-    ::urbi::UVar hystDirThreshold;
-    ::urbi::UVar hystCenterThreshold;
-
-    ::urbi::UVar hystForgetRatio;
-    ::urbi::UVar hystForgetThreshold;
-
-    ::urbi::UVar hystForgetDerRatio;
-    ::urbi::UVar hystForgetDerThreshold;
+    /*
+     * Line finding params
+     */
+    ::urbi::UVar hystDeviationThr;
+    ::urbi::UVar hystDistanceThr;
 
     ::urbi::UVar cameraParam;
 
@@ -79,47 +73,39 @@ private:
     enum LineType {
         LINE_NONE, //! No visible line.
         LINE_VISUAL, //! Visible line.
-        LINE_REMEMBERED //! Line not visible but remembered.
     };
 
     static const size_t REFRESH_PERIOD;
     static const size_t STUCK_TOLERANCE;
 
 
-    static const double DEFAULT_DEVIATION; //! deviation set when no clues are present
-    static const double DEFAULT_DISTANCE; //! distance set when no clues are present
-
     xcs::urbi::ULineDrawer *lineDrawer_;
-
-    void onChangeVideo(::urbi::UVar &uvar);
-    void adjustValueRange(cv::Mat image);
-    void processFrame();
-    void useRememberedLine();
-    cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType> useOnlyGoodLines(cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType> lines);
-    void calculateExpectedLine();
 
     bool hasFrame_;
     ::urbi::UImage lastFrame_;
     size_t lastReceivedFrameNo_;
     size_t lastProcessedFrameNo_;
     size_t stuckCounter_;
-
-    // processing results
     double distance_;
     double deviation_;
-    double distanceDer_;
-    double deviationDer_;
-    double expectedDistance_;
-    double expectedDeviation_;
+
+    // processing results
     LineType lineType_;
-    double hystStrength_;
-    double hystDerStrength_;
-    double nonVisualOffset_; //! Angular difference between "non-visual" line and visual line (as of last time seen)
     xcs::urbi::line_finder::LineUtils lineUtils_;
 
     inline bool isLineVisual(LineType lineType) {
-        return lineType == LINE_VISUAL || lineType == LINE_REMEMBERED;
+        return lineType == LINE_VISUAL;
     }
+    
+    void onChangeVideo(::urbi::UVar &uvar);
+    
+    void adjustValueRange(cv::Mat image);
+    
+    void processFrame();
+    
+    cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType> useOnlyGoodLines(cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType> lines);
+    
+    void drawDebugLines(const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& lines, const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& filteredLines);
 
 };
 

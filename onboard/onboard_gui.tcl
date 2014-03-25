@@ -301,18 +301,18 @@ scale .houghrho -label "Hough Rho" \
 -showvalue 1 -orient horizontal
 pack .houghrho
 
-scale .hystcenterthresh -label "Hystersis Center Threshhold" \
+scale .hystcenterthresh -label "Hystersis Distance Threshhold" \
 -length 240 -from 0 -to 1 \
--command { setParam "f.hystCenterThreshold" } \
+-command { setParam "f.hystDistanceThr" } \
 -resolution 0.05 \
 -digits 3 \
 -variable hystcenterthresh \
 -showvalue 1 -orient horizontal
 pack .hystcenterthresh
 
-scale .hystdirthresh -label "Hystersis Direction Threshhold" \
+scale .hystdirthresh -label "Hystersis Deviation Threshhold" \
 -length 240 -from 0 -to 1 \
--command { setParam "f.hystDirThreshold" } \
+-command { setParam "f.hystDeviationThr" } \
 -resolution 0.05 \
 -digits 3 \
 -variable hystdirthresh \

@@ -10,10 +10,6 @@ using namespace std;
 const size_t ULineFinder::REFRESH_PERIOD = 66; // ms
 const size_t ULineFinder::STUCK_TOLERANCE = 2; // timer periods
 
-
-const double ULineFinder::DEFAULT_DEVIATION = 0;
-const double ULineFinder::DEFAULT_DISTANCE = 0;
-
 ULineFinder::ULineFinder(const string& name) :
   ::urbi::UObject(name),
   lineDrawer_(nullptr),
@@ -21,15 +17,9 @@ ULineFinder::ULineFinder(const string& name) :
   lastReceivedFrameNo_(1), // must be greater than lastProcessedFrame_ at the beginning
   lastProcessedFrameNo_(0),
   stuckCounter_(0),
-  distance_(DEFAULT_DISTANCE),
-  deviation_(DEFAULT_DEVIATION),
-  distanceDer_(0),
-  deviationDer_(0),
-  expectedDistance_(DEFAULT_DISTANCE),
-  expectedDeviation_(DEFAULT_DEVIATION),
-  lineType_(LINE_NONE),
-  hystStrength_(0),
-  hystDerStrength_(0) {
+  distance_(0),
+  deviation_(0),
+  lineType_(LINE_NONE) {
     UBindFunction(ULineFinder, init);
 
     UBindVar(ULineFinder, video);
@@ -40,7 +30,7 @@ ULineFinder::ULineFinder(const string& name) :
     UBindVar(ULineFinder, cameraParam);
     UBindVarRename(ULineFinder, expectedDistanceUVar, "expectedDistance");
     UBindVarRename(ULineFinder, expectedDeviationUVar, "expectedDeviation");
-            
+
 
     UBindVar(ULineFinder, blurRange);
     UBindVar(ULineFinder, autoHsvValueRangeEnabled);
@@ -56,14 +46,8 @@ ULineFinder::ULineFinder(const string& name) :
     UBindVar(ULineFinder, houghT);
     UBindVar(ULineFinder, houghMinLength);
     UBindVar(ULineFinder, houghMaxGap);
-    UBindVar(ULineFinder, distanceAging);
-    UBindVar(ULineFinder, deviationAging);
-    UBindVar(ULineFinder, hystDirThreshold);
-    UBindVar(ULineFinder, hystCenterThreshold);
-    UBindVar(ULineFinder, hystForgetRatio);
-    UBindVar(ULineFinder, hystForgetThreshold);
-    UBindVar(ULineFinder, hystForgetDerRatio);
-    UBindVar(ULineFinder, hystForgetDerThreshold);
+    UBindVar(ULineFinder, hystDeviationThr);
+    UBindVar(ULineFinder, hystDistanceThr);
 
 
     UBindVarRename(ULineFinder, distanceUVar, "distance");
@@ -91,14 +75,8 @@ void ULineFinder::init() {
     houghT = 70;
     houghMinLength = 100;
     houghMaxGap = 40;
-    distanceAging = 0.05; // how much previous distance is taken into account
-    deviationAging = 0.2; // how much previous deviation is taken into account
-    hystDirThreshold = M_PI / 3; // angle in radians for hysteresis filtering
-    hystCenterThreshold = 0.2; // distance in relative units for hysteresis filtering
-    hystForgetRatio = 0.9; // forgetting factor (1 = no forgetting factor, 0 = no remembering)
-    hystForgetThreshold = 0.1; // threshold of forgotten line
-    hystForgetDerRatio = 0.5; // derivative forgetting factor (1 = no forgetting factor, 0 = no remembering; used for scaling)
-    hystForgetDerThreshold = 0.1; // derivative forgetting threshold (1 = no forgetting factor, 0 = no remembering; used "zeroing" the derivative)
+    hystDeviationThr = M_PI / 3; // angle in radians for hysteresis filtering
+    hystDistanceThr = 0.2; // distance in relative units for hysteresis filtering
     cameraParam = 0.78; // experimentally determined camera intrinsic
     /*
      * Output vars
@@ -117,7 +95,7 @@ int ULineFinder::update() {
     //TODO fallback to lost line when video is stucked
     if (!hasFrame_ || lastProcessedFrameNo_ >= lastReceivedFrameNo_) {
         if (++stuckCounter_ > STUCK_TOLERANCE) {
-            lineType_ = LINE_REMEMBERED;
+            lineType_ = LINE_NONE;
             hasLine = false;
         }
         return 0;
@@ -126,7 +104,7 @@ int ULineFinder::update() {
 
     processFrame();
 
-    const static size_t waitDelay = 20;
+    const static size_t waitDelay = 10;
     cv::waitKey(waitDelay); // re-render image windows
 
     return 0; // Urbi undocumented, return value probably doesn't matter
@@ -181,7 +159,6 @@ void ULineFinder::processFrame() {
     /*
      * 2. Differentiate line pixels from others
      */
-    // convert to HSV
     cv::cvtColor(mid, mid, CV_BGR2HSV);
 
     if (lastProcessedFrameNo_ % static_cast<int> (autoHsvValueRangeFreq) == 0) {
@@ -201,35 +178,19 @@ void ULineFinder::processFrame() {
     cv::HoughLinesP(mid, lines, static_cast<double> (houghRho), static_cast<double> (houghTheta), static_cast<int> (houghT), static_cast<double> (houghMinLength), static_cast<double> (houghMaxGap));
 
     /*
-     * 3.5 Filter out outlying lines
+     * 4. Filter out outlying lines
      */
-
     cv::vector<LineUtils::RawLineType> filteredLines;
     LineUtils::RawLineType avg;
     bool hasAvg(false);
-    calculateExpectedLine();
 
     if (lines.size() == 0) { // no line detected
-        useRememberedLine();
+        lineType_ = LINE_NONE;
     } else {
-        switch (lineType_) {
-            case LINE_VISUAL:
-            case LINE_REMEMBERED:
-                filteredLines = useOnlyGoodLines(lines);
-                // line type is unchanged
-                break;
-            case LINE_NONE:
-                filteredLines = useOnlyGoodLines(lines);
-                //filteredLines = lines; // without previous line assume all lines are correct
-                lineType_ = LINE_VISUAL;
-                break;
-            default:
-                throw runtime_error("Unknown line type.");
-                break;
-        }
+        filteredLines = useOnlyGoodLines(lines);
 
         if (filteredLines.size() == 0) {
-            useRememberedLine();
+            lineType_ = LINE_NONE;
         } else {
             lineType_ = LINE_VISUAL;
             /*
@@ -239,59 +200,68 @@ void ULineFinder::processFrame() {
             hasAvg = true;
             LineUtils::normalizeOrientation(avg);
 
-
-            double newDistance(LineUtils::pointLineDistance(lineUtils_.referencePoint, avg) / lineUtils_.distanceUnit);
-            double newDeviation = LineUtils::lineDirection(avg);
-
-            /*
-             * Calculate derivatives
-             */
-            distanceDer_ = (newDistance - distance_) / REFRESH_PERIOD;
-            deviationDer_ = (newDeviation - deviation_) / REFRESH_PERIOD;
-            hystDerStrength_ = 1;
-
-            /*
-             * Combine line with previous data
-             */
-            double distAging(static_cast<double> (distanceAging));
-            distance_ = distAging * distance_ + (1 - distAging) * newDistance;
-
-            double devAging(static_cast<double> (deviationAging));
-            deviation_ = devAging * deviation_ + (1 - devAging) * newDeviation;
+            distance_ = LineUtils::pointLineDistance(lineUtils_.referencePoint, avg) / lineUtils_.distanceUnit;
+            deviation_ = LineUtils::lineDirection(avg);
         }
 
     }
 
     /*
-     * Draw output
+     * 5. Draw output
      */
-    // mean line
-    if (cv::countNonZero(avg)) {
-        //lineDrawer_->drawPoint(cv::Point(avg[2], avg[3]), cv::Scalar(128, 128, 255)); //TODO is it necessary
-        lineDrawer_->drawLine(avg, cv::Scalar(128, 128, 255), 3);
+    drawDebugLines(lines, filteredLines);
+
+    /*
+     * 6. Notify output
+     */
+    distanceUVar = distance_;
+    deviationUVar = deviation_;
+    hasLine = isLineVisual(lineType_); // must be last as it notifies other UObjects
+}
+
+cv::vector<LineUtils::RawLineType> ULineFinder::useOnlyGoodLines(cv::vector<LineUtils::RawLineType> lines) {
+    auto expectedDistance = static_cast<double> (expectedDistanceUVar);
+    auto expectedDeviation = static_cast<double> (expectedDeviationUVar);
+    cv::vector<LineUtils::RawLineType> result;
+
+    cv::Point deltaPoint(lineUtils_.getDeltaPoint(expectedDistance, expectedDeviation));
+
+    for (auto lineCandidate : lines) {
+        LineUtils::normalizeOrientation(lineCandidate);
+
+        cv::Point center((lineCandidate[0] + lineCandidate[2]) / 2, (lineCandidate[3] + lineCandidate[1]) / 2);
+        // check line validity
+        double devDiff = expectedDeviation - LineUtils::lineDirection(lineCandidate);
+        devDiff = abs(devDiff);
+
+        double distDiff(LineUtils::pointLineDistance2(center, expectedDeviation, deltaPoint));
+        distDiff = abs(distDiff);
+        distDiff /= lineUtils_.distanceUnit; // normalize for relative units
+
+        // factors are currently unused
+        auto devFactor = 1;
+        auto distFactor = 1;
+        if (devFactor * devDiff <= static_cast<double> (hystDeviationThr) && distFactor * distDiff <= static_cast<double> (hystDistanceThr)) {
+            result.push_back(lineCandidate);
+        }
     }
+
+    return result;
+
+}
+
+void ULineFinder::drawDebugLines(const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& lines, const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& filteredLines) {
 
     if (isLineVisual(lineType_)) {
         // distance circle
         cv::Scalar distanceColor((distance_ > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0));
         lineDrawer_->drawCircle(lineUtils_.referencePoint, distanceColor, abs(distance_) * lineUtils_.distanceUnit);
 
-        // followed line
-        double forgetThr = static_cast<double> (hystForgetThreshold);
-        double strength = (hystStrength_ <= forgetThr) ? 0 : (hystStrength_ - forgetThr) / (1 - forgetThr);
-        cv::Scalar hystColor;
-        if (lineType_ == LINE_VISUAL) {
-            hystColor = cv::Scalar(0, 0, 255);
-        } else {
-            hystColor = cv::Scalar(0, 128, 255);
-            hystColor *= strength;
-        }
         // expected line
-        lineDrawer_->drawFullLine(expectedDistance_, expectedDeviation_, cv::Scalar(128, 0, 128), 2);
+        lineDrawer_->drawFullLine(static_cast<double> (expectedDistanceUVar), static_cast<double> (expectedDeviationUVar), cv::Scalar(128, 0, 128), 2);
 
         // followed line
-        lineDrawer_->drawFullLine(distance_, deviation_, hystColor);
-
+        lineDrawer_->drawFullLine(distance_, deviation_, cv::Scalar(0, 0, 255));
     }
 
     // detected lines are last (top layer)    
@@ -308,97 +278,7 @@ void ULineFinder::processFrame() {
     // image center
     lineDrawer_->drawCircle(lineUtils_.imageCenter, cv::Scalar(128, 128, 128), 3);
 
-    /*
-     * Set output
-     */
-    deviationUVar = deviation_;
-    distanceUVar = distance_;
-    hasLine = isLineVisual(lineType_); // must be last as it notifies other UObjects
-}
 
-void ULineFinder::useRememberedLine() {
-    switch (lineType_) { // dispatch on previous line type
-        case LINE_NONE:// when nothing present even death rejects (how to write this in English?)
-            distance_ = DEFAULT_DISTANCE;
-            deviation_ = DEFAULT_DEVIATION;
-            break;
-        case LINE_VISUAL:
-            hystStrength_ = 1; // fresh memory is 100%
-            lineType_ = LINE_REMEMBERED;
-            // use expected position
-            distance_ = expectedDistance_;
-            deviation_ = expectedDeviation_;
-            break;
-        case LINE_REMEMBERED:
-            hystStrength_ *= static_cast<double> (hystForgetRatio);
-            if (hystStrength_ <= static_cast<double> (hystForgetThreshold)) { // we've forgotten the line
-                hystStrength_ = 0;
-                lineType_ = LINE_NONE; //TODO any more settings here?
-            } else {// use expected position
-                distance_ = expectedDistance_;
-                deviation_ = expectedDeviation_;
-            }
-            break;
-        default:
-            throw runtime_error("Unknown line type.");
-            break;
-    }
-}
-
-cv::vector<LineUtils::RawLineType> ULineFinder::useOnlyGoodLines(cv::vector<LineUtils::RawLineType> lines) {
-    auto expectedDistance = expectedDistance_;
-    auto expectedDeviation = expectedDeviation_;
-    cv::vector<LineUtils::RawLineType> result;
-
-    cv::Point deltaPoint(lineUtils_.distanceUnit * expectedDistance * cos(expectedDeviation), lineUtils_.distanceUnit * expectedDistance * sin(expectedDeviation));
-    deltaPoint += lineUtils_.referencePoint;
-
-    for (auto lineCandidate : lines) {
-        LineUtils::normalizeOrientation(lineCandidate);
-
-
-        cv::Point center((lineCandidate[0] + lineCandidate[2]) / 2, (lineCandidate[3] + lineCandidate[1]) / 2);
-        // check line validity
-        double dirDiff = expectedDeviation - LineUtils::lineDirection(lineCandidate);
-        dirDiff = abs(dirDiff);
-
-        double centerDiff(LineUtils::pointLineDistance2(center, expectedDeviation, deltaPoint));
-        centerDiff = abs(centerDiff);
-        centerDiff /= lineUtils_.distanceUnit; // normalize for relative units
-
-        // hystStrength effectively broadens search region
-        auto dirFactor = (lineType_ == LINE_NONE) ? 0 :
-                (lineType_ == LINE_VISUAL) ? 1 :
-                0.8; // TODO another parameter -- tolerance for nonvisual detection
-
-        auto centerFactor = (lineType_ == LINE_VISUAL) ? 1 : hystStrength_;
-        if (dirFactor * dirDiff <= static_cast<double> (hystDirThreshold) && centerFactor * centerDiff <= static_cast<double> (hystCenterThreshold)) {
-            result.push_back(lineCandidate);
-        }
-    }
-
-    return result;
-
-}
-
-void ULineFinder::calculateExpectedLine() {
-    switch (lineType_) {
-        case LINE_NONE:
-            expectedDistance_ = static_cast<double>(expectedDistanceUVar);
-            expectedDeviation_ = static_cast<double>(expectedDeviationUVar);
-            break;
-        default:
-            auto factor = static_cast<double> (hystForgetDerRatio);
-            auto threshold = static_cast<double> (hystForgetDerThreshold);
-            if (hystDerStrength_ *= factor < threshold) {
-                distanceDer_ = 0;
-                deviationDer_ = 0;
-            }
-
-            expectedDistance_ = distance_ + distanceDer_ * REFRESH_PERIOD * hystDerStrength_;
-            expectedDeviation_ = deviation_ + deviationDer_ * REFRESH_PERIOD* hystDerStrength_;
-            break;
-    }
 }
 
 UStart(ULineFinder);
