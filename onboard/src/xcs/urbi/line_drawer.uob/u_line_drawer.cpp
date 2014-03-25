@@ -132,7 +132,7 @@ void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar col
         drawLine(bottomPoint, topPoint, color, width);
     }
 
-    if (withCircle) {
+    if (withCircle && abs(distance) < 100) { // this prevents fail in OpenCV for very large doubles (which become negative numbers)
         // intersection circle
         cv::Point deltaPoint = lineUtils_.getDeltaPoint(distance, deviation);
         drawCircle(deltaPoint, color, width + 3);
@@ -140,8 +140,6 @@ void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar col
         // distance circle
         cv::Scalar distanceColor((distance > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0));
         drawCircle(lineUtils_.referencePoint, distanceColor, abs(distance) * lineUtils_.distanceUnit);
-
-
     }
     //    if (abs(deviation) > M_PI / 2) {
     //        cv::circle(image, bottomPoint, width + 2, color, width, CV_AA);
