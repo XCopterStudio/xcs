@@ -127,6 +127,8 @@ AVFrame* VideoFileWriter::allocPicture(const PixelFormat pixelFormat, const int 
 }
 
 VideoFileWriter::VideoFileWriter(const std::string &fileName, const unsigned int &width, const unsigned int &height, const unsigned int &bitrate){
+    pictureConvertContext_ = nullptr;
+
     av_register_all();
 
     outputFormat_ = av_guess_format(NULL, fileName.c_str(), NULL);

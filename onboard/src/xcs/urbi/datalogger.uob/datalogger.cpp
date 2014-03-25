@@ -38,6 +38,11 @@ VideoWriter::VideoWriter(const std::string &name) :
 DataWriter(name)
 {
     frameNumber_ = 0;
+    avframe_ = avcodec_alloc_frame();
+}
+
+VideoWriter::~VideoWriter(){
+    avcodec_free_frame(&avframe_);
 }
 
 void VideoWriter::init(const std::string &videoFile, const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar){
@@ -53,10 +58,14 @@ void VideoWriter::write(urbi::UVar &uvar){
     *file_ << dataName_ << " " << frameNumber_++;
     *file_ << " timestamp " << time << endl;
     UImage frame = uvar;
-    AVFrame avframe;
+    
     //TODO: use frame format
-    avpicture_fill((AVPicture*)&avframe, frame.data, PIX_FMT_BGR24, frame.width, frame.height);
-    videoFileWriter->writeVideoFrame(avframe);
+    
+    avframe_->width = frame.width;
+    avframe_->height = frame.height;
+    avframe_->format = PIX_FMT_BGR24;
+    avpicture_fill((AVPicture*)avframe_, frame.data, (AVPixelFormat) avframe_->format, frame.width, frame.height);
+    videoFileWriter->writeVideoFrame(*avframe_);
 
 }
 

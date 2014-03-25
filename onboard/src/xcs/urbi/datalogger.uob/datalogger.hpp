@@ -32,9 +32,11 @@ namespace nodes{
 
     class VideoWriter : public DataWriter{
         unsigned int frameNumber_;
+        AVFrame* avframe_;
         std::unique_ptr<VideoFileWriter> videoFileWriter;
     public:
         VideoWriter(const std::string &name);
+        ~VideoWriter();
         void init(const std::string &videoFile, const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar);
         virtual void write(::urbi::UVar &uvar);
     };
