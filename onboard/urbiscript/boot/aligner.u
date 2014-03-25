@@ -35,7 +35,7 @@ class Aligner{
         this.gazPidParam = gazPidParam;
     };
 
-    function pidLoop(pidParams, value){
+    var pidLoop = function (pidParams, value) {
         var correctedValue = value + pidParams.lastDerivation * pidParams.timeDelay;
         
         pidParams.sumI += correctedValue;
@@ -86,11 +86,11 @@ class Aligner{
         },
     };
 
-    function adjustGaz(){
-        this.tgaz: every(this.gazInterval){
+    var adjustGaz = function () {
+        this.tgaz: every(this.gazInterval) {
             var altDif = gazAltitude - xci.altitude;
             var gaz = Global.crop(pidLoop(gazPidParam, altDif), 1);
-            echo("gaz: \t\t\t\t\t\t" + gaz);
+            echo("gaz: \t\t\t\t\t\t\t" + gaz);
             xci.gaz = gaz; 
         },
     };

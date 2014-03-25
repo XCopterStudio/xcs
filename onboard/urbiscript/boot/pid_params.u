@@ -12,4 +12,10 @@ class PidParams {
         this.i = i;
         this.d = d;
     };
+
+    function reset() {
+        this.sumI = 0.0;
+        this.lastValue = 0.0;
+        this.lastDerivation = 0.0;
+    };
 }|;

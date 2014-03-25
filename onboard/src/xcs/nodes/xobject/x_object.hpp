@@ -24,19 +24,4 @@ private:
 }
 }
 
-# define XBindVar(x)							\
-	this->RegisterXVar(#x, x.Type().synType, x.Type().semType);	\
-	x.Init(*this, #x)
-
-//TODO: prejmenovat na XBindVar (pretizit)
-# define XBindVarF(x, f)	\
-	XBindVar(x);			\
-	UNotifyChange(x.Data(), f)
-
-# define XBindFunction(xObj, f) UBindFunction(xObj, f)
-
-//# define XNotifyChange(x, f) UNotifyChange(x.Data(), f)
-
-# define XStart(type) UStart(type)
-
 #endif

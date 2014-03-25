@@ -25,7 +25,10 @@ using namespace std;
 using namespace xcs::nodes;
 using namespace xcs::xci::dodo;
 
-VideoPlayer::VideoPlayer() : swsContext_(nullptr), hasPic_(false) {
+VideoPlayer::VideoPlayer() :
+  swsContext_(nullptr),
+  hasPic_(false),
+  timestamps_(false) {
 
 }
 
@@ -86,8 +89,9 @@ void VideoPlayer::init(const string &filename, const string &fontFile) {
 
     // prepare for decoding
     avFrame_ = AVFramePtr(avcodec_alloc_frame(), &av_free);
-
-    initFilters("drawtext=fontcolor=white:fontfile=" + fontFile + ":text='%T'");
+    if (timestamps_) {
+        initFilters("drawtext=fontcolor=white:fontfile=" + fontFile + ":text='%T'");
+    }
 }
 
 void VideoPlayer::rewind() {

@@ -45,6 +45,7 @@ var lineProvider = s;
 
 var a = Aligner.new(xci, lineProvider, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
 
+var logger = Datalogger.new("pokus.txt");
 
 
 /*
@@ -63,6 +64,10 @@ xci.&velocityY >> k.&vy;
 xci.&altitude >> k.&altitude;
 xci.&psi >> k.&psi;
 
+logger.registerData("theta","theta","double",xci.&theta);
+logger.registerData("psi","psi","double",xci.&psi);
+logger.registerData("phi","phi","double",xci.&phi);
+
 // Default values for image processing (not set in Tcl GUI)
 f.autoHsvValueRangeEnabled = true;
 
@@ -80,8 +85,6 @@ m.start(),; // would block
 if(xciVersion == "xci_dodo") {
     //xci.setConfiguration("video:timestamps", "1");
     xci.setConfiguration("video:filename", "tmp/video.xcs");
-    //xci.setConfiguration("video:filename", "/home/michal/Videos/Paris, je t'aime (2006)/Paris, je t'aime 2.avi");
-    //xci.setConfiguration("video:fps", "50");
     xci.doCommand("Load");
     xci.doCommand("Play");
 } else if(xciVersion == "xci_parrot") {

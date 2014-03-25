@@ -10,8 +10,8 @@ class Adapter {
     function start(server, port) {
         _socket = Socket.new();
         _socket.connect(server, port);
-        at (_socket.received?(var data)) {
-            echo("Received: " + data);
+        var receiveMtx = Mutex.new();
+        at (_socket.received?(var data)) receiveMtx: {
             output = data;
         };
         clog << "Started adapter %s:%s." % [server, port];
@@ -84,13 +84,16 @@ class SemanticReceiver {
 
         var that = this;
         at(adapter.output->changed?) {
-            var rawData = UJson.decode(adapter.output);
-            var data = rawData["data"];
-            for(var input: inputs) {
-                var name = input.first;
-                if(name in data) {
-                    //echo("updating: " + name);
-                    that.updateSlot(name, data[name]);
+            /* This handles the case when more JSON objects are present in the buffer */
+            var messageArray = "[" + adapter.output.replace("}\n{", "},{") + "]";
+            var rawMessages = UJson.decode(messageArray);
+            for(var rawData: rawMessages) {
+                var data = rawData["data"];
+                for(var input: inputs) {
+                    var name = input.first;
+                    if(name in data) {
+                        that.updateSlot(name, data[name]);
+                    };
                 };
             };
         };

@@ -1,0 +1,162 @@
+class FrontierAligner {
+
+    var xci;
+    var finder;
+    var rollPidParam;
+    var yawPidParam;
+    var pitchPidParam;
+    var gazPidParam;
+    var tyaw = Tag.new("tyaw");
+    var troll = Tag.new("troll");
+    var tpitch = Tag.new("tpitch");
+    var tgaz = Tag.new("tgaz");
+    var gazAltitude = 1.5;
+
+    // Default values in seconds
+    // ! most likely to be overwritten !
+    var rollInterval = 0.1;
+    var rollSleep = 0.05;
+    var rollThreshold = 0.02;
+    var yawInterval = 0.1;
+    var pitchInterval = 0.1;
+    var pitchSleep = 0.05;
+    var pitchDistance = 0.1;
+    var pitchDeviation = 0.1;
+    var gazInterval = 0.2;
+
+
+    var frontierRadius = 0.5; // half of screen diagonal
+    var trollpitch = Tag.new("trollpitch");
+    var rollPitchInterval = 1;
+    var rollPitchSleep = 0.5;
+
+
+    function init(xci, finder, rollPidParam, yawPidParam, pitchPidParam, gazPidParam) {
+        this.xci = xci;
+        this.finder = finder;
+        this.rollPidParam = rollPidParam;
+        this.yawPidParam = yawPidParam;
+        this.pitchPidParam = pitchPidParam;
+        this.gazPidParam = gazPidParam;
+    };
+
+    function computeSetPoint() {
+        var R = this.frontierRadius;
+        var D = Math.abs(finder.distance);
+        var delta = Math.abs(finder.deviation);
+        var deltaComplement = (Math.pi / 2) - delta;
+
+        //echo("d' = " + Math.sign(0));
+        // Process degenerated states
+        if (delta == 0) {
+            var x = D;
+            var y = Math.sqrt( Math.sqr(R) - Math.sqr(D) );
+            return [x,y];
+        } else if (D == 0) {
+            var x = Math.sin(delta) * R * Math.sign(finder.deviation);
+            var y = Math.cos(delta) * R;
+            return [x,y];
+        } else
+        // ++,-- transposed
+        // +-,-+ OK
+        if (Math.sign(finder.distance) * Math.sign(finder.deviation) == -1) { // OK
+
+            var l1 = Math.tan(delta) * D;
+            var l2 = Math.sqrt( Math.sqr(R) - Math.sqr(D) );
+            var l = l1 + l2; //echo("l1 = " + l1 + " l2 = " + l2);
+
+            var y = Math.sin(deltaComplement) * l;
+            var x = Math.cos(deltaComplement) * l;
+
+            var a = D / Math.cos(delta);
+            var x_ = (x - a) * Math.sign(finder.deviation);
+
+            return [x_,y];
+        } else { // transposed
+
+            var l1 = Math.tan(deltaComplement) * D;
+            var l2 = Math.sqrt( Math.sqr(R) - Math.sqr(D) );
+            var l = l1 + l2; //echo("l1 = " + l1 + " l2 = " + l2);
+
+            var y = Math.sin(deltaComplement) * l;
+            var x = (Math.cos(deltaComplement) * l) * Math.sign(finder.deviation);
+
+            var a = D / Math.cos(deltaComplement);
+            var y_ = y - a;
+
+            return [x,y_];
+        };
+    };
+
+    var pidLoop = function (pidParams, value) {
+        var correctedValue = value + pidParams.lastDerivation * pidParams.timeDelay;
+
+        pidParams.sumI += correctedValue;
+        var derivation = correctedValue - pidParams.lastValue;
+        pidParams.lastValue = correctedValue;
+        pidParams.lastDerivation = derivation;
+
+        return pidParams.p*correctedValue + pidParams.i*pidParams.sumI + pidParams.d*derivation;
+    };
+
+    var adjustYaw = function () {
+        this.tyaw: every(this.yawInterval) {
+            var deviation = finder.deviation;
+            var yaw = Global.crop(pidLoop(yawPidParam,deviation), 1);
+            echo("yaw: \t" + yaw);
+            xci.yaw = yaw;
+        },
+    };
+
+    var adjustRollPitch = function () {
+        this.trollpitch: every(this.rollPitchInterval) {
+            if (!finder.hasLine) {
+                continue;
+            }; // Otherwise input would be dist=0 dev=0 and result error is [0,0.5]
+            var setPoint = computeSetPoint();
+            //echo("[dist,dev] = [" + finder.distance + "," + finder.deviation + "]");
+            //echo("[dist,dev] = [" + finder.distance + "," + finder.deviation / (Math.pi/180) + "]");
+            //echo("[x,y] = [" + setPoint[0] + "," + setPoint[1] + "]");
+            var roll = pidLoop(rollPidParam, setPoint[0]);
+            var pitch = -1 * pidLoop(pitchPidParam, setPoint[1]);
+            echo("roll&pitch \t\t\t" + roll + " , " + pitch);
+            xci.roll = roll;
+            xci.pitch = pitch;
+            sleep(this.rollPitchSleep);
+            xci.roll = 0;
+            xci.pitch = 0;
+        },
+    };
+
+    var adjustGaz = function () {
+        this.tgaz: every(this.gazInterval) {
+            var altDif = gazAltitude - xci.altitude;
+            var gaz = Global.crop(pidLoop(gazPidParam, altDif), 1);
+            echo("gaz: \t\t\t\t\t\t\t" + gaz);
+            xci.gaz = gaz;
+        },
+    };
+
+    var resetYaw = function () {
+        yawPidParam.reset();
+        xci.yaw = 0;
+    };
+
+    var resetRollPitch = function () {
+        rollPidParam.reset();
+        pitchPidParam.reset();
+        xci.roll = 0;
+        xci.pitch = 0;
+    };
+
+    var resetGaz = function () {
+        gazPidParam.reset();
+        xci.gaz = 0;
+    };
+
+    var resetAll = function () {
+        resetRollPitch();
+        resetYaw();
+        resetGaz();
+    }
+}|;

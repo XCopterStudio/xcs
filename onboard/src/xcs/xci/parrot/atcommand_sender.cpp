@@ -22,12 +22,12 @@ void AtCommandSender::handleConnectedAtCommand(const boost::system::error_code& 
 
     if (!socket_.is_open()){
         cerr << "Connect atCommand socket timed out." << endl;
-        //connect();
+        connect();
     }
     else if (ec){
         cerr << "Connect atCommand socket error: " << ec.message() << endl;
-        //socket_.close();
-        //connect();
+        socket_.close();
+        connect();
     }
     else{
         sendAtCommand();
@@ -55,10 +55,13 @@ void AtCommandSender::handleWritedAtCommand(const boost::system::error_code& ec)
         return;
     }
 
-    if (ec){
+    if (!socket_.is_open()){
+        cerr << "Connect atCommand socket timed out." << endl;
+        connect();
+    }else if (ec){
         cerr << "Send atCommand data error: " << ec.message() << endl;
-        //socket_.close();
-        //connect();
+        socket_.close();
+        connect();
     }
     else{
         sendAtCommand();
@@ -78,7 +81,7 @@ void AtCommandSender::checkDeadlineAtCommand(){
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled.
         socket_.close();
-        connect();
+        //connect();
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
         deadline_.expires_at(boost::posix_time::pos_infin);

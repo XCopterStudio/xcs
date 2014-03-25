@@ -1,0 +1,6 @@
+//PRIORITY 2
+
+// prepare all generated structs
+System.eval(XCS.getStructs4Reg());
+
+// create static dataflow - connect

@@ -9,9 +9,9 @@
 
 #include <iostream>
 
+#include <xcs/nodes/xobject/x.hpp>
 #include <xcs/library_loader.hpp>
 #include <xcs/symbol_loader.hpp>
-
 
 using namespace xcs::nodes;
 using namespace xcs::xci;
@@ -20,6 +20,7 @@ using namespace std;
 XXci::XXci(const std::string& name) :
   xcs::nodes::XObject(name),
   flyParamPersistence("FLY_PARAM_PERSISTENCE"),
+  fly("FLY_PARAM"),
   roll("ROLL"),
   pitch("PITCH"),
   yaw("YAW"),
@@ -42,6 +43,8 @@ XXci::XXci(const std::string& name) :
     XBindFunction(XXci, setConfiguration);
 
     XBindVarF(flyParamPersistence, &XXci::setFlyParamPersistence);
+
+    XBindVarF(fly, &XXci::onChangeFly);
 
     XBindVarF(roll, &XXci::onChangeRoll);
     XBindVarF(pitch, &XXci::onChangePitch);
@@ -81,11 +84,12 @@ void XXci::doCommand(const std::string& command) {
     roll_ = 0;
     pitch_ = 0;
     yaw_ = 0;
-    gaz_= 0;
+    gaz_ = 0;
     xci_->command(command);
 }
 
 void XXci::flyParam(double roll, double pitch, double yaw, double gaz) {
+    //TODO here should be lock to atomic update of RPYG
     roll_ = roll;
     pitch_ = pitch;
     yaw_ = yaw;
@@ -104,6 +108,11 @@ InformationMap XXci::dumpConfiguration() {
 
 void XXci::setConfiguration(const std::string& key, const std::string& value) {
     xci_->configuration(key, value);
+}
+
+void XXci::onChangeFly(FlyParam fp) {
+    flyParam(fp.roll, fp.pitch, fp.yaw, fp.gaz);
+    //cerr << "***************** " << fp.roll << " - " << fp.pitch << " - " << fp.yaw << " - " << fp.gaz;
 }
 
 void XXci::onChangeRoll(double roll) {
