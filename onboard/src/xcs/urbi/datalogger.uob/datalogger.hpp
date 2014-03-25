@@ -10,6 +10,7 @@
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_var.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
+#include "video_file_writer.hpp"
 
 namespace xcs{
 namespace nodes{
@@ -29,6 +30,8 @@ namespace nodes{
     };
 
     class VideoWriter : public DataWriter{
+        unsigned int frameNumber_;
+        std::unique_ptr<VideoFileWriter> videoFileWriter;
     public:
         VideoWriter(const std::string &name);
         void init(const std::string &videoFile, const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar);

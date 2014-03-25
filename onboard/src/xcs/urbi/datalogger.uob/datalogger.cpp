@@ -37,22 +37,27 @@ void DataWriter::write(urbi::UVar &uvar){
 VideoWriter::VideoWriter(const std::string &name) :
 DataWriter(name)
 {
-    
+    frameNumber_ = 0;
 }
 
 void VideoWriter::init(const std::string &videoFile, const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar){
     startTime_ = startTime;
     file_ = file;
     dataName_ = dataName;
+    videoFileWriter = unique_ptr<VideoFileWriter>(new VideoFileWriter(videoFile));
     UNotifyChange(uvar, &VideoWriter::write);
 }
 
 void VideoWriter::write(urbi::UVar &uvar){
     auto time = duration_cast<milliseconds>(highResolutionClock_.now() - startTime_).count();
-    *file_ << dataName_ ;
+    *file_ << dataName_ << " " << frameNumber_++;
     *file_ << " timestamp " << time << endl;
     UImage frame = uvar;
-    
+    AVFrame avframe;
+    //TODO: use frame format
+    avpicture_fill((AVPicture*)&avframe, frame.data, PIX_FMT_BGR24, frame.width, frame.height);
+    videoFileWriter->writeVideoFrame(avframe);
+
 }
 
 // ========
@@ -63,6 +68,7 @@ startTime_(Clock().now())
 {
     XBindFunction(Datalogger, init);
     XBindFunction(Datalogger, registerData);
+    XBindFunction(Datalogger, registerVideo);
 }
 
 Datalogger::~Datalogger(){

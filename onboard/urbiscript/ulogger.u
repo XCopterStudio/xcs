@@ -1,9 +1,19 @@
+var xciVersion = "xci_parrot";
 var logger = Datalogger.new("pokus.txt");
-var xci = XXci.new("xci_parrot");
+var xci = XXci.new(xciVersion);
 
 logger.registerData("altitude","altitude","double",xci.&altitude);
-logger.registerData("psi","psi","double",xci.&psi);
-logger.registerData("battery","battery","double",xci.&battery);
-logger.registerData("video","video","video",xci.&video);
+//logger.registerData("psi","psi","double",xci.&psi);
+//logger.registerData("phi","phi","double",xci.&phi);
+//logger.registerData("theta","theta","double",xci.&theta);
+logger.registerVideo("video.avi","video","video","video",xci.&video);
 
 xci.xciInit();
+
+if(xciVersion == "xci_dodo") {
+    xci.setConfiguration("video:timestamps", "0");
+    xci.setConfiguration("video:filename", "tmp/video.xcs");
+    xci.setConfiguration("video:fps", "25");
+    xci.doCommand("Load");
+    xci.doCommand("Play");
+};
