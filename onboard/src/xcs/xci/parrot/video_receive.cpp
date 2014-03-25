@@ -17,12 +17,12 @@ const unsigned int VideoReceiver::BUFFER_SIZE = 25000;
 void VideoReceiver::handleConnectedVideo(const boost::system::error_code& ec){
     if (!socketVideo_.is_open()){
         cerr << "Connect video socket timed out." << endl;
-        //connect();
+        connect();
     }
     else if (ec){
         cerr << "Receive video error: " << ec.message() << endl;
-        //socketVideo_.close();
-        //connect();
+        socketVideo_.close();
+        connect();
     }
     else{
         receiveVideo();
@@ -53,10 +53,13 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
         return;
     }
 
-    if (ec){
-        cerr << "Receive Video data error: " << ec.message() << endl;
-        //socketVideo_.close();
-        //connect();
+    if (!socketVideo_.is_open()){
+        cerr << "Navdata video closed socket" << endl;
+        connect();
+    }else if (ec){
+        cerr << "Receive video data error: " << ec.message() << endl;
+        socketVideo_.close();
+        connect();
     }
     else{
         deadlineVideo_.expires_at(boost::posix_time::pos_infin);
@@ -136,7 +139,7 @@ void VideoReceiver::checkVideoDeadline(){
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled.
         socketVideo_.close();
-        connect();
+        //connect();
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
         deadlineVideo_.expires_at(boost::posix_time::pos_infin);
