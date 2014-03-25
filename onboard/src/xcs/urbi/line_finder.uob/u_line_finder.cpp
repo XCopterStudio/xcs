@@ -273,10 +273,6 @@ void ULineFinder::drawDebugLines(const cv::vector<xcs::urbi::line_finder::LineUt
     lineDrawer_->drawLine(expectedDeltaPoint, expectedDeltaPoint + negVector, cv::Scalar(128, 0, 128), 1);
 
     if (isLineVisual(lineType_)) {
-        // distance circle
-        cv::Scalar distanceColor((distance_ > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0));
-        lineDrawer_->drawCircle(lineUtils_.referencePoint, distanceColor, abs(distance_) * lineUtils_.distanceUnit);
-
         // followed line
         lineDrawer_->drawFullLine(distance_, deviation_, cv::Scalar(0, 0, 255));
     }

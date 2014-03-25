@@ -7,11 +7,19 @@ System.loadModule("libulinedrawer");
 System.loadModule("libulinekeeper");
 
 /*
+ * Static parameters
+ */
+var rollPidParam = PidParams.new(0.4, 0, 0);
+var yawPidParam = PidParams.new(0.5, 0, 0);
+var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
+var gazPidParam = PidParams.new(0.5, 0, 0);
+
+/*
  * Dataflow graph
  */
  
-//var xciVersion = "xci_dodo";
-var xciVersion = "xci_parrot";
+var xciVersion = "xci_dodo";
+//var xciVersion = "xci_parrot";
 
 /*
  * Initialize nodes
@@ -31,6 +39,9 @@ k.setLineDrawer(d);
 
 var m = LineMaster.new(f, k);
 
+var a = Aligner.new(xci, m, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
+
+var lineProvider = m;
 
 /*
  * Connect nodes
@@ -66,20 +77,17 @@ serverConnect("127.0.0.1", 1234, xci, xciVersion),; // beware the comma
 xci.xciInit();
 m.start(),; // would block
 
-// 4 DODO
+/*
+ * After start configuration
+ */
 if(xciVersion == "xci_dodo") {
     //xci.setConfiguration("video:timestamps", "1");
-    xci.setConfiguration("video:filename", "/tmp/video.xcs");
+    xci.setConfiguration("video:filename", "tmp/video.xcs");
     //xci.setConfiguration("video:filename", "/home/michal/Videos/Paris, je t'aime (2006)/Paris, je t'aime 2.avi");
-    
-    //xci.setConfiguration("video:fps", "4");
     //xci.setConfiguration("video:fps", "50");
     xci.doCommand("Load");
     xci.doCommand("Play");
-};
-
-// 4 parrot
-if(xciVersion == "xci_parrot") {
+} else if(xciVersion == "xci_parrot") {
     sleep(1s);
     xci.flyParamPersistence = 25;
     xci.setConfiguration("video:video_channel", "1");
@@ -87,22 +95,13 @@ if(xciVersion == "xci_parrot") {
     sleep(4s);
 };
 
-var rollPidParam = PidParams.new(0.4, 0, 0);
-var yawPidParam = PidParams.new(0.5, 0, 0);
-var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
-var gazPidParam = PidParams.new(0.5, 0, 0);
-var a = Aligner.new(xci, m, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
+/*
+ * Automation
+ */
 
-k.start(f.distance, f.deviation);
+//k.reset(f.distance, f.deviation);
+
+// draw the main directing line
 every(100ms) {
-   d.drawFullLine(m.distance, m.deviation, 2, 3); 
+    d.drawFullLine(lineProvider.distance, lineProvider.deviation, 2, 3, true); 
 },;
-
-//echo("adjust GAZ");
-//a.adjustGaz(), while((xci.altitude - a.gazAltitude).abs() > 0.1) { sleep(100ms) };
-//echo("adjust ROLL, PITCH, YAW");
-//a.adjustRoll(), a.adjustYaw(), a.adjustPitch(),;
-
-//a.adjustYaw(),;
-//a.adjustRoll(), a.adjustYaw(), a.adjustPitch(), a.adjustGaz(), ;
-//a.adjustRoll(),;

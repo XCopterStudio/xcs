@@ -9,22 +9,43 @@ class LineMaster {
         hasLine = false;
         var this._lineFinder = lineFinder;
         var this._lineKeeper = lineKeeper;
-        var this.imuExpiration = 5s;
-        var this.tKeeper = Tag.new("tKeeper");
     }|;
     
     function start() {
         var that = this;
-        _lineKeeper.&distance.notifyChange(function(){
-            that.distance = 0.5 * that._lineKeeper.distance + 0.5 * that._lineFinder.distance;
+        // check only deviation (after deviation notify, distance is already updated)
+        _lineKeeper.&deviation.notifyChange(function() {
+            that.distance = that._lineKeeper.distance;
+            that.deviation = that._lineKeeper.deviation;
+            
+            // feedback to line finder
             that._lineFinder.expectedDistance = that.distance;
-            that._lineKeeper.start(that.distance, that.deviation);
+            that._lineFinder.expectedDeviation = that.deviation;            
         });
-        _lineKeeper.&deviation.notifyChange(function(){
-            that.deviation = 0.5 * that._lineKeeper.deviation + 0.5 * that._lineFinder.deviation;
-            that._lineFinder.expectedDeviation = that.deviation;
-            that._lineKeeper.start(that.distance, that.deviation);
+        
+        _lineFinder.&deviation.notifyChange(function() {
+            // simply combine via averaging
+            var imuWeight = 0.5;
+            if(!that._lineFinder.hasLine) {
+                imuWeight = 1;
+            };
+            that.distance = (1 - imuWeight) * that._lineFinder.distance + imuWeight * that.distance;
+            that.deviation = (1 - imuWeight) * that._lineFinder.deviation + imuWeight * that.deviation;
+            
+            // recalibrate IMU keeper
+            that._lineKeeper.reset(that.distance, that.deviation);
+
+            // feedback to line finder
+            that._lineFinder.expectedDistance = that.distance;
+            that._lineFinder.expectedDeviation = that.deviation;            
         });
+        
+        // TODO lines below are probably innecessary
+//        _lineFinder.&hasLine.notifyChange(function(){
+//            if(!that._lineKeeper.hasLine) {
+//                imuWeight = 1;
+//            }
+//        });
         this.hasLine = true;
     }
 }|;

@@ -35,7 +35,7 @@ public:
     
     void init();
 
-    void start(double distance, double deviation);
+    void reset(double distance, double deviation);
     
     void stop();
 

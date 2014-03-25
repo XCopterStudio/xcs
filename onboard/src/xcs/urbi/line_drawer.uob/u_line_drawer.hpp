@@ -42,12 +42,12 @@ public:
     /*!
      * Very ugly geometry.
      */
-    void drawFullLine(double distance, double deviation, cv::Scalar color, size_t width = 3, bool withPoint = true);
+    void drawFullLine(double distance, double deviation, cv::Scalar color, size_t width = 3, bool withCircle = false);
     
     /*!
      * Wrapper for Urbi until struct casting is ready.
      */
-    void drawFullLineU(double distance, double deviation, size_t color = 0, size_t width = 3);
+    void drawFullLineU(double distance, double deviation, size_t color = 0, size_t width = 3, bool withCircle = false);
 
     void drawLine(xcs::urbi::line_finder::LineUtils::RawLineType line, cv::Scalar color, size_t width = 2);
 

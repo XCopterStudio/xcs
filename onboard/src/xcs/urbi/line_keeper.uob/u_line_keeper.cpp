@@ -7,14 +7,14 @@ using namespace xcs::urbi;
 using namespace std;
 using namespace std::chrono;
 
-const size_t ULineKeeper::REFRESH_PERIOD = 100; // ms
+const size_t ULineKeeper::REFRESH_PERIOD = 20; // ms
 
 ULineKeeper::ULineKeeper(const string& name) :
   ::urbi::UObject(name),
   isKeeping_(false) {
     UBindFunction(ULineKeeper, init);
     UBindFunction(ULineKeeper, setLineDrawer);
-    UBindFunction(ULineKeeper, start);
+    UBindFunction(ULineKeeper, reset);
     UBindFunction(ULineKeeper, stop);
 
     UBindVar(ULineKeeper, vx);
@@ -87,7 +87,7 @@ void ULineKeeper::setLineDrawer(UObject *drawer) {
     lineDrawer_ = (ULineDrawer *) (drawer); //TODO missing typeinfo when linking
 }
 
-void ULineKeeper::start(double distance, double deviation) {
+void ULineKeeper::reset(double distance, double deviation) {
     initialDistance_ = distance;
     initialDeviation_ = deviation;
     initialDevOffset_ = deviation + static_cast<double> (psi); // beware: psi has opposite sign, this is difference

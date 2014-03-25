@@ -120,8 +120,8 @@ void ULineDrawer::drawCircle(cv::Point center, cv::Scalar color, size_t radius) 
 /*!
  * Very ugly geometry.
  */
-void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar color, size_t width, bool withPoint) {
-    if (cos(deviation) < 1e-6) { // TODO would be better general solution for skewed lines
+void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar color, size_t width, bool withCircle) {
+    if (cos(deviation) < 1e-6) { // TODO general solution for skewed lines would be better
         cv::Point leftPoint(0, lineUtils_.referencePoint.y + distance * lineUtils_.distanceUnit);
         cv::Point rightPoint(lineUtils_.width, lineUtils_.referencePoint.y + distance * lineUtils_.distanceUnit);
         drawLine(leftPoint, rightPoint, color, width);
@@ -132,9 +132,16 @@ void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar col
         drawLine(bottomPoint, topPoint, color, width);
     }
 
-    if (withPoint) {
+    if (withCircle) {
+        // intersection circle
         cv::Point deltaPoint = lineUtils_.getDeltaPoint(distance, deviation);
         drawCircle(deltaPoint, color, width + 3);
+        
+        // distance circle
+        cv::Scalar distanceColor((distance > 0) ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0));
+        drawCircle(lineUtils_.referencePoint, distanceColor, abs(distance) * lineUtils_.distanceUnit);
+
+
     }
     //    if (abs(deviation) > M_PI / 2) {
     //        cv::circle(image, bottomPoint, width + 2, color, width, CV_AA);
@@ -143,7 +150,7 @@ void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar col
     //    }
 }
 
-void ULineDrawer::drawFullLineU(double distance, double deviation, size_t color, size_t width) {
+void ULineDrawer::drawFullLineU(double distance, double deviation, size_t color, size_t width, bool withCircle) {
     cv::Scalar cvColor;
     switch (color) {
         case 1:
@@ -159,7 +166,7 @@ void ULineDrawer::drawFullLineU(double distance, double deviation, size_t color,
             cvColor = cv::Scalar(0, 0, 0);
             break;
     }
-    drawFullLine(distance, deviation, cvColor, width);
+    drawFullLine(distance, deviation, cvColor, width, withCircle);
 }
 
 void ULineDrawer::drawLine(xcs::urbi::line_finder::LineUtils::RawLineType line, cv::Scalar color, size_t width) {

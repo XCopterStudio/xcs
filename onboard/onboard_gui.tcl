@@ -16,10 +16,10 @@ pack .buttons.startall -side left
 button .buttons.stopall -text "Stop ALL" -command { cmd "a.tpitch.stop();a.tyaw.stop();a.troll.stop();a.tgaz.stop();" }
 pack .buttons.stopall -side left
 
-button .buttons.resetimu -text "Reset IMU" -command { cmd "k.stop();k.start(0,0);" }
+button .buttons.resetimu -text "Reset IMU" -command { cmd "k.reset(0,0);" }
 pack .buttons.resetimu -side left
 
-button .buttons.resetimuvis -text "Reset IMU (visual)" -command { cmd "k.stop();k.start(f.distance, f.deviation);" }
+button .buttons.resetimuvis -text "Reset IMU (visual)" -command { cmd "k.reset(f.distance, f.deviation);" }
 pack .buttons.resetimuvis -side left
 
 ### ROLL ###
