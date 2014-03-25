@@ -1,0 +1,43 @@
+/*
+class Point: UValueSerializable 
+{ 
+  var x = 0; 
+  var y = 0; 
+ 
+  function init(var xx = 0, var yy = 0) 
+  { 
+    x = xx| 
+    y = yy 
+  }; 
+ 
+  function asString() 
+  { 
+    "<%s, %s>" % [x, y] 
+  }; 
+}; 
+
+var Serializables.Point = Point;
+*/
+
+load("boot/boot.u");
+
+var xciVersion = "xci_dodo";
+var xci = XXci.new(xciVersion);
+xci.xciInit();
+
+var fp = FlyParam.new();
+fp.roll = 0.1;
+fp.pitch = 0.2;
+fp.yaw = 0.3;
+fp.gaz = 0.4;
+xci.fly;
+xci.fly = fp;
+xci.fly;
+
+/*
+var p = Point.new();
+p.x=10;
+p.y=5;
+var s = Subject.new();
+s.opposite(p);
+*/

@@ -20,13 +20,14 @@ void NavdataReceiver::handleConnectedNavdata(const boost::system::error_code& ec
 
     if (!socketNavdata_.is_open()) {
         cerr << "Connect Navdata socket timed out." << endl;
-        //connect();
+        connect();
     }
     else if (ec){
         cerr << "Connect Navdata socket error: " << ec.message() << endl;
-        //socketNavdata_.close();
-        //connect();
+        socketNavdata_.close();
+        connect();
     }else{
+        cerr << "Navdata socket connected." << endl;
         int32_t flag = 1; // 1 - unicast, 2 - multicast
         deadlineNavdata_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
         socketNavdata_.async_send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)), boost::bind(&NavdataReceiver::receiveNavdata, this, _1));
@@ -41,7 +42,7 @@ void NavdataReceiver::receiveNavdata(const boost::system::error_code& ec) {
     if (ec){
         cerr << "Navdata receive error: " << ec.message() << endl;
         //socketNavdata_.close();
-        //connect();
+        connect();
     }else{
         deadlineNavdata_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
         socketNavdata_.async_receive(boost::asio::buffer(navdataBuffer, NAVDATA_MAX_SIZE), boost::bind(&NavdataReceiver::handleReceivedNavdata, this, _1, _2));
@@ -53,10 +54,13 @@ void NavdataReceiver::handleReceivedNavdata(const boost::system::error_code& ec,
         return;
     }
 
-    if (ec) {
+    if (!socketNavdata_.is_open()){
+        cerr << "Navdata receive closed socket" << endl;
+        connect();
+    }else if (ec) {
         cerr << "Navdata receive error: " << ec.message() << endl;
-        //socketNavdata_.close();
-        //connect();
+        socketNavdata_.close();
+        connect();
     }else{
 
         deadlineNavdata_.expires_at(boost::posix_time::pos_infin);
@@ -90,7 +94,7 @@ void NavdataReceiver::checkDeadlineNavdata() {
         // The deadline has passed. The socket is closed so that any outstanding
         // asynchronous operations are cancelled.
         socketNavdata_.close();
-        connect();
+        //connect();
         // There is no longer an active deadline. The expiry is set to positive
         // infinity so that the actor takes no action until a new deadline is set.
         deadlineNavdata_.expires_at(boost::posix_time::pos_infin);

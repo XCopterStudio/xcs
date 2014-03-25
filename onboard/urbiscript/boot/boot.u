@@ -67,4 +67,5 @@ function readScripts(dirPath = nil) {
 
 }|;
 
+// read all scripts
 readScripts();

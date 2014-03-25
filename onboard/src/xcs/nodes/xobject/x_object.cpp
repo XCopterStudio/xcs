@@ -1,4 +1,5 @@
 #include "x_object.hpp"
+#include "x.hpp"
 #include <urbi/uobject.hh>
 #include <boost/algorithm/string.hpp> //NOTE: must be under XVar.hpp and XcsObject.hpp
 
@@ -10,7 +11,12 @@ XObject::XObject(const std::string& name) : UObject(name), xVarsType_(new map<co
     XBindFunction(XObject, getType);
 }
 
-XObject::~XObject(void) { }
+XObject::~XObject(void) { 
+    for (map<const string, XType*>::iterator it = xVarsType_->begin(); it != xVarsType_->end(); ++it) {
+        delete it->second;
+    }
+    delete xVarsType_;
+}
 
 bool XObject::RegisterXVar(const string& xVarName, string synType, string semType) {
     // erase whitespace in syntactic type
