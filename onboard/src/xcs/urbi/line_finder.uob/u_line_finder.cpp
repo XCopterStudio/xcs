@@ -240,8 +240,6 @@ cv::vector<LineUtils::RawLineType> ULineFinder::useOnlyGoodLines(cv::vector<Line
         distDiff = abs(distDiff);
         distDiff /= lineUtils_.distanceUnit; // normalize for relative units
 
-        cerr << "dev: " << devDiff << " dist:" << distDiff << endl;
-
         // factors are currently unused
         auto devFactor = 1;
         auto distFactor = 1;
@@ -249,7 +247,6 @@ cv::vector<LineUtils::RawLineType> ULineFinder::useOnlyGoodLines(cv::vector<Line
             result.push_back(lineCandidate);
         }
     }
-    cerr << "----" << endl;
 
     return result;
 

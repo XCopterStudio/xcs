@@ -61,10 +61,7 @@ public:
     }
 
     static inline double pointLineDistance2(cv::Point point, double deviation, cv::Point lineOrigin) {
-        cv::Point norm(cos(deviation), sin(deviation));
-        if (abs(norm.x) <= 0 && abs(norm.y) <= 0) { // avoid division by zero
-            return hypot(lineOrigin.x - point.x, lineOrigin.y - point.y);
-        }
+        cv::Point2d norm(cos(deviation), sin(deviation)); // this is correct normal vector, deviation is "top oriented"
         auto c = -norm.dot(lineOrigin);
         return (norm.dot(point) + c) / hypot(norm.x, norm.y);
     }
