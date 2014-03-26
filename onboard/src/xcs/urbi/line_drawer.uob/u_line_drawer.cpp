@@ -127,7 +127,7 @@ void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar col
         drawLine(leftPoint, rightPoint, color, width);
     } else {
         auto horizOffset = distance * lineUtils_.distanceUnit / cos(deviation);
-        cv::Point bottomPoint(lineUtils_.referencePoint.x + horizOffset - tan(deviation) * (lineUtils_.height - lineUtils_.referencePoint.y), lineUtils_.height);
+        cv::Point bottomPoint(lineUtils_.referencePoint.x + horizOffset - tan(deviation) * (static_cast<int>(lineUtils_.height) - lineUtils_.referencePoint.y), lineUtils_.height);
         cv::Point topPoint(lineUtils_.referencePoint.x + horizOffset + tan(deviation) * lineUtils_.referencePoint.y, 0);
         drawLine(bottomPoint, topPoint, color, width);
 
