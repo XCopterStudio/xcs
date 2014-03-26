@@ -31,7 +31,7 @@ label .roll.lbl -text "ROLL"
 pack .roll.lbl
 
 scale .roll.p  -label "roll P" \
--length 240 -from 0 -to 2 \
+-length 150 -from 0 -to 2 \
 -command { setParam "a.rollPidParam.p" } \
 -resolution 0.01 \
 -digits 3 \
@@ -40,7 +40,7 @@ scale .roll.p  -label "roll P" \
 pack .roll.p
 
 scale .roll.i  -label "roll I" \
--length 240 -from 0 -to 2 \
+-length 150 -from 0 -to 2 \
 -command { setParam "a.rollPidParam.i" } \
 -resolution 0.01 \
 -digits 3 \
@@ -49,7 +49,7 @@ scale .roll.i  -label "roll I" \
 pack .roll.i
 
 scale .roll.d -label "roll D" \
--length 240 -from -2 -to 2 \
+-length 150 -from -2 -to 2 \
 -command { setParam "a.rollPidParam.d" } \
 -resolution 0.01 \
 -digits 3 \
@@ -63,7 +63,7 @@ button .roll.stop -text "Stop" -command { cmd "a.troll.stop()" }
 pack .roll.stop
 
 scale .roll.int -label "roll interval" \
--length 240 -from 0 -to 2 \
+-length 150 -from 0 -to 2 \
 -command { setParam "a.rollInterval" } \
 -resolution 0.05 \
 -digits 3 \
@@ -72,7 +72,7 @@ scale .roll.int -label "roll interval" \
 pack .roll.int
 
 scale .roll.sleep -label "roll sleep" \
--length 240 -from 0 -to 1 \
+-length 150 -from 0 -to 1 \
 -command { setParam "a.rollSleep" } \
 -resolution 0.01 \
 -digits 3 \
@@ -81,7 +81,7 @@ scale .roll.sleep -label "roll sleep" \
 pack .roll.sleep
 
 scale .roll.threshold -label "roll threshold" \
--length 240 -from 0 -to 0.5 \
+-length 150 -from 0 -to 0.5 \
 -command { setParam "a.rollThreshold" } \
 -resolution 0.05 \
 -digits 3 \
@@ -98,7 +98,7 @@ label .yaw.lbl -text "YAW"
 pack .yaw.lbl
 
 scale .yaw.p  -label "yaw P" \
--length 240 -from 0 -to 2 \
+-length 150 -from 0 -to 2 \
 -command { setParam "a.yawPidParam.p" } \
 -resolution 0.01 \
 -digits 3 \
@@ -107,7 +107,7 @@ scale .yaw.p  -label "yaw P" \
 pack .yaw.p
 
 scale .yaw.i  -label "yaw I" \
--length 240 -from 0 -to 2 \
+-length 150 -from 0 -to 2 \
 -command { setParam "a.yawPidParam.i" } \
 -resolution 0.01 \
 -digits 3 \
@@ -116,7 +116,7 @@ scale .yaw.i  -label "yaw I" \
 pack .yaw.i
 
 scale .yaw.d -label "yaw D" \
--length 240 -from -2 -to 2 \
+-length 150 -from -2 -to 2 \
 -command { setParam "a.yawPidParam.d" } \
 -resolution 0.01 \
 -digits 3 \
@@ -138,7 +138,7 @@ label .pitch.lbl -text "PITCH"
 pack .pitch.lbl
 
 scale .pitch.p  -label "pitch P" \
--length 240 -from 0 -to 2 \
+-length 150 -from 0 -to 2 \
 -command { setParam "a.pitchPidParam.p" } \
 -resolution 0.01 \
 -digits 3 \
@@ -147,7 +147,7 @@ scale .pitch.p  -label "pitch P" \
 pack .pitch.p
 
 scale .pitch.i  -label "pitch I" \
--length 240 -from 0 -to 2 \
+-length 150 -from 0 -to 2 \
 -command { setParam "a.pitchPidParam.i" } \
 -resolution 0.01 \
 -digits 3 \
@@ -156,7 +156,7 @@ scale .pitch.i  -label "pitch I" \
 pack .pitch.i
 
 scale .pitch.d -label "pitch D" \
--length 240 -from -2 -to 2 \
+-length 150 -from -2 -to 2 \
 -command { setParam "a.pitchPidParam.d" } \
 -resolution 0.01 \
 -digits 3 \
@@ -170,7 +170,7 @@ button .pitch.stop -text "Stop" -command { cmd "a.tpitch.stop()" }
 pack .pitch.stop
 
 scale .pitch.int -label "pitch interval" \
--length 240 -from 0 -to 2 \
+-length 150 -from 0 -to 2 \
 -command { setParam "a.pitchInterval" } \
 -resolution 0.05 \
 -digits 3 \
@@ -179,7 +179,7 @@ scale .pitch.int -label "pitch interval" \
 pack .pitch.int
 
 scale .pitch.sleep -label "pitch sleep" \
--length 240 -from 0 -to 1 \
+-length 150 -from 0 -to 1 \
 -command { setParam "a.pitchSleep" } \
 -resolution 0.01 \
 -digits 3 \
@@ -188,7 +188,7 @@ scale .pitch.sleep -label "pitch sleep" \
 pack .pitch.sleep
 
 scale .pitch.distance -label "pitch distance" \
--length 240 -from 0 -to 0.5 \
+-length 150 -from 0 -to 0.5 \
 -command { setParam "a.pitchDistance" } \
 -resolution 0.05 \
 -digits 3 \
@@ -197,7 +197,7 @@ scale .pitch.distance -label "pitch distance" \
 pack .pitch.distance
 
 scale .pitch.deviation -label "pitch deviation" \
--length 240 -from 0 -to 0.5 \
+-length 150 -from 0 -to 0.5 \
 -command { setParam "a.pitchDeviation" } \
 -resolution 0.05 \
 -digits 3 \
@@ -214,7 +214,7 @@ label .gaz.lbl -text "GAZ"
 pack .gaz.lbl
 
 scale .gaz.p  -label "gaz P" \
--length 240 -from 0 -to 2 \
+-length 150 -from 0 -to 2 \
 -command { setParam "a.gazPidParam.p" } \
 -resolution 0.01 \
 -digits 3 \
@@ -223,7 +223,7 @@ scale .gaz.p  -label "gaz P" \
 pack .gaz.p
 
 scale .gaz.i  -label "gaz I" \
--length 240 -from 0 -to 2 \
+-length 150 -from 0 -to 2 \
 -command { setParam "a.gazPidParam.i" } \
 -resolution 0.01 \
 -digits 3 \
@@ -232,7 +232,7 @@ scale .gaz.i  -label "gaz I" \
 pack .gaz.i
 
 scale .gaz.d -label "gaz D" \
--length 240 -from -2 -to 2 \
+-length 150 -from -2 -to 2 \
 -command { setParam "a.gazPidParam.d" } \
 -resolution 0.01 \
 -digits 3 \
@@ -245,10 +245,21 @@ pack .gaz.start
 button .gaz.stop -text "Stop" -command { cmd "a.tgaz.stop()" }
 pack .gaz.stop
 
+scale .gaz.altitude -label "Altitude" \
+-length 150 -from 1 -to 2 \
+-command { setParam "a.gazAltitude" } \
+-resolution 0.05 \
+-digits 3 \
+-variable gazaltitude \
+-showvalue 1 -orient horizontal
+pack .gaz.altitude
+
+
+
 ### MIscellaneous ###
 
 scale .distaging -label "Distance Aging" \
--length 240 -from 0 -to 1 \
+-length 150 -from 0 -to 1 \
 -command { setParam "s.distanceAging" } \
 -resolution 0.05 \
 -digits 3 \
@@ -257,7 +268,7 @@ scale .distaging -label "Distance Aging" \
 pack .distaging
 
 scale .devaging -label "Deviation Aging" \
--length 240 -from 0 -to 1 \
+-length 150 -from 0 -to 1 \
 -command { setParam "s.deviationAging" } \
 -resolution 0.05 \
 -digits 3 \
@@ -266,7 +277,7 @@ scale .devaging -label "Deviation Aging" \
 pack .devaging
 
 scale .hsvratio -label "Auto HSV Range Ratio" \
--length 240 -from 0 -to 0.5 \
+-length 150 -from 0 -to 0.5 \
 -command { setParam "f.autoHsvValueRangeRatio" } \
 -resolution 0.005 \
 -digits 3 \
@@ -275,7 +286,7 @@ scale .hsvratio -label "Auto HSV Range Ratio" \
 pack .hsvratio
 
 scale .houghminlenght -label "Hough Min Length" \
--length 240 -from 0 -to 200 \
+-length 150 -from 0 -to 200 \
 -command { setParam "f.houghMinLength" } \
 -resolution 1 \
 -digits 3 \
@@ -284,7 +295,7 @@ scale .houghminlenght -label "Hough Min Length" \
 pack .houghminlenght
 
 scale .houghmaxgap -label "Hough Max Gap" \
--length 240 -from 0 -to 200 \
+-length 150 -from 0 -to 200 \
 -command { setParam "f.houghMaxGap" } \
 -resolution 1 \
 -digits 3 \
@@ -293,7 +304,7 @@ scale .houghmaxgap -label "Hough Max Gap" \
 pack .houghmaxgap
 
 scale .houghrho -label "Hough Rho" \
--length 240 -from 0 -to 10 \
+-length 150 -from 0 -to 10 \
 -command { setParam "f.houghRho" } \
 -resolution 0.5 \
 -digits 3 \
@@ -302,7 +313,7 @@ scale .houghrho -label "Hough Rho" \
 pack .houghrho
 
 scale .hystcenterthresh -label "Hystersis Distance Threshhold" \
--length 240 -from 0 -to 1 \
+-length 150 -from 0 -to 1 \
 -command { setParam "f.hystDistanceThr" } \
 -resolution 0.05 \
 -digits 3 \
@@ -311,7 +322,7 @@ scale .hystcenterthresh -label "Hystersis Distance Threshhold" \
 pack .hystcenterthresh
 
 scale .hystdirthresh -label "Hystersis Deviation Threshhold" \
--length 240 -from 0 -to 1 \
+-length 150 -from 0 -to 1 \
 -command { setParam "f.hystDeviationThr" } \
 -resolution 0.05 \
 -digits 3 \
@@ -319,8 +330,17 @@ scale .hystdirthresh -label "Hystersis Deviation Threshhold" \
 -showvalue 1 -orient horizontal
 pack .hystdirthresh
 
+scale .imuweight -label "IMU line weight" \
+-length 150 -from 0 -to 1 \
+-command { setParam "m.imuWeight" } \
+-resolution 0.05 \
+-digits 3 \
+-variable imuweight \
+-showvalue 1 -orient horizontal
+pack .imuweight
+
 scale .cameraparam -label "Camera param" \
--length 240 -from 0.01 -to 2 \
+-length 150 -from 0.01 -to 2 \
 -command { setParam "f.cameraParam" } \
 -resolution 0.025 \
 -digits 3 \
@@ -329,22 +349,13 @@ scale .cameraparam -label "Camera param" \
 pack .cameraparam
 
 scale .camerascale -label "Camera scale" \
--length 240 -from 0.000 -to 0.03 \
+-length 150 -from 0.000 -to 0.03 \
 -command { setParam "k.cameraScale" } \
 -resolution 0.0003 \
 -digits 4 \
 -variable camerascale \
 -showvalue 1 -orient horizontal
 pack .camerascale
-
-scale .gazaltitude -label "Altitude" \
--length 240 -from 1 -to 2 \
--command { setParam "a.gazAltitude" } \
--resolution 0.05 \
--digits 3 \
--variable gazaltitude \
--showvalue 1 -orient horizontal
-pack .gazaltitude
 
 #label .lbl -textvariable val 
 #pack .lbl
@@ -383,8 +394,7 @@ set houghmaxgap 40
 set houghrho 3
 set hystcenterthresh 0.2
 set hystdirthresh 0.50
-set hystforgetthresh 0.1
-set imuexp 5
+set imuweight 0.5
 set gazaltitude 1.5
 
 # value determined by measurement (more precise experiment)

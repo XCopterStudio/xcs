@@ -3,6 +3,8 @@
 class LineMaster {
     
     function init(lineFinder, lineKeeper) {
+        var this.imuWeight = 0.5;
+        
         var this.distance = 0;
         var this.deviation = 0;
         var this.hasLine = false;
@@ -25,7 +27,7 @@ class LineMaster {
         
         _lineFinder.&deviation.notifyChange(function() {
             // simply combine via averaging
-            var imuWeight = 0.5;
+            var imuWeight = that.imuWeight;
             if(!that._lineFinder.hasLine) {
                 imuWeight = 1;
             };
