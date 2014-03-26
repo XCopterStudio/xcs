@@ -7,13 +7,10 @@ pack .buttons
 button .buttons.takeoff -text "TakeOff" -command { setParam "xci.command" "\"TakeOff\"" }
 pack .buttons.takeoff -side left
 
-button .buttons.land -text "Land" -command { cmd "a.tpitch.stop();a.tyaw.stop();a.troll.stop();a.tgaz.stop();xci.command=\"Land\";" }
+button .buttons.land -text "Land" -command { cmd "a.trp.stop();a.tyg.stop();xci.command=\"Land\";" }
 pack .buttons.land -side left
 
-button .buttons.startall -text "Start ALL" -command { cmd "a.adjustGaz(),a.adjustRoll(),a.adjustYaw(),a.adjustPitch()," }
-pack .buttons.startall -side left
-
-button .buttons.stopall -text "Stop ALL" -command { cmd "a.tpitch.stop();a.tyaw.stop();a.troll.stop();a.tgaz.stop();" }
+button .buttons.stopall -text "Stop ALL" -command { cmd "a.trp.stop();a.tyg.stop();" }
 pack .buttons.stopall -side left
 
 button .buttons.resetimu -text "Reset IMU" -command { cmd "k.reset(0,0);" }
@@ -22,7 +19,94 @@ pack .buttons.resetimu -side left
 button .buttons.resetimuvis -text "Reset IMU (visual)" -command { cmd "k.reset(f.distance, f.deviation);" }
 pack .buttons.resetimuvis -side left
 
-### ROLL ###
+### GAZ ###
+
+
+frame .gaz -borderwidth 3 -relief raised
+pack .gaz -side left
+
+label .gaz.lbl -text "GAZ"
+pack .gaz.lbl
+
+scale .gaz.p  -label "gaz P" \
+-length 150 -from 0 -to 2 \
+-command { setParam "a.gazPidParam.p" } \
+-resolution 0.01 \
+-digits 3 \
+-variable gazpval \
+-showvalue 1 -orient horizontal
+pack .gaz.p
+
+scale .gaz.i  -label "gaz I" \
+-length 150 -from 0 -to 2 \
+-command { setParam "a.gazPidParam.i" } \
+-resolution 0.01 \
+-digits 3 \
+-variable gazival \
+-showvalue 1 -orient horizontal
+pack .gaz.i
+
+scale .gaz.d -label "gaz D" \
+-length 150 -from -2 -to 2 \
+-command { setParam "a.gazPidParam.d" } \
+-resolution 0.01 \
+-digits 3 \
+-variable gazdval \
+-showvalue 1 -orient horizontal
+pack .gaz.d
+
+scale .gaz.altitude -label "Altitude" \
+-length 150 -from 1 -to 2 \
+-command { setParam "a.gazAltitude" } \
+-resolution 0.05 \
+-digits 3 \
+-variable gazaltitude \
+-showvalue 1 -orient horizontal
+pack .gaz.altitude
+
+### YAW (& GAZ) ###
+
+frame .yaw -borderwidth 3 -relief raised
+pack .yaw -side left
+
+label .yaw.lbl -text "YAW (& GAZ)"
+pack .yaw.lbl
+
+scale .yaw.p  -label "yaw P" \
+-length 150 -from 0 -to 2 \
+-command { setParam "a.yawPidParam.p" } \
+-resolution 0.01 \
+-digits 3 \
+-variable yawpval \
+-showvalue 1 -orient horizontal
+pack .yaw.p
+
+scale .yaw.i  -label "yaw I" \
+-length 150 -from 0 -to 2 \
+-command { setParam "a.yawPidParam.i" } \
+-resolution 0.01 \
+-digits 3 \
+-variable yawival \
+-showvalue 1 -orient horizontal
+pack .yaw.i
+
+scale .yaw.d -label "yaw D" \
+-length 150 -from -2 -to 2 \
+-command { setParam "a.yawPidParam.d" } \
+-resolution 0.01 \
+-digits 3 \
+-variable yawdval \
+-showvalue 1 -orient horizontal
+pack .yaw.d
+
+button .yaw.start -text "Start YG" -command { cmd "a.adjustYG()," }
+pack .yaw.start
+button .yaw.stop -text "Stop YG" -command { cmd "a.tyg.stop()" }
+pack .yaw.stop
+
+
+
+### ROLL (& PICTH) ###
 
 frame .roll -borderwidth 3 -relief raised
 pack .roll -side left
@@ -57,77 +141,28 @@ scale .roll.d -label "roll D" \
 -showvalue 1 -orient horizontal
 pack .roll.d
 
-button .roll.start -text "Start" -command { cmd "a.adjustRoll()," }
+button .roll.start -text "Start RP" -command { cmd "a.adjustRP()," }
 pack .roll.start
-button .roll.stop -text "Stop" -command { cmd "a.troll.stop()" }
+button .roll.stop -text "Stop RP" -command { cmd "a.trp.stop()" }
 pack .roll.stop
 
-scale .roll.int -label "roll interval" \
+scale .roll.int -label "RP interval" \
 -length 150 -from 0 -to 2 \
--command { setParam "a.rollInterval" } \
+-command { setParam "a.rpInterval" } \
 -resolution 0.05 \
 -digits 3 \
 -variable rollint \
 -showvalue 1 -orient horizontal
 pack .roll.int
 
-scale .roll.sleep -label "roll sleep" \
+scale .roll.sleep -label "RP sleep" \
 -length 150 -from 0 -to 1 \
--command { setParam "a.rollSleep" } \
+-command { setParam "a.rpSleep" } \
 -resolution 0.01 \
 -digits 3 \
 -variable rollsleep \
 -showvalue 1 -orient horizontal
 pack .roll.sleep
-
-scale .roll.threshold -label "roll threshold" \
--length 150 -from 0 -to 0.5 \
--command { setParam "a.rollThreshold" } \
--resolution 0.05 \
--digits 3 \
--variable rollthreshold \
--showvalue 1 -orient horizontal
-pack .roll.threshold
-
-### YAW ###
-
-frame .yaw -borderwidth 3 -relief raised
-pack .yaw -side left
-
-label .yaw.lbl -text "YAW"
-pack .yaw.lbl
-
-scale .yaw.p  -label "yaw P" \
--length 150 -from 0 -to 2 \
--command { setParam "a.yawPidParam.p" } \
--resolution 0.01 \
--digits 3 \
--variable yawpval \
--showvalue 1 -orient horizontal
-pack .yaw.p
-
-scale .yaw.i  -label "yaw I" \
--length 150 -from 0 -to 2 \
--command { setParam "a.yawPidParam.i" } \
--resolution 0.01 \
--digits 3 \
--variable yawival \
--showvalue 1 -orient horizontal
-pack .yaw.i
-
-scale .yaw.d -label "yaw D" \
--length 150 -from -2 -to 2 \
--command { setParam "a.yawPidParam.d" } \
--resolution 0.01 \
--digits 3 \
--variable yawdval \
--showvalue 1 -orient horizontal
-pack .yaw.d
-
-button .yaw.start -text "Start" -command { cmd "a.adjustYaw()," }
-pack .yaw.start
-button .yaw.stop -text "Stop" -command { cmd "a.tyaw.stop()" }
-pack .yaw.stop
 
 ### PITCH ###
 
@@ -164,96 +199,14 @@ scale .pitch.d -label "pitch D" \
 -showvalue 1 -orient horizontal
 pack .pitch.d
 
-button .pitch.start -text "Start" -command { cmd "a.adjustPitch()," }
-pack .pitch.start
-button .pitch.stop -text "Stop" -command { cmd "a.tpitch.stop()" }
-pack .pitch.stop
-
-scale .pitch.int -label "pitch interval" \
--length 150 -from 0 -to 2 \
--command { setParam "a.pitchInterval" } \
--resolution 0.05 \
--digits 3 \
--variable pitchint \
--showvalue 1 -orient horizontal
-pack .pitch.int
-
-scale .pitch.sleep -label "pitch sleep" \
+scale .pitch.forward -label "Forward" \
 -length 150 -from 0 -to 1 \
--command { setParam "a.pitchSleep" } \
--resolution 0.01 \
--digits 3 \
--variable pitchsleep \
--showvalue 1 -orient horizontal
-pack .pitch.sleep
-
-scale .pitch.distance -label "pitch distance" \
--length 150 -from 0 -to 0.5 \
--command { setParam "a.pitchDistance" } \
+-command { setParam "a.forward" } \
 -resolution 0.05 \
 -digits 3 \
--variable pitchdistance \
+-variable pitchforward \
 -showvalue 1 -orient horizontal
-pack .pitch.distance
-
-scale .pitch.deviation -label "pitch deviation" \
--length 150 -from 0 -to 0.5 \
--command { setParam "a.pitchDeviation" } \
--resolution 0.05 \
--digits 3 \
--variable pitchdeviation \
--showvalue 1 -orient horizontal
-pack .pitch.deviation
-
-### GAZ ###
-
-frame .gaz -borderwidth 3 -relief raised
-pack .gaz -side left
-
-label .gaz.lbl -text "GAZ"
-pack .gaz.lbl
-
-scale .gaz.p  -label "gaz P" \
--length 150 -from 0 -to 2 \
--command { setParam "a.gazPidParam.p" } \
--resolution 0.01 \
--digits 3 \
--variable gazpval \
--showvalue 1 -orient horizontal
-pack .gaz.p
-
-scale .gaz.i  -label "gaz I" \
--length 150 -from 0 -to 2 \
--command { setParam "a.gazPidParam.i" } \
--resolution 0.01 \
--digits 3 \
--variable gazival \
--showvalue 1 -orient horizontal
-pack .gaz.i
-
-scale .gaz.d -label "gaz D" \
--length 150 -from -2 -to 2 \
--command { setParam "a.gazPidParam.d" } \
--resolution 0.01 \
--digits 3 \
--variable gazdval \
--showvalue 1 -orient horizontal
-pack .gaz.d
-
-button .gaz.start -text "Start" -command { cmd "a.adjustGaz()," }
-pack .gaz.start
-button .gaz.stop -text "Stop" -command { cmd "a.tgaz.stop()" }
-pack .gaz.stop
-
-scale .gaz.altitude -label "Altitude" \
--length 150 -from 1 -to 2 \
--command { setParam "a.gazAltitude" } \
--resolution 0.05 \
--digits 3 \
--variable gazaltitude \
--showvalue 1 -orient horizontal
-pack .gaz.altitude
-
+pack .pitch.forward
 
 
 ### MIscellaneous ###
@@ -396,7 +349,6 @@ set rollival 0
 set rolldval 0
 set rollint 1
 set rollsleep 0.4
-set rollthreshold 0.1
 
 set yawpval 0.9
 set yawival 0.0
@@ -405,10 +357,7 @@ set yawdval 0
 set pitchpval 0.35
 set pitchival 0
 set pitchdval 0
-set pitchint 0.9
-set pitchsleep 0.5
-set pitchdistance 0.2
-set pitchdeviation 0.15
+set pitchforward 0
 
 set gazpval 0.5
 set gazival 0
