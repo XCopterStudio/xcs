@@ -4,7 +4,11 @@ class LineMaster {
     
     function init(lineFinder, lineKeeper) {
         var this.imuWeight = 0.5;
+        var this.curvatureAging = 0.5;
+        var this.hystDeviationThrBase = 0.5;
+        var this.hystDeviationThrRate = 0.1;
         
+        var this.curvature = 0;
         var this.distance = 0;
         var this.deviation = 0;
         var this.hasLine = false;
@@ -30,9 +34,12 @@ class LineMaster {
             var imuWeight = that.imuWeight;
             if(!that._lineFinder.hasLine) {
                 imuWeight = 1;
+            } else {
+                //imuWeight = 0.1;
             };
             that.distance = (1 - imuWeight) * that._lineFinder.distance + imuWeight * that.distance;
             that.deviation = Global.angleLinComb(that._lineFinder.deviation, that.deviation, 1 - imuWeight, imuWeight);
+            that.curvature = that.curvatureAging * that.curvature + (1-that.curvatureAging) * that._lineFinder.curvature;
             
             // recalibrate IMU keeper
             that._lineKeeper.reset(that.distance, that.deviation);
@@ -40,6 +47,7 @@ class LineMaster {
             // feedback to line finder
             that._lineFinder.expectedDistance = that.distance;
             that._lineFinder.expectedDeviation = that.deviation;            
+            that._lineFinder.hystDeviationThr = that.hystDeviationThrBase + that.curvature.abs() * that.hystDeviationThrRate;
         });
         
         // TODO lines below are probably innecessary

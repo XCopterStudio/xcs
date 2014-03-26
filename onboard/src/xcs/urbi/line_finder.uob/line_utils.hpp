@@ -77,6 +77,15 @@ public:
         cv::Point dir(line[2] - line[0], line[1] - line[3]);
         return atan2(dir.x, dir.y);
     }
+
+    static inline cv::Point lineCenter(RawLineType line) {
+        return cv::Point((line[0] + line[2]) / 2, (line[3] + line[1]) / 2);
+    }
+    
+    static inline double lineLength(RawLineType line) {
+        cv::Point dir(line[2] - line[0], line[1] - line[3]);
+        return hypot(dir.x, dir.y);
+    }
 };
 }
 }

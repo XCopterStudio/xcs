@@ -2,6 +2,7 @@
 #include <thread>
 #include <chrono>
 #include <cmath>
+#include <basic.hpp>
 
 using namespace xcs::urbi;
 using namespace xcs::urbi::line_finder;
@@ -48,8 +49,10 @@ ULineFinder::ULineFinder(const string& name) :
     UBindVar(ULineFinder, houghMaxGap);
     UBindVar(ULineFinder, hystDeviationThr);
     UBindVar(ULineFinder, hystDistanceThr);
+    UBindVar(ULineFinder, curvatureTolerance);
 
 
+    UBindVarRename(ULineFinder, curvatureUVar, "curvature");
     UBindVarRename(ULineFinder, distanceUVar, "distance");
     UBindVarRename(ULineFinder, deviationUVar, "deviation");
     UBindVar(ULineFinder, hasLine);
@@ -77,6 +80,7 @@ void ULineFinder::init() {
     houghMaxGap = 40;
     hystDeviationThr = M_PI / 3; // angle in radians for hysteresis filtering
     hystDistanceThr = 0.2; // distance in relative units for hysteresis filtering
+    curvatureTolerance = 2; // threshold factors for curvature estimation
     cameraParam = 0.78; // experimentally determined camera intrinsic
     /*
      * Output vars
@@ -170,7 +174,6 @@ void ULineFinder::processFrame() {
     cv::imshow("HSV->InRange", mid);
     // transform to edge map
     cv::Canny(mid, mid, static_cast<double> (cannyT1), static_cast<double> (cannyT2), static_cast<int> (cannyApertureSize), static_cast<double> (cannyL2Gradient));
-    cv::imshow("Canny", mid);
     /*
      * 3. Detect lines
      */
@@ -181,13 +184,14 @@ void ULineFinder::processFrame() {
      * 4. Filter out outlying lines
      */
     cv::vector<LineUtils::RawLineType> filteredLines;
+    cv::vector<LineUtils::RawLineType> curvatureLines;
     LineUtils::RawLineType avg;
     bool hasAvg(false);
 
     if (lines.size() == 0) { // no line detected
         lineType_ = LINE_NONE;
     } else {
-        filteredLines = useOnlyGoodLines(lines);
+        useOnlyGoodLines(lines, filteredLines, curvatureLines);
 
         if (filteredLines.size() == 0) {
             lineType_ = LINE_NONE;
@@ -202,9 +206,12 @@ void ULineFinder::processFrame() {
 
             distance_ = LineUtils::pointLineDistance(lineUtils_.referencePoint, avg) / lineUtils_.distanceUnit;
             deviation_ = LineUtils::lineDirection(avg);
+
+            curvature_ = calculateCurvature(avg, curvatureLines, mid);
         }
 
     }
+    cv::imshow("Canny", mid);
 
     /*
      * 5. Draw output
@@ -214,22 +221,23 @@ void ULineFinder::processFrame() {
     /*
      * 6. Notify output
      */
+    curvatureUVar = curvature_;
     distanceUVar = distance_;
     deviationUVar = deviation_;
     hasLine = isLineVisual(lineType_); // must be last as it notifies other UObjects
 }
 
-cv::vector<LineUtils::RawLineType> ULineFinder::useOnlyGoodLines(cv::vector<LineUtils::RawLineType> lines) {
+void ULineFinder::useOnlyGoodLines(cv::vector<LineUtils::RawLineType> lines, cv::vector<LineUtils::RawLineType> &goodLines, cv::vector<LineUtils::RawLineType> &curvatureLines) {
     auto expectedDistance = static_cast<double> (expectedDistanceUVar);
     auto expectedDeviation = static_cast<double> (expectedDeviationUVar);
-    cv::vector<LineUtils::RawLineType> result;
+
 
     cv::Point deltaPoint(lineUtils_.getDeltaPoint(expectedDistance, expectedDeviation));
 
     for (auto lineCandidate : lines) {
         LineUtils::normalizeOrientation(lineCandidate);
 
-        cv::Point center((lineCandidate[0] + lineCandidate[2]) / 2, (lineCandidate[3] + lineCandidate[1]) / 2);
+        cv::Point center = LineUtils::lineCenter(lineCandidate);
         // check line validity
         double devDiff = expectedDeviation - LineUtils::lineDirection(lineCandidate);
         /* Orientation is ignored */
@@ -244,12 +252,64 @@ cv::vector<LineUtils::RawLineType> ULineFinder::useOnlyGoodLines(cv::vector<Line
         auto devFactor = 1;
         auto distFactor = 1;
         if (devFactor * devDiff <= static_cast<double> (hystDeviationThr) && distFactor * distDiff <= static_cast<double> (hystDistanceThr)) {
-            result.push_back(lineCandidate);
+            goodLines.push_back(lineCandidate);
+            curvatureLines.push_back(lineCandidate);
+        }
+        auto toleranceFactor = static_cast<double> (curvatureTolerance); // factor is applied to angle only
+        if (devDiff <= toleranceFactor * static_cast<double> (hystDeviationThr) && distDiff <= static_cast<double> (hystDistanceThr)) {
+            curvatureLines.push_back(lineCandidate);
         }
     }
+}
 
-    return result;
+double ULineFinder::calculateCurvature(xcs::urbi::line_finder::LineUtils::RawLineType meanLine, cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& curvatureLines, cv::Mat image) {
+    cv::Point meanLineCenter(LineUtils::lineCenter(meanLine));
 
+    /*
+     * Change and transform line coordinates
+     */
+    cv::vector<cv::Point> centerPoints;
+    cv::vector<double> deviations;
+    for (auto line : curvatureLines) {
+        auto center = LineUtils::lineCenter(line);
+        // translate
+        center = center - meanLineCenter;
+        // rotate
+        auto rotation = -deviation_;
+        cv::Point centerTr(center.x * cos(rotation) - center.y * sin(rotation), center.x * sin(rotation) + center.y * cos(rotation));
+        centerPoints.push_back(centerTr);
+
+        auto deviation = LineUtils::lineDirection(line);
+        deviation = deviation - deviation_;
+        deviations.push_back(deviation);
+    }
+
+    /*
+     * Sum all curvature contributions
+     */
+    auto l = LineUtils::lineLength(meanLine) / 2;
+    double curvature = 0;
+    for (size_t i = 0; i < centerPoints.size(); ++i) {
+        auto center = centerPoints[i];
+        auto deviation = deviations[i];
+        auto dbgCenter = LineUtils::lineCenter(curvatureLines[i]);
+
+        if (abs(center.y) < l) {
+            // TODO remove cv::putText(image, "IN", dbgCenter, cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 0));
+            continue;
+        }
+        if (sgn(deviation) * sgn(-center.x * center.y) <= 0) {
+            //TODO remove cv::putText(image, "BAD", dbgCenter, cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 0));
+            continue;
+        }
+
+
+        auto curvaturePart = deviation / hypot(center.x, center.y);
+        curvaturePart *= sgn(center.y);
+        // TODO remove cv::putText(image, to_string(dbgCurv), dbgCenter, cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255, 255, 0));
+        curvature += curvaturePart;
+    }
+    return curvature;
 }
 
 void ULineFinder::drawDebugLines(const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& lines, const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& filteredLines) {

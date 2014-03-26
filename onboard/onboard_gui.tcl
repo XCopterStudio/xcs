@@ -276,6 +276,16 @@ scale .devaging -label "Deviation Aging" \
 -showvalue 1 -orient horizontal
 pack .devaging
 
+scale .curvaging -label "Curvature aging" \
+-length 150 -from 0 -to 1 \
+-command { setParam "m.curvatureAging" } \
+-resolution 0.05 \
+-digits 3 \
+-variable curvaging \
+-showvalue 1 -orient horizontal
+pack .curvaging
+
+
 scale .hsvratio -label "Auto HSV Range Ratio" \
 -length 150 -from 0 -to 0.5 \
 -command { setParam "f.autoHsvValueRangeRatio" } \
@@ -321,14 +331,23 @@ scale .hystcenterthresh -label "Hystersis Distance Threshhold" \
 -showvalue 1 -orient horizontal
 pack .hystcenterthresh
 
-scale .hystdirthresh -label "Hystersis Deviation Threshhold" \
+scale .hystdirthreshbs -label "Hyst. Dev. Thr. Base" \
 -length 150 -from 0 -to 1 \
--command { setParam "f.hystDeviationThr" } \
+-command { setParam "m.hystDeviationThrBase" } \
 -resolution 0.05 \
 -digits 3 \
--variable hystdirthresh \
+-variable hystdirthreshbs \
 -showvalue 1 -orient horizontal
-pack .hystdirthresh
+pack .hystdirthreshbs
+
+scale .hystdirthreshrt -label "Hyst. Dev. Thr. Rate" \
+-length 150 -from 0 -to 100 \
+-command { setParam "m.hystDeviationThrRate" } \
+-resolution 5 \
+-digits 3 \
+-variable hystdirthreshrt \
+-showvalue 1 -orient horizontal
+pack .hystdirthreshrt
 
 scale .imuweight -label "IMU line weight" \
 -length 150 -from 0 -to 1 \
@@ -339,23 +358,32 @@ scale .imuweight -label "IMU line weight" \
 -showvalue 1 -orient horizontal
 pack .imuweight
 
-scale .cameraparam -label "Camera param" \
--length 150 -from 0.01 -to 2 \
--command { setParam "f.cameraParam" } \
--resolution 0.025 \
+scale .curva -label "Curvature tolerance" \
+-length 150 -from 1 -to 4 \
+-command { setParam "f.curvatureTolerance" } \
+-resolution 0.25 \
 -digits 3 \
--variable cameraparam \
+-variable curva \
 -showvalue 1 -orient horizontal
-pack .cameraparam
+pack .curva
 
-scale .camerascale -label "Camera scale" \
--length 150 -from 0.000 -to 0.03 \
--command { setParam "k.cameraScale" } \
--resolution 0.0003 \
--digits 4 \
--variable camerascale \
--showvalue 1 -orient horizontal
-pack .camerascale
+#scale .cameraparam -label "Camera param" \
+#-length 150 -from 0.01 -to 2 \
+#-command { setParam "f.cameraParam" } \
+#-resolution 0.025 \
+#-digits 3 \
+#-variable cameraparam \
+#-showvalue 1 -orient horizontal
+#pack .cameraparam
+#
+#scale .camerascale -label "Camera scale" \
+#-length 150 -from 0.000 -to 0.03 \
+#-command { setParam "k.cameraScale" } \
+#-resolution 0.0003 \
+#-digits 4 \
+#-variable camerascale \
+#-showvalue 1 -orient horizontal
+#pack .camerascale
 
 #label .lbl -textvariable val 
 #pack .lbl
@@ -387,14 +415,17 @@ set gazival 0
 set gazdval 0
 
 set distagingval 0.1
-set devaging 0.5
+set devaging 0.8
+set curvaging 0.85
 set hsvratio 0.0
 set houghminlenght 50
 set houghmaxgap 40
 set houghrho 3
 set hystcenterthresh 0.2
-set hystdirthresh 0.50
-set imuweight 0.5
+set hystdirthreshbs 0.30
+set hystdirthreshrt 40
+set imuweight 0.65
+set curva 2.0
 set gazaltitude 1.5
 
 # value determined by measurement (more precise experiment)

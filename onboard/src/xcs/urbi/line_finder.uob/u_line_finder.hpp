@@ -49,6 +49,7 @@ public:
      */
     ::urbi::UVar hystDistanceThr;
     ::urbi::UVar hystDeviationThr;
+    ::urbi::UVar curvatureTolerance;
 
     ::urbi::UVar cameraParam;
 
@@ -58,6 +59,7 @@ public:
     ::urbi::UVar distanceUVar;
     ::urbi::UVar deviationUVar;
     ::urbi::UVar hasLine;
+    ::urbi::UVar curvatureUVar;
 
     ULineFinder(const std::string &);
     void init();
@@ -88,6 +90,7 @@ private:
     size_t stuckCounter_;
     double distance_;
     double deviation_;
+    double curvature_;
 
     // processing results
     LineType lineType_;
@@ -96,15 +99,17 @@ private:
     inline bool isLineVisual(LineType lineType) {
         return lineType == LINE_VISUAL;
     }
-    
+
     void onChangeVideo(::urbi::UVar &uvar);
-    
+
     void adjustValueRange(cv::Mat image);
-    
+
     void processFrame();
+
+    void useOnlyGoodLines(cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType> lines, cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType> & goodLines, cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType> & curvatureLines);
     
-    cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType> useOnlyGoodLines(cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType> lines);
-    
+    double calculateCurvature(xcs::urbi::line_finder::LineUtils::RawLineType meanLine, cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& curvatureLines, cv::Mat image);
+
     void drawDebugLines(const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& lines, const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& filteredLines);
 
 };
