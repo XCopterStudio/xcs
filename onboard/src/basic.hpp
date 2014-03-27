@@ -32,4 +32,8 @@ inline double miliDegreesToRadias(int degrees) {
     return (double) (degrees * M_PI / 180000);
 }
 
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 #endif
