@@ -99,4 +99,23 @@ class Frontier2Aligner{
         },
     };
 
+    var resetRollPitch = function () {
+        rollPidParam.reset();
+        pitchPidParam.reset();
+        xci.roll = 0;
+        xci.pitch = 0;
+    };
+
+    var resetGazYaw = function () {
+        gazPidParam.reset();
+        xci.gaz = 0;
+        yawPidParam.reset();
+        xci.yaw = 0;
+    };
+
+    var resetAll = function () {
+        resetRollPitch();
+        resetGazYaw();
+    }
+
 }|;

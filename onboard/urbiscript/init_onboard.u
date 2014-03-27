@@ -40,7 +40,7 @@ var Global.user_lobby = this;
 
 // free-flight mode
 function Onboard.start_free_flight() {
-    echo("start_free_fligth");
+    echo("start_free_flight");
 };
 
 function Onboard.stop_free_flight() {
@@ -50,9 +50,17 @@ function Onboard.stop_free_flight() {
 // scripting mode
 function Onboard.start_scripting() {
     echo("start_scripting");
+    var that = Global.user_lobby;
+    var that.user_job = detach({ that.autostart(that.a, that.xci, that.m) });
 };
 
 function Onboard.stop_scripting() {
     echo("stop_scripting");
-    Global.user_lobby.connectionTag.stop();
+    var that = Global.user_lobby;
+    //that.connectionTag.stop();
+    that.a.trp.stop();
+    that.a.tyg.stop();
+    that.a.resetAll();
+    that.user_job.terminate();
+    that.xci.command = "Land";
 };

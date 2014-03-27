@@ -94,7 +94,7 @@ m.start(),; // would block
  */
 if(xciVersion == "xci_dodo") {
     //xci.setConfiguration("video:timestamps", "1");
-    //xci.setConfiguration("video:filename", "tmp/video.xcs");
+    xci.setConfiguration("video:filename", "tmp/video.mp4");
     xci.setConfiguration("video:filename", "logs/2014-03-27_12:08:48.152538.avi");
     
     xci.doCommand("Load");
