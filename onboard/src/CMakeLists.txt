@@ -38,6 +38,7 @@ add_subdirectory(xcs/urbi/datalogger.uob)
 # Subprojects (nodes)
 add_subdirectory(xcs/nodes/xobject)
 add_subdirectory(xcs/nodes/xci.xob)
+add_subdirectory(xcs/nodes/onboard.xob)
 
 # Subprojects (urbiscript)
 #add_subdirectory(../urbiscript ./urbiscript)
