@@ -43,7 +43,7 @@ public:
      * Very ugly geometry.
      */
     void drawFullLine(double distance, double deviation, cv::Scalar color, size_t width = 3, bool withCircle = false);
-    
+
     /*!
      * Wrapper for Urbi until struct casting is ready.
      */
@@ -54,19 +54,6 @@ public:
     void drawCircle(cv::Point center, cv::Scalar color, size_t radius = 3);
 
 private:
-
-    struct TaskCircle {
-        cv::Point center;
-        cv::Scalar color;
-        size_t radius;
-    };
-
-    struct TaskLine {
-        cv::Point begin;
-        cv::Point end;
-        cv::Scalar color;
-        size_t width;
-    };
 
     enum DrawTaskType {
         TASK_VOID,
@@ -81,18 +68,28 @@ private:
         DrawTaskType type;
 
         union {
-            TaskCircle dataCircle;
-            TaskLine dataLine;
+            struct {
+                cv::Point center;
+                cv::Scalar color;
+                size_t radius;
+            } dataCircle;
+
+            struct {
+                cv::Point begin;
+                cv::Point end;
+                cv::Scalar color;
+                size_t width;
+            } dataLine;
         };
     };
 
     xcs::urbi::line_finder::LineUtils lineUtils_;
     ::urbi::UImage lastFrame_;
     bool hasFrame_;
-    
+
     std::vector<DrawTask> drawTasks_;
     std::mutex drawTasksMtx_;
-    
+
     void onChangeVideo(::urbi::UVar &uvar);
     void onChangeFps(int value);
 
