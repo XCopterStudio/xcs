@@ -60,6 +60,94 @@ function serverConnect(ip, port, xci, xciVersion = "xci_parrot") {
     semanticSender.start(); // this is blocking call, so its at the end
 }|;
 
+function autostart(aligner, xci, lineMaster) {
+    var lineFinder = lineMaster._lineFinder;
+    var lineKeeper = lineMaster._lineKeeper;
+    
+    function takeOff(wait) {
+        echo("Sent take off");
+        xci.command = "TakeOff";
+        sleep(wait);
+        echo("Still after take off");
+    };
+    
+    function land() {
+        aligner.tyg.stop();
+        aligner.trp.stop();
+        xci.command = "Land";
+        
+    };
+    
+    function rise(limit) {
+        aligner.yawEnabled = 0;
+    
+        aligner.adjustYG(),;
+        while(xci.altitude < limit) {
+            sleep(2s);
+        };
+        echo("Flight level attained.");
+    };
+    
+    function hasLine() {
+        lineMaster.stop();
+        var originalDistanceThr = lineFinder.hystDistanceThr;
+        
+        lineFinder.expectedDistance = 0;
+        lineFinder.expectedDeviation = 0;
+        lineFinder.hystDistanceThr = 0.5;
+        
+        sleep(100ms); // at least few frames with new settings
+        
+        while(!lineFinder.hasLine && lineFinder.expectedDeviation <= 0.pi()) {
+            lineFinder.expectedDeviation += lineFinder.hystDeviationThr;
+            sleep(100ms); // at least few frames with new settings
+        };
+        
+        if(!lineFinder.hasLine) {
+            return false;
+        } else {
+            lineKeeper.reset(lineFinder.distance, lineFinder.deviation);
+            lineFinder.hystDistanceThr = originalDistanceThr;
+            lineMaster.start();
+            return true;
+        };        
+    };
+    
+    function randomMove() {
+        xci.roll = (10.random() - 5) / 100;
+        xci.pitch = (10.random() - 5) / 100;
+        sleep(500ms);
+        xci.roll = 0;
+        xci.pitch = 0;
+    };
+    
+    function findLine(attempts) {
+        while(!hasLine() && attempts > 0) {
+            randomMove();
+            attempts -= 1;
+        };
+        lineFinder.hasLine;
+    };
+    
+    takeOff(6s);
+    rise(1.45),; // block because of adjustYG
+    sleep(5s); // rise is nonblocking but we'd need blocking
+    if(!findLine(5)) {
+        echo("Giving up, landing");
+        land();
+        return;
+    };
+    echo("Found line");
+    
+    aligner.yawEnabled = 1;
+    echo("Enabled yaw.");
+    sleep(4s);
+    
+    aligner.adjustRP(),;
+    echo("Started RP");
+    echo("Flying...");
+}|;
+
 function Global.crop(value, max) {
     if(value.abs() > max) value.sign() * max else value; // pseudo-ternary operator
 }|;
