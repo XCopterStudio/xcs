@@ -17,8 +17,8 @@ var yawPidParam = PidParams.new(0.5, 0, 0);
 var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
 var gazPidParam = PidParams.new(0.5, 0, 0);
  
-var xciVersion = "xci_dodo";
-//var xciVersion = "xci_parrot";
+//var xciVersion = "xci_dodo";
+var xciVersion = "xci_parrot";
 
 /*
  * Dataflow graph
@@ -45,8 +45,7 @@ var s = LineSmoother.new(f);
 var m = LineMaster.new(f, k, s);
 
 
-
-var lineProvider = s;
+var lineProvider = m;
 
 var a = Frontier2Aligner.new(xci, lineProvider, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
 
@@ -75,7 +74,7 @@ xci.&psi >> k.&psi;
     logger.registerData("psi","psi","double",xci.&psi);
     logger.registerData("phi","phi","double",xci.&phi);
     logger.registerData("altitude","altitude","double",xci.&altitude);    
-    logger.registerVideo("logs/" + logname + ".avi", 640, 360, "video","video","video",xci.&video);
+    logger.registerData("battery","battery","double",xci.&battery);    
     
     logger.registerData("roll","roll","double",a.&roll);    
     logger.registerData("pitch","pitch","double",a.&pitch);    
@@ -86,7 +85,9 @@ xci.&psi >> k.&psi;
     logger.registerData("pitchE","pitchE","double",a.&pitchE);    
     logger.registerData("yawE","yawE","double",a.&yawE);    
     logger.registerData("gazE","gazE","double",a.&gazE);    
-    
+
+    logger.registerVideo("logs/" + logname + ".avi", 640, 360, "video","video","video",xci.&video);
+
     //logger.registerData("command","command","string",xci.&command);
 
 // Default values for image processing (not set in Tcl GUI)
