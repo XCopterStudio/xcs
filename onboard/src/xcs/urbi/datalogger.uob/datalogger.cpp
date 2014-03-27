@@ -45,11 +45,11 @@ VideoWriter::~VideoWriter(){
     avcodec_free_frame(&avframe_);
 }
 
-void VideoWriter::init(const std::string &videoFile, const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar){
+void VideoWriter::init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar){
     startTime_ = startTime;
     file_ = file;
     dataName_ = dataName;
-    videoFileWriter = unique_ptr<VideoFileWriter>(new VideoFileWriter(videoFile));
+    videoFileWriter = unique_ptr<VideoFileWriter>(new VideoFileWriter(videoFile,width,height));
     UNotifyChange(uvar, &VideoWriter::write);
 }
 
@@ -111,7 +111,7 @@ void Datalogger::registerData(const std::string &name, const std::string &semant
     }
 }
 
-void Datalogger::registerVideo(const std::string &videoFile, const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar){
+void Datalogger::registerVideo(const std::string &videoFile, int width, int height, const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar){
     if (!file_.is_open()){
         cerr << "File error" << endl;
     }
@@ -119,7 +119,7 @@ void Datalogger::registerVideo(const std::string &videoFile, const std::string &
         if (semanticType == "video"){
             file_ << REGISTER << " " << name << " " << semanticType << " " << syntacticType << endl;
             VideoWriter* function = new VideoWriter(std::string());
-            function->init(videoFile, name, startTime_, &file_, uvar);
+            function->init(videoFile, width, height, name, startTime_, &file_, uvar);
             writerList_.push_back(std::unique_ptr<DataWriter>(function));
         }
         else{

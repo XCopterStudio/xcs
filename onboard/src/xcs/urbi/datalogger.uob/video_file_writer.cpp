@@ -133,8 +133,8 @@ VideoFileWriter::VideoFileWriter(const std::string &fileName, const unsigned int
 
     outputFormat_ = av_guess_format(NULL, fileName.c_str(), NULL);
     if (!outputFormat_){
-        cerr << "Could not deduce output format from file extension: using h264" << endl;
-        outputFormat_ = av_guess_format("h264", NULL, NULL);
+        cerr << "Could not deduce output format from file extension: using mpeg" << endl;
+        outputFormat_ = av_guess_format("mpeg", NULL, NULL);
     }
 
     if (!outputFormat_){

@@ -37,7 +37,7 @@ namespace nodes{
     public:
         VideoWriter(const std::string &name);
         ~VideoWriter();
-        void init(const std::string &videoFile, const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar);
+        void init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar);
         virtual void write(::urbi::UVar &uvar);
     };
 
@@ -56,7 +56,7 @@ namespace nodes{
         
         void init(const std::string &file);
         void registerData(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);
-        void registerVideo(const std::string &videoFile, const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);
+        void registerVideo(const std::string &videoFile, int width, int height, const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);
     };
 
 }}

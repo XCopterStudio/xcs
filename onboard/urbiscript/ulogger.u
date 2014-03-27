@@ -6,7 +6,7 @@ logger.registerData("altitude","altitude","double",xci.&altitude);
 //logger.registerData("psi","psi","double",xci.&psi);
 //logger.registerData("phi","phi","double",xci.&phi);
 //logger.registerData("theta","theta","double",xci.&theta);
-logger.registerVideo("video.avi","video","video","video",xci.&video);
+logger.registerVideo("video.avi","640","360","video","video","video",xci.&video);
 
 xci.xciInit();
 
