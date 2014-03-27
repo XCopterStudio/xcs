@@ -137,7 +137,7 @@ label .roll.lbl -text "ROLL"
 pack .roll.lbl
 
 scale .roll.p  -label "roll P" \
--length 150 -from 0 -to 2 \
+-length 150 -from 0 -to 4 \
 -command { setParam "a.rollPidParam.p" } \
 -resolution 0.01 \
 -digits 3 \
@@ -205,7 +205,7 @@ label .pitch.lbl -text "PITCH"
 pack .pitch.lbl
 
 scale .pitch.p  -label "pitch P" \
--length 150 -from 0 -to 2 \
+-length 150 -from 0 -to 4 \
 -command { setParam "a.pitchPidParam.p" } \
 -resolution 0.01 \
 -digits 3 \
@@ -246,7 +246,7 @@ pack .pitch.enabled
 scale .pitch.forward -label "Forward" \
 -length 150 -from 0 -to 1 \
 -command { setParam "a.forward" } \
--resolution 0.05 \
+-resolution 0.01 \
 -digits 3 \
 -variable pitchforward \
 -showvalue 1 -orient horizontal
@@ -373,14 +373,14 @@ pack .curva
 #-showvalue 1 -orient horizontal
 #pack .cameraparam
 #
-#scale .camerascale -label "Camera scale" \
-#-length 150 -from 0.000 -to 0.03 \
-#-command { setParam "k.cameraScale" } \
-#-resolution 0.0003 \
-#-digits 4 \
-#-variable camerascale \
-#-showvalue 1 -orient horizontal
-#pack .camerascale
+scale .camerascale -label "Camera scale" \
+-length 150 -from 0.0001 -to 0.0020 \
+-command { setParam "k.cameraScale" } \
+-resolution 0.00005 \
+-digits 4 \
+-variable camerascale \
+-showvalue 1 -orient horizontal
+pack .camerascale
 
 #label .lbl -textvariable val 
 #pack .lbl
@@ -388,20 +388,20 @@ pack .curva
 ##################
 # Default values #
 ##################
-set rollpval 1
+set rollpval 1.1
 set rollival 0
 set rolldval 0
-set rollint 1
-set rollsleep 0.4
+set rollint 0.6
+set rollsleep 0.20
 
 set yawpval 0.9
 set yawival 0.0
 set yawdval 0
 
-set pitchpval 0.35
+set pitchpval 2.4
 set pitchival 0
 set pitchdval 0
-set pitchforward 0
+set pitchforward 0.09
 
 set gazpval 0.5
 set gazival 0
@@ -429,7 +429,7 @@ set gazenabled 1
 # value determined by measurement (more precise experiment)
 set cameraparam 0.74
 # value determined by experiment
-set camerascale 0.0012
+set camerascale 0.001
 
 #############
 # functions #
