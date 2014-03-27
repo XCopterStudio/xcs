@@ -37,6 +37,10 @@ var KeyboardControllerView = Backbone.View.extend({
     },
 
     keydown : function(e) {
+        if (e.which == 88 && e.ctrlKey) {
+            app.XcopterState.setMode("free_flight");
+        }
+
         if (this.keyMap[e.which] === undefined) {
             return;
         }

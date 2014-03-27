@@ -41,7 +41,7 @@
 </nav>
 
 <!-- Flash messages -->
-<div class="container-fluid">
+<div style="float:left;">
         <div id="flash-messages" class="col-md-6 col-md-offset-3">
             <!--<div class="alert alert-success">Great! X-Copter is connected.</div>
             <div class="alert alert-info">Taking off! Take care.</div>
@@ -49,15 +49,15 @@
         </div>
 </div>
 
-<div id="data-from-onboard">
+<div class="container-fluid" id="data-from-onboard">
 
-<div class="gridster">
-    <ul>
-        <li data-row="1" data-col="1" data-sizex="1" data-sizey="1" class="widget-line" id="altitude"></li>
-        <li data-row="2" data-col="1" data-sizex="1" data-sizey="1" class="widget-line" id="phi"></li>
-        <li data-row="3" data-col="1" data-sizex="1" data-sizey="1" class="widget-line" id="psi"></li>
-        <li data-row="4" data-col="1" data-sizex="1" data-sizey="1" class="widget-line" id="theta"></li>
-    </ul>
-</div>
+    <div class="gridster">
+        <ul>
+            <li data-row="1" data-col="1" data-sizex="1" data-sizey="1" class="widget-line" id="altitude"></li>
+            <li data-row="2" data-col="1" data-sizex="1" data-sizey="1" class="widget-line" id="phi"></li>
+            <li data-row="3" data-col="1" data-sizex="1" data-sizey="1" class="widget-line" id="psi"></li>
+            <li data-row="4" data-col="1" data-sizex="1" data-sizey="1" class="widget-line" id="theta"></li>
+        </ul>
+    </div>
 
 </div>

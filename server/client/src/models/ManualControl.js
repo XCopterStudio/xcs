@@ -2,7 +2,7 @@
 
 function Controller() {
     function cmd(data) {
-        gSocket.emit('manual', data);
+        gSocket.emit('resend', data);
     }
     this.takeOff = function() {
         data = {

@@ -1,4 +1,10 @@
 node_modules
 .project
 
+# Qt Creator project files
+xcs-server.config
+xcs-server.creator
+xcs-server.creator.user
+xcs-server.files
+xcs-server.includes
 

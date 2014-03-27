@@ -23,6 +23,21 @@ class Adapter {
     };
 }|;
 
+class OnboardSender {
+
+    function init(adapter, UJson) {
+        var this.adapter = adapter;
+        var this.ujson = UJson;
+    }|;
+
+    function sendMode(mode) {
+        var data = [ => ];
+        data["type"] = "onboard";
+        data["data"] = [ "mode" => mode ];
+        this.adapter.send(this.ujson.encode(data) + "\n");
+    }|;
+}|;
+
 class FlashSender {
 
     function init(adapter, UJson) {
@@ -37,23 +52,21 @@ class FlashSender {
         this.adapter.send(this.ujson.encode(data) + "\n");
     }|;
 }|;
-//TODO rename inputs to outputs in receiver
-//TODO rename outputs to inputs in sender
 
 class SemanticSender {
 
-    function init(adapter, outputs, UJson, refreshFrequency) {
+    function init(adapter, inputs, UJson, refreshFrequency) {
         var that = this;
-        var this._outputs = [ => ];
+        var this._inputs = [ => ];
         var this.adapter = adapter;
         var this.period = 1 / refreshFrequency;
 
-        for(var output: outputs) {
-            setSlot(output.first, nil); // slot for outer "writers"
-            _outputs[output.first] = nil; // last stored value
-            var slot = getSlot(output.first);
+        for(var input: inputs) {
+            setSlot(input.first, nil); // slot for outer "writers"
+            _inputs[input.first] = nil; // last stored value
+            var slot = getSlot(input.first);
             slot.notifyChange(function() {
-                that._outputs[output.first] = that.getSlotValue(output.first);
+                that._inputs[input.first] = that.getSlotValue(input.first);
             });
         };
     }|;
@@ -61,9 +74,9 @@ class SemanticSender {
     function start() {
         every(this.period) {
                 var dataToSend = [ => ];
-                for(var output: _outputs) {
-                    if(!this._outputs[output.first].isNil) {
-                        dataToSend[output.first] = this.getSlotValue(output.first);
+                for(var input: _inputs) {
+                    if(!this._inputs[input.first].isNil) {
+                        dataToSend[input.first] = this.getSlotValue(input.first);
                     }
                 };
                 if(dataToSend.size > 0) {
@@ -79,23 +92,51 @@ class SemanticSender {
 }|;
 
 class SemanticReceiver {
-    function init(adapter, inputs, UJson) { // parseJson as arg, lookup is wierd in this case (TODO package/import? or Global) 
-        for(var input: inputs) setSlot(input.first, nil);
 
-        var that = this;
+    var onboardMode;
+    var receivers = Dictionary.new();
+
+    function init(adapter, UJson) { // parseJson as arg, lookup is wierd in this case (TODO package/import? or Global)
         at(adapter.output->changed?) {
+
             /* This handles the case when more JSON objects are present in the buffer */
             var messageArray = "[" + adapter.output.replace("}\n{", "},{") + "]";
             var rawMessages = UJson.decode(messageArray);
             for(var rawData: rawMessages) {
+                var type = rawData["type"];
                 var data = rawData["data"];
-                for(var input: inputs) {
-                    var name = input.first;
-                    if(name in data) {
-                        that.updateSlot(name, data[name]);
-                    };
-                };
+                if (receivers.has(type)) {
+                    receivers[type].receive(data);
+                } else {
+                    echo("Unhandled message from Server of type: " + rawData["type"]);
+                }
             };
         };
     };
+
+    function addReceiver(receiver) {
+        receivers[receiver.typeName] = receiver;
+    };
+}|;
+
+class Receiver {
+
+    var typeName;
+    var outputs;
+
+    function init(type, outputs) {
+        this.typeName = type;
+        this.outputs = outputs;
+        for(var output: outputs) setSlot(output.first, nil);
+    };
+
+    var receive = function (data) {
+        for(var output: outputs) {
+            var name = output.first;
+            if(name in data) {
+                this.updateSlot(name, data[name]);
+            };
+        };
+    };
+
 }|;

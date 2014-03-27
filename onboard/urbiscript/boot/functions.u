@@ -1,29 +1,48 @@
 function serverConnect(ip, port, xci, xciVersion = "xci_parrot") {
+
     var adapter = Adapter.new();
     adapter.start(ip, port);
 
-    // create graph nodes
+    // semantic sender node
     var semanticSender = SemanticSender.new(adapter, [
-        "altitude" => "altitude",
-        "phi" => "phi",
-        "psi" => "psi",
-        "theta" => "theta",
-        "alive" => "alive",
+        "altitude" => "ALTITUDE",
+        "phi" => "PHI",
+        "psi" => "PSI",
+        "theta" => "THETA",
+        "alive" => "ALIVE",
     ], UJson, 8); // frequency in Hz of refresh frequency for web GUI
 
-    var flyParamReceiver = SemanticReceiver.new(adapter, [
-        "roll" => "roll",
-        "pitch" => "pitch",
-        "yaw" => "yaw",
-        "gaz" => "gaz",
-        "command" => "command"
-    ], UJson);
+    // Fly params receiver
+    var flyParamReceiver = Receiver.new("data", [
+        "roll" => "ROLL",
+        "pitch" => "PITCH",
+        "yaw" => "YAW",
+        "gaz" => "GAZ",
+        "command" => "COMMAND"
+    ]);
+    // Onboard state receiver
+    var onboardReceiver = Receiver.new("onboard", [
+        "mode" => "MODE",
+    ]);
+
+    var semanticReceiver = SemanticReceiver.new(adapter, UJson);
+    semanticReceiver.addReceiver(onboardReceiver);
+    semanticReceiver.addReceiver(flyParamReceiver);
 
     var flashSender = FlashSender.new(adapter, UJson);
+    flashSender.send("Graph nodes created.");
 
-    flashSender.send("Created graph nodes.");
+    /*
+     * Connecting graph nodes.
+     */
+    flyParamReceiver.&roll >> xci.&roll;
+    flyParamReceiver.&pitch >> xci.&pitch;
+    flyParamReceiver.&yaw >> xci.&yaw;
+    flyParamReceiver.&gaz >> xci.&gaz;
+    flyParamReceiver.&command >> xci.&command;
 
-    // connect graph nodes
+    onboardReceiver.&mode >> Onboard.&changeMode;
+
     if(xciVersion == "xci_parrot") {
         xci.&altitude >> semanticSender.&altitude;
         xci.&phi >> semanticSender.&phi;
@@ -35,13 +54,7 @@ function serverConnect(ip, port, xci, xciVersion = "xci_parrot") {
         xci.&altitude >> semanticSender.&altitude;
     };
 
-    flyParamReceiver.&roll >> xci.&roll;
-    flyParamReceiver.&pitch >> xci.&pitch;
-    flyParamReceiver.&yaw >> xci.&yaw;
-    flyParamReceiver.&gaz >> xci.&gaz;
-    flyParamReceiver.&command >> xci.&command;
-
-    flashSender.send("Connected graph nodes.");
+    flashSender.send("Graph nodes connected.");
     semanticSender.start(); // this is blocking call, so its at the end
 }|;
 

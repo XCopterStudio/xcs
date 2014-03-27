@@ -66,16 +66,12 @@ io.sockets.on('connection', function (socket) {
     socket.on('disconnect', function () {
         client = null;
     })
-    // handling manual control
-    socket.on('init_manual', function () {
-    });
-    socket.on('manual', function (cmd) {
+    // just resend data from client to onboard
+    socket.on('resend', function (cmd) {
         if (onboard) {
             onboard.write(cmd + '\n');
         }
         console.log('Client COMMAND: ' + cmd);
-    });
-    socket.on('term_manual', function () {
     });
 });
 

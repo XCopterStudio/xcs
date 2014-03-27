@@ -11,7 +11,7 @@ var XcopterState = Backbone.Model.extend({
     initialize : function() {
         var model = this;
         gSocket.on('data', function(json) {
-            console.log(json);
+            //console.log(json);
             if (json.type == "flash") {
                 console.log('>>> Setting flash data');
                 model.set('flash', json.data);
@@ -19,5 +19,13 @@ var XcopterState = Backbone.Model.extend({
                 model.set('data', json.data);
             }
         });
+    },
+
+    setMode: function (mode) {
+        data = {
+            "type": "onboard",
+            "data": { "mode": mode }
+        };
+        gSocket.emit('resend', JSON.stringify(data));
     }
 });

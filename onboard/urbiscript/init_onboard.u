@@ -1,0 +1,52 @@
+/*
+ * Onboar initialization script
+ */
+
+// module names to be loaded
+var moduleList = [
+    "ujson",
+    "ulinefinder",
+    "datalogger",
+];
+
+// nodes to be loaded
+var nodeList = [
+    "onboard",
+    "xxci"
+];
+
+moduleList += nodeList;
+
+// modify list for Linux platform
+if (System.Platform.hostOs == "Linux") {
+    for (var i = 0; i < moduleList.size(); i++) {
+        moduleList[i] = "lib" + moduleList[i];
+    }
+};
+
+// load listed modules
+for (var module: moduleList) {
+    System.loadModule(module);
+};
+
+
+var Global.user_lobby = this;
+
+// free-flight mode
+function Onboard.start_free_flight() {
+    echo("start_free_fligth");
+};
+
+function Onboard.stop_free_flight() {
+    echo("stop_free_flight");
+};
+
+// scripting mode
+function Onboard.start_scripting() {
+    echo("start_scripting");
+};
+
+function Onboard.stop_scripting() {
+    echo("stop_scripting");
+    Global.user_lobby.connectionTag.stop();
+};
