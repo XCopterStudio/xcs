@@ -58,13 +58,20 @@ int ULineDrawer::update() {
     if (!hasFrame_) {
         return 0;
     }
-
+    /*
+     * This workaround copies image data.
+     * http://stackoverflow.com/a/11354422/1351874
+     */
     cv::Mat src(lastFrame_.height, lastFrame_.width, CV_8UC3, lastFrame_.data);
+    CvMat tmp = src;
+    src = cv::Mat(&tmp, true);    
+    
     {
         lock_guard<mutex> lock(drawTasksMtx_);
         for (auto drawTask : drawTasks_) {
             switch (drawTask.type) {
                 case TASK_LINE:
+                    //cerr << drawTask.dataLine.begin << ", " << drawTask.dataLine.end << ", " << drawTask.dataLine.color << ", " << drawTask.dataLine.width << endl;
                     cv::line(src, drawTask.dataLine.begin, drawTask.dataLine.end, drawTask.dataLine.color, drawTask.dataLine.width);
                     break;
                 case TASK_CIRCLE:
@@ -127,7 +134,7 @@ void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar col
         drawLine(leftPoint, rightPoint, color, width);
     } else {
         auto horizOffset = distance * lineUtils_.distanceUnit / cos(deviation);
-        cv::Point bottomPoint(lineUtils_.referencePoint.x + horizOffset - tan(deviation) * (static_cast<int>(lineUtils_.height) - lineUtils_.referencePoint.y), lineUtils_.height);
+        cv::Point bottomPoint(lineUtils_.referencePoint.x + horizOffset - tan(deviation) * (static_cast<int> (lineUtils_.height) - lineUtils_.referencePoint.y), lineUtils_.height);
         cv::Point topPoint(lineUtils_.referencePoint.x + horizOffset + tan(deviation) * lineUtils_.referencePoint.y, 0);
         drawLine(bottomPoint, topPoint, color, width);
 
