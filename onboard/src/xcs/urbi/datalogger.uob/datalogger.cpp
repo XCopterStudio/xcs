@@ -35,7 +35,7 @@ void DataWriter::write(urbi::UVar &uvar){
 // ========
 
 VideoWriter::VideoWriter(const std::string &name) :
-DataWriter(name)
+XObject(name)
 {
     frameNumber_ = 0;
     avframe_ = avcodec_alloc_frame();
@@ -50,21 +50,20 @@ void VideoWriter::init(const std::string &videoFile, const unsigned int &width, 
     file_ = file;
     dataName_ = dataName;
     videoFileWriter = unique_ptr<VideoFileWriter>(new VideoFileWriter(videoFile,width,height));
-    UNotifyChange(uvar, &VideoWriter::write);
+    UNotifyThreadedChange(uvar, &VideoWriter::write, ::urbi::LOCK_FUNCTION);
 }
 
-void VideoWriter::write(urbi::UVar &uvar){
+void VideoWriter::write(urbi::UImage &image){
     auto time = duration_cast<milliseconds>(highResolutionClock_.now() - startTime_).count();
     *file_ << dataName_ << " " << frameNumber_++;
     *file_ << " timestamp " << time << endl;
-    UImage frame = uvar;
     
     //TODO: use frame format
     
-    avframe_->width = frame.width;
-    avframe_->height = frame.height;
+    avframe_->width = image.width;
+    avframe_->height = image.height;
     avframe_->format = PIX_FMT_BGR24;
-    avpicture_fill((AVPicture*)avframe_, frame.data, (AVPixelFormat) avframe_->format, frame.width, frame.height);
+    avpicture_fill((AVPicture*)avframe_, image.data, (AVPixelFormat) avframe_->format, image.width, image.height);
     videoFileWriter->writeVideoFrame(*avframe_);
 
 }
@@ -106,7 +105,7 @@ void Datalogger::registerData(const std::string &name, const std::string &semant
 
             DataWriter* function = new DataWriter(std::string());
             function->init(name, startTime_ ,&file_, uvar);
-            writerList_.push_back(std::unique_ptr<DataWriter>(function));
+            dataWriterList_.push_back(std::unique_ptr<DataWriter>(function));
         }
     }
 }
@@ -120,7 +119,7 @@ void Datalogger::registerVideo(const std::string &videoFile, int width, int heig
             file_ << REGISTER << " " << name << " " << semanticType << " " << syntacticType << endl;
             VideoWriter* function = new VideoWriter(std::string());
             function->init(videoFile, width, height, name, startTime_, &file_, uvar);
-            writerList_.push_back(std::unique_ptr<DataWriter>(function));
+            videoWriterList_.push_back(std::unique_ptr<VideoWriter>(function));
         }
         else{
             cerr << "Use registerData function for another data than video!" << endl;

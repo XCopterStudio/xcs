@@ -19,7 +19,6 @@ namespace nodes{
     typedef std::chrono::time_point<std::chrono::high_resolution_clock> TimePoint;
 
     class DataWriter : public xcs::nodes::XObject{
-    protected:
         Clock highResolutionClock_;
         TimePoint startTime_;
         std::string dataName_;
@@ -27,10 +26,15 @@ namespace nodes{
     public:
         DataWriter(const std::string &name);
         void init(const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar);
-        virtual void write(::urbi::UVar &uvar);
+        void write(::urbi::UVar &uvar);
     };
 
-    class VideoWriter : public DataWriter{
+    class VideoWriter : public xcs::nodes::XObject{
+        Clock highResolutionClock_;
+        TimePoint startTime_;
+        std::string dataName_;
+        std::ofstream *file_;
+
         unsigned int frameNumber_;
         AVFrame* avframe_;
         std::unique_ptr<VideoFileWriter> videoFileWriter;
@@ -38,15 +42,17 @@ namespace nodes{
         VideoWriter(const std::string &name);
         ~VideoWriter();
         void init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar);
-        virtual void write(::urbi::UVar &uvar);
+        void write(::urbi::UImage &image);
     };
 
-    typedef std::list<std::unique_ptr<DataWriter> > WriterList;
+    typedef std::list<std::unique_ptr<DataWriter> > DataWriterList;
+    typedef std::list<std::unique_ptr<VideoWriter> > VideoWriterList;
 
     class Datalogger : public xcs::nodes::XObject {
         static const char* REGISTER;
 
-        WriterList writerList_;
+        DataWriterList dataWriterList_;
+        VideoWriterList videoWriterList_;
         TimePoint startTime_;
 
         std::ofstream file_;
