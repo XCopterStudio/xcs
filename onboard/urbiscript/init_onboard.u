@@ -6,6 +6,8 @@
 var moduleList = [
     "ujson",
     "ulinefinder",
+    "ulinedrawer",
+    "ulinekeeper",
     "datalogger",
 ];
 

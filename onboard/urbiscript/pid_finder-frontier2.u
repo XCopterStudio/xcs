@@ -1,12 +1,4 @@
-// TODO make platform independent function (or cmake macro to compile UObjects w/out lib-)
-System.loadModule("libujson");
-System.loadModule("libxxci");
-System.loadModule("libulinefinder");
-System.loadModule("libulinedrawer");
-System.loadModule("libulinekeeper");
-System.loadModule("libdatalogger");
-System.loadModule("libxobject");
-
+load("init_onboard.u");
 load("boot/boot.u");
 
 /*
