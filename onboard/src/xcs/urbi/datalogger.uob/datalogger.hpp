@@ -30,6 +30,12 @@ namespace nodes{
         virtual void write(::urbi::UVar &uvar);
     };
 
+    class InputPortWriter : public DataWriter{
+    public:
+        InputPortWriter(const std::string &name);
+        void init(const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::InputPort &inputPort);
+    };
+
     class VideoWriter : public DataWriter{
         unsigned int frameNumber_;
         AVFrame* avframe_;
@@ -56,6 +62,7 @@ namespace nodes{
         
         void init(const std::string &file);
         void registerData(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);
+        void registerInputPort(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::InputPort &inputPort);
         void registerVideo(const std::string &videoFile, int width, int height, const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);
     };
 

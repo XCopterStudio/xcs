@@ -34,6 +34,20 @@ void DataWriter::write(urbi::UVar &uvar){
 
 // ========
 
+InputPortWriter::InputPortWriter(const std::string &name) :
+DataWriter(name)
+{
+}
+
+void InputPortWriter::init(const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::InputPort &inputPort){
+    startTime_ = startTime;
+    file_ = file;
+    dataName_ = dataName;
+    UNotifyChange(inputPort, &InputPortWriter::write);
+}
+
+// ========
+
 VideoWriter::VideoWriter(const std::string &name) :
 DataWriter(name)
 {
@@ -106,6 +120,24 @@ void Datalogger::registerData(const std::string &name, const std::string &semant
 
             DataWriter* function = new DataWriter(std::string());
             function->init(name, startTime_ ,&file_, uvar);
+            writerList_.push_back(std::unique_ptr<DataWriter>(function));
+        }
+    }
+}
+
+void Datalogger::registerInputPort(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::InputPort &inputPort){
+    if (!file_.is_open()){
+        cerr << "File error" << endl;
+    }
+    else{
+        if (semanticType == "video"){
+            cerr << "Use registerVideo function for video data!." << endl;
+        }
+        else{
+            file_ << REGISTER << " " << name << " " << semanticType << " " << syntacticType << endl;
+
+            InputPortWriter* function = new InputPortWriter(std::string());
+            function->init(name, startTime_, &file_, inputPort);
             writerList_.push_back(std::unique_ptr<DataWriter>(function));
         }
     }
