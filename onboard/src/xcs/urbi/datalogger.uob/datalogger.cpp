@@ -18,16 +18,19 @@ XObject(name)
 {
 }
 
-void DataWriter::init(const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar){
+void DataWriter::init(const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock,::urbi::UVar &uvar){
     startTime_ = startTime;
     file_ = file;
     dataName_ = dataName;
+    lock_ = lock;
     UNotifyChange(uvar, &DataWriter::write);
 }
 
 void DataWriter::write(urbi::UVar &uvar){
     //cerr << dataName_ << " " << uvar.val() << endl;
     auto time = duration_cast<milliseconds>(highResolutionClock_.now() - startTime_).count();
+
+    std::lock_guard<std::mutex> lck(*lock_);
     *file_ << dataName_ << " " << uvar.val() ;
     *file_ << " timestamp " << time << endl ;
 }
@@ -45,19 +48,17 @@ VideoWriter::~VideoWriter(){
     avcodec_free_frame(&avframe_);
 }
 
-void VideoWriter::init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar){
+void VideoWriter::init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar){
     startTime_ = startTime;
     file_ = file;
     dataName_ = dataName;
     videoFileWriter = unique_ptr<VideoFileWriter>(new VideoFileWriter(videoFile,width,height));
+    lock_ = lock;
     UNotifyThreadedChange(uvar, &VideoWriter::write, ::urbi::LOCK_FUNCTION);
 }
 
 void VideoWriter::write(urbi::UImage image){
     auto time = duration_cast<milliseconds>(highResolutionClock_.now() - startTime_).count();
-    *file_ << dataName_ << " " << frameNumber_++;
-    *file_ << " timestamp " << time << endl;
-    
     //TODO: use frame format
     
     avframe_->width = image.width;
@@ -66,6 +67,9 @@ void VideoWriter::write(urbi::UImage image){
     avpicture_fill((AVPicture*)avframe_, image.data, (AVPixelFormat) avframe_->format, image.width, image.height);
     videoFileWriter->writeVideoFrame(*avframe_);
 
+    std::lock_guard<std::mutex> lck(*lock_);
+    *file_ << dataName_ << " " << frameNumber_++;
+    *file_ << " timestamp " << time << endl;
 }
 
 // ========
@@ -104,7 +108,7 @@ void Datalogger::registerData(const std::string &name, const std::string &semant
             file_ << REGISTER << " " << name << " " << semanticType << " " << syntacticType << endl;
 
             DataWriter* function = new DataWriter(std::string());
-            function->init(name, startTime_ ,&file_, uvar);
+            function->init(name, startTime_, &file_, &lock_, uvar);
             dataWriterList_.push_back(std::unique_ptr<DataWriter>(function));
         }
     }
@@ -118,7 +122,7 @@ void Datalogger::registerVideo(const std::string &videoFile, int width, int heig
         if (semanticType == "video"){
             file_ << REGISTER << " " << name << " " << semanticType << " " << syntacticType << endl;
             VideoWriter* function = new VideoWriter(std::string());
-            function->init(videoFile, width, height, name, startTime_, &file_, uvar);
+            function->init(videoFile, width, height, name, startTime_, &file_, &lock_, uvar);
             videoWriterList_.push_back(std::unique_ptr<VideoWriter>(function));
         }
         else{

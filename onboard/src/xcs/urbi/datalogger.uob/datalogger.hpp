@@ -6,6 +6,7 @@
 #include <list>
 #include <chrono>
 #include <fstream>
+#include <mutex>
 
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_var.hpp>
@@ -23,9 +24,11 @@ namespace nodes{
         TimePoint startTime_;
         std::string dataName_;
         std::ofstream *file_;
+
+        std::mutex *lock_;
     public:
         DataWriter(const std::string &name);
-        void init(const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar);
+        void init(const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar);
         void write(::urbi::UVar &uvar);
     };
 
@@ -38,10 +41,12 @@ namespace nodes{
         unsigned int frameNumber_;
         AVFrame* avframe_;
         std::unique_ptr<VideoFileWriter> videoFileWriter;
+
+        std::mutex *lock_;
     public:
         VideoWriter(const std::string &name);
         ~VideoWriter();
-        void init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar);
+        void init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar);
         void write(::urbi::UImage image);
     };
 
@@ -54,6 +59,8 @@ namespace nodes{
         DataWriterList dataWriterList_;
         VideoWriterList videoWriterList_;
         TimePoint startTime_;
+
+        std::mutex lock_;
 
         std::ofstream file_;
     public:
