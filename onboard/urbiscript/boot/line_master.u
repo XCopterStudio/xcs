@@ -1,0 +1,65 @@
+
+
+class LineMaster {
+    
+    function init(lineFinder, lineKeeper, lineSmoother) {
+        var this.imuWeight = 0.5;
+        var this.curvatureAging = 0.5;
+        var this.hystDeviationThrBase = 0.5;
+        var this.hystDeviationThrRate = 0.1;
+        
+        var this.curvature = 0;
+        var this.distance = 0;
+        var this.deviation = 0;
+        var this.hasLine = false;
+        
+        var this._lineFinder = lineFinder;
+        var this._lineKeeper = lineKeeper;
+        var this._lineSmoother = lineSmoother;
+    }|;
+    
+    function start() {
+        var that = this;
+        // check only deviation (after deviation notify, distance is already updated)
+        _lineKeeper.&deviation.notifyChange(function() {
+            that.distance = that._lineKeeper.distance;
+            that.deviation = that._lineKeeper.deviation;
+            
+            // feedback to line finder
+            that._lineFinder.expectedDistance = that.distance;
+            that._lineFinder.expectedDeviation = that.deviation;            
+        });
+        
+        _lineFinder.&deviation.notifyChange(function() {
+            // simply combine via averaging
+            var imuWeight = that.imuWeight;
+            if(!that._lineFinder.hasLine) {
+                imuWeight = 1;
+            };
+            
+            var distance = that._lineSmoother.smoothDistance(that._lineFinder.distance);
+            var deviation = that._lineSmoother.smoothDeviation(that._lineFinder.deviation);
+            var curvature = that._lineSmoother.smoothCurvature(that._lineFinder.curvature);
+            
+            that.distance = (1 - imuWeight) * distance + imuWeight * that.distance;
+            that.deviation = Global.angleLinComb(deviation, that.deviation, 1 - imuWeight, imuWeight);
+            that.curvature = curvature;
+            
+            // recalibrate IMU keeper
+            that._lineKeeper.reset(that.distance, that.deviation);
+
+            // feedback to line finder
+            that._lineFinder.expectedDistance = that.distance;
+            that._lineFinder.expectedDeviation = that.deviation;            
+            that._lineFinder.hystDeviationThr = that.hystDeviationThrBase + that.curvature.abs() * that.hystDeviationThrRate;
+        });
+        
+        // TODO lines below are probably innecessary
+//        _lineFinder.&hasLine.notifyChange(function(){
+//            if(!that._lineKeeper.hasLine) {
+//                imuWeight = 1;
+//            }
+//        });
+        this.hasLine = true;
+    }
+}|;

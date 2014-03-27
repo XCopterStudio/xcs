@@ -3,17 +3,13 @@ load("boot/boot.u");
 /*
  * Dataflow graph
  */
- 
+
 //var xciVersion = "xci_dodo";
 var xciVersion = "xci_parrot";
 var xci = XXci.new(xciVersion);
 var f = ULineFinder.new();
 xci.&video >> f.&video;
 var logger = Datalogger.new("pokus.txt");
-
-logger.registerData("theta","theta","double",xci.&theta);
-logger.registerData("psi","psi","double",xci.&psi);
-logger.registerData("phi","phi","double",xci.&phi);
 
 // Default values for image processing
 f.houghRho = 5;
@@ -32,7 +28,8 @@ xci.xciInit();
 // 4 DODO
 if(xciVersion == "xci_dodo") {
     //xci.setConfiguration("video:timestamps", "1");
-    xci.setConfiguration("video:filename", "tmp/video.xcs");
+    //xci.setConfiguration("video:filename", "tmp/video.xcs");
+    xci.setConfiguration("video:filename", "d:/tmp/video.xcs");
     xci.setConfiguration("video:fps", "25");
     xci.doCommand("Load");
     xci.doCommand("Play");
@@ -40,6 +37,10 @@ if(xciVersion == "xci_dodo") {
 
 // 4 parrot
 if(xciVersion == "xci_parrot") {
+    logger.registerData("theta","theta","double",xci.&theta);
+    logger.registerData("psi","psi","double",xci.&psi);
+    logger.registerData("phi","phi","double",xci.&phi);
+    
     sleep(1s);
     xci.flyParamPersistence = 25;
     xci.setConfiguration("video:video_channel", "1");
@@ -52,9 +53,12 @@ var yawPidParam = PidParams.new(0.5, 0, 0);
 var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
 var gazPidParam = PidParams.new(0.5, 0, 0);
 var a = Aligner.new(xci, f, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
+//var a = AlignerLinear.new(xci, f, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
 
-xci.&theta >> f.&theta;
-xci.&phi >> f.&phi;
+if(xciVersion == "xci_parrot") {
+    xci.&theta >> f.&theta;
+    xci.&phi >> f.&phi;
+};
 f.cameraParam = 0.1;
 
 //echo("adjust GAZ");

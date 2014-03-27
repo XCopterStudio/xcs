@@ -84,11 +84,12 @@ void XXci::doCommand(const std::string& command) {
     roll_ = 0;
     pitch_ = 0;
     yaw_ = 0;
-    gaz_= 0;
+    gaz_ = 0;
     xci_->command(command);
 }
 
 void XXci::flyParam(double roll, double pitch, double yaw, double gaz) {
+    //TODO here should be lock to atomic update of RPYG
     roll_ = roll;
     pitch_ = pitch;
     yaw_ = yaw;

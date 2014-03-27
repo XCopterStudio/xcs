@@ -1,0 +1,120 @@
+class AlignerLinear{
+    var xci;
+    var finder;
+    var rollPidParam;
+    var yawPidParam;
+    var pitchPidParam;
+    var gazPidParam;
+    var tadjust = Tag.new("tadjust");
+    var gazAltitude = 1.5;
+
+    // Default values in seconds
+    // ! most likely to be overwritten !
+    var rollSleep = 0.05;
+    var rollThreshold = 0.02;
+    var yawSleep = 0.1;
+    var yawThreshold = 0.1;
+    var pitchSleep = 0.05;
+    var pitchDistance = 0.1;
+    var pitchDeviation = 0.1;
+    var gazSleep = 0.2;
+    
+
+
+    function init(xci, finder, rollPidParam, yawPidParam, pitchPidParam, gazPidParam) {
+        this.xci = xci;
+        this.finder = finder;
+        this.rollPidParam = rollPidParam;
+        this.yawPidParam = yawPidParam;
+        this.pitchPidParam = pitchPidParam;
+        this.gazPidParam = gazPidParam;
+    };
+
+    var pidLoop = function (pidParams, value) {
+        var correctedValue = value + pidParams.lastDerivation * pidParams.timeDelay;
+        
+        pidParams.sumI += correctedValue;
+        var derivation = correctedValue - pidParams.lastValue;
+        pidParams.lastValue = correctedValue;
+        pidParams.lastDerivation = derivation;
+
+        return pidParams.p*correctedValue + pidParams.i*pidParams.sumI + pidParams.d*derivation; 
+    };
+
+    var adjust = function() {
+        var gazEnabled = true;
+        var avgDistance = 1;
+        var avgDeviation = 1;
+        this.tadjust: while(true) {
+            // gaz
+            while (gazEnabled) {
+                var altDif = gazAltitude - xci.altitude;
+                if(Global.inRangeBool(altDif, 0.1) == 1) {
+                    gazEnabled = false;
+                    break;
+                };
+                var gaz = Global.crop(pidLoop(gazPidParam, altDif), 1);
+                if(gaz != 0) {
+                    echo("gaz: \t\t\t\t\t\t\t" + gaz);
+                    xci.gaz = gaz;
+                    sleep(this.gazSleep);
+                    xci.gaz = 0;
+                };
+            };
+
+            // yaw
+            //while (true) 
+            {
+                var deviation = Global.ground(finder.deviation, this.yawThreshold);
+                var distance = Global.ground(finder.distance, this.rollThreshold);
+                //if(Global.inRangeBool(deviation, this.pitchDeviation) == 1) {
+                //    break;
+                //};
+                var yaw = Global.crop(pidLoop(yawPidParam,deviation), 1);
+                if(yaw != 0) {
+                    echo("yaw: \t" + yaw + "(" + deviation + ")");
+                    xci.yaw = yaw;
+                    sleep(this.yawSleep);
+                    xci.yaw = 0;
+                };
+            //};
+
+            // roll
+            //while (true) 
+            //{
+                //var distance = Global.ground(finder.distance, this.rollThreshold);
+                //if(Global.inRangeBool(distance, this.pitchDistance) == 1) {
+                //    break;
+                //};
+                var roll = Global.crop(pidLoop(rollPidParam,distance), 1);
+                if(roll != 0) {
+                    echo("roll: \t\t\t" + roll);
+                    xci.roll = roll; 
+                    sleep(this.rollSleep);
+                    xci.roll = 0;
+                };
+            };
+
+            //pitch
+            //while(true) 
+            {
+                var distance = finder.distance;
+                var deviation = finder.deviation;
+                avgDistance = { if(distance > avgDistance) distance else (0.8 * avgDistance + 0.2 * distance) };
+                avgDeviation = { if(deviation > avgDeviation) deviation else (0.8 * avgDeviation + 0.2 * deviation) };
+                var enabled = Global.inRangeBool(distance, this.pitchDistance) * Global.inRangeBool(deviation, this.pitchDeviation);
+                //if(enabled == 0) {
+                //    break;
+                //};
+                var error = enabled * (1 - Global.crop(4 * (Math.abs(distance) + Math.abs(deviation)), 1));
+                var pitch = -1 * Global.crop(pidLoop(pitchPidParam, error), 1); //* Math.abs(0.5 - distance);
+                if(pitch != 0) {
+                    echo("pitch: \t\t\t\t\t" + pitch);
+                    xci.pitch = pitch; 
+                    sleep(this.pitchSleep);
+                    xci.pitch = 0;
+                };
+            };
+        };
+    };
+}|;

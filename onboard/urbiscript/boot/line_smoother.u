@@ -1,0 +1,26 @@
+
+
+class LineSmoother {
+    
+    var distanceAging = 0;
+    var deviationAging = 0;
+    var curvatureAging = 0;
+    
+    function init(lineProvider) {
+        var this.distance = 0;
+        var this.deviation = 0;
+        var this.curvature = 0;
+    }|;
+    
+    function smoothDistance(distance) {
+       this.distance = this.distance * this.distanceAging + (1 - this.distanceAging) * distance;
+    }|;
+    
+    function smoothDeviation(deviation) {
+       this.deviation = Global.angleLinComb(this.deviation, deviation, this.deviationAging, (1 - this.deviationAging));
+    }|;
+
+    function smoothCurvature(curvature) {
+       this.curvature = this.curvatureAging * this.curvature + (1-this.curvatureAging) * curvature;
+    }|;
+}|;

@@ -1,0 +1,102 @@
+class Frontier2Aligner{
+
+    var xci;
+    var lineProvider;
+    var rollPidParam;
+    var yawPidParam;
+    var pitchPidParam;
+    var gazPidParam;
+    var tyg = Tag.new("tyg");
+    var trp = Tag.new("trp"); 
+    var gazAltitude = 1.5;
+    var forward = 0;
+    var rollEnabled = 1;
+    var pitchEnabled = 1;
+    var yawEnabled = 1;
+    var gazEnabled = 1;
+
+    // Default values in seconds
+    // ! most likely to be overwritten !
+    var ygInterval = 0.2;
+    var rpInterval = 0.2;
+    var rpSleep = 0.05;
+    var rollThreshold = 0.02;
+    var pitchDistance = 0.1;
+    var pitchDeviation = 0.1;
+    
+
+
+    function init(xci, lineProvider, rollPidParam, yawPidParam, pitchPidParam, gazPidParam) {
+        this.xci = xci;
+        this.lineProvider = lineProvider;
+        this.rollPidParam = rollPidParam;
+        this.yawPidParam = yawPidParam;
+        this.pitchPidParam = pitchPidParam;
+        this.gazPidParam = gazPidParam;
+        
+        /* For loggin purposes */
+        var this.roll = 0;
+        var this.pitch = 0;
+        var this.yaw = 0;
+        var this.gaz = 0;
+        var this.rollE = 0;
+        var this.pitchE = 0;
+        var this.yawE = 0;
+        var this.gazE = 0;
+    };
+
+    var pidLoop = function (pidParams, value) {
+        var correctedValue = value + pidParams.lastDerivation * pidParams.timeDelay;
+        
+        pidParams.sumI += correctedValue;
+        var derivation = correctedValue - pidParams.lastValue;
+        pidParams.lastValue = correctedValue;
+        pidParams.lastDerivation = derivation;
+
+        return pidParams.p*correctedValue + pidParams.i*pidParams.sumI + pidParams.d*derivation; 
+    };
+
+    function adjustYG(){
+        this.tyg: every(this.ygInterval){
+            var deviation = this.yawE = lineProvider.deviation;
+            // +/- pi (hopefully unnecessary)
+            var yaw = pidLoop(yawPidParam,deviation);
+            yaw = {if(yawEnabled) yaw else 0};
+            xci.yaw = this.yaw = yaw; 
+            
+            var altDif = this.gazE = gazAltitude - xci.altitude;
+            var gaz = pidLoop(gazPidParam, altDif);
+            gaz = {if(gazEnabled) gaz else 0}; 
+            xci.gaz = this.gaz = gaz;
+            echo("yaw:\t\t" + yaw + "\tgaz\t\t\t\t" + gaz);
+        },
+    };
+
+    function adjustRP(){
+        this.trp: every(this.rpInterval){
+            var distance = lineProvider.distance;
+            var deviation = lineProvider.deviation;
+            
+            /* ROLL */
+            var rollError = this.rollE = distance * deviation.cos() + forward * deviation.sin();
+            var roll = pidLoop(rollPidParam, rollError);
+            
+            /* PITCH */
+            var pitchError = this.pitchE = distance * deviation.sin() - forward * deviation.cos();
+            var pitch = pidLoop(pitchPidParam, pitchError);
+
+
+            /* Common control */            
+            pitch = {if(pitchEnabled) pitch else 0}; 
+            roll = {if(rollEnabled) roll else 0}; 
+            echo("roll: " + roll + "\t\t pitch:\t\t" + pitch);
+            xci.pitch = this.pitch = pitch; 
+            xci.roll = this.roll = roll; 
+            sleep(this.rpSleep);
+            xci.pitch = this.pitch = 0;
+            xci.roll = this.roll = 0;
+            echo("RP released");
+        },
+    };
+
+}|;
