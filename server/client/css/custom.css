@@ -1,4 +1,5 @@
-.margin-top-30 { margin-top: 50px; }
+/*.margin-top-30 { margin-top: 50px; }
+*/
 
 body { background-image: url("../image/first_aid_kit.png"); }
 
@@ -32,7 +33,7 @@ body { background-image: url("../image/first_aid_kit.png"); }
 
 .widget { background-color: whitesmoke; border-radius: 3px; }
 
-.widget-line { font-size: 28pt; line-height: 48pt; text-align: right; margin-top: 60px; margin-right: 10px; }
+.widget-line { font-size: 28pt; line-height: 48pt; text-align: right; }
 
 .widget-graph {}
 

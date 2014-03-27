@@ -1,21 +1,21 @@
 <!-- Main X-copter Panel -->
 <nav class="navbar navbar-default" role="navigation">
-	<div class="container-fluid">
-		<!-- Brand and toggle get grouped for better mobile display -->
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle" data-toggle="collapse"
-				data-target="#bs-example-navbar-collapse-1">
-				<span class="sr-only">Toggle navigation</span> <span
-					class="icon-bar"></span> <span class="icon-bar"></span> <span
-					class="icon-bar"></span>
-			</button>
-			<a class="navbar-brand" href="#">XCS</a>
-		</div>
-		<!-- Collect the nav links, forms, and other content for toggling -->
-		<div class="collapse navbar-collapse"
-			id="bs-example-navbar-collapse-1">
-			
-			<div class="btn-group">
+        <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse"
+                                data-target="#bs-example-navbar-collapse-1">
+                                <span class="sr-only">Toggle navigation</span> <span
+                                        class="icon-bar"></span> <span class="icon-bar"></span> <span
+                                        class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand" href="#">XCS</a>
+                </div>
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse"
+                        id="bs-example-navbar-collapse-1">
+
+                        <div class="btn-group">
                 <button class="disabled btn navbar-btn btn-large">Settings</button>
             </div>
             <div class="btn-group" data-toggle="buttons-radio">
@@ -26,18 +26,18 @@
                 <button class="disabled btn navbar-btn btn-large btn-danger">Reset</button>
             </div>
             <div class="btn-group">
-                <button id="takeoff" class="btn navbar-btn btn-large btn-primary">Take off</button> 
+                <button id="takeoff" class="btn navbar-btn btn-large btn-primary">Take off</button>
             </div>
-            <div class="btn-group">                    
-                <button id="land" class="btn navbar-btn btn-large btn-success">Land</button> 
+            <div class="btn-group">
+                <button id="land" class="btn navbar-btn btn-large btn-success">Land</button>
             </div>
-			
-			
-			<ul class="nav navbar-nav navbar-right">
-				<li><p class="navbar-text"><span>Disconnected<span><span>&nbsp&nbsp&nbsp</span><i class="icon-circle"></i></li>
-			</ul>
-		</div> <!-- /.navbar-collapse -->
-	</div> <!-- /.container-fluid -->
+
+
+                        <ul class="nav navbar-nav navbar-right">
+                                <li><p class="navbar-text"><span>Disconnected<span><span>&nbsp&nbsp&nbsp</span><i class="icon-circle"></i></li>
+                        </ul>
+                </div> <!-- /.navbar-collapse -->
+        </div> <!-- /.container-fluid -->
 </nav>
 
 <!-- Flash messages -->
@@ -53,10 +53,6 @@
 
     <div class="gridster">
         <ul>
-            <li data-row="1" data-col="1" data-sizex="1" data-sizey="1" class="widget-line" id="altitude"></li>
-            <li data-row="2" data-col="1" data-sizex="1" data-sizey="1" class="widget-line" id="phi"></li>
-            <li data-row="3" data-col="1" data-sizex="1" data-sizey="1" class="widget-line" id="psi"></li>
-            <li data-row="4" data-col="1" data-sizex="1" data-sizey="1" class="widget-line" id="theta"></li>
         </ul>
     </div>
 
