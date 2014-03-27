@@ -64,6 +64,18 @@ scale .gaz.altitude -label "Altitude" \
 -showvalue 1 -orient horizontal
 pack .gaz.altitude
 
+scale .gaz.enabled -label "Enabled" \
+-length 100 -from 0 -to 1 \
+-command { setParam "a.gazEnabled" } \
+-resolution 1 \
+-digits 1 \
+-variable gazenabled \
+-showvalue 1 -orient horizontal
+pack .gaz.enabled
+
+
+
+
 ### YAW (& GAZ) ###
 
 frame .yaw -borderwidth 3 -relief raised
@@ -99,10 +111,20 @@ scale .yaw.d -label "yaw D" \
 -showvalue 1 -orient horizontal
 pack .yaw.d
 
+scale .yaw.enabled -label "Enabled" \
+-length 100 -from 0 -to 1 \
+-command { setParam "a.yawEnabled" } \
+-resolution 1 \
+-digits 1 \
+-variable yawenabled \
+-showvalue 1 -orient horizontal
+pack .yaw.enabled
+
 button .yaw.start -text "Start YG" -command { cmd "a.adjustYG()," }
 pack .yaw.start
 button .yaw.stop -text "Stop YG" -command { cmd "a.tyg.stop()" }
 pack .yaw.stop
+
 
 
 
@@ -140,6 +162,16 @@ scale .roll.d -label "roll D" \
 -variable rolldval \
 -showvalue 1 -orient horizontal
 pack .roll.d
+
+scale .roll.enabled -label "Enabled" \
+-length 100 -from 0 -to 1 \
+-command { setParam "a.rollEnabled" } \
+-resolution 1 \
+-digits 1 \
+-variable rollenabled \
+-showvalue 1 -orient horizontal
+pack .roll.enabled
+
 
 button .roll.start -text "Start RP" -command { cmd "a.adjustRP()," }
 pack .roll.start
@@ -199,6 +231,18 @@ scale .pitch.d -label "pitch D" \
 -showvalue 1 -orient horizontal
 pack .pitch.d
 
+
+scale .pitch.enabled -label "Enabled" \
+-length 100 -from 0 -to 1 \
+-command { setParam "a.pitchEnabled" } \
+-resolution 1 \
+-digits 1 \
+-variable pitchenabled \
+-showvalue 1 -orient horizontal
+pack .pitch.enabled
+
+
+
 scale .pitch.forward -label "Forward" \
 -length 150 -from 0 -to 1 \
 -command { setParam "a.forward" } \
@@ -231,7 +275,7 @@ pack .devaging
 
 scale .curvaging -label "Curvature aging" \
 -length 150 -from 0 -to 1 \
--command { setParam "m.curvatureAging" } \
+-command { setParam "s.curvatureAging" } \
 -resolution 0.05 \
 -digits 3 \
 -variable curvaging \
@@ -376,6 +420,11 @@ set hystdirthreshrt 40
 set imuweight 0.65
 set curva 2.0
 set gazaltitude 1.5
+
+set rollenabled 1
+set pitchenabled 1
+set yawenabled 1
+set gazenabled 1
 
 # value determined by measurement (more precise experiment)
 set cameraparam 0.74

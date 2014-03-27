@@ -40,15 +40,18 @@ var k = ULineKeeper.new();
 //k.cameraScale = 0.73; // TODO optimize
 k.setLineDrawer(d);
 
-var m = LineMaster.new(f, k);
+var s = LineSmoother.new(f);
 
-var s = LineSmoother.new(m);
+var m = LineMaster.new(f, k, s);
+
+
 
 var lineProvider = s;
 
 var a = Frontier2Aligner.new(xci, lineProvider, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
 
-var logger = Datalogger.new("pokus.txt");
+var logname = Date.now().asString().replace(" ", "_");
+var logger = Datalogger.new("logs/" + logname + ".txt");
 
 var xci.psi = 0;
 
@@ -71,8 +74,20 @@ xci.&psi >> k.&psi;
     logger.registerData("theta","theta","double",xci.&theta);
     logger.registerData("psi","psi","double",xci.&psi);
     logger.registerData("phi","phi","double",xci.&phi);
-    logger.registerData("altitude","altitude","double",xci.&altitude);
-    logger.registerVideo("video.avi","video","video","video",xci.&video);
+    logger.registerData("altitude","altitude","double",xci.&altitude);    
+    logger.registerVideo("logs/" + logname + ".avi", 640, 360, "video","video","video",xci.&video);
+    
+    logger.registerData("roll","roll","double",a.&roll);    
+    logger.registerData("pitch","pitch","double",a.&pitch);    
+    logger.registerData("yaw","yaw","double",a.&yaw);    
+    logger.registerData("gaz","gaz","double",a.&gaz);    
+    
+    logger.registerData("rollE","rollE","double",a.&rollE);    
+    logger.registerData("pitchE","pitchE","double",a.&pitchE);    
+    logger.registerData("yawE","yawE","double",a.&yawE);    
+    logger.registerData("gazE","gazE","double",a.&gazE);    
+    
+    //logger.registerData("command","command","string",xci.&command);
 
 // Default values for image processing (not set in Tcl GUI)
 f.autoHsvValueRangeEnabled = true;
@@ -90,7 +105,9 @@ m.start(),; // would block
  */
 if(xciVersion == "xci_dodo") {
     //xci.setConfiguration("video:timestamps", "1");
-    xci.setConfiguration("video:filename", "video2.avi");
+    //xci.setConfiguration("video:filename", "tmp/video.xcs");
+    xci.setConfiguration("video:filename", "logs/2014-03-27_12:08:48.152538.avi");
+    
     xci.doCommand("Load");
     xci.doCommand("Play");
 } else if(xciVersion == "xci_parrot") {

@@ -2,7 +2,7 @@
 
 class LineMaster {
     
-    function init(lineFinder, lineKeeper) {
+    function init(lineFinder, lineKeeper, lineSmoother) {
         var this.imuWeight = 0.5;
         var this.curvatureAging = 0.5;
         var this.hystDeviationThrBase = 0.5;
@@ -15,6 +15,7 @@ class LineMaster {
         
         var this._lineFinder = lineFinder;
         var this._lineKeeper = lineKeeper;
+        var this._lineSmoother = lineSmoother;
     }|;
     
     function start() {
@@ -34,12 +35,15 @@ class LineMaster {
             var imuWeight = that.imuWeight;
             if(!that._lineFinder.hasLine) {
                 imuWeight = 1;
-            } else {
-                //imuWeight = 0.1;
             };
-            that.distance = (1 - imuWeight) * that._lineFinder.distance + imuWeight * that.distance;
-            that.deviation = Global.angleLinComb(that._lineFinder.deviation, that.deviation, 1 - imuWeight, imuWeight);
-            that.curvature = that.curvatureAging * that.curvature + (1-that.curvatureAging) * that._lineFinder.curvature;
+            
+            var distance = that._lineSmoother.smoothDistance(that._lineFinder.distance);
+            var deviation = that._lineSmoother.smoothDeviation(that._lineFinder.deviation);
+            var curvature = that._lineSmoother.smoothCurvature(that._lineFinder.curvature);
+            
+            that.distance = (1 - imuWeight) * distance + imuWeight * that.distance;
+            that.deviation = Global.angleLinComb(deviation, that.deviation, 1 - imuWeight, imuWeight);
+            that.curvature = curvature;
             
             // recalibrate IMU keeper
             that._lineKeeper.reset(that.distance, that.deviation);
