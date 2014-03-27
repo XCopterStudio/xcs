@@ -13,6 +13,7 @@ var moduleList = [
 
 // nodes to be loaded
 var nodeList = [
+    "xcs",
     "onboard",
     "xxci"
 ];
@@ -30,6 +31,9 @@ if (System.Platform.hostOs == "Linux") {
 for (var module: moduleList) {
     System.loadModule(module);
 };
+
+// bootstrap urbiscripts
+load("boot/boot.u");
 
 
 var Global.user_lobby = this;

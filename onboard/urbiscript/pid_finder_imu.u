@@ -1,4 +1,4 @@
-load("boot/boot.u");
+load("init_onboard.u");
 
 /*
  * Dataflow graph

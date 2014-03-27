@@ -1,5 +1,4 @@
 load("init_onboard.u");
-load("boot/boot.u");
 
 /*
  * Static parameters
