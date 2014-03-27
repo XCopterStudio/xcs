@@ -19,6 +19,9 @@ pack .buttons.resetimu -side left
 button .buttons.resetimuvis -text "Reset IMU (visual)" -command { cmd "k.reset(f.distance, f.deviation);" }
 pack .buttons.resetimuvis -side left
 
+button .buttons.autostart -text "Autostart" -command { cmd "autostart(a, xci, m),;" }
+pack .buttons.autostart -side left
+
 ### GAZ ###
 
 

@@ -28,7 +28,6 @@ d.cameraParam = f.cameraParam;
 f.setLineDrawer(d);
 
 var k = ULineKeeper.new();
-//k.cameraScale = 0.73; // TODO optimize
 k.setLineDrawer(d);
 
 var s = LineSmoother.new(f);
@@ -42,8 +41,6 @@ var a = Frontier2Aligner.new(xci, lineProvider, rollPidParam, yawPidParam, pitch
 
 var logname = Date.now().asString().replace(" ", "_");
 var logger = Datalogger.new("logs/" + logname + ".txt");
-
-var xci.psi = 0;
 
 /*
  * Connect nodes
