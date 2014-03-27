@@ -53,7 +53,7 @@ void VideoWriter::init(const std::string &videoFile, const unsigned int &width, 
     UNotifyThreadedChange(uvar, &VideoWriter::write, ::urbi::LOCK_FUNCTION);
 }
 
-void VideoWriter::write(urbi::UImage &image){
+void VideoWriter::write(urbi::UImage image){
     auto time = duration_cast<milliseconds>(highResolutionClock_.now() - startTime_).count();
     *file_ << dataName_ << " " << frameNumber_++;
     *file_ << " timestamp " << time << endl;

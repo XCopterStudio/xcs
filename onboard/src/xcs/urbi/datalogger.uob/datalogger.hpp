@@ -42,7 +42,7 @@ namespace nodes{
         VideoWriter(const std::string &name);
         ~VideoWriter();
         void init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, const TimePoint startTime, std::ofstream* file, ::urbi::UVar &uvar);
-        void write(::urbi::UImage &image);
+        void write(::urbi::UImage image);
     };
 
     typedef std::list<std::unique_ptr<DataWriter> > DataWriterList;
