@@ -131,8 +131,8 @@ function autostart(aligner, xci, lineMaster) {
     
     takeOff(6s);
     rise(1.45),; // block because of adjustYG
-    sleep(5s); // rise is nonblocking but we'd need blocking
-    if(!findLine(5)) {
+    sleep(8s); // rise is nonblocking but we'd need blocking
+    if(!findLine(2)) {
         echo("Giving up, landing");
         land();
         return;
