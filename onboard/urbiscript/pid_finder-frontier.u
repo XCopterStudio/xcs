@@ -4,31 +4,12 @@ load("init_onboard.u");
  * Dataflow graph
  */
  
-var xciVersion = "xci_dodo";
-//var xciVersion = "xci_parrot";
+//var xciVersion = "xci_dodo";
+var xciVersion = "xci_parrot";
 var xci = XXci.new(xciVersion);
 
 serverConnect("127.0.0.1", 1234, xci, xciVersion),; // beware the comma
 
-xci.xciInit();
-
-// 4 DODO
-if(xciVersion == "xci_dodo") {
-    //xci.setConfiguration("video:timestamps", "1");
-    xci.setConfiguration("video:filename", "tmp/frontier_aligner.mp4");
-    xci.setConfiguration("video:fps", "25");
-    xci.doCommand("Load");
-    xci.doCommand("Play");
-};
-
-// 4 parrot
-if(xciVersion == "xci_parrot") {
-    sleep(1s);
-    //xci.flyParamPersistence = 25;
-    xci.setConfiguration("video:video_channel", "1");
-    //xci.command = "TakeOff";
-    sleep(4s);
-};
 
 var rollPidParam = PidParams.new(0.4, 0, 0);
 var yawPidParam = PidParams.new(0.5, 0, 0);
@@ -55,7 +36,20 @@ var lineProvider = m;
 
 var a = FrontierAligner.new(xci, lineProvider, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
 
-var xci.psi = 0;
+xci.psi = 0;
+
+
+// Default values for image processing (not set in Tcl GUI)
+f.autoHsvValueRangeEnabled = true;
+
+/*
+ * Start dataflow
+ */
+serverConnect("127.0.0.1", 1234, xci, xciVersion),; // beware the comma
+
+xci.xciInit();
+m.start();
+
 
 /*
  * Connect nodes
@@ -72,6 +66,25 @@ xci.&velocityX >> k.&vx;
 xci.&velocityY >> k.&vy;
 xci.&altitude >> k.&altitude;
 xci.&psi >> k.&psi;
+
+
+// 4 DODO
+if(xciVersion == "xci_dodo") {
+    //xci.setConfiguration("video:timestamps", "1");
+    xci.setConfiguration("video:filename", "tmp/frontier_aligner.mp4");
+    xci.setConfiguration("video:fps", "25");
+    xci.doCommand("Load");
+    xci.doCommand("Play");
+};
+
+// 4 parrot
+if(xciVersion == "xci_parrot") {
+    sleep(1s);
+    //xci.flyParamPersistence = 25;
+    xci.setConfiguration("video:video_channel", "1");
+    //xci.command = "TakeOff";
+    sleep(4s);
+};
 
 //// Default values for image processing
 //f.houghRho = 5;
