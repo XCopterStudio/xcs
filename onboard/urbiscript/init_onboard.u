@@ -37,6 +37,7 @@ load("boot/boot.u");
 
 
 var Global.user_lobby = this;
+var Global.user_lobby.user_job;
 
 // free-flight mode
 function Onboard.start_free_flight() {
@@ -51,7 +52,7 @@ function Onboard.stop_free_flight() {
 function Onboard.start_scripting() {
     echo("start_scripting");
     var that = Global.user_lobby;
-    var that.user_job = detach({ that.autostart(that.a, that.xci, that.m) });
+    that.user_job = detach({ that.autostart(that.a, that.xci, that.m) });
 };
 
 function Onboard.stop_scripting() {

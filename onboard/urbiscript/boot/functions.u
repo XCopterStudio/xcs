@@ -103,11 +103,12 @@ function autostart(aligner, xci, lineMaster) {
             sleep(100ms); // at least few frames with new settings
         };
         
+        lineFinder.hystDistanceThr = originalDistanceThr;
+
         if(!lineFinder.hasLine) {
             return false;
         } else {
             lineKeeper.reset(lineFinder.distance, lineFinder.deviation);
-            lineFinder.hystDistanceThr = originalDistanceThr;
             lineMaster.start();
             return true;
         };        
