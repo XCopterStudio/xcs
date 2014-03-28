@@ -14,6 +14,7 @@ class LineMaster {
         var this.distance = 0;
         var this.deviation = 0;
         var this.hasLine = false;
+        var this.hasVisualLine = false;
         
         var this._lineFinder = lineFinder;
         var this._lineKeeper = lineKeeper;
@@ -49,6 +50,7 @@ class LineMaster {
             that.distance = (1 - imuWeight) * distance + imuWeight * that.distance;
             that.deviation = Global.angleLinComb(deviation, that.deviation, 1 - imuWeight, imuWeight);
             that.curvature = curvature;
+            that.hasVisualLine = that._lineFinder.hasLine;
             
             // recalibrate IMU keeper
             if(that._lineFinder.hasLine) {

@@ -199,6 +199,15 @@ scale .roll.sleep -label "RP sleep" \
 -showvalue 1 -orient horizontal
 pack .roll.sleep
 
+scale .roll.sleepmax -label "RP sleep max" \
+-length 150 -from 0 -to 1 \
+-command { setParam "a.rpSleepMax" } \
+-resolution 0.01 \
+-digits 3 \
+-variable rollsleepmax \
+-showvalue 1 -orient horizontal
+pack .roll.sleepmax
+
 ### PITCH ###
 
 frame .pitch -borderwidth 3 -relief raised
@@ -254,6 +263,33 @@ scale .pitch.forward -label "Forward" \
 -variable pitchforward \
 -showvalue 1 -orient horizontal
 pack .pitch.forward
+
+scale .pitch.forwardmax -label "Forward max" \
+-length 150 -from 0 -to 1 \
+-command { setParam "a.forwardMax" } \
+-resolution 0.01 \
+-digits 3 \
+-variable pitchforwardmax \
+-showvalue 1 -orient horizontal
+pack .pitch.forwardmax
+
+scale .pitch.safecurv -label "Safe curv" \
+-length 150 -from 0 -to 0.0100 \
+-command { setParam "a.safeCurv" } \
+-resolution 0.0001 \
+-digits 4 \
+-variable pitchsafecurv \
+-showvalue 1 -orient horizontal
+pack .pitch.safecurv
+
+scale .pitch.fullcurv -label "Full curv" \
+-length 150 -from 0 -to 0.0080 \
+-command { setParam "a.fullCurv" } \
+-resolution 0.0001 \
+-digits 4 \
+-variable pitchfullcurv \
+-showvalue 1 -orient horizontal
+pack .pitch.fullcurv
 
 
 ### MIscellaneous ###
@@ -396,6 +432,7 @@ set rollival 0
 set rolldval 0
 set rollint 0.6
 set rollsleep 0.20
+set rollsleepmax 0.25
 
 set yawpval 0.9
 set yawival 0.0
@@ -405,13 +442,16 @@ set pitchpval 2.4
 set pitchival 0
 set pitchdval 0
 set pitchforward 0.09
+set pitchforwardmax 0.2
+set pitchfullcurv 0.0004
+set pitchsafecurv 0.0080
 
 set gazpval 0.5
 set gazival 0
 set gazdval 0
 
 set distagingval 0.1
-set devaging 0.8
+set devaging 0.7
 set curvaging 0.85
 set hsvratio 0.0
 set houghminlenght 50
@@ -420,7 +460,7 @@ set houghrho 3
 set hystcenterthresh 0.2
 set hystdirthreshbs 0.30
 set hystdirthreshrt 40
-set imuweight 0.65
+set imuweight 0.75
 set curva 2.0
 set gazaltitude 1.5
 
