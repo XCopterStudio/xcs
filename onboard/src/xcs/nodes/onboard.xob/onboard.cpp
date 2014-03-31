@@ -18,11 +18,7 @@ Onboard::Onboard(const std::string &name) :
     mode_ = "scripting";
 
     // TODO: unused so far
-    modes_ = {
-        { "free_flight", Onboard::FREE_FLIGHT },
-        { "assisted_flight", Onboard::ASSISTED_FLIGHT },
-        { "scripting", Onboard::SCRIPTING }
-    };
+    
 
     XBindVar(mode);
 

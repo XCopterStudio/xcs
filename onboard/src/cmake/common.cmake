@@ -13,3 +13,9 @@ find_package (Threads)
 target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
 endfunction(use_logging)
+
+function(use_armadillo TARGET_NAME)
+
+include_directories(${Armadillo_INCLUDE_DIRS})
+
+endfunction(use_armadillo)
