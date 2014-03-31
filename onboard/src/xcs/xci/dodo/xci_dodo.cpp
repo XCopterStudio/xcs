@@ -18,7 +18,8 @@ using namespace xcs::nodes;
 const std::string XciDodo::NAME_ = "Dodo Test Drone";
 
 const size_t XciDodo::ALIVE_FREQ_ = 1;
-const size_t XciDodo::ALTITUDE_FREQ_ = 100;
+const size_t XciDodo::ALTITUDE_FREQ_ = 20;
+const size_t XciDodo::EULER_FREQ_ = 100;
 
 const size_t XciDodo::SENSOR_PERIOD_ = 10;
 const size_t XciDodo::VIDEO_IDLE_SLEEP_ = 200;
@@ -66,6 +67,7 @@ void XciDodo::init() {
     inited_ = true;
     // reset sensors (pseudophysical state)
     altitude_ = 0;
+    theta_ = 0;
 
     // back-propagation of default values
     configuration(CONFIG_VIDEO_FPS, to_string(videoFps_));
@@ -89,6 +91,7 @@ SensorList XciDodo::sensorList() {
     result.push_back(Sensor("alive", "alive"));
     result.push_back(Sensor("video", "video"));
     result.push_back(Sensor("altitude", "altitude"));
+    result.push_back(Sensor("theta", "theta"));
     return result;
 }
 
@@ -141,6 +144,7 @@ void XciDodo::flyParam(float roll, float pitch, float yaw, float gaz) {
     }
 
     altitude_ += valueInRange<double>(gaz, 1.0) * 0.05; // very simple
+    theta_ += valueInRange<double>(pitch, 1.0) * 0.05; // very simple
 }
 
 void XciDodo::sensorGenerator() {
@@ -150,8 +154,10 @@ void XciDodo::sensorGenerator() {
             dataReceiver_.notify("alive", true);
         }
         if (clock % (1000 / ALTITUDE_FREQ_) == 0) {
-            //cerr << "Alti: " << altitude_ << endl;
             dataReceiver_.notify("altitude", altitude_);
+        }
+        if (clock % (1000 / EULER_FREQ_) == 0) {
+            dataReceiver_.notify("theta", theta_);
         }
 
         clock += SENSOR_PERIOD_;
