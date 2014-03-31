@@ -11,4 +11,5 @@ x_target_link_libraries(${PROJECT_NAME} xobject)
 find_package(UrbiAll)
 use_urbi(${PROJECT_NAME})
 
+find_package(Armadillo)
 use_armadillo(${PROJECT_NAME})

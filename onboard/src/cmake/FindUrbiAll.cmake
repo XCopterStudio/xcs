@@ -3,7 +3,7 @@
 #
 
 # Paths
-set(CMAKE_LIBRARY_PATH ${URBI_D_ROOT}/lib;${URBI_ROOT}/lib)
+set(CMAKE_LIBRARY_PATH ${URBI_D_ROOT}/lib;${URBI_ROOT}/lib;${CMAKE_LIBRARY_PATH})
 #message(STATUS "Searching Urbi libraries in: ${CMAKE_LIBRARY_PATH}")
 
 set(Port_DIR ${URBI_ROOT}/share/cmake/port)
