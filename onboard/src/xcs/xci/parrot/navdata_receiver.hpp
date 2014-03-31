@@ -2,6 +2,7 @@
 #define NAVDATA_RECEIVER_H
 
 #include <atomic>
+#include <chrono>
 
 #include <xcs/tsqueue.hpp>
 #include <xcs/xci/xci.hpp>

@@ -9,9 +9,9 @@ using namespace boost::asio;
 using namespace boost::asio::ip;
 using namespace std;
 
-const unsigned int VideoReceiver::TIMEOUT = 2000; // ms
+const unsigned int VideoReceiver::TIMEOUT = 1000; // ms
 
-const unsigned int VideoReceiver::BUFFER_COUNT = 20;
+const unsigned int VideoReceiver::BUFFER_COUNT = 30;
 const unsigned int VideoReceiver::BUFFER_SIZE = 25000;
 
 void VideoReceiver::handleConnectedVideo(const boost::system::error_code& ec){

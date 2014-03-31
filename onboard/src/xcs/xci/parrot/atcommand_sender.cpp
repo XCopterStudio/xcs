@@ -11,7 +11,7 @@ using namespace xcs::xci::parrot;
 using namespace boost::asio;
 using namespace boost::asio::ip;
 
-const unsigned int AtCommandSender::TIMEOUT = 2000; // ms
+const unsigned int AtCommandSender::TIMEOUT = 1000; // ms
 const int32_t AtCommandSender::DEFAULT_SEQUENCE_NUMBER = 1;
 const unsigned int AtCommandSender::AT_CMD_PACKET_SIZE = 1024;
 

@@ -10,7 +10,7 @@ using namespace xcs::xci::parrot;
 using namespace boost::asio;
 using namespace boost::asio::ip;
 
-const unsigned int NavdataReceiver::TIMEOUT = 2000; // ms
+const unsigned int NavdataReceiver::TIMEOUT = 1000; // ms
 const int32_t NavdataReceiver::DEFAULT_SEQUENCE_NUMBER = 1;
 
 void NavdataReceiver::handleConnectedNavdata(const boost::system::error_code& ec) {
@@ -39,9 +39,14 @@ void NavdataReceiver::receiveNavdata(const boost::system::error_code& ec) {
         return;
     }
 
-    if (ec){
+
+    if (!socketNavdata_.is_open()) {
+        cerr << "Navdata receive error connection closed." << endl;
+        connect();
+    }
+    else if (ec){
         cerr << "Navdata receive error: " << ec.message() << endl;
-        //socketNavdata_.close();
+        socketNavdata_.close();
         connect();
     }else{
         deadlineNavdata_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
@@ -62,7 +67,6 @@ void NavdataReceiver::handleReceivedNavdata(const boost::system::error_code& ec,
         socketNavdata_.close();
         connect();
     }else{
-
         deadlineNavdata_.expires_at(boost::posix_time::pos_infin);
 
         Navdata* navdata = (Navdata*)& navdataBuffer[0];
@@ -107,7 +111,7 @@ void NavdataReceiver::processState(uint32_t parrotState) {
     parrotState_.updateState(parrotState);
 
     if (parrotState_.getState(FLAG_ARDRONE_NAVDATA_BOOTSTRAP)) { //test if drone is in BOOTSTRAP MODE
-        atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
+        atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "FALSE")); // exit bootstrap mode and drone will send the demo navdata
     }
 
     if (parrotState_.getState(FLAG_ARDRONE_COMMAND_MASK)) {
