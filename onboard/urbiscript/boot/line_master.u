@@ -2,6 +2,8 @@
 
 class LineMaster {
     
+    var hasLine = false;
+    
     function init(lineFinder, lineKeeper, lineSmoother) {
         var this.imuWeight = 0.5;
         var this.curvatureAging = 0.5;
@@ -12,16 +14,20 @@ class LineMaster {
         var this.distance = 0;
         var this.deviation = 0;
         var this.hasLine = false;
+        var this.hasVisualLine = false;
         
         var this._lineFinder = lineFinder;
         var this._lineKeeper = lineKeeper;
         var this._lineSmoother = lineSmoother;
+        
+        var this.keeperHandle;
+        var this.finderHandle;
     }|;
     
     function start() {
         var that = this;
         // check only deviation (after deviation notify, distance is already updated)
-        _lineKeeper.&deviation.notifyChange(function() {
+        keeperHandle = _lineKeeper.&deviation.notifyChange(function() {
             that.distance = that._lineKeeper.distance;
             that.deviation = that._lineKeeper.deviation;
             
@@ -30,7 +36,7 @@ class LineMaster {
             that._lineFinder.expectedDeviation = that.deviation;            
         });
         
-        _lineFinder.&deviation.notifyChange(function() {
+        finderHandle = _lineFinder.&deviation.notifyChange(function() {
             // simply combine via averaging
             var imuWeight = that.imuWeight;
             if(!that._lineFinder.hasLine) {
@@ -44,9 +50,12 @@ class LineMaster {
             that.distance = (1 - imuWeight) * distance + imuWeight * that.distance;
             that.deviation = Global.angleLinComb(deviation, that.deviation, 1 - imuWeight, imuWeight);
             that.curvature = curvature;
+            that.hasVisualLine = that._lineFinder.hasLine;
             
             // recalibrate IMU keeper
-            that._lineKeeper.reset(that.distance, that.deviation);
+            if(that._lineFinder.hasLine) {
+                that._lineKeeper.reset(that.distance, that.deviation);
+            };
 
             // feedback to line finder
             that._lineFinder.expectedDistance = that.distance;
@@ -54,12 +63,13 @@ class LineMaster {
             that._lineFinder.hystDeviationThr = that.hystDeviationThrBase + that.curvature.abs() * that.hystDeviationThrRate;
         });
         
-        // TODO lines below are probably innecessary
-//        _lineFinder.&hasLine.notifyChange(function(){
-//            if(!that._lineKeeper.hasLine) {
-//                imuWeight = 1;
-//            }
-//        });
         this.hasLine = true;
-    }
+    }|;
+    
+    function stop() {
+        if(hasLine) {
+            _lineKeeper.&deviation.removeNotifyChange(keeperHandle);
+            _lineFinder.&deviation.removeNotifyChange(finderHandle);
+        };
+    }|;
 }|;

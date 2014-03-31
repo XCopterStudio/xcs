@@ -6,10 +6,6 @@ class FrontierAligner {
     var yawPidParam;
     var pitchPidParam;
     var gazPidParam;
-    var tyaw = Tag.new("tyaw");
-    var troll = Tag.new("troll");
-    var tpitch = Tag.new("tpitch");
-    var tgaz = Tag.new("tgaz");
     var gazAltitude = 1.5;
 
     // Default values in seconds
@@ -17,18 +13,19 @@ class FrontierAligner {
     var rollInterval = 0.1;
     var rollSleep = 0.05;
     var rollThreshold = 0.02;
-    var yawInterval = 0.1;
     var pitchInterval = 0.1;
     var pitchSleep = 0.05;
     var pitchDistance = 0.1;
     var pitchDeviation = 0.1;
-    var gazInterval = 0.2;
 
 
     var frontierRadius = 0.5; // half of screen diagonal
     var trollpitch = Tag.new("trollpitch");
     var rollPitchInterval = 1;
     var rollPitchSleep = 0.5;
+
+    var tgazyaw = Tag.new("tgazyaw");
+    var gazYawInterval = 0.2;
 
 
     function init(xci, finder, rollPidParam, yawPidParam, pitchPidParam, gazPidParam) {
@@ -99,15 +96,6 @@ class FrontierAligner {
         return pidParams.p*correctedValue + pidParams.i*pidParams.sumI + pidParams.d*derivation;
     };
 
-    var adjustYaw = function () {
-        this.tyaw: every(this.yawInterval) {
-            var deviation = finder.deviation;
-            var yaw = Global.crop(pidLoop(yawPidParam,deviation), 1);
-            echo("yaw: \t" + yaw);
-            xci.yaw = yaw;
-        },
-    };
-
     var adjustRollPitch = function () {
         this.trollpitch: every(this.rollPitchInterval) {
             if (!finder.hasLine) {
@@ -116,7 +104,7 @@ class FrontierAligner {
             var setPoint = computeSetPoint();
             //echo("[dist,dev] = [" + finder.distance + "," + finder.deviation + "]");
             //echo("[dist,dev] = [" + finder.distance + "," + finder.deviation / (Math.pi/180) + "]");
-            //echo("[x,y] = [" + setPoint[0] + "," + setPoint[1] + "]");
+            echo("[x,y] = [" + setPoint[0] + "," + setPoint[1] + "]");
             var roll = pidLoop(rollPidParam, setPoint[0]);
             var pitch = -1 * pidLoop(pitchPidParam, setPoint[1]);
             echo("roll&pitch \t\t\t" + roll + " , " + pitch);
@@ -128,18 +116,18 @@ class FrontierAligner {
         },
     };
 
-    var adjustGaz = function () {
-        this.tgaz: every(this.gazInterval) {
+    var adjustGazYaw = function () {
+        this.tgazyaw: every(this.gazYawInterval) {
             var altDif = gazAltitude - xci.altitude;
             var gaz = Global.crop(pidLoop(gazPidParam, altDif), 1);
             echo("gaz: \t\t\t\t\t\t\t" + gaz);
             xci.gaz = gaz;
-        },
-    };
 
-    var resetYaw = function () {
-        yawPidParam.reset();
-        xci.yaw = 0;
+            var deviation = finder.deviation;
+            var yaw = Global.crop(pidLoop(yawPidParam,deviation), 1);
+            echo("yaw: \t" + yaw);
+            xci.yaw = yaw;
+        },
     };
 
     var resetRollPitch = function () {
@@ -149,14 +137,15 @@ class FrontierAligner {
         xci.pitch = 0;
     };
 
-    var resetGaz = function () {
+    var resetGazYaw = function () {
         gazPidParam.reset();
         xci.gaz = 0;
+        yawPidParam.reset();
+        xci.yaw = 0;
     };
 
     var resetAll = function () {
         resetRollPitch();
-        resetYaw();
-        resetGaz();
+        resetGazYaw();
     }
 }|;

@@ -19,7 +19,7 @@ class Point: UValueSerializable
 var Serializables.Point = Point;
 */
 
-load("boot/boot.u");
+load("init_onboard.u");
 
 var xciVersion = "xci_dodo";
 var xci = XXci.new(xciVersion);

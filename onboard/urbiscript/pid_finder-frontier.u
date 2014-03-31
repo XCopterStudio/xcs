@@ -1,4 +1,4 @@
-load("boot/boot.u");
+load("init_onboard.u");
 
 /*
  * Dataflow graph
@@ -7,22 +7,66 @@ load("boot/boot.u");
 //var xciVersion = "xci_dodo";
 var xciVersion = "xci_parrot";
 var xci = XXci.new(xciVersion);
-var f = ULineFinder.new();
-xci.&video >> f.&video;
-
-// Default values for image processing
-f.houghRho = 5;
-f.houghMinLength = 20; // for Parrot resolution should be larger
-f.autoHsvValueRangeEnabled = true;
-f.autoHsvValueRangeRatio = 0.4; // for Parrot the less the better probably
-f.distanceAging = 0.5;
-f.hystDirThreshold = 0.3;
-f.hystForgetRatio = 0.7;
-f.hystCenterThreshold = 0.1;
 
 serverConnect("127.0.0.1", 1234, xci, xciVersion),; // beware the comma
 
+
+var rollPidParam = PidParams.new(0.4, 0, 0);
+var yawPidParam = PidParams.new(0.5, 0, 0);
+var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
+var gazPidParam = PidParams.new(0.5, 0, 0);
+
+
+var f = ULineFinder.new();
+f.cameraParam = 0.73;
+
+var d = ULineDrawer.new();
+d.cameraParam = f.cameraParam;
+f.setLineDrawer(d);
+
+var k = ULineKeeper.new();
+//k.cameraScale = 0.73; // TODO optimize
+k.setLineDrawer(d);
+
+var s = LineSmoother.new(f);
+
+var m = LineMaster.new(f, k, s);
+
+var lineProvider = m;
+
+var a = FrontierAligner.new(xci, lineProvider, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
+
+xci.psi = 0;
+
+
+// Default values for image processing (not set in Tcl GUI)
+f.autoHsvValueRangeEnabled = true;
+
+/*
+ * Start dataflow
+ */
+serverConnect("127.0.0.1", 1234, xci, xciVersion),; // beware the comma
+
 xci.xciInit();
+m.start();
+
+
+/*
+ * Connect nodes
+ */
+xci.&video >> f.&video;
+xci.&theta >> f.&theta;
+xci.&phi >> f.&phi;
+
+xci.&video >> d.&video;
+xci.&theta >> d.&theta;
+xci.&phi >> d.&phi;
+
+xci.&velocityX >> k.&vx;
+xci.&velocityY >> k.&vy;
+xci.&altitude >> k.&altitude;
+xci.&psi >> k.&psi;
+
 
 // 4 DODO
 if(xciVersion == "xci_dodo") {
@@ -42,23 +86,14 @@ if(xciVersion == "xci_parrot") {
     sleep(4s);
 };
 
-var rollPidParam = PidParams.new(0.4, 0, 0);
-var yawPidParam = PidParams.new(0.5, 0, 0);
-var pitchPidParam = PidParams.new(0.1, 0.1, -0.02);
-var gazPidParam = PidParams.new(0.5, 0, 0);
-var a = FrontierAligner.new(xci, f, rollPidParam, yawPidParam, pitchPidParam, gazPidParam);
-
-xci.&theta >> f.&theta;
-xci.&phi >> f.&phi;
-f.cameraParam = 0.1;
-
-//echo("adjust GAZ");
-//a.adjustGaz(), while((xci.altitude - a.gazAltitude).abs() > 0.1) { sleep(100ms) };
-//echo("adjust ROLL, PITCH, YAW");
-//a.adjustRoll(), a.adjustYaw(), a.adjustPitch(),;
-
-//a.adjustYaw(),;
-//a.adjustRoll(), a.adjustYaw(), a.adjustPitch(), a.adjustGaz(), ;
-//a.adjustRoll(),;
+//// Default values for image processing
+//f.houghRho = 5;
+//f.houghMinLength = 20; // for Parrot resolution should be larger
+//f.autoHsvValueRangeEnabled = true;
+//f.autoHsvValueRangeRatio = 0.4; // for Parrot the less the better probably
+//f.distanceAging = 0.5;
+//f.hystDirThreshold = 0.3;
+//f.hystForgetRatio = 0.7;
+//f.hystCenterThreshold = 0.1;
 
 

@@ -10,6 +10,9 @@ class Frontier2Aligner{
     var trp = Tag.new("trp"); 
     var gazAltitude = 1.5;
     var forward = 0;
+    var forwardMax = 0;
+    var safeCurv = 0;
+    var fullCurv = 0;
     var rollEnabled = 1;
     var pitchEnabled = 1;
     var yawEnabled = 1;
@@ -20,6 +23,7 @@ class Frontier2Aligner{
     var ygInterval = 0.2;
     var rpInterval = 0.2;
     var rpSleep = 0.05;
+    var rpSleepMax = 0.05;
     var rollThreshold = 0.02;
     var pitchDistance = 0.1;
     var pitchDeviation = 0.1;
@@ -76,27 +80,63 @@ class Frontier2Aligner{
         this.trp: every(this.rpInterval){
             var distance = lineProvider.distance;
             var deviation = lineProvider.deviation;
+            var forwardRange = 0.max(forwardMax - forward);
+            var sleepRange = 0.max(rpSleepMax - rpSleep);
+            
+            var coeff = forwardRange / (fullCurv - safeCurv + 0.00000001); //  not divide by zero
+            var curvForward = forwardMax + (lineProvider.curvature.abs() - fullCurv) * coeff;
+            curvForward = forward.max(forwardMax.min(curvForward));
+            
+            var coeffSleep = sleepRange / (fullCurv - safeCurv + 0.00000001); //  not divide by zero
+            var curvSleep = rpSleepMax + (lineProvider.curvature.abs() - fullCurv) * coeffSleep;
+            curvSleep = rpSleep.max(rpSleepMax.min(curvSleep));
+            
+            if(!lineProvider.hasVisualLine) {
+                curvForward = forward;
+                curvSleep = rpSleep;
+            };
+            
+            echo("CurvForward:\t" + curvForward + "\t" + curvSleep + "\t" + lineProvider.curvature);
             
             /* ROLL */
-            var rollError = this.rollE = distance * deviation.cos() + forward * deviation.sin();
+            var rollError = this.rollE = distance * deviation.cos() + curvForward * deviation.sin();
             var roll = pidLoop(rollPidParam, rollError);
             
             /* PITCH */
-            var pitchError = this.pitchE = distance * deviation.sin() - forward * deviation.cos();
+            var pitchError = this.pitchE = distance * deviation.sin() - curvForward * deviation.cos();
             var pitch = pidLoop(pitchPidParam, pitchError);
 
 
             /* Common control */            
             pitch = {if(pitchEnabled) pitch else 0}; 
             roll = {if(rollEnabled) roll else 0}; 
-            echo("roll: " + roll + "\t\t pitch:\t\t" + pitch);
+            //echo("roll: " + roll + "\t\t pitch:\t\t" + pitch);
             xci.pitch = this.pitch = pitch; 
             xci.roll = this.roll = roll; 
-            sleep(this.rpSleep);
+            sleep(curvSleep);
             xci.pitch = this.pitch = 0;
             xci.roll = this.roll = 0;
-            echo("RP released");
+            //echo("RP released");
         },
     };
+
+    var resetRollPitch = function () {
+        rollPidParam.reset();
+        pitchPidParam.reset();
+        xci.roll = 0;
+        xci.pitch = 0;
+    };
+
+    var resetGazYaw = function () {
+        gazPidParam.reset();
+        xci.gaz = 0;
+        yawPidParam.reset();
+        xci.yaw = 0;
+    };
+
+    var resetAll = function () {
+        resetRollPitch();
+        resetGazYaw();
+    }
 
 }|;

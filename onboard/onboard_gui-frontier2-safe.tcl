@@ -432,7 +432,7 @@ set rollival 0
 set rolldval 0
 set rollint 0.6
 set rollsleep 0.20
-set rollsleepmax 0.25
+set rollsleepmax 0.20
 
 set yawpval 0.9
 set yawival 0.0
@@ -442,7 +442,7 @@ set pitchpval 2.4
 set pitchival 0
 set pitchdval 0
 set pitchforward 0.09
-set pitchforwardmax 0.2
+set pitchforwardmax 0.09
 set pitchfullcurv 0.0004
 set pitchsafecurv 0.0080
 
