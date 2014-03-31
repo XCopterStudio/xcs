@@ -92,6 +92,8 @@ private:
     static const size_t ALIVE_FREQ_;
     //! How often altitude data is sent (in Hz) (must divisor of 1000/SENSOR_PERIOD_).
     static const size_t ALTITUDE_FREQ_;
+    //! How often euler angles are sent (in Hz) (must divisor of 1000/SENSOR_PERIOD_).
+    static const size_t EULER_FREQ_;
     //! Period of sensor thread in ms.
     static const size_t SENSOR_PERIOD_;
     //! Milliseconds for video thread when not playing
@@ -129,6 +131,9 @@ private:
 
     /*! Altitude */
     double altitude_;
+    
+    /*! Theta */
+    double theta_;
 
     //! Generates dummy data for sensors
     void sensorGenerator();
