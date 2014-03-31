@@ -19,7 +19,7 @@
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_var.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
-#include "fly_param.hpp"
+#include "structs/fly_param.hpp"
 
 namespace xcs {
 namespace nodes {
@@ -33,7 +33,7 @@ public:
     xcs::nodes::XInputPort<double> yaw;
     xcs::nodes::XInputPort<double> gaz;
 
-    xcs::nodes::XVar<FlyParam> fly;
+    xcs::nodes::XVar<xcs::nodes::xci::FlyParam> fly;
 
     xcs::nodes::XInputPort<std::string> command;
 
@@ -64,7 +64,7 @@ private:
     //! Guard to prevent double initialization.
     bool inited_;
 
-    void onChangeFly(FlyParam fp);
+    void onChangeFly(xcs::nodes::xci::FlyParam fp);
 
     //! InputPort doesn't provide its current value, we keep it ourselves
     double roll_;

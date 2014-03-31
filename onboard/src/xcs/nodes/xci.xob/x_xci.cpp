@@ -14,6 +14,7 @@
 #include <xcs/symbol_loader.hpp>
 
 using namespace xcs::nodes;
+using namespace xcs::nodes::xci;
 using namespace xcs::xci;
 using namespace std;
 
@@ -70,7 +71,7 @@ void XXci::init(const std::string& driver) {
 void XXci::xciInit() {
     if (!inited_) {
         xci_->init();
-        setFlyParamPersistence(stoi(xci_->parameter(xci::XCI_PARAM_FP_PERSISTENCE)));
+        setFlyParamPersistence(stoi(xci_->parameter(xcs::xci::XCI_PARAM_FP_PERSISTENCE)));
         flyParamAlive_ = true;
         flyParamThread_ = move(thread(&XXci::keepFlyParam, this));
         inited_ = true; // TODO check this variable in all commands to the drone
