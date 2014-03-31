@@ -1,6 +1,8 @@
 #include "fly_param.hpp"
 #include <xcs/nodes/xobject/x.hpp>
 
+using namespace xcs::nodes::xci;
+
 FlyParam::FlyParam() :
     roll(0),
     pitch(0),

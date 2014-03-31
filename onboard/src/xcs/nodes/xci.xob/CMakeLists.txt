@@ -1,8 +1,8 @@
 set(PROJECT_NAME xxci)
 project(${PROJECT_NAME})
 
-file(GLOB SOURCES *.cpp struct/*.cpp)
-file(GLOB HEADERS *.hpp struct/*.hpp)
+file(GLOB SOURCES *.cpp structs/*.cpp)
+file(GLOB HEADERS *.hpp structs/*.hpp)
 
 add_library(${PROJECT_NAME} MODULE ${SOURCES} ${HEADERS})
 
