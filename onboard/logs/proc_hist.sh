@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Usage: $0 filename fieldname
+# Draws histogram of timestamp differences in given input.
+
 TMP=tmp.dat
 TMP2=tmp2.dat
 
