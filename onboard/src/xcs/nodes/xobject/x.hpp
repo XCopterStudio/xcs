@@ -24,7 +24,6 @@
 # define XStartRename(type, name) UStartRename(type, name)
 
 # define X_REGISTER_STRUCT(cName, ...)          \
-    GD_CATEGORY(Test.All);                      \
     URBI_REGISTER_STRUCT(cName, __VA_ARGS__)
 
 #define X_GENERATE_STRUCT_PROPERTY_S(cName, cProperty) int _ ## cName ## _ ## cProperty ## _ = xcs::nodes::XcsObject::registerStructProperty(#cName, #cProperty)

@@ -8,6 +8,8 @@
 #include "x_var.hpp"
 #include <xcs/nodes/xobject/xobject_export.h>
 
+GD_CATEGORY(Test.All);
+
 namespace xcs {
 namespace nodes {
 

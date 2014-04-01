@@ -58,21 +58,20 @@ xci.&velocityY >> k.&vy;
 xci.&altitude >> k.&altitude;
 xci.&psi >> k.&psi;
 
-    logger.registerData("theta","theta","double",xci.&theta);
-    logger.registerData("psi","psi","double",xci.&psi);
-    logger.registerData("phi","phi","double",xci.&phi);
+    logger.registerData("rotation","ROTATION","EulerianVectorChronologic",xci.&rotation);
+    logger.registerData("velocity","VELOCITY","CartesianVectorChronologic",xci.&velocity);
     logger.registerData("altitude","altitude","double",xci.&altitude);    
     logger.registerData("battery","battery","double",xci.&battery);    
     
-    logger.registerData("roll","roll","double",a.&roll);    
-    logger.registerData("pitch","pitch","double",a.&pitch);    
-    logger.registerData("yaw","yaw","double",a.&yaw);    
-    logger.registerData("gaz","gaz","double",a.&gaz);    
-    
-    logger.registerData("rollE","rollE","double",a.&rollE);    
-    logger.registerData("pitchE","pitchE","double",a.&pitchE);    
-    logger.registerData("yawE","yawE","double",a.&yawE);    
-    logger.registerData("gazE","gazE","double",a.&gazE);    
+//    logger.registerData("roll","roll","double",a.&roll);    
+//    logger.registerData("pitch","pitch","double",a.&pitch);    
+//    logger.registerData("yaw","yaw","double",a.&yaw);    
+//    logger.registerData("gaz","gaz","double",a.&gaz);    
+//    
+//    logger.registerData("rollE","rollE","double",a.&rollE);    
+//    logger.registerData("pitchE","pitchE","double",a.&pitchE);    
+//    logger.registerData("yawE","yawE","double",a.&yawE);    
+//    logger.registerData("gazE","gazE","double",a.&gazE);    
 
     logger.registerVideo("logs/" + logname + ".avi", 640, 360, "video","video","video",xci.&video);
 
