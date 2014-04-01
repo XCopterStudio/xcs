@@ -15,8 +15,14 @@ namespace xci {
         CartesianVector(double x, double y, double z);
     };
 
+    struct CartesianVectorChronologic : public CartesianVector{
+        long int time; // in milliseconds
+        CartesianVectorChronologic();
+        CartesianVectorChronologic(double x, double y, double z, long int time);
+    };
+
 }}}
 
-X_REGISTER_STRUCT(xcs::nodes::xci::CartesianVector, x, y, z);
+X_REGISTER_STRUCT(xcs::nodes::xci::CartesianVectorChronologic, x, y, z, time);
 
 #endif	/* CARTESIAN_VECTOR_HPP */

@@ -3,15 +3,25 @@
 using namespace xcs::nodes::xci;
 
 EulerianVector::EulerianVector() :
-phi(0),
-theta(0),
-psi(0){
+    phi(0),
+    theta(0),
+    psi(0){
 }
 
-EulerianVector::EulerianVector(double phi, double theta, double psi) :
-phi(phi),
-theta(theta),
-psi(psi){
+EulerianVector::EulerianVector(double phi, double psi, double theta) :
+    phi(phi),
+    psi(psi),
+    theta(theta){
 }
 
-X_GENERATE_STRUCT(EulerianVector, phi, theta, psi);
+EulerianVectorChronologic::EulerianVectorChronologic() :
+    EulerianVector(),
+    time(-1){
+};
+
+EulerianVectorChronologic::EulerianVectorChronologic(double phi, double psi, double theta, long int time) :
+    EulerianVector(phi,psi,theta),
+    time(time){
+};
+
+X_GENERATE_STRUCT(EulerianVectorChronologic, phi, psi, theta, time);

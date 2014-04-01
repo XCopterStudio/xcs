@@ -9,9 +9,20 @@ CartesianVector::CartesianVector() :
 }
 
 CartesianVector::CartesianVector(double x, double y, double z) :
-x(x),
-y(y),
-z(z){
+    x(x),
+    y(y),
+    z(z){
 }
 
-X_GENERATE_STRUCT(CartesianVector, x, y, z);
+CartesianVectorChronologic::CartesianVectorChronologic() : 
+    CartesianVector(),
+    time(-1) {
+}
+
+CartesianVectorChronologic::CartesianVectorChronologic(double x, double y, double z, long int time) : 
+    CartesianVector(x,y,z),
+    time(-1) {
+
+}
+
+X_GENERATE_STRUCT(CartesianVectorChronologic, x, y, z, time);
