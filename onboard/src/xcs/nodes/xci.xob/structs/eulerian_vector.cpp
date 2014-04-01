@@ -8,10 +8,10 @@ EulerianVector::EulerianVector() :
     psi(0){
 }
 
-EulerianVector::EulerianVector(double phi, double psi, double theta) :
+EulerianVector::EulerianVector(double phi, double theta, double psi) :
     phi(phi),
-    psi(psi),
-    theta(theta){
+    theta(theta),
+    psi(psi){
 }
 
 EulerianVectorChronologic::EulerianVectorChronologic() :
@@ -19,8 +19,8 @@ EulerianVectorChronologic::EulerianVectorChronologic() :
     time(-1){
 };
 
-EulerianVectorChronologic::EulerianVectorChronologic(double phi, double psi, double theta, long int time) :
-    EulerianVector(phi,psi,theta),
+EulerianVectorChronologic::EulerianVectorChronologic(double phi, double theta, double psi, long int time) :
+    EulerianVector(phi,theta, psi),
     time(time){
 };
 

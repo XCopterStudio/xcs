@@ -100,19 +100,12 @@ std::string XCI_Parrot::name() {
 SensorList XCI_Parrot::sensorList() {
     SensorList sensorList;
 
-    sensorList.push_back(Sensor("phi", "phi"));
-    sensorList.push_back(Sensor("theta", "theta"));
-    sensorList.push_back(Sensor("psi", "psi"));
+    sensorList.push_back(Sensor("rotation", "ROTATION"));
+    sensorList.push_back(Sensor("velocity", "VELOCITY"));
 
-    sensorList.push_back(Sensor("velocityX", "velocityX"));
-    sensorList.push_back(Sensor("velocityY", "velocityY"));
-    sensorList.push_back(Sensor("velocityZ", "velocityY"));
-
-    sensorList.push_back(Sensor("altitude", "altitude"));
-
-    sensorList.push_back(Sensor("battery", "battery"));
-
-    sensorList.push_back(Sensor("video", "video"));
+    sensorList.push_back(Sensor("altitude", "ALTITUDE"));
+    sensorList.push_back(Sensor("battery", "BATTERY"));
+    sensorList.push_back(Sensor("video", "VIDEO"));
 
     return sensorList;
 }

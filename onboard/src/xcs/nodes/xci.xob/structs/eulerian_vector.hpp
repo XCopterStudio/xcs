@@ -9,19 +9,19 @@ namespace xci {
 
     struct EulerianVector {
         double phi; // x-axis
-        double psi; // y-axis
-        double theta; // z-axis
+        double theta; // y-axis
+        double psi; // z-axis
         EulerianVector();
-        EulerianVector(double phi, double psi, double theta);
+        EulerianVector(double phi, double theta, double psi);
     };
 
     struct EulerianVectorChronologic : public EulerianVector{
         long int time; // in milliseconds
         EulerianVectorChronologic();
-        EulerianVectorChronologic(double phi, double psi, double theta, long int time);
+        EulerianVectorChronologic(double phi, double theta, double psi, long int time);
     };
 }}}
 
-X_REGISTER_STRUCT(xcs::nodes::xci::EulerianVectorChronologic, phi, psi, theta, time);
+X_REGISTER_STRUCT(xcs::nodes::xci::EulerianVectorChronologic, phi, theta, psi, time);
 
 #endif	/* EULERIAN_VECTOR_HPP */
