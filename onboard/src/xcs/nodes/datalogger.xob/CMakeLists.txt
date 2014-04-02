@@ -1,12 +1,11 @@
-set(PROJECT_NAME datalogger)
+set(PROJECT_NAME xdatalogger)
 project(${PROJECT_NAME})
 
-file(GLOB SOURCES *.cpp)
-file(GLOB HEADERS *.hpp)
+file(GLOB SOURCES *.cpp writers/*.cpp)
+file(GLOB HEADERS *.hpp writers/*.hpp)
 
 add_library(${PROJECT_NAME} MODULE ${SOURCES} ${HEADERS})
 
-x_target_link_libraries(${PROJECT_NAME} xcs)
 x_target_link_libraries(${PROJECT_NAME} xobject)
 
 find_package(UrbiAll)

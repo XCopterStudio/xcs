@@ -7,15 +7,15 @@ var moduleList = [
     "ujson",
     "ulinefinder",
     "ulinedrawer",
-    "ulinekeeper",
-    "datalogger",
+    "ulinekeeper"
 ];
 
 // nodes to be loaded
 var nodeList = [
     "xcs",
     "onboard",
-    "xxci"
+    "xxci",
+    "xdatalogger"
 ];
 
 moduleList += nodeList;
