@@ -7,7 +7,7 @@ using namespace std;
 using namespace urbi;
 using namespace xcs::nodes;
 
-map< string, vector<string>* >* XcsObject::structHolder_ = NULL;
+map< string, vector<string>* > XcsObject::structHolder_;
 
 XcsObject::XcsObject(const string& name) :
     XObject(name) {
@@ -27,7 +27,7 @@ int XcsObject::init() {
 string XcsObject::getStructs4Reg() {
     stringstream structs;
 
-    for (map<string, vector<string>*>::iterator it = structHolder_->begin(); it != structHolder_->end(); ++it) {
+    for (map<string, vector<string>*>::iterator it = structHolder_.begin(); it != structHolder_.end(); ++it) {
         // struct name
         structs << "class " << it->first << ": UValueSerializable {" << endl;
 
@@ -63,24 +63,18 @@ string XcsObject::getStructs4Reg() {
     }
     
     //cerr << endl << endl << structs.str() << endl << endl;
-    structHolder_->clear();
+    structHolder_.clear();
     return structs.str();
 }
 
-std::map< std::string, std::vector<std::string>* >* XcsObject::getStructHolder() {
-    if (structHolder_ == NULL) {
-        structHolder_ = new map< string, vector<string>* >();
-    }
-    return structHolder_;
-}
 
 
 int XcsObject::registerStructProperty(string structName, string structProperty) {
-    if (getStructHolder()->count(structName) == 0) {
-        getStructHolder()->emplace(structName, new vector<string>);
+    if (structHolder_.count(structName) == 0) {
+        structHolder_.emplace(structName, new vector<string>);
     }
 
-    (*getStructHolder())[structName]->push_back(structProperty);
+    structHolder_[structName]->push_back(structProperty);
 
     return 1;
 }
