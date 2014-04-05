@@ -57,3 +57,9 @@
     </div>
 
 </div>
+
+<div class="container-fluid" id="script-generator">
+    <div id="screen" style="height: 500px; width: 500px;"></div>
+    <xml id="toolbox" style="display: none"></xml>
+    <textarea id="scriptScreen" rows="5" cols="80"></textarea>
+</div>

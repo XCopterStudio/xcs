@@ -11,6 +11,12 @@
 <!-- code mirror -->
 <script type="text/javascript" src="js/codemirror/codemirror.js"></script>
 <script type="text/javascript" src="js/codemirror/xcsMode.js"></script>
+<!-- blockly -->
+<script type="text/javascript" src="js/blockly/blockly_compressed.js"></script>
+<script type="text/javascript" src="js/blockly/blocks_compressed.js"></script>
+<script type="text/javascript" src="js/blockly/msg/js/en.js"></script>
+<script type="text/javascript" src="js/blockly/javascript_compressed.js"></script>
+<script type="text/javascript" src="js/blockly/urbiscript.js"></script>
 <!-- Custom scripts -->
 <script type="text/javascript" src="js/custom.js"></script>
 <!-- 
@@ -29,4 +35,5 @@
 <script type="text/javascript" src="src/views/FlashMessagesView.js"></script>
 <script type="text/javascript" src="src/views/AbstractNavdataView.js"></script>
 <script type="text/javascript" src="src/views/AppView.js"></script>
+<script type="text/javascript" src="src/views/ScriptGeneratorView.js"></script>
 <script type="text/javascript" src="src/app.js"></script>
