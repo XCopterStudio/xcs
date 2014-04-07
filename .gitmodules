@@ -1,3 +1,6 @@
 [submodule "3rd-party/rapidjson/rapidjson"]
 	path = 3rd-party/rapidjson/rapidjson
 	url = https://github.com/Kanma/rapidjson.git
+[submodule "3rd-party/armadillo"]
+	path = 3rd-party/armadillo
+	url = drones.ms.mff.cuni.cz:/srv/xcs/repo/armadillo.git
