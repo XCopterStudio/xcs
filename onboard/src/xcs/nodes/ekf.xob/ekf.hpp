@@ -3,10 +3,13 @@
 
 #include <queue>
 #include <utility>
+#include <random>
 
 #include <xcs/nodes/xci.xob/structs/fly_param.hpp>
 #include <xcs/nodes/xci.xob/structs/cartesian_vector.hpp>
 #include <xcs/nodes/xci.xob/structs/eulerian_vector.hpp>
+
+#include <armadillo>
 
 namespace xcs{
 namespace nodes{
@@ -17,6 +20,9 @@ namespace ekf{
         xcs::nodes::xci::CartesianVector velocity;
         xcs::nodes::xci::EulerianVector angles;
         double angularRotationPsi;
+
+        arma::mat getMat() const;
+        void Mat(const arma::mat &mat);
     };
 
     struct DroneStateMeasurement{
@@ -37,7 +43,8 @@ namespace ekf{
     // FlyParam consist from send fly parameters and timestamp. Timestamp is the time in milliseconds when drone received fly parameters.
     typedef std::queue< FlyParamChronologic > FlyParams;
 
-
+    typedef std::mt19937 Generator;
+    typedef std::normal_distribution<double> NormalDistribution;
 
     class Ekf{
         DroneStates droneStates_;
@@ -45,11 +52,15 @@ namespace ekf{
         Measurements measurements_;
         FlyParams flyParams_;
 
-        double parameters[9];
+        double parameters[10];
+
+        Generator randomGenerator;
+        NormalDistribution normalDistribution;
+
 
         DroneStateDistribution predict(const DroneStateDistribution &state, const xcs::nodes::xci::FlyParam &flyparam, const double &delta);
     public:
-
+        Ekf();
     };
 
 }}}
