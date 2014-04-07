@@ -52,7 +52,7 @@ namespace ekf{
         Measurements measurements_;
         FlyParams flyParams_;
 
-        double parameters[9];
+        double parameters[10];
 
         Generator randomGenerator;
         NormalDistribution normalDistribution;

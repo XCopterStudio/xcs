@@ -48,24 +48,24 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
 
     // predict acceleration
     // acceleration in drone frame
-    double force = parameters[0] * (1.0 + flyparam.gaz);
+    double force = parameters[1] * (1.0 + parameters[0] * flyparam.gaz);
     double forceX = force * sin(anglesOld.phi)*cos(anglesOld.theta);
     double forceY = -force * sin(anglesOld.theta);
     // friction
-    double frictionX = parameters[1] * velocityOld.x + parameters[2] * velocityOld.x * velocityOld.x;
-    double frictionY = parameters[1] * velocityOld.y + parameters[2] * velocityOld.y * velocityOld.y;
+    double frictionX = parameters[2] * velocityOld.x + parameters[3] * velocityOld.x * velocityOld.x;
+    double frictionY = parameters[2] * velocityOld.y + parameters[3] * velocityOld.y * velocityOld.y;
 
     // drone acceleration in global frame
     CartesianVector acceleration;
     acceleration.x = (cos(anglesOld.psi)*forceX + sin(anglesOld.psi)*forceY) - frictionX;
     acceleration.y = (-sin(anglesOld.psi)*forceX + cos(anglesOld.psi)*forceY) - frictionY;
-    acceleration.z = parameters[7] * (1.0 + flyparam.gaz) - parameters[8] * velocityOld.z;
+    acceleration.z = parameters[8] * (1.0 + parameters[0] * flyparam.gaz) - parameters[9] * velocityOld.z;
 
     // angular rotation speed
     EulerianVector angularRotation;
-    angularRotation.phi = parameters[3] * flyparam.roll - parameters[4] * anglesOld.phi;
-    angularRotation.theta = parameters[3] * flyparam.pitch - parameters[4] * anglesOld.theta;
-    angularRotation.psi = parameters[5] * flyparam.yaw - parameters[6] * anglesOld.psi;
+    angularRotation.phi = parameters[4] * flyparam.roll - parameters[5] * anglesOld.phi;
+    angularRotation.theta = parameters[4] * flyparam.pitch - parameters[5] * anglesOld.theta;
+    angularRotation.psi = parameters[6] * flyparam.yaw - parameters[7] * anglesOld.psi;
 
     // =========== predict new state ============
     // position
@@ -99,7 +99,7 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     jacobian[3, 3] = 1;
     jacobian[6, 3] = delta;
     // velocity x
-    jacobian[4, 4] = 1 - parameters[1] * delta - parameters[2] * 2 * delta * velocityOld.x;
+    jacobian[4, 4] = 1 - parameters[2] * delta - parameters[3] * 2 * delta * velocityOld.x;
     jacobian[7, 4] = delta*force * (
         cos(anglesOld.phi) * cos(anglesOld.psi) * cos(anglesOld.theta) 
         );
@@ -112,7 +112,7 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
         -cos(anglesOld.psi) * sin(anglesOld.theta)
         );
     // velocity y
-    jacobian[5, 5] = 1 - parameters[1] * delta - parameters[2] * 2 * delta * velocityOld.y;
+    jacobian[5, 5] = 1 - parameters[2] * delta - parameters[3] * 2 * delta * velocityOld.y;
     jacobian[7, 5] = delta*force * (
         -cos(anglesOld.phi) * sin(anglesOld.psi) * cos(anglesOld.theta)
         );
@@ -125,27 +125,27 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
         + sin(anglesOld.psi) * sin(anglesOld.theta)
         );
     // velocity z
-    jacobian[6, 6] = 1 - delta*parameters[8];
+    jacobian[6, 6] = 1 - delta*parameters[9];
     // angle phi
-    jacobian[7, 7] = 1 - delta*parameters[4];
+    jacobian[7, 7] = 1 - delta*parameters[5];
     // angle theta
-    jacobian[8, 8] = 1 - delta*parameters[4];
+    jacobian[8, 8] = 1 - delta*parameters[5];
     // angle psi
     jacobian[9, 9] = 1;
     jacobian[10, 9] = delta;
     // rotation speed psi
-    jacobian[10, 10] = 1 - delta*parameters[6];
+    jacobian[10, 10] = 1 - delta*parameters[7];
 
     // normal noise
     mat noiseTransf(4, 10, fill::zeros);
     // gaz
-    noiseTransf[4, 6] = delta * parameters[7];
+    noiseTransf[4, 6] = delta * parameters[8];
     // phi
-    noiseTransf[1, 7] = delta * parameters[3];
+    noiseTransf[1, 7] = delta * parameters[4];
     // theta
-    noiseTransf[2, 8] = delta * parameters[3];
+    noiseTransf[2, 8] = delta * parameters[4];
     // rotation speed psi
-    noiseTransf[3, 10] = delta * parameters[5];
+    noiseTransf[3, 10] = delta * parameters[6];
 
     // ======= predict state deviation ===========
 
