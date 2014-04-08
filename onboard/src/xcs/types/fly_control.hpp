@@ -4,8 +4,6 @@
 #include <xcs/nodes/xobject/x.hpp>
 
 namespace xcs {
-namespace nodes {
-namespace xci {
 
 struct FlyControl {
     double roll;
@@ -18,10 +16,8 @@ struct FlyControl {
     };
 };
 }
-}
-}
 
-X_REGISTER_STRUCT(xcs::nodes::xci::FlyControl, roll, pitch, yaw, gaz);
+X_REGISTER_STRUCT(xcs::FlyControl, roll, pitch, yaw, gaz);
 
 #endif	/* FLY_CONTROL_HPP */
 

@@ -37,7 +37,7 @@ namespace ekf{
     typedef std::pair<DroneState, arma::mat> DroneStateDistribution;
     typedef std::pair<DroneStateMeasurement, long int> MeasurementChronologic;
     typedef std::pair<DroneStateDistribution, long int> DroneStateDistributionChronologic;
-    typedef std::pair<xcs::nodes::xci::FlyControl, long int> FlyControlChronologic;
+    typedef std::pair<xcs::FlyControl, long int> FlyControlChronologic;
 
     // Measurement consist from measurement of the drone state and timestamp. Timestamp is the time in milliseconds when measurement was created.
     typedef std::queue< MeasurementChronologic > Measurements;

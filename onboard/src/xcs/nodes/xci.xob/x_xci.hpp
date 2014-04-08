@@ -26,7 +26,7 @@ public:
     xcs::nodes::XInputPort<double> yaw;
     xcs::nodes::XInputPort<double> gaz;
 
-    xcs::nodes::XVar<xcs::nodes::xci::FlyControl> fly;
+    xcs::nodes::XVar<xcs::FlyControl> fly;
 
     xcs::nodes::XInputPort<std::string> command;
 
@@ -57,7 +57,7 @@ private:
     //! Guard to prevent double initialization.
     bool inited_;
 
-    void onChangeFly(xcs::nodes::xci::FlyControl fp);
+    void onChangeFly(xcs::FlyControl fp);
 
     //! InputPort doesn't provide its current value, we keep it ourselves
     double roll_;

@@ -14,7 +14,6 @@
 #include <xcs/symbol_loader.hpp>
 
 using namespace xcs::nodes;
-using namespace xcs::nodes::xci;
 using namespace xcs::xci;
 using namespace std;
 
