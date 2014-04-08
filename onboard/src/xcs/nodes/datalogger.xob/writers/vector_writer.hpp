@@ -6,13 +6,15 @@
 
 #include <xcs/types/cartesian_vector.hpp>
 #include <xcs/types/eulerian_vector.hpp>
+#include <xcs/types/fly_control.hpp>
 #include "abstract_writer.hpp"
 
 #define VECTOR_TYPES LIBPORT_LIST( \
         xcs::EulerianVector, \
         xcs::EulerianVectorChronologic, \
         xcs::CartesianVector, \
-        xcs::CartesianVectorChronologic, )
+        xcs::CartesianVectorChronologic, \
+        xcs::FlyControl, )
 
 namespace xcs {
 namespace nodes {
