@@ -5,24 +5,6 @@
 using namespace xcs::urbi;
 using namespace std;
 
-ULineDrawer::DrawTask::DrawTask() : type(TASK_VOID) {
-}
-
-ULineDrawer::DrawTask::DrawTask(const DrawTask &drawTask) {
-    this->type = drawTask.type;
-    switch (drawTask.type) {
-        case TASK_CIRCLE:
-            this->dataCircle = drawTask.dataCircle;
-            break;
-        case TASK_LINE:
-            this->dataLine = drawTask.dataLine;
-            break;
-        default:
-            this->type = TASK_VOID;
-            break;
-    }
-}
-
 ULineDrawer::ULineDrawer(const string& name) :
   ::urbi::UObject(name),
   hasFrame_(false) {
@@ -72,10 +54,10 @@ int ULineDrawer::update() {
             switch (drawTask.type) {
                 case TASK_LINE:
                     //cerr << drawTask.dataLine.begin << ", " << drawTask.dataLine.end << ", " << drawTask.dataLine.color << ", " << drawTask.dataLine.width << endl;
-                    cv::line(src, drawTask.dataLine.begin, drawTask.dataLine.end, drawTask.dataLine.color, drawTask.dataLine.width);
+                    cv::line(src, drawTask.point1, drawTask.point2, drawTask.color, drawTask.dimension1);
                     break;
                 case TASK_CIRCLE:
-                    cv::circle(src, drawTask.dataCircle.center, drawTask.dataCircle.radius, drawTask.dataCircle.color, 3);
+                    cv::circle(src, drawTask.point1, drawTask.dimension1, drawTask.color, 3);
                     break;
             }
         }
@@ -106,10 +88,10 @@ void ULineDrawer::onChangeFps(int value) {
 void ULineDrawer::drawLine(cv::Point begin, cv::Point end, cv::Scalar color, size_t width) {
     lock_guard<mutex> lock(drawTasksMtx_);
     DrawTask task;
-    task.dataLine.begin = begin;
-    task.dataLine.end = end;
-    task.dataLine.color = color;
-    task.dataLine.width = width;
+    task.point1 = begin;
+    task.point2 = end;
+    task.color = color;
+    task.dimension1 = width;
     task.type = TASK_LINE;
     drawTasks_.push_back(task);
 }
@@ -117,9 +99,9 @@ void ULineDrawer::drawLine(cv::Point begin, cv::Point end, cv::Scalar color, siz
 void ULineDrawer::drawCircle(cv::Point center, cv::Scalar color, size_t radius) {
     lock_guard<mutex> lock(drawTasksMtx_);
     DrawTask task;
-    task.dataCircle.center = center;
-    task.dataCircle.color = color;
-    task.dataCircle.radius = radius;
+    task.point1 = center;
+    task.color = color;
+    task.dimension1 = radius;
     task.type = TASK_CIRCLE;
     drawTasks_.push_back(task);
 }

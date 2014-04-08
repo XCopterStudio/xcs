@@ -62,25 +62,11 @@ private:
     };
 
     struct DrawTask {
-        DrawTask();
-        DrawTask(const DrawTask &drawTask);
-
         DrawTaskType type;
-
-        union {
-            struct {
-                cv::Point center;
-                cv::Scalar color;
-                size_t radius;
-            } dataCircle;
-
-            struct {
-                cv::Point begin;
-                cv::Point end;
-                cv::Scalar color;
-                size_t width;
-            } dataLine;
-        };
+        cv::Point point1; // center for circle
+        cv::Point point2; // unused for circle
+        cv::Scalar color;
+        size_t dimension1; // width for line, radius for circle
     };
 
     xcs::urbi::line_finder::LineUtils lineUtils_;
