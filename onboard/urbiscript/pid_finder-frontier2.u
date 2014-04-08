@@ -58,8 +58,8 @@ xci.&velocityY >> k.&vy;
 xci.&altitude >> k.&altitude;
 xci.&psi >> k.&psi;
 
-    logger.registerData("rotation","ROTATION","xcs::nodes::xci::EulerianVector",xci.&rotation);
-    logger.registerData("velocity","VELOCITY","xcs::nodes::xci::CartesianVector",xci.&velocity);
+    logger.registerData("rotation","ROTATION","xcs::EulerianVector",xci.&rotation);
+    logger.registerData("velocity","VELOCITY","xcs::CartesianVector",xci.&velocity);
     logger.registerData("altitude","ALTITUDE","double",xci.&altitude);
     logger.registerData("battery","BATTERY","double",xci.&battery);    
     
@@ -73,7 +73,7 @@ xci.&psi >> k.&psi;
 //    logger.registerData("yawE","yawE","double",a.&yawE);    
 //    logger.registerData("gazE","gazE","double",a.&gazE);    
 
-    logger.registerVideo("logs/" + logname + ".avi", 640, 360, "video","CAMERA_BOTTOM","xcs::nodes::BitmapType",xci.&video);
+    logger.registerVideo("logs/" + logname + ".avi", 640, 360, "video","CAMERA_BOTTOM","xcs::BitmapType",xci.&video);
 
     //logger.registerData("command","command","string",xci.&command);
 
