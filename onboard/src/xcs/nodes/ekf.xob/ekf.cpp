@@ -40,6 +40,18 @@ void DroneState::Mat(const arma::mat &mat){
     }
 }
 
+mat DroneStateMeasurement::getMat() const{
+    mat measurement(7, 1);
+    measurement[1, 1] = altitude;
+    measurement[2, 1] = velocity.x;
+    measurement[3, 1] = velocity.y;
+    measurement[4, 1] = velocity.z;
+    measurement[5, 1] = angles.phi;
+    measurement[6, 1] = angles.theta;
+    measurement[7, 1] = angularRotationPsi;
+    return measurement;
+}
+
 DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const FlyParam &flyparam, const double &delta){
     DroneStateDistribution predictedState = state;
     const CartesianVector &positionOld = state.first.position;
@@ -155,13 +167,74 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     noise[3, 3] = normalDistribution(randomGenerator) * flyparam.yaw * flyparam.yaw;
     noise[4, 4] = normalDistribution(randomGenerator) * flyparam.gaz * flyparam.gaz;
 
-    mat deviation(10, 10);
-    deviation = jacobian * state.second.getMat() * jacobian.t() + noiseTransf * noise * noiseTransf.t();
-    predictedState.second.Mat(deviation);
+    predictedState.second = jacobian * state.second * jacobian.t() + noiseTransf * noise * noiseTransf.t();
 
     // ======= end predict state deviation ===========
 
     return predictedState;
+}
+
+DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const DroneStateMeasurement &imuMeasurement){
+    DroneStateDistribution updatedState;
+
+    // create jacobian from measurement function
+    mat measurementJacobian(7, 10, fill::zeros);
+    // altitude
+    measurementJacobian[1, 3] = 1;
+    // acceleration x
+    measurementJacobian[2, 4] = cos(state.first.angles.psi);
+    measurementJacobian[2, 5] = -sin(state.first.angles.psi);
+    measurementJacobian[2, 9] = -state.first.velocity.x*sin(state.first.angles.psi) 
+        - state.first.velocity.y*cos(state.first.angles.psi);
+    // acceleration y
+    measurementJacobian[3, 4] = sin(state.first.angles.psi);
+    measurementJacobian[3, 5] = cos(state.first.angles.psi);
+    measurementJacobian[3, 9] = state.first.velocity.x*cos(state.first.angles.psi)
+        - state.first.velocity.y*sin(state.first.angles.psi);
+    // acceleration z
+    measurementJacobian[4, 6] = 1;
+    // phi
+    measurementJacobian[5, 7] = 1;
+    // theta
+    measurementJacobian[6, 8] = 1;
+    // psi
+    measurementJacobian[7, 10] = 1;
+
+    // additional noise 
+    mat noise(7, 7, fill::zeros);
+    noise[1, 1] = normalDistribution(randomGenerator) * imuMeasurement.altitude * imuMeasurement.altitude;
+    noise[2, 2] = normalDistribution(randomGenerator) * imuMeasurement.velocity.x * imuMeasurement.velocity.x;
+    noise[3, 3] = normalDistribution(randomGenerator) * imuMeasurement.velocity.y * imuMeasurement.velocity.y;
+    noise[4, 4] = normalDistribution(randomGenerator) * imuMeasurement.velocity.z * imuMeasurement.velocity.z;
+    noise[5, 5] = normalDistribution(randomGenerator) * imuMeasurement.angles.phi * imuMeasurement.angles.phi;
+    noise[6, 6] = normalDistribution(randomGenerator) * imuMeasurement.angles.theta * imuMeasurement.angles.theta;
+    noise[7, 7] = normalDistribution(randomGenerator) * imuMeasurement.angularRotationPsi * imuMeasurement.angularRotationPsi;
+
+    // compute kalman gain
+    mat gain(10, 7);
+    gain = state.second * measurementJacobian.t() * (measurementJacobian * state.second * measurementJacobian.t() + noise).i();
+
+    // compute predicted measurement 
+    mat predictedMeasurment(7, 1, fill::zeros);
+    predictedMeasurment[1, 1] = state.first.position.z;
+    predictedMeasurment[2, 1] = state.first.velocity.x * cos(state.first.angles.psi) 
+        - state.first.velocity.y * sin(state.first.angles.psi);
+    predictedMeasurment[3, 1] = state.first.velocity.x * sin(state.first.angles.psi)
+        + state.first.velocity.y * cos(state.first.angles.psi);
+    predictedMeasurment[4, 1] = state.first.velocity.z;
+    predictedMeasurment[5, 1] = state.first.angles.phi;
+    predictedMeasurment[6, 1] = state.first.angles.theta;
+    predictedMeasurment[7, 1] = state.first.angularRotationPsi;
+
+    // update state
+    mat newState(10, 1);
+    newState = state.first.getMat() + gain * (imuMeasurement.getMat() - predictedMeasurment);
+    updatedState.first.Mat(newState);
+
+    // update deviation
+    updatedState.second = (mat(10, 10).eye() - gain*measurementJacobian) * state.second;
+
+    return updatedState;
 }
 
 // =========================== public functions ============================

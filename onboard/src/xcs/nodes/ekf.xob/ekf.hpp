@@ -29,9 +29,12 @@ namespace ekf{
         xcs::nodes::xci::CartesianVector velocity;
         xcs::nodes::xci::EulerianVector angles;
         double altitude;
+        double angularRotationPsi;
+
+        arma::mat getMat() const;
     };
 
-    typedef std::pair<DroneState, DroneState> DroneStateDistribution;
+    typedef std::pair<DroneState, arma::mat> DroneStateDistribution;
     typedef std::pair<DroneStateMeasurement, long int> MeasurementChronologic;
     typedef std::pair<DroneStateDistribution, long int> DroneStateDistributionChronologic;
     typedef std::pair<xcs::nodes::xci::FlyParam, long int> FlyParamChronologic;
@@ -59,6 +62,7 @@ namespace ekf{
 
 
         DroneStateDistribution predict(const DroneStateDistribution &state, const xcs::nodes::xci::FlyParam &flyparam, const double &delta);
+        DroneStateDistribution updateIMU(const DroneStateDistribution &state, const DroneStateMeasurement &imuMeasurement);
     public:
         Ekf();
     };
