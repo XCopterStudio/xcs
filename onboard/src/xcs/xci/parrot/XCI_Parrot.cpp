@@ -107,6 +107,8 @@ SensorList XCI_Parrot::sensorList() {
     sensorList.push_back(Sensor("battery", "BATTERY"));
     sensorList.push_back(Sensor("video", "VIDEO"));
 
+    sensorList.push_back(Sensor("alive", "ALIVE"));
+
     return sensorList;
 }
 

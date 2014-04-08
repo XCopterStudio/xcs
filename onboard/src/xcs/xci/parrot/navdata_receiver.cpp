@@ -127,6 +127,13 @@ void NavdataReceiver::processState(uint32_t parrotState) {
         sequenceNumberNavdata_ = DEFAULT_SEQUENCE_NUMBER - 1;
         //initNavdataReceive();
     }
+
+    // parrot is in state in which can not fly
+    if (parrotState_.getState(FLAG_ARDRONE_MOTORS_MASK) || parrotState_.getState(FLAG_ARDRONE_SOFTWARE_FAULT) || parrotState_.getState(FLAG_ARDRONE_VBAT_LOW)){
+        dataReceiver_.notify("alive", 1);
+    }else{
+        dataReceiver_.notify("alive", 0);
+    }
 }
 
 void NavdataReceiver::processNavdata(vector<OptionAcceptor*> &options) {
