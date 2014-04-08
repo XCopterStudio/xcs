@@ -7,12 +7,13 @@
 #include <urbi/uobject.hh>
 #include <opencv2/opencv.hpp>
 #include <xcs/urbi/line_finder.uob/line_utils.hpp>
+#include <xcs/urbi/line_drawer.uob/ulinedrawer_export.h>
 
 
 namespace xcs {
 namespace urbi {
 
-class ULineDrawer : public ::urbi::UObject {
+class ULINEDRAWER_EXPORT ULineDrawer : public ::urbi::UObject {
 public:
     /*!
      * Inputs
