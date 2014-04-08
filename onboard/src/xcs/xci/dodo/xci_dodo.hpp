@@ -66,8 +66,8 @@ public:
     //! A pure virtual member taking command from list of x-copter's special commands and sending it to the x-copter
     virtual void command(const std::string &command);
 
-    //! A pure virtual member taking four fly parameters and send it to the x-copter
-    virtual void flyParam(float roll, float pitch, float yaw, float gaz);
+    //! A pure virtual member taking four fly controls and send it to the x-copter
+    virtual void flyControl(float roll, float pitch, float yaw, float gaz);
 
     //! A pure virtual member initializing XCI for use
     virtual void init();

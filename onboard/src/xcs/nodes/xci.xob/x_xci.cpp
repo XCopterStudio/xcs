@@ -20,30 +20,30 @@ using namespace std;
 
 XXci::XXci(const std::string& name) :
   xcs::nodes::XObject(name),
-  flyParamPersistence("FLY_PARAM_PERSISTENCE"),
+  flyControlPersistence("FLY_CONTROL_PERSISTENCE"),
   roll("ROLL"),
   pitch("PITCH"),
   yaw("YAW"),
   gaz("GAZ"),
-  fly("FLY_PARAM"),
+  fly("FLY_CONTROL"),
   command("COMMAND"),
   inited_(false),
   roll_(0),
   pitch_(0),
   yaw_(0),
   gaz_(0),
-  flyParamActive_(false),
-  flyParamAlive_(false),
-  flyParamPersistence_(0) {
+  flyControlActive_(false),
+  flyControlAlive_(false),
+  flyControlPersistence_(0) {
     XBindFunction(XXci, init);
     XBindFunction(XXci, xciInit);
     XBindFunction(XXci, doCommand);
-    XBindFunction(XXci, flyParam);
+    XBindFunction(XXci, flyControl);
     XBindFunction(XXci, getConfiguration);
     XBindFunction(XXci, dumpConfiguration);
     XBindFunction(XXci, setConfiguration);
 
-    XBindVarF(flyParamPersistence, &XXci::setFlyParamPersistence);
+    XBindVarF(flyControlPersistence, &XXci::setFlyControlPersistence);
 
     XBindVarF(fly, &XXci::onChangeFly);
 
@@ -71,9 +71,9 @@ void XXci::init(const std::string& driver) {
 void XXci::xciInit() {
     if (!inited_) {
         xci_->init();
-        setFlyParamPersistence(stoi(xci_->parameter(xcs::xci::XCI_PARAM_FP_PERSISTENCE)));
-        flyParamAlive_ = true;
-        flyParamThread_ = move(thread(&XXci::keepFlyParam, this));
+        setFlyControlPersistence(stoi(xci_->parameter(xcs::xci::XCI_PARAM_FP_PERSISTENCE)));
+        flyControlAlive_ = true;
+        flyControlThread_ = move(thread(&XXci::keepFlyControl, this));
         inited_ = true; // TODO check this variable in all commands to the drone
     } else {
         cerr << "[XXci] already called init." << endl; //TODO general way for runtime warnings (in Urbi)
@@ -81,7 +81,7 @@ void XXci::xciInit() {
 }
 
 void XXci::doCommand(const std::string& command) {
-    setFlyParamActive(false);
+    setFlyControlActive(false);
     roll_ = 0;
     pitch_ = 0;
     yaw_ = 0;
@@ -89,14 +89,14 @@ void XXci::doCommand(const std::string& command) {
     xci_->command(command);
 }
 
-void XXci::flyParam(double roll, double pitch, double yaw, double gaz) {
+void XXci::flyControl(double roll, double pitch, double yaw, double gaz) {
     //TODO here should be lock to atomic update of RPYG
     roll_ = roll;
     pitch_ = pitch;
     yaw_ = yaw;
     gaz_ = gaz;
-    sendFlyParam();
-    setFlyParamActive();
+    sendFlyControl();
+    setFlyControlActive();
 }
 
 std::string XXci::getConfiguration(const std::string &key) {
@@ -111,33 +111,33 @@ void XXci::setConfiguration(const std::string& key, const std::string& value) {
     xci_->configuration(key, value);
 }
 
-void XXci::onChangeFly(FlyParam fp) {
-    flyParam(fp.roll, fp.pitch, fp.yaw, fp.gaz);
+void XXci::onChangeFly(FlyControl fp) {
+    flyControl(fp.roll, fp.pitch, fp.yaw, fp.gaz);
     //cerr << "***************** " << fp.roll << " - " << fp.pitch << " - " << fp.yaw << " - " << fp.gaz;
 }
 
 void XXci::onChangeRoll(double roll) {
     roll_ = roll;
-    sendFlyParam();
-    setFlyParamActive();
+    sendFlyControl();
+    setFlyControlActive();
 }
 
 void XXci::onChangePitch(double pitch) {
     pitch_ = pitch;
-    sendFlyParam();
-    setFlyParamActive();
+    sendFlyControl();
+    setFlyControlActive();
 }
 
 void XXci::onChangeYaw(double yaw) {
     yaw_ = yaw;
-    sendFlyParam();
-    setFlyParamActive();
+    sendFlyControl();
+    setFlyControlActive();
 }
 
 void XXci::onChangeGaz(double gaz) {
     gaz_ = gaz;
-    sendFlyParam();
-    setFlyParamActive();
+    sendFlyControl();
+    setFlyControlActive();
 }
 
 void XXci::initOutputs() {
@@ -150,54 +150,54 @@ void XXci::initOutputs() {
     }
 }
 
-void XXci::stopFlyParamsThread() {
-    flyParamAlive_ = false;
-    flyParamCond_.notify_one();
-    flyParamThread_.join();
+void XXci::stopFlyControlsThread() {
+    flyControlAlive_ = false;
+    flyControlCond_.notify_one();
+    flyControlThread_.join();
 }
 
-void XXci::setFlyParamPersistence(unsigned int value) {
-    flyParamPersistence_ = value;
-    setFlyParamActive(flyParamActive_); // notifies
+void XXci::setFlyControlPersistence(unsigned int value) {
+    flyControlPersistence_ = value;
+    setFlyControlActive(flyControlActive_); // notifies
 }
 
-void XXci::setFlyParamActive(bool value) {
-    if (!flyParamThread_.joinable()) { // thread haven't started yet
-        flyParamActive_ = value;
+void XXci::setFlyControlActive(bool value) {
+    if (!flyControlThread_.joinable()) { // thread haven't started yet
+        flyControlActive_ = value;
         return;
     } else {
-        lock_guard<mutex> lock(flyParamMtx_);
-        flyParamActive_ = value;
+        lock_guard<mutex> lock(flyControlMtx_);
+        flyControlActive_ = value;
     }
-    flyParamCond_.notify_one();
+    flyControlCond_.notify_one();
 }
 
-void XXci::keepFlyParam() {
-    unique_lock<mutex> lock(flyParamMtx_, defer_lock_t());
+void XXci::keepFlyControl() {
+    unique_lock<mutex> lock(flyControlMtx_, defer_lock_t());
 
-    while (flyParamAlive_) {
+    while (flyControlAlive_) {
         lock.lock();
-        flyParamCond_.wait(lock, [this] {
-            return !flyParamAlive_ || (flyParamActive_ && flyParamPersistence_ > 0);
+        flyControlCond_.wait(lock, [this] {
+            return !flyControlAlive_ || (flyControlActive_ && flyControlPersistence_ > 0);
         });
 
-        unsigned int localPersistence(flyParamPersistence_);
+        unsigned int localPersistence(flyControlPersistence_);
         lock.unlock();
-        if (!flyParamAlive_) {
+        if (!flyControlAlive_) {
             break;
         }
 
-        sendFlyParam();
+        sendFlyControl();
         this_thread::sleep_for(chrono::milliseconds(localPersistence));
     }
 }
 
-void XXci::sendFlyParam() {
-    xci_->flyParam(roll_, pitch_, yaw_, gaz_);
+void XXci::sendFlyControl() {
+    xci_->flyControl(roll_, pitch_, yaw_, gaz_);
 }
 
 XXci::~XXci() {
-    stopFlyParamsThread();
+    stopFlyControlsThread();
 }
 
 XStart(XXci);

@@ -52,7 +52,7 @@ mat DroneStateMeasurement::getMat() const{
     return measurement;
 }
 
-DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const FlyParam &flyparam, const double &delta){
+DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const FlyControl &flyControl, const double &delta){
     DroneStateDistribution predictedState = state;
     const CartesianVector &positionOld = state.first.position;
     const CartesianVector &velocityOld = state.first.velocity;
@@ -60,7 +60,7 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
 
     // predict acceleration
     // acceleration in drone frame
-    double force = parameters[0] * (1.0 + parameters[1] * flyparam.gaz);
+    double force = parameters[0] * (1.0 + parameters[1] * flyControl.gaz);
     double forceX = force * sin(anglesOld.phi)*cos(anglesOld.theta);
     double forceY = -force * sin(anglesOld.theta);
     // friction
@@ -71,14 +71,14 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     CartesianVector acceleration;
     acceleration.x = (cos(anglesOld.psi)*forceX + sin(anglesOld.psi)*forceY) - dragX;
     acceleration.y = (-sin(anglesOld.psi)*forceX + cos(anglesOld.psi)*forceY) - dragY;
-    acceleration.z = parameters[8] * flyparam.gaz - parameters[9] * velocityOld.z;
+    acceleration.z = parameters[8] * flyControl.gaz - parameters[9] * velocityOld.z;
 
     // angular rotation speed
     EulerianVector angularRotation;
-    angularRotation.phi = parameters[4] * flyparam.roll - parameters[5] * anglesOld.phi;
-    angularRotation.theta = parameters[4] * flyparam.pitch - parameters[5] * anglesOld.theta;
+    angularRotation.phi = parameters[4] * flyControl.roll - parameters[5] * anglesOld.phi;
+    angularRotation.theta = parameters[4] * flyControl.pitch - parameters[5] * anglesOld.theta;
     // angular acceleration
-    angularRotation.psi = parameters[6] * flyparam.yaw - parameters[7] * state.first.angularRotationPsi;
+    angularRotation.psi = parameters[6] * flyControl.yaw - parameters[7] * state.first.angularRotationPsi;
 
     // =========== predict new state ============
     // position
@@ -163,10 +163,10 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     // ======= predict state deviation ===========
 
     mat noise(4, 4, fill::zeros);
-    noise[1, 1] = normalDistribution(randomGenerator) * flyparam.roll * flyparam.roll;
-    noise[2, 2] = normalDistribution(randomGenerator) * flyparam.pitch * flyparam.pitch;
-    noise[3, 3] = normalDistribution(randomGenerator) * flyparam.yaw * flyparam.yaw;
-    noise[4, 4] = normalDistribution(randomGenerator) * flyparam.gaz * flyparam.gaz;
+    noise[1, 1] = normalDistribution(randomGenerator) * flyControl.roll * flyControl.roll;
+    noise[2, 2] = normalDistribution(randomGenerator) * flyControl.pitch * flyControl.pitch;
+    noise[3, 3] = normalDistribution(randomGenerator) * flyControl.yaw * flyControl.yaw;
+    noise[4, 4] = normalDistribution(randomGenerator) * flyControl.gaz * flyControl.gaz;
 
     predictedState.second = jacobian * state.second * jacobian.t() + noiseTransf * noise * noiseTransf.t();
 

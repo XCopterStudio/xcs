@@ -195,7 +195,7 @@ void XCI_Parrot::command(const std::string &command) {
     }
 }
 
-void XCI_Parrot::flyParam(float roll, float pitch, float yaw, float gaz) {
+void XCI_Parrot::flyControl(float roll, float pitch, float yaw, float gaz) {
     //printf("Roll %f Pitch %f YAW %f GAZ %f \n", roll,pitch,yaw,gaz);
     if (std::abs(pitch) < EPSILON && std::abs(roll) < EPSILON) {
         atCommandQueue_.push(new AtCommandPCMD(DroneMove(roll, pitch, yaw, gaz)));

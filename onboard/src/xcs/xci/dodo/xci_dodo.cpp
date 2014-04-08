@@ -135,9 +135,9 @@ void XciDodo::command(const std::string& command) {
     }
 }
 
-void XciDodo::flyParam(float roll, float pitch, float yaw, float gaz) {
+void XciDodo::flyControl(float roll, float pitch, float yaw, float gaz) {
     if (stoi(configuration(CONFIG_LOG_FP))) {
-        BOOST_LOG_TRIVIAL(info) << "[dodo] flyParam: " << roll << ", " << pitch << ", " << yaw << ", " << gaz;
+        BOOST_LOG_TRIVIAL(info) << "[dodo] flyControl: " << roll << ", " << pitch << ", " << yaw << ", " << gaz;
     }
 
     velocity_.x = valueInRange<double>(roll, 1.0) * 0.05; // very simple
