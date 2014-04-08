@@ -14,7 +14,7 @@
 #include <functional>
 
 
-#include <xcs/nodes/xobject/syntactic_types.hpp>
+#include <xcs/types/bitmap_type.hpp>
 
 
 extern "C" {
@@ -74,7 +74,7 @@ public:
     VideoPlayer();
     void init(const std::string &filename, const std::string &fontFile);
     void rewind();
-    xcs::nodes::BitmapType getFrame();
+    xcs::BitmapType getFrame();
     size_t framePeriod();
     bool timestamps() const;
     void timestamps(bool value);

@@ -1,10 +1,3 @@
-/*
- * File:   XXci.hpp
- * Author: michal
- *
- * Created on January 31, 2014, 11:07 PM
- */
-
 #ifndef XXCI_HPP
 #define	XXCI_HPP
 
@@ -19,7 +12,7 @@
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_var.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
-#include "structs/fly_param.hpp"
+#include <xcs/types/fly_param.hpp>
 
 namespace xcs {
 namespace nodes {

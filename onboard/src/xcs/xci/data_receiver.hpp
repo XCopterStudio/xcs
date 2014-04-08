@@ -7,7 +7,7 @@
 
 #include <urbi/uobject.hh>
 
-#include <xcs/nodes/xobject/syntactic_types.hpp>
+#include <xcs/types/bitmap_type.hpp>
 
 namespace xcs {
 namespace xci {
@@ -39,7 +39,7 @@ public:
      * Specialization for non-urbi and special-memory-managed types.
      */
     
-    void notify(const std::string& sensorName, xcs::nodes::BitmapType value) {
+    void notify(const std::string& sensorName, xcs::BitmapType value) {
         auto it = outputs_.find(sensorName);
         if (it == outputs_.end()) {
             throw std::runtime_error("Unregistered sensor '" + sensorName + "'."); // TODO is it necessary to link with libxcs, therefore std::runtime_error?

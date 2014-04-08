@@ -22,7 +22,7 @@
 #endif
 
 using namespace std;
-using namespace xcs::nodes;
+using namespace xcs;
 using namespace xcs::xci::dodo;
 
 VideoPlayer::VideoPlayer() :
@@ -98,7 +98,7 @@ void VideoPlayer::rewind() {
     av_seek_frame(avFormat_.get(), videoStreamIndex_, 0, 0);
 }
 
-xcs::nodes::BitmapType VideoPlayer::getFrame() {
+xcs::BitmapType VideoPlayer::getFrame() {
     Packet packet_;
     size_t failCounter = 0;
 

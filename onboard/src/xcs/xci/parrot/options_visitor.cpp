@@ -2,12 +2,12 @@
 
 #include "basic.hpp"
 #include "options_visitor.hpp"
-#include <xcs/nodes/xci.xob/structs/cartesian_vector.hpp>
-#include <xcs/nodes/xci.xob/structs/eulerian_vector.hpp>
+#include <xcs/types/cartesian_vector.hpp>
+#include <xcs/types/eulerian_vector.hpp>
 
 
+using namespace xcs;
 using namespace xcs::xci::parrot;
-using namespace xcs::nodes::xci;
 
 void OptionVisitor::visit(NavdataDemo* demo){
     /*dataReceiver_.notify("psi", miliDegreesToRadias(demo->psi));

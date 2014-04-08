@@ -2,8 +2,8 @@
 #define XCI_DODO_H
 
 #include <xcs/xci/xci.hpp>
-#include <xcs/nodes/xci.xob/structs/cartesian_vector.hpp>
-#include <xcs/nodes/xci.xob/structs/eulerian_vector.hpp>
+#include <xcs/types/cartesian_vector.hpp>
+#include <xcs/types/eulerian_vector.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -129,9 +129,9 @@ private:
 
     /*! Pseudophysical state */
 
-    xcs::nodes::xci::CartesianVector position_;
-    xcs::nodes::xci::CartesianVector velocity_;
-    xcs::nodes::xci::EulerianVector rotation_;
+    xcs::CartesianVector position_;
+    xcs::CartesianVector velocity_;
+    xcs::EulerianVector rotation_;
     
     //! Generates dummy data for sensors
     void sensorGenerator();

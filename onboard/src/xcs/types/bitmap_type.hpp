@@ -1,18 +1,10 @@
-/* 
- * File:   syntactic_types.hpp
- * Author: michal
- *
- * Created on February 25, 2014, 11:17 AM
- */
-
-#ifndef SYNTACTICTYPES_HPP
-#define	SYNTACTICTYPES_HPP
+#ifndef BITMAPTYPE_HPP
+#define	BITMAPTYPE_HPP
 
 #include <cstdint>
 #include <cstddef>
 
 namespace xcs {
-namespace nodes {
 
 struct BitmapType {
 
@@ -21,13 +13,12 @@ struct BitmapType {
       height(height),
       data(data) {
     };
-    
+
     const size_t width;
     const size_t height;
     uint8_t * const data;
 };
 }
-}
 
-#endif	/* SYNTACTICTYPES_HPP */
+#endif	/* BITMAPTYPE_HPP */
 

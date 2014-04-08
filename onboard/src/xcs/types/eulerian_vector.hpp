@@ -4,8 +4,6 @@
 #include <xcs/nodes/xobject/x.hpp>
 
 namespace xcs {
-namespace nodes {
-namespace xci {
 
 struct EulerianVector {
     double phi; // x-axis
@@ -39,10 +37,8 @@ struct EulerianVectorChronologic : public EulerianVector {
 };
 
 }
-}
-}
 
-X_REGISTER_STRUCT(xcs::nodes::xci::EulerianVector, phi, theta, psi);
-X_REGISTER_STRUCT(xcs::nodes::xci::EulerianVectorChronologic, phi, theta, psi, time);
+X_REGISTER_STRUCT(xcs::EulerianVector, phi, theta, psi);
+X_REGISTER_STRUCT(xcs::EulerianVectorChronologic, phi, theta, psi, time);
 
 #endif	/* EULERIAN_VECTOR_HPP */

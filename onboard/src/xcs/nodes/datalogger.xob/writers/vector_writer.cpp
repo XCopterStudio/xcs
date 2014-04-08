@@ -3,7 +3,6 @@
 using namespace std;
 using namespace std::chrono;
 using namespace xcs::nodes::datalogger;
-using namespace xcs::nodes::xci;
 
 VectorWriter::VectorWriter(const std::string &name) :
   AbstractWriter(name) {

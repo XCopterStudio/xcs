@@ -5,9 +5,9 @@
 #include <utility>
 #include <random>
 
-#include <xcs/nodes/xci.xob/structs/fly_param.hpp>
-#include <xcs/nodes/xci.xob/structs/cartesian_vector.hpp>
-#include <xcs/nodes/xci.xob/structs/eulerian_vector.hpp>
+#include <xcs/types/fly_param.hpp>
+#include <xcs/types/cartesian_vector.hpp>
+#include <xcs/types/eulerian_vector.hpp>
 
 #include <armadillo>
 
@@ -16,9 +16,9 @@ namespace nodes{
 namespace ekf{
 
     struct DroneState{
-        xcs::nodes::xci::CartesianVector position;
-        xcs::nodes::xci::CartesianVector velocity;
-        xcs::nodes::xci::EulerianVector angles;
+        xcs::CartesianVector position;
+        xcs::CartesianVector velocity;
+        xcs::EulerianVector angles;
         double angularRotationPsi;
 
         arma::mat getMat() const;
@@ -26,8 +26,8 @@ namespace ekf{
     };
 
     struct DroneStateMeasurement{
-        xcs::nodes::xci::CartesianVector velocity;
-        xcs::nodes::xci::EulerianVector angles;
+        xcs::CartesianVector velocity;
+        xcs::EulerianVector angles;
         double altitude;
         double angularRotationPsi;
 

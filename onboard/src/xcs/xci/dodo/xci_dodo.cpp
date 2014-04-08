@@ -8,10 +8,9 @@
 #include <xcs/xci/data_receiver.hpp>
 
 using namespace std;
+using namespace xcs;
 using namespace xcs::xci;
 using namespace xcs::xci::dodo;
-using namespace xcs::nodes;
-using namespace xcs::nodes::xci;
 
 /*
  * Constants

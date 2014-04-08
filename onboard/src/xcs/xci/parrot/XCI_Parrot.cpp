@@ -5,8 +5,7 @@
 #include "XCI_Parrot.hpp"
 #include "video_encapsulation.h"
 #include "video_decode.hpp"
-#include <xcs/nodes/xobject/syntactic_types.hpp>
-//#include <boost/date_time/posix_time/posix_time.hpp>
+#include <xcs/types/bitmap_type.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
@@ -14,8 +13,8 @@
 using namespace std;
 using namespace boost::asio;
 using namespace boost::asio::ip;
+using namespace xcs;
 using namespace xcs::xci;
-using namespace xcs::nodes; // because of syntactic types
 using namespace xcs::xci::parrot;
 // ----------------- Constant ----------------------- //
 

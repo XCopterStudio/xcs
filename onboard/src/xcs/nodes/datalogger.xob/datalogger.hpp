@@ -38,7 +38,7 @@ class XDatalogger : public xcs::nodes::XObject {
     }
 
     inline bool isVideoType(const std::string &syntacticType) const {
-        return syntacticType == "xcs::nodes::BitmapType";
+        return syntacticType == "xcs::BitmapType";
     }
     
     inline bool isVectorType(const std::string &syntacticType) const {

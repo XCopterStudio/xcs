@@ -4,8 +4,6 @@
 #include <xcs/nodes/xobject/x.hpp>
 
 namespace xcs {
-namespace nodes {
-namespace xci {
 
 struct CartesianVector {
     double x;
@@ -39,10 +37,8 @@ struct CartesianVectorChronologic : public CartesianVector {
 };
 
 }
-}
-}
 
-X_REGISTER_STRUCT(xcs::nodes::xci::CartesianVector, x, y, z);
-X_REGISTER_STRUCT(xcs::nodes::xci::CartesianVectorChronologic, x, y, z, time);
+X_REGISTER_STRUCT(xcs::CartesianVector, x, y, z);
+X_REGISTER_STRUCT(xcs::CartesianVectorChronologic, x, y, z, time);
 
 #endif	/* CARTESIAN_VECTOR_HPP */

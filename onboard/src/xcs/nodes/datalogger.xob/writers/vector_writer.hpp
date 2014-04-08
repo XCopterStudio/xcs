@@ -4,15 +4,15 @@
 #include <string>
 #include <urbi/uobject.hh>
 
-#include <xcs/nodes/xci.xob/structs/cartesian_vector.hpp>
-#include <xcs/nodes/xci.xob/structs/eulerian_vector.hpp>
+#include <xcs/types/cartesian_vector.hpp>
+#include <xcs/types/eulerian_vector.hpp>
 #include "abstract_writer.hpp"
 
 #define VECTOR_TYPES LIBPORT_LIST( \
-        xcs::nodes::xci::EulerianVector, \
-        xcs::nodes::xci::EulerianVectorChronologic, \
-        xcs::nodes::xci::CartesianVector, \
-        xcs::nodes::xci::CartesianVectorChronologic, )
+        xcs::EulerianVector, \
+        xcs::EulerianVectorChronologic, \
+        xcs::CartesianVector, \
+        xcs::CartesianVectorChronologic, )
 
 namespace xcs {
 namespace nodes {
