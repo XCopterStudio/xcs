@@ -7,13 +7,15 @@ using namespace xcs::nodes;
 
 SimpleXInputPort::SimpleXInputPort(const type_info& synT, const string& semT) :
     input_(NULL),
-    xType_(synT, semT) {
+    xType_(synT, semT, XType::DATAFLOWTYPE_XINPUTPORT) {
 }
 
 SimpleXInputPort::~SimpleXInputPort() {
 }
 
-void SimpleXInputPort::Init(const UObject& parent, const string& varname) {
+void SimpleXInputPort::Init(XObject& parent, const string& varname) {
+    parent.RegisterXInputPort(varname, Type().synType, Type().semType);
+    
     if(input_ != NULL) {
         delete input_;
     }
