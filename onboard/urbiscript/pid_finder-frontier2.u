@@ -58,10 +58,10 @@ xci.&velocityY >> k.&vy;
 xci.&altitude >> k.&altitude;
 xci.&psi >> k.&psi;
 
-    logger.registerData("rotation","ROTATION","xcs::nodes::xci::EulerianVectorChronologic",xci.&rotation);
-    logger.registerData("velocity","VELOCITY","xcs::nodes::xci::CartesianVectorChronologic",xci.&velocity);
-    //logger.registerData("altitude","altitude","xcs::nodes::xci::CartesianVectorChronologic",xci.&altitude);    //TODO this is wrong Dodo should be vectorized
-    logger.registerData("battery","battery","double",xci.&battery);    
+    logger.registerData("rotation","ROTATION","xcs::nodes::xci::EulerianVector",xci.&rotation);
+    logger.registerData("velocity","VELOCITY","xcs::nodes::xci::CartesianVector",xci.&velocity);
+    logger.registerData("altitude","ALTITUDE","double",xci.&altitude);
+    logger.registerData("battery","BATTERY","double",xci.&battery);    
     
 //    logger.registerData("roll","roll","double",a.&roll);    
 //    logger.registerData("pitch","pitch","double",a.&pitch);    

@@ -9,35 +9,10 @@ VectorWriter::VectorWriter(const std::string &name) :
   AbstractWriter(name) {
 }
 
-void VectorWriter::init(const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar) {
+void VectorWriter::init(const std::string &syntacticType, const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar) {
     basicInit(dataName, startTime, file, lock, uvar);
-    UNotifyChange(uvar, &VectorWriter::write);
+
+#define DECLARE(Type) if(syntacticType == #Type) UNotifyChange(uvar, &VectorWriter::write<Type>);
+    LIBPORT_LIST_APPLY(DECLARE, VECTOR_TYPES)
 }
 
-void VectorWriter::write(CartesianVectorChronologic value) {
-    std::lock_guard<std::mutex> lck(*lock_);
-
-    writeRecordBegin();
-    *file_ << value.x << "\t" << value.y << "\t" << value.z << "\t" << value.time << endl;
-}
-
-//void VectorWriter::write(EulerianVectorChronologic value) {
-//    std::lock_guard<std::mutex> lck(*lock_);
-//
-//    writeRecordBegin();
-//    *file_ << value.phi << "\t" << value.theta << "\t" << value.psi << "\t" << value.time << endl;
-//}
-
-//void VectorWriter::write(std::string value) {
-//    std::lock_guard<std::mutex> lck(*lock_);
-//
-//    writeRecordBegin();
-//    *file_ << value << endl;
-//}
-//
-//void VectorWriter::write(::urbi::UDictionary value) {
-//    std::lock_guard<std::mutex> lck(*lock_);
-//
-//    writeRecordBegin();
-//    *file_ << value << endl;
-//}
