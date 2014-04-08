@@ -6,11 +6,13 @@
 #include <boost/log/trivial.hpp>
 
 #include <xcs/xci/data_receiver.hpp>
+#include <xcs/nodes/xci.xob/structs/cartesian_vector.hpp>
 
 using namespace std;
 using namespace xcs::xci;
 using namespace xcs::xci::dodo;
 using namespace xcs::nodes;
+using namespace xcs::nodes::xci;
 
 /*
  * Constants
@@ -154,7 +156,7 @@ void XciDodo::sensorGenerator() {
             dataReceiver_.notify("alive", true);
         }
         if (clock % (1000 / ALTITUDE_FREQ_) == 0) {
-            dataReceiver_.notify("altitude", altitude_);
+            dataReceiver_.notify("altitude", CartesianVectorChronologic(0, 0, altitude_));
         }
         if (clock % (1000 / EULER_FREQ_) == 0) {
             dataReceiver_.notify("theta", theta_);
@@ -228,7 +230,7 @@ void XciDodo::stop() {
 
 extern "C" {
 
-XCI* CreateXci(DataReceiver& dataReceiver) {
-    return new XciDodo(dataReceiver);
-}
+    XCI* CreateXci(DataReceiver& dataReceiver) {
+        return new XciDodo(dataReceiver);
+    }
 }

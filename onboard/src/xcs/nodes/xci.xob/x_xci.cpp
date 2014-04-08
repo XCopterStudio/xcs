@@ -21,11 +21,11 @@ using namespace std;
 XXci::XXci(const std::string& name) :
   xcs::nodes::XObject(name),
   flyParamPersistence("FLY_PARAM_PERSISTENCE"),
-  fly("FLY_PARAM"),
   roll("ROLL"),
   pitch("PITCH"),
   yaw("YAW"),
   gaz("GAZ"),
+  fly("FLY_PARAM"),
   command("COMMAND"),
   inited_(false),
   roll_(0),

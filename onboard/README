@@ -1,3 +1,7 @@
+!!!
+TODO full documentation is on project's Dokuwiki (http://drones.ms.mff.cuni.cz/xcs/wiki)
+!!!
+
 Build
 =====
 
@@ -6,12 +10,10 @@ Build
 1) Install required libraries
 	- Boost 1.55
 	- Urbi SDK (dev version from Github)
-	- rapidjson 0.11 (header only)
 
 2) Create symlinks to installed libraries
 	- 3rd-party/boost -> BOOST_ROOT
 	- 3rd-party/urbi -> Urbi SDK
-	- 3rd-paty/rapidjson -> rapidjson's include dir
 
 3) Build onboard (in 'onboard/build')
 	- run `cmake ../src && make`
