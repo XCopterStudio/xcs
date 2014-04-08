@@ -71,7 +71,7 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     CartesianVector acceleration;
     acceleration.x = (cos(anglesOld.psi)*forceX + sin(anglesOld.psi)*forceY) - frictionX;
     acceleration.y = (-sin(anglesOld.psi)*forceX + cos(anglesOld.psi)*forceY) - frictionY;
-    acceleration.z = parameters[8] * (1.0 + parameters[0] * flyparam.gaz) - parameters[9] * velocityOld.z;
+    acceleration.z = parameters[8] * flyparam.gaz - parameters[9] * velocityOld.z;
 
     // angular rotation speed
     EulerianVector angularRotation;
