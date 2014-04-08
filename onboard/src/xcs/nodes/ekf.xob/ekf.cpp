@@ -63,7 +63,7 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     double force = parameters[0] * (1.0 + parameters[1] * flyControl.gaz);
     double forceX = force * sin(anglesOld.phi)*cos(anglesOld.theta);
     double forceY = -force * sin(anglesOld.theta);
-    // friction
+    // drag
     double dragX = parameters[2] * velocityOld.x + parameters[3] * velocityOld.x * velocityOld.x;
     double dragY = parameters[2] * velocityOld.y + parameters[3] * velocityOld.y * velocityOld.y;
 
