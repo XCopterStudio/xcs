@@ -12,8 +12,10 @@ struct FlyParam {
     double pitch;
     double yaw;
     double gaz;
-    FlyParam();
-    FlyParam(double roll, double pitch, double yaw, double gaz);
+
+    FlyParam(double roll = 0, double pitch = 0, double yaw = 0, double gaz = 0) :
+      roll(roll), pitch(pitch), yaw(yaw), gaz(gaz) {
+    };
 };
 }
 }
