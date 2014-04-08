@@ -60,24 +60,25 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
 
     // predict acceleration
     // acceleration in drone frame
-    double force = parameters[1] * (1.0 + parameters[0] * flyparam.gaz);
+    double force = parameters[0] * (1.0 + parameters[1] * flyparam.gaz);
     double forceX = force * sin(anglesOld.phi)*cos(anglesOld.theta);
     double forceY = -force * sin(anglesOld.theta);
     // friction
-    double frictionX = parameters[2] * velocityOld.x + parameters[3] * velocityOld.x * velocityOld.x;
-    double frictionY = parameters[2] * velocityOld.y + parameters[3] * velocityOld.y * velocityOld.y;
+    double dragX = parameters[2] * velocityOld.x + parameters[3] * velocityOld.x * velocityOld.x;
+    double dragY = parameters[2] * velocityOld.y + parameters[3] * velocityOld.y * velocityOld.y;
 
     // drone acceleration in global frame
     CartesianVector acceleration;
-    acceleration.x = (cos(anglesOld.psi)*forceX + sin(anglesOld.psi)*forceY) - frictionX;
-    acceleration.y = (-sin(anglesOld.psi)*forceX + cos(anglesOld.psi)*forceY) - frictionY;
+    acceleration.x = (cos(anglesOld.psi)*forceX + sin(anglesOld.psi)*forceY) - dragX;
+    acceleration.y = (-sin(anglesOld.psi)*forceX + cos(anglesOld.psi)*forceY) - dragY;
     acceleration.z = parameters[8] * flyparam.gaz - parameters[9] * velocityOld.z;
 
     // angular rotation speed
     EulerianVector angularRotation;
     angularRotation.phi = parameters[4] * flyparam.roll - parameters[5] * anglesOld.phi;
     angularRotation.theta = parameters[4] * flyparam.pitch - parameters[5] * anglesOld.theta;
-    angularRotation.psi = parameters[6] * flyparam.yaw - parameters[7] * anglesOld.psi;
+    // angular acceleration
+    angularRotation.psi = parameters[6] * flyparam.yaw - parameters[7] * state.first.angularRotationPsi;
 
     // =========== predict new state ============
     // position
@@ -94,7 +95,7 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     EulerianVector &angles = predictedState.first.angles;
     angles.phi += angularRotation.phi*delta;
     angles.theta += angularRotation.theta*delta;
-    angles.psi += anglesOld.psi*delta + angularRotation.psi*delta*delta / 2.0;
+    angles.psi += state.first.angularRotationPsi*delta + angularRotation.psi*delta*delta / 2.0;
     // angular rotation psi
     predictedState.first.angularRotationPsi += angularRotation.psi*delta;
     // =========== end predict new state ========
