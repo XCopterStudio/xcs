@@ -2,6 +2,8 @@
 #define XCI_DODO_H
 
 #include <xcs/xci/xci.hpp>
+#include <xcs/nodes/xci.xob/structs/cartesian_vector.hpp>
+#include <xcs/nodes/xci.xob/structs/eulerian_vector.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -90,10 +92,8 @@ private:
 
     //! How often alive signal is sent (in Hz) (must divisor of 1000/SENSOR_PERIOD_).
     static const size_t ALIVE_FREQ_;
-    //! How often altitude data is sent (in Hz) (must divisor of 1000/SENSOR_PERIOD_).
-    static const size_t ALTITUDE_FREQ_;
-    //! How often euler angles are sent (in Hz) (must divisor of 1000/SENSOR_PERIOD_).
-    static const size_t EULER_FREQ_;
+    //! How often navdata data is sent (in Hz) (must divisor of 1000/SENSOR_PERIOD_).
+    static const size_t NAVDATA_FREQ_;
     //! Period of sensor thread in ms.
     static const size_t SENSOR_PERIOD_;
     //! Milliseconds for video thread when not playing
@@ -129,12 +129,10 @@ private:
 
     /*! Pseudophysical state */
 
-    /*! Altitude */
-    double altitude_;
+    xcs::nodes::xci::CartesianVector position_;
+    xcs::nodes::xci::CartesianVector velocity_;
+    xcs::nodes::xci::EulerianVector rotation_;
     
-    /*! Theta */
-    double theta_;
-
     //! Generates dummy data for sensors
     void sensorGenerator();
 

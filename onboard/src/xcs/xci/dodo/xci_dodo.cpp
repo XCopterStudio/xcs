@@ -6,7 +6,6 @@
 #include <boost/log/trivial.hpp>
 
 #include <xcs/xci/data_receiver.hpp>
-#include <xcs/nodes/xci.xob/structs/cartesian_vector.hpp>
 
 using namespace std;
 using namespace xcs::xci;
@@ -20,8 +19,7 @@ using namespace xcs::nodes::xci;
 const std::string XciDodo::NAME_ = "Dodo Test Drone";
 
 const size_t XciDodo::ALIVE_FREQ_ = 1;
-const size_t XciDodo::ALTITUDE_FREQ_ = 20;
-const size_t XciDodo::EULER_FREQ_ = 100;
+const size_t XciDodo::NAVDATA_FREQ_ = 20;
 
 const size_t XciDodo::SENSOR_PERIOD_ = 10;
 const size_t XciDodo::VIDEO_IDLE_SLEEP_ = 200;
@@ -67,9 +65,6 @@ void XciDodo::init() {
         return;
     }
     inited_ = true;
-    // reset sensors (pseudophysical state)
-    altitude_ = 0;
-    theta_ = 0;
 
     // back-propagation of default values
     configuration(CONFIG_VIDEO_FPS, to_string(videoFps_));
@@ -90,10 +85,11 @@ std::string XciDodo::name() {
 
 SensorList XciDodo::sensorList() {
     SensorList result;
-    result.push_back(Sensor("alive", "alive"));
-    result.push_back(Sensor("video", "video"));
-    result.push_back(Sensor("altitude", "altitude"));
-    result.push_back(Sensor("theta", "theta"));
+    result.push_back(Sensor("alive", "ALIVE"));
+    result.push_back(Sensor("video", "CAMERA_FRONT"));
+    result.push_back(Sensor("altitude", "ALTITUDE"));
+    result.push_back(Sensor("rotation", "ROTATION"));
+    result.push_back(Sensor("velocity", "VELOCITY_LOC"));
     return result;
 }
 
@@ -145,8 +141,17 @@ void XciDodo::flyParam(float roll, float pitch, float yaw, float gaz) {
         BOOST_LOG_TRIVIAL(info) << "[dodo] flyParam: " << roll << ", " << pitch << ", " << yaw << ", " << gaz;
     }
 
-    altitude_ += valueInRange<double>(gaz, 1.0) * 0.05; // very simple
-    theta_ += valueInRange<double>(pitch, 1.0) * 0.05; // very simple
+    velocity_.x = valueInRange<double>(roll, 1.0) * 0.05; // very simple
+    velocity_.y = -valueInRange<double>(pitch, 1.0) * 0.05; // very simple
+    velocity_.z = valueInRange<double>(gaz, 1.0) * 0.05; // very simple
+
+    position_.x += velocity_.x;
+    position_.y += velocity_.y;
+    position_.z += velocity_.z;
+
+    rotation_.psi += valueInRange<double>(yaw, 1.0) * 0.05; // very simple
+    rotation_.phi = valueInRange<double>(roll, 1.0); // very simple
+    rotation_.theta = valueInRange<double>(pitch, 1.0); // very simple
 }
 
 void XciDodo::sensorGenerator() {
@@ -155,11 +160,10 @@ void XciDodo::sensorGenerator() {
         if (clock % (1000 / ALIVE_FREQ_) == 0) {
             dataReceiver_.notify("alive", true);
         }
-        if (clock % (1000 / ALTITUDE_FREQ_) == 0) {
-            dataReceiver_.notify("altitude", CartesianVectorChronologic(0, 0, altitude_));
-        }
-        if (clock % (1000 / EULER_FREQ_) == 0) {
-            dataReceiver_.notify("theta", theta_);
+        if (clock % (1000 / NAVDATA_FREQ_) == 0) {
+            dataReceiver_.notify("altitude", position_.z);
+            dataReceiver_.notify("rotation", rotation_);
+            dataReceiver_.notify("velocity", velocity_);
         }
 
         clock += SENSOR_PERIOD_;
@@ -230,7 +234,7 @@ void XciDodo::stop() {
 
 extern "C" {
 
-    XCI* CreateXci(DataReceiver& dataReceiver) {
-        return new XciDodo(dataReceiver);
-    }
+XCI* CreateXci(DataReceiver& dataReceiver) {
+    return new XciDodo(dataReceiver);
+}
 }
