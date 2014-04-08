@@ -40,6 +40,11 @@ class XDatalogger : public xcs::nodes::XObject {
     inline bool isVideoType(const std::string &syntacticType) const {
         return syntacticType == "xcs::nodes::BitmapType";
     }
+    
+    inline bool isVectorType(const std::string &syntacticType) const {
+#define DECLARE(Type) || (syntacticType == #Type)
+        return false LIBPORT_LIST_APPLY(DECLARE, VECTOR_TYPES);
+    }
 public:
     XDatalogger(const std::string& name);
     ~XDatalogger();

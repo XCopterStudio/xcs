@@ -14,6 +14,11 @@ struct CartesianVector {
 
     CartesianVector(double x = 0, double y = 0, double z = 0) : x(x), y(y), z(z) {
     }
+
+    template<typename T>
+            void serialize(T &stream) {
+        stream << x << "\t" << y << "\t" << z;
+    }    
 };
 
 struct CartesianVectorChronologic : public CartesianVector {
@@ -22,12 +27,22 @@ struct CartesianVectorChronologic : public CartesianVector {
     CartesianVectorChronologic(double x = 0, double y = 0, double z = 0, long int time = -1) :
       CartesianVector(x, y, z), time(time) {
     }
+    
+    CartesianVectorChronologic(const CartesianVector &vector, long int time = -1) :
+      CartesianVector(vector), time(time) {
+    }
+
+    template<typename T>
+            void serialize(T &stream) {
+        stream << x << "\t" << y << "\t" << z << "\t" << time;
+    }
 };
 
 }
 }
 }
 
+X_REGISTER_STRUCT(xcs::nodes::xci::CartesianVector, x, y, z);
 X_REGISTER_STRUCT(xcs::nodes::xci::CartesianVectorChronologic, x, y, z, time);
 
 #endif	/* CARTESIAN_VECTOR_HPP */

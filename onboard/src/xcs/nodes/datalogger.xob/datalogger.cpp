@@ -52,10 +52,10 @@ void XDatalogger::registerData(const std::string &name, const std::string &seman
 
     registerHeader(name, semanticType, syntacticType);
 
-    if (syntacticType == "xcs::nodes::xci::CartesianVectorChronologic") {
-        cerr << "Registered cartesian vector " << endl;
+    if (isVectorType(syntacticType)) {
+        cerr << "Registered vector writer " << endl;
         VectorWriter* function = new VectorWriter(std::string());
-        function->init(name, startTime_, &file_, &lock_, uvar);
+        function->init(syntacticType, name, startTime_, &file_, &lock_, uvar);
         vectorWriterList_.push_back(std::unique_ptr<VectorWriter>(function));
     } else {
         cerr << "Registered general writer " << endl;
