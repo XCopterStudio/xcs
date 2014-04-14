@@ -15,6 +15,7 @@
 
 using namespace xcs::nodes;
 using namespace xcs::xci;
+using namespace xcs;
 using namespace std;
 
 XXci::XXci(const std::string& name) :
