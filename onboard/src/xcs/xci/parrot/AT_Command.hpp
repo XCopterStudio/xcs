@@ -65,6 +65,7 @@ namespace parrot{
 
     class AtCommand {
     public:
+        virtual AtCommand* clone() const = 0;
         //! Return text representation of at command.
         /*!
                 \param sequenceNumber have to be in increasing order. Drone discard all at command with lower seqNumber than last one.
@@ -88,6 +89,7 @@ namespace parrot{
 
         AtCommandRef(const Behavior basicBehavior) : basicBehavior_(basicBehavior) {
         };
+        AtCommandRef* clone() const;
         std::string toString(const int32_t sequenceNumber) const;
     };
 
@@ -107,6 +109,7 @@ namespace parrot{
         \param combYaw enable combined yaw control for generating complete turns (phi+yaw) from phi parameter.
         */
         AtCommandPCMD(const DroneMove movement, const bool absControl = false, const bool combYaw = false, const bool progCmd = false);
+        AtCommandPCMD* clone() const;
         std::string toString(const int32_t sequenceNumber) const;
     };
 
@@ -125,6 +128,7 @@ namespace parrot{
         \param psi is normalized angle <-1,1> from north provided by magnetometer sensor. Positive value means orientation to the east and negative to the west and 0 north.
         */
         AtCommandPCMD_MAG(const DroneMove movement, const float psi, const float psiAccur, const bool absControl = false, const bool combYaw = false, const bool progCmd = false);
+        AtCommandPCMD_MAG* clone() const;
         std::string toString(const int32_t sequenceNumber) const;
     };
 
@@ -133,6 +137,7 @@ namespace parrot{
     class AtCommandFTRIM : public AtCommand {
         static const std::string nameOfCommand_; /*!< AT command name according to the ar drone 2.0 documentation. */
     public:
+        AtCommandFTRIM* clone() const;
         std::string toString(const int32_t sequenceNumber) const;
     };
 
@@ -149,6 +154,7 @@ namespace parrot{
         \param value is value of ar drone parrot 2.0 option
         */
         AtCommandCONFIG(const std::string option, const std::string value);
+        AtCommandCONFIG* clone() const;
         std::string toString(const int32_t sequenceNumber) const;
     };
 
@@ -156,12 +162,13 @@ namespace parrot{
 
     class AtCommandCONFIG_IDS : public AtCommand {
         static const std::string nameOfCommand_; /*!< AT command name according to the ar drone 2.0 documentation. */
-        std::string sessionID_;
-        std::string userID_;
-        std::string applicationID_;
+        const std::string sessionID_;
+        const std::string userID_;
+        const std::string applicationID_;
     public:
         //! Identify to which session in the multi configuration setting will be assigned next AtCommandCONFIG. Have to be send before every AtCommandCONFIG in multi configuration setting.
-        AtCommandCONFIG_IDS(const std::string sessionID, std::string userID, std::string applicationID);
+        AtCommandCONFIG_IDS(const std::string sessionID, const std::string userID, const std::string applicationID);
+        AtCommandCONFIG_IDS* clone() const;
         std::string toString(const int32_t sequenceNumber) const;
     };
 
@@ -170,6 +177,7 @@ namespace parrot{
     class AtCommandCOMWDG : public AtCommand {
         static const std::string nameOfCommand_; /*!< AT command name according to the ar drone 2.0 documentation. */
     public:
+        AtCommandCOMWDG* clone() const;
         std::string toString(const int32_t sequenceNumber) const;
     };
 
@@ -184,6 +192,7 @@ namespace parrot{
         \param device is identifier of the device to calibrate. Choose this identifier from ardrone_calibration_device_t.
         */
         AtCommandCALIB(const int device);
+        AtCommandCALIB* clone() const;
         std::string toString(const int32_t sequenceNumber) const;
     };
 
@@ -196,6 +205,7 @@ namespace parrot{
 
         AtCommandCTRL(ArdroneControlMode mode = STATE_NO_CONTROL_MODE) : mode_(mode) {
         };
+        AtCommandCTRL* clone() const;
         std::string toString(const int32_t sequenceNumber) const;
     };
 }}}

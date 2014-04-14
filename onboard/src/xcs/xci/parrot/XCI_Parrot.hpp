@@ -69,7 +69,9 @@ class XCI_Parrot : public virtual XCI {
     void initNetwork();
     void processVideoData();
 
+  
     bool setConfirmedConfigure(AtCommand *command);
+    bool setDefaultConfiguration();
     bool setNavdataReceive(bool full_mode = false);
 
 public:

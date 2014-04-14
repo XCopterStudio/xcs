@@ -57,28 +57,42 @@ void XCI_Parrot::processVideoData(){
 
 bool XCI_Parrot::setConfirmedConfigure(AtCommand *command){
 
-    atCommandQueue_.push(new AtCommandCONFIG_IDS("XCI_Parrot", "XCS user", "XCS"));
-    atCommandQueue_.push(command);
-
     unsigned int count = 0;
     do{
-        this_thread::sleep_for(std::chrono::milliseconds(5));
+        atCommandQueue_.push(new AtCommandCONFIG_IDS("0a1b2c3d", "0a1b2c3d", "0a1b2c3d"));
+        atCommandQueue_.push(command->clone());
+        this_thread::sleep_for(std::chrono::milliseconds(10));
         if (++count > 20){
             cerr << "Cannot receive ack \n" << endl;
+            delete command;
             return false;
         }
     } while (!state_.getState(FLAG_ARDRONE_COMMAND_MASK));
+    delete command;
 
     count = 0;
     do{
         atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
-        this_thread::sleep_for(std::chrono::milliseconds(5));
+        this_thread::sleep_for(std::chrono::milliseconds(10));
 
         if (++count >= 20){
             cerr << "Cannot receive clear ack \n" << endl;
             return false;
         }
     } while (state_.getState(FLAG_ARDRONE_COMMAND_MASK));
+
+    return true;
+}
+
+bool XCI_Parrot::setDefaultConfiguration(){
+    setConfirmedConfigure(new AtCommandCONFIG("custom:application_id","0a1b2c3d"));
+    setConfirmedConfigure(new AtCommandCONFIG("custom:profile_id", "0a1b2c3d"));
+    setConfirmedConfigure(new AtCommandCONFIG("custom:session_id", "0a1b2c3d"));
+
+    setConfirmedConfigure(new AtCommandCONFIG("video:video_codec", "129"));
+    setConfirmedConfigure(new AtCommandCONFIG("video:bitrate_control_mode", "1"));
+    setConfirmedConfigure(new AtCommandCONFIG("video:max_bitrate", "4000"));
+    setConfirmedConfigure(new AtCommandCONFIG("video:video_channel", "0"));
 
     return true;
 }
@@ -95,7 +109,7 @@ bool XCI_Parrot::setNavdataReceive(bool full_mode){
             atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "FALSE")); // exit bootstrap mode and drone will send the demo navdata
         }
 
-        this_thread::sleep_for(std::chrono::milliseconds(5));
+        this_thread::sleep_for(std::chrono::milliseconds(10));
 
         if(++count >= 20){
             cerr << "Cannot receive general:navdata_demo ack \n" << endl;
@@ -107,7 +121,7 @@ bool XCI_Parrot::setNavdataReceive(bool full_mode){
     count = 0;
     do{
         atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
-        this_thread::sleep_for(std::chrono::milliseconds(5));
+        this_thread::sleep_for(std::chrono::milliseconds(10));
 
         if (++count >= 20){
             cerr << "Cannot receive clear general:navdata_demo ack \n" << endl;
@@ -133,6 +147,7 @@ void XCI_Parrot::init(){
     std::cerr << "After network" << std::endl;
 
     setNavdataReceive();
+    setDefaultConfiguration();
 
     // init videoDecoder
     videoDecoder_.init(AV_CODEC_ID_H264);
