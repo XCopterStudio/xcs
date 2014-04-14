@@ -55,16 +55,18 @@ namespace ekf{
         Measurements measurements_;
         FlyParams flyParams_;
 
-        double parameters[10];
+        double parameters_[10];
 
-        Generator randomGenerator;
-        NormalDistribution normalDistribution;
-
+        Generator randomGenerator_;
+        NormalDistribution normalDistribution_;
 
         DroneStateDistribution predict(const DroneStateDistribution &state, const xcs::nodes::xci::FlyParam &flyparam, const double &delta);
         DroneStateDistribution updateIMU(const DroneStateDistribution &state, const DroneStateMeasurement &imuMeasurement);
     public:
         Ekf();
+        void flyParam(const xcs::nodes::xci::FlyParam &flyParam, const long int &timestamp);
+        void measurement(const DroneStateMeasurement &measurement, const long int &timestamp);
+        
     };
 
 }}}
