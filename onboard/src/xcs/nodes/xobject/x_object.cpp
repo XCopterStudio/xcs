@@ -19,6 +19,14 @@ XObject::~XObject(void) {
 }
 
 bool XObject::RegisterXVar(const string& xVarName, string synType, string semType) {
+    return RegisterXChild(xVarName, synType, semType, XType::DATAFLOWTYPE_XVAR);
+}
+
+bool XObject::RegisterXInputPort(const string& xVarName, string synType, string semType) {
+    return RegisterXChild(xVarName, synType, semType, XType::DATAFLOWTYPE_XINPUTPORT);
+}
+
+bool XObject::RegisterXChild(const string& xVarName, string synType, string semType, const XType::DataFlowType dataFlowType) {
     // erase whitespace in syntactic type
     //synType.erase(remove_if(synType.begin(), synType.end(), isspace), synType.end());
 
@@ -26,8 +34,8 @@ bool XObject::RegisterXVar(const string& xVarName, string synType, string semTyp
     boost::algorithm::trim(semType);
 
     // reg new xvar
-    if(xVarsType_->count(xVarName) == 0) {
-        (*xVarsType_).emplace(xVarName, new XType(synType, semType));
+    if (xVarsType_->count(xVarName) == 0) {
+        (*xVarsType_).emplace(xVarName, new XType(synType, semType, dataFlowType));
         return true;
     }
 

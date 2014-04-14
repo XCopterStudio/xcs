@@ -17,8 +17,13 @@ public:
     const std::string getType(const std::string& xVarName) const;
 protected:
     bool RegisterXVar(const std::string& xVarName, std::string synType, std::string semType);
+    bool RegisterXInputPort(const std::string& xVarName, std::string synType, std::string semType);
 private:
+    bool RegisterXChild(const std::string& xVarName, std::string synType, std::string semType, const XType::DataFlowType dataFlowType);
     std::map<const std::string, XType*>* xVarsType_;
+
+    friend class SimpleXVar;
+    friend class SimpleXInputPort;
 };
 
 }

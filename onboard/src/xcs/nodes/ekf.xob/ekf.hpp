@@ -4,6 +4,7 @@
 #include <queue>
 #include <utility>
 #include <random>
+#include <chrono>
 
 #include <xcs/types/fly_control.hpp>
 #include <xcs/types/cartesian_vector.hpp>
@@ -49,22 +50,29 @@ namespace ekf{
     typedef std::mt19937 Generator;
     typedef std::normal_distribution<double> NormalDistribution;
 
+    typedef std::chrono::high_resolution_clock Clock;
+
     class Ekf{
         DroneStates droneStates_;
         DroneStates droneStateDeviation_;
         Measurements measurements_;
         FlyControls flyControls_;
 
-        double parameters[10];
+        double parameters_[10];
 
-        Generator randomGenerator;
-        NormalDistribution normalDistribution;
+        Generator randomGenerator_;
+        NormalDistribution normalDistribution_;
 
+        std::chrono::high_resolution_clock::time_point startTime_;
 
         DroneStateDistribution predict(const DroneStateDistribution &state, const xcs::FlyControl &flyControl, const double &delta);
         DroneStateDistribution updateIMU(const DroneStateDistribution &state, const DroneStateMeasurement &imuMeasurement);
     public:
         Ekf();
+        void flyControl(const xcs::FlyControl &flyControl, const long int &timestamp);
+        void measurement(const DroneStateMeasurement &measurement, const long int &timestamp);
+        DroneStateDistribution predict();
+        
     };
 
 }}}

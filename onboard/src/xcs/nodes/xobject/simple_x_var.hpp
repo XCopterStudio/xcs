@@ -3,7 +3,7 @@
 
 #include <string>
 #include <typeinfo>
-#include <urbi/uobject.hh>
+#include "x_object.hpp"
 #include "x_type.hpp"
 #include <xcs/nodes/xobject/xobject_export.h>
 
@@ -18,7 +18,7 @@ public:
     const XType& Type() const;
     template<class T>
     SimpleXVar& operator=(const T&);
-    void Init(const urbi::UObject& parent, const std::string& varname);
+    void Init(xcs::nodes::XObject& parent, const std::string& varname);
 private:
     urbi::UVar* data_;
     XType xType_;

@@ -7,13 +7,15 @@ using namespace xcs::nodes;
 
 SimpleXVar::SimpleXVar(const type_info& synT, const string& semT) :
     data_(NULL),
-    xType_(synT, semT) {
+    xType_(synT, semT, XType::DATAFLOWTYPE_XVAR) {
 }
 
 SimpleXVar::~SimpleXVar() {
 }
 
-void SimpleXVar::Init(const UObject& parent, const string& varname) {
+void SimpleXVar::Init(XObject& parent, const string& varname) {
+    parent.RegisterXVar(varname, Type().synType, Type().semType);
+    
     if(data_ != NULL) {
         delete data_;
     }

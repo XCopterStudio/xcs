@@ -5,9 +5,7 @@
 #include <libport/containers.hh>
 #include "xcs_object.hpp"
 
-# define XBindVar(x)							\
-    this->RegisterXVar(#x, x.Type().synType, x.Type().semType);	\
-    x.Init(*this, #x)
+# define XBindVar(x) x.Init(*this, #x)
 
 //TODO: prejmenovat na XBindVar (pretizit)
 # define XBindVarF(x, f)	\

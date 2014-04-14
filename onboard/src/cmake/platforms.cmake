@@ -16,6 +16,7 @@ endif()
 if(X_WIN)
     set(TPN_WIN32 "/EHsc")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SAFESEH:NO")
+    set(CMAKE_MODULE_LINKER_FLAGS "/SAFESEH:NO")
     add_definitions(-D_USE_MATH_DEFINES) # workaround for broken cmath in libport + xcs
     add_definitions(-D_WIN32_WINNT=0x0501)
     set(PATH_SEPARATOR ";")
