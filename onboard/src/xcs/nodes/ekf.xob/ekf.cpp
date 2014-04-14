@@ -3,8 +3,8 @@
 #include <cmath>
 
 using namespace std;
+using namespace xcs;
 using namespace xcs::nodes::ekf;
-using namespace xcs::nodes::xci;
 using namespace arma;
 
 mat DroneState::getMat() const{
@@ -52,7 +52,7 @@ mat DroneStateMeasurement::getMat() const{
     return measurement;
 }
 
-DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const FlyParam &flyparam, const double &delta){
+DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const FlyControl &flyControl, const double &delta){
     DroneStateDistribution predictedState = state;
     const CartesianVector &positionOld = state.first.position;
     const CartesianVector &velocityOld = state.first.velocity;
@@ -60,25 +60,25 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
 
     // predict acceleration
     // acceleration in drone frame
-    double force = parameters[0] * (1.0 + parameters[1] * flyparam.gaz);
+    double force = parameters_[0] * (1.0 + parameters_[1] * flyControl.gaz);
     double forceX = force * sin(anglesOld.phi)*cos(anglesOld.theta);
     double forceY = -force * sin(anglesOld.theta);
-    // friction
-    double dragX = parameters[2] * velocityOld.x + parameters[3] * velocityOld.x * velocityOld.x;
-    double dragY = parameters[2] * velocityOld.y + parameters[3] * velocityOld.y * velocityOld.y;
+    // drag
+    double dragX = parameters_[2] * velocityOld.x + parameters_[3] * velocityOld.x * velocityOld.x;
+    double dragY = parameters_[2] * velocityOld.y + parameters_[3] * velocityOld.y * velocityOld.y;
 
     // drone acceleration in global frame
     CartesianVector acceleration;
     acceleration.x = (cos(anglesOld.psi)*forceX + sin(anglesOld.psi)*forceY) - dragX;
     acceleration.y = (-sin(anglesOld.psi)*forceX + cos(anglesOld.psi)*forceY) - dragY;
-    acceleration.z = parameters[8] * flyparam.gaz - parameters[9] * velocityOld.z;
+    acceleration.z = parameters_[8] * flyControl.gaz - parameters_[9] * velocityOld.z;
 
     // angular rotation speed
     EulerianVector angularRotation;
-    angularRotation.phi = parameters[4] * flyparam.roll - parameters[5] * anglesOld.phi;
-    angularRotation.theta = parameters[4] * flyparam.pitch - parameters[5] * anglesOld.theta;
+    angularRotation.phi = parameters_[4] * flyControl.roll - parameters_[5] * anglesOld.phi;
+    angularRotation.theta = parameters_[4] * flyControl.pitch - parameters_[5] * anglesOld.theta;
     // angular acceleration
-    angularRotation.psi = parameters[6] * flyparam.yaw - parameters[7] * state.first.angularRotationPsi;
+    angularRotation.psi = parameters_[6] * flyControl.yaw - parameters_[7] * state.first.angularRotationPsi;
 
     // =========== predict new state ============
     // position
@@ -112,7 +112,7 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     jacobian[3, 3] = 1;
     jacobian[6, 3] = delta;
     // velocity x
-    jacobian[4, 4] = 1 - parameters[2] * delta - parameters[3] * 2 * delta * velocityOld.x;
+    jacobian[4, 4] = 1 - parameters_[2] * delta - parameters_[3] * 2 * delta * velocityOld.x;
     jacobian[7, 4] = delta*force * (
         cos(anglesOld.phi) * cos(anglesOld.psi) * cos(anglesOld.theta) 
         );
@@ -125,7 +125,7 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
         -cos(anglesOld.psi) * sin(anglesOld.theta)
         );
     // velocity y
-    jacobian[5, 5] = 1 - parameters[2] * delta - parameters[3] * 2 * delta * velocityOld.y;
+    jacobian[5, 5] = 1 - parameters_[2] * delta - parameters_[3] * 2 * delta * velocityOld.y;
     jacobian[7, 5] = delta*force * (
         -cos(anglesOld.phi) * sin(anglesOld.psi) * cos(anglesOld.theta)
         );
@@ -138,35 +138,35 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
         + sin(anglesOld.psi) * sin(anglesOld.theta)
         );
     // velocity z
-    jacobian[6, 6] = 1 - delta*parameters[9];
+    jacobian[6, 6] = 1 - delta*parameters_[9];
     // angle phi
-    jacobian[7, 7] = 1 - delta*parameters[5];
+    jacobian[7, 7] = 1 - delta*parameters_[5];
     // angle theta
-    jacobian[8, 8] = 1 - delta*parameters[5];
+    jacobian[8, 8] = 1 - delta*parameters_[5];
     // angle psi
     jacobian[9, 9] = 1;
     jacobian[10, 9] = delta;
     // rotation speed psi
-    jacobian[10, 10] = 1 - delta*parameters[7];
+    jacobian[10, 10] = 1 - delta*parameters_[7];
 
     // normal noise
     mat noiseTransf(4, 10, fill::zeros);
     // gaz
-    noiseTransf[4, 6] = delta * parameters[8];
+    noiseTransf[4, 6] = delta * parameters_[8];
     // phi
-    noiseTransf[1, 7] = delta * parameters[4];
+    noiseTransf[1, 7] = delta * parameters_[4];
     // theta
-    noiseTransf[2, 8] = delta * parameters[4];
+    noiseTransf[2, 8] = delta * parameters_[4];
     // rotation speed psi
-    noiseTransf[3, 10] = delta * parameters[6];
+    noiseTransf[3, 10] = delta * parameters_[6];
 
     // ======= predict state deviation ===========
 
     mat noise(4, 4, fill::zeros);
-    noise[1, 1] = normalDistribution(randomGenerator) * flyparam.roll * flyparam.roll;
-    noise[2, 2] = normalDistribution(randomGenerator) * flyparam.pitch * flyparam.pitch;
-    noise[3, 3] = normalDistribution(randomGenerator) * flyparam.yaw * flyparam.yaw;
-    noise[4, 4] = normalDistribution(randomGenerator) * flyparam.gaz * flyparam.gaz;
+    noise[1, 1] = normalDistribution_(randomGenerator_) * flyControl.roll * flyControl.roll;
+    noise[2, 2] = normalDistribution_(randomGenerator_) * flyControl.pitch * flyControl.pitch;
+    noise[3, 3] = normalDistribution_(randomGenerator_) * flyControl.yaw * flyControl.yaw;
+    noise[4, 4] = normalDistribution_(randomGenerator_) * flyControl.gaz * flyControl.gaz;
 
     predictedState.second = jacobian * state.second * jacobian.t() + noiseTransf * noise * noiseTransf.t();
 
@@ -203,13 +203,13 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
 
     // additional noise 
     mat noise(7, 7, fill::zeros);
-    noise[1, 1] = normalDistribution(randomGenerator) * imuMeasurement.altitude * imuMeasurement.altitude;
-    noise[2, 2] = normalDistribution(randomGenerator) * imuMeasurement.velocity.x * imuMeasurement.velocity.x;
-    noise[3, 3] = normalDistribution(randomGenerator) * imuMeasurement.velocity.y * imuMeasurement.velocity.y;
-    noise[4, 4] = normalDistribution(randomGenerator) * imuMeasurement.velocity.z * imuMeasurement.velocity.z;
-    noise[5, 5] = normalDistribution(randomGenerator) * imuMeasurement.angles.phi * imuMeasurement.angles.phi;
-    noise[6, 6] = normalDistribution(randomGenerator) * imuMeasurement.angles.theta * imuMeasurement.angles.theta;
-    noise[7, 7] = normalDistribution(randomGenerator) * imuMeasurement.angularRotationPsi * imuMeasurement.angularRotationPsi;
+    noise[1, 1] = normalDistribution_(randomGenerator_) * imuMeasurement.altitude * imuMeasurement.altitude;
+    noise[2, 2] = normalDistribution_(randomGenerator_) * imuMeasurement.velocity.x * imuMeasurement.velocity.x;
+    noise[3, 3] = normalDistribution_(randomGenerator_) * imuMeasurement.velocity.y * imuMeasurement.velocity.y;
+    noise[4, 4] = normalDistribution_(randomGenerator_) * imuMeasurement.velocity.z * imuMeasurement.velocity.z;
+    noise[5, 5] = normalDistribution_(randomGenerator_) * imuMeasurement.angles.phi * imuMeasurement.angles.phi;
+    noise[6, 6] = normalDistribution_(randomGenerator_) * imuMeasurement.angles.theta * imuMeasurement.angles.theta;
+    noise[7, 7] = normalDistribution_(randomGenerator_) * imuMeasurement.angularRotationPsi * imuMeasurement.angularRotationPsi;
 
     // compute kalman gain
     mat gain(10, 7);
@@ -241,6 +241,15 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
 // =========================== public functions ============================
 
 Ekf::Ekf() : 
-randomGenerator(5){
+randomGenerator_(5),
+startTime_(Clock::now()){
 
 }
+
+void flyControl(const FlyControl &flyControl, const long int &timestamp){
+
+};
+
+void measurement(const DroneStateMeasurement &measurement, const long int &timestamp){
+
+};

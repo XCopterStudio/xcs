@@ -69,6 +69,11 @@ class XCI_Parrot : public virtual XCI {
     void initNetwork();
     void processVideoData();
 
+  
+    bool setConfirmedConfigure(AtCommand *command);
+    bool setDefaultConfiguration();
+    bool setNavdataReceive(bool full_mode = false);
+
 public:
 
     XCI_Parrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1")
@@ -110,8 +115,8 @@ public:
     void dataReceiver(DataReceiver* dataReceiver);
     //! Take command from list of x-copter�s special commands and send it to the x-copter
     void command(const std::string &command);
-    //! Take four fly parameters and send it to the x-copter
-    void flyParam(float roll, float pitch, float yaw, float gaz);
+    //! Take four fly controls and send it to the x-copter
+    void flyControl(float roll, float pitch, float yaw, float gaz);
 
     ~XCI_Parrot();
 };

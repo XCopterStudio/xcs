@@ -33,7 +33,7 @@ const std::string XciDodo::CONFIG_VIDEO_FILENAME = "video:filename";
 const std::string XciDodo::CONFIG_VIDEO_FPS = "video:fps";
 const std::string XciDodo::CONFIG_VIDEO_FONT = "video:font";
 const std::string XciDodo::CONFIG_VIDEO_TIMESTAMPS = "video:timestamps";
-const std::string XciDodo::CONFIG_LOG_FP = "log:fp";
+const std::string XciDodo::CONFIG_LOG_FC = "log:fc";
 const std::string XciDodo::CONFIG_LOG_COMMAND = "log:command";
 
 const SpecialCMDList XciDodo::specialCommands_({
@@ -69,7 +69,7 @@ void XciDodo::init() {
     configuration(CONFIG_VIDEO_FPS, to_string(videoFps_));
     configuration(CONFIG_VIDEO_FONT, "/usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf");
     configuration(CONFIG_VIDEO_TIMESTAMPS, "0");
-    configuration(CONFIG_LOG_FP, "0");
+    configuration(CONFIG_LOG_FC, "0");
     configuration(CONFIG_LOG_COMMAND, "1");
 
     // start threads
@@ -135,9 +135,9 @@ void XciDodo::command(const std::string& command) {
     }
 }
 
-void XciDodo::flyParam(float roll, float pitch, float yaw, float gaz) {
-    if (stoi(configuration(CONFIG_LOG_FP))) {
-        BOOST_LOG_TRIVIAL(info) << "[dodo] flyParam: " << roll << ", " << pitch << ", " << yaw << ", " << gaz;
+void XciDodo::flyControl(float roll, float pitch, float yaw, float gaz) {
+    if (stoi(configuration(CONFIG_LOG_FC))) {
+        BOOST_LOG_TRIVIAL(info) << "[dodo] flyControl: " << roll << ", " << pitch << ", " << yaw << ", " << gaz;
     }
 
     velocity_.x = valueInRange<double>(roll, 1.0) * 0.05; // very simple

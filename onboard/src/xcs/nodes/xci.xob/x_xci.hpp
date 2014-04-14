@@ -12,21 +12,21 @@
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_var.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
-#include <xcs/types/fly_param.hpp>
+#include <xcs/types/fly_control.hpp>
 
 namespace xcs {
 namespace nodes {
 
 class XXci : public xcs::nodes::XObject {
 public:
-    xcs::nodes::XVar<int> flyParamPersistence;
+    xcs::nodes::XVar<int> flyControlPersistence;
 
     xcs::nodes::XInputPort<double> roll;
     xcs::nodes::XInputPort<double> pitch;
     xcs::nodes::XInputPort<double> yaw;
     xcs::nodes::XInputPort<double> gaz;
 
-    xcs::nodes::XVar<xcs::nodes::xci::FlyParam> fly;
+    xcs::nodes::XVar<xcs::FlyControl> fly;
 
     xcs::nodes::XInputPort<std::string> command;
 
@@ -41,7 +41,7 @@ public:
 
     void doCommand(const std::string& command);
 
-    void flyParam(double roll = 0, double pitch = 0, double yaw = 0, double gaz = 0);
+    void flyControl(double roll = 0, double pitch = 0, double yaw = 0, double gaz = 0);
 
     std::string getConfiguration(const std::string& key);
     xcs::xci::InformationMap dumpConfiguration();
@@ -57,7 +57,7 @@ private:
     //! Guard to prevent double initialization.
     bool inited_;
 
-    void onChangeFly(xcs::nodes::xci::FlyParam fp);
+    void onChangeFly(xcs::FlyControl fp);
 
     //! InputPort doesn't provide its current value, we keep it ourselves
     double roll_;
@@ -76,52 +76,52 @@ private:
     void onChangeGaz(double gaz);
 
     /*!
-     * Setter for flyParam persistence.
+     * Setter for flyControl persistence.
      * It blocks/unblock the persistence thread (when set to 0).
      *
      * \note It may take up to 'previous value' time until the new persistence
      * is set.
      */
-    void setFlyParamPersistence(unsigned int value);
+    void setFlyControlPersistence(unsigned int value);
 
     /*!
      * Enables/disables persistence (waking/suspending the thread).
      */
-    void setFlyParamActive(bool value = true);
+    void setFlyControlActive(bool value = true);
 
-    void keepFlyParam();
+    void keepFlyControl();
 
-    void sendFlyParam();
+    void sendFlyControl();
 
 
     /*!
      * Whether fly param persistence is active.
      */
-    bool flyParamActive_;
+    bool flyControlActive_;
     
     /*!
      * Variable that controls fly param keeping thread.
      */
-    volatile bool flyParamAlive_;
+    volatile bool flyControlAlive_;
 
     /*!
      * How often is fly param sent to XCI (in ms).
      * When set to 0, no persistence is enforced.
      */
-    unsigned int flyParamPersistence_;
+    unsigned int flyControlPersistence_;
 
-    std::thread flyParamThread_;
+    std::thread flyControlThread_;
 
-    std::mutex flyParamMtx_;
+    std::mutex flyControlMtx_;
 
-    std::condition_variable flyParamCond_;
+    std::condition_variable flyControlCond_;
 
     void initOutputs();
     
     /*!
      * Correctly terminates keep fly params thread.
      */
-    void stopFlyParamsThread();
+    void stopFlyControlsThread();
 };
 
 }

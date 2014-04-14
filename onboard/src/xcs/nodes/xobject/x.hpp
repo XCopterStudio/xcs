@@ -28,6 +28,9 @@
 
 #define X_GENERATE_STRUCT_PROPERTY(r, cName, cProperty) X_GENERATE_STRUCT_PROPERTY_S(cName, cProperty);
 
+/**
+ * \param cName Name must be valid as C++ variable name.
+ */
 # define X_GENERATE_STRUCT(cName, ...)    \
     BOOST_PP_SEQ_FOR_EACH(X_GENERATE_STRUCT_PROPERTY, cName, LIBPORT_LIST(__VA_ARGS__, ))
 

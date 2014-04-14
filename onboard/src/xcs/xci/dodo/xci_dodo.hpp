@@ -25,7 +25,7 @@ namespace dodo {
  * Available configuration:
  *     video:filename -- path to video file
  *     video:fps      -- approximate FPS of the video
- *     log:fp         -- 0|1 whether to log fly params
+ *     log:fc         -- 0|1 whether to log fly control
  *     log:command    -- 0|1 whether to log fly commands
  * 
  * Special commands
@@ -66,8 +66,8 @@ public:
     //! A pure virtual member taking command from list of x-copter's special commands and sending it to the x-copter
     virtual void command(const std::string &command);
 
-    //! A pure virtual member taking four fly parameters and send it to the x-copter
-    virtual void flyParam(float roll, float pitch, float yaw, float gaz);
+    //! A pure virtual member taking four fly controls and send it to the x-copter
+    virtual void flyControl(float roll, float pitch, float yaw, float gaz);
 
     //! A pure virtual member initializing XCI for use
     virtual void init();
@@ -122,7 +122,7 @@ private:
     static const std::string CONFIG_VIDEO_FPS;
     static const std::string CONFIG_VIDEO_FONT;
     static const std::string CONFIG_VIDEO_TIMESTAMPS;
-    static const std::string CONFIG_LOG_FP;
+    static const std::string CONFIG_LOG_FC;
     static const std::string CONFIG_LOG_COMMAND;
 
     InformationMap configuration_;

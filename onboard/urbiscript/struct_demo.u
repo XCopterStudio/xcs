@@ -24,15 +24,19 @@ load("init_onboard.u");
 var xciVersion = "xci_dodo";
 var xci = XXci.new(xciVersion);
 xci.xciInit();
+xci.flyControlPersistence = 0;
+xci.setConfiguration("log:fc", "1");
 
-var fp = FlyParam.new();
-fp.roll = 0.1;
-fp.pitch = 0.2;
-fp.yaw = 0.3;
-fp.gaz = 0.4;
-xci.fly;
-xci.fly = fp;
-xci.fly;
+var fc = FlyControl.new();
+fc.roll = 0.1;
+fc.pitch = 0.2;
+fc.yaw = 0.3;
+fc.gaz = 0.4;
+echo("Current: " + xci.fly); // is void
+echo("To set: " + fc);
+xci.fly = fc;
+echo("After: " + xci.fly);
+xci.command = "Land"; // to stop fly param persistence
 
 /*
 var p = Point.new();

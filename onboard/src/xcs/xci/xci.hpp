@@ -94,8 +94,8 @@ public:
     // Bellow are methods important for simple manually driven skeleton.
     //
 
-    //! A pure virtual member taking four fly parameters and send it to the x-copter
-    virtual void flyParam(float roll, float pitch, float yaw, float gaz) = 0;
+    //! A pure virtual member taking four fly controls and send it to the x-copter
+    virtual void flyControl(float roll, float pitch, float yaw, float gaz) = 0;
 
     //! A pure virtual member initializing XCI for use
     virtual void init() = 0;
