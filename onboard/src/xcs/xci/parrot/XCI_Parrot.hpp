@@ -69,6 +69,9 @@ class XCI_Parrot : public virtual XCI {
     void initNetwork();
     void processVideoData();
 
+    bool setConfirmedConfigure(AtCommand *command);
+    bool setNavdataReceive(bool full_mode = false);
+
 public:
 
     XCI_Parrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1")

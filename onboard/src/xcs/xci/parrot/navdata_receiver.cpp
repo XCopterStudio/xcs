@@ -110,14 +110,6 @@ void NavdataReceiver::checkDeadlineNavdata() {
 void NavdataReceiver::processState(uint32_t parrotState) {
     parrotState_.updateState(parrotState);
 
-    if (parrotState_.getState(FLAG_ARDRONE_NAVDATA_BOOTSTRAP)) { //test if drone is in BOOTSTRAP MODE
-        atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "FALSE")); // exit bootstrap mode and drone will send the demo navdata
-    }
-
-    if (parrotState_.getState(FLAG_ARDRONE_COMMAND_MASK)) {
-        atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
-    }
-
     if (parrotState_.getState(FLAG_ARDRONE_COM_WATCHDOG_MASK)) { // reset sequence number
         sequenceNumberNavdata_ = DEFAULT_SEQUENCE_NUMBER - 1;
         atCommandQueue_.push(new AtCommandCOMWDG());
@@ -130,9 +122,9 @@ void NavdataReceiver::processState(uint32_t parrotState) {
 
     // parrot is in state in which can not fly
     if (parrotState_.getState(FLAG_ARDRONE_MOTORS_MASK) || parrotState_.getState(FLAG_ARDRONE_SOFTWARE_FAULT) || parrotState_.getState(FLAG_ARDRONE_VBAT_LOW)){
-        dataReceiver_.notify("alive", 1);
-    }else{
         dataReceiver_.notify("alive", 0);
+    }else{
+        dataReceiver_.notify("alive", 1);
     }
 }
 

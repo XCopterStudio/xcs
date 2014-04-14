@@ -55,6 +55,69 @@ void XCI_Parrot::processVideoData(){
     }
 }
 
+bool XCI_Parrot::setConfirmedConfigure(AtCommand *command){
+
+    atCommandQueue_.push(new AtCommandCONFIG_IDS("XCI_Parrot", "XCS user", "XCS"));
+    atCommandQueue_.push(command);
+
+    unsigned int count = 0;
+    do{
+        this_thread::sleep_for(std::chrono::milliseconds(5));
+        if (++count > 20){
+            cerr << "Cannot receive ack \n" << endl;
+            return false;
+        }
+    } while (!state_.getState(FLAG_ARDRONE_COMMAND_MASK));
+
+    count = 0;
+    do{
+        atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
+        this_thread::sleep_for(std::chrono::milliseconds(5));
+
+        if (++count >= 20){
+            cerr << "Cannot receive clear ack \n" << endl;
+            return false;
+        }
+    } while (state_.getState(FLAG_ARDRONE_COMMAND_MASK));
+
+    return true;
+}
+
+bool XCI_Parrot::setNavdataReceive(bool full_mode){
+
+    unsigned int count = 0;
+
+    do{
+        if (full_mode){
+            atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
+        }
+        else{
+            atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "FALSE")); // exit bootstrap mode and drone will send the demo navdata
+        }
+
+        this_thread::sleep_for(std::chrono::milliseconds(5));
+
+        if(++count >= 20){
+            cerr << "Cannot receive general:navdata_demo ack \n" << endl;
+            return false;
+        }
+
+    } while (!state_.getState(FLAG_ARDRONE_COMMAND_MASK));
+
+    count = 0;
+    do{
+        atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
+        this_thread::sleep_for(std::chrono::milliseconds(5));
+
+        if (++count >= 20){
+            cerr << "Cannot receive clear general:navdata_demo ack \n" << endl;
+            return false;
+        }
+    } while (state_.getState(FLAG_ARDRONE_COMMAND_MASK));
+
+    return true;
+}
+
 // ----------------- Public function ---------------- //
 
 void XCI_Parrot::init(){
@@ -68,6 +131,8 @@ void XCI_Parrot::init(){
     std::cerr << "Before network" << std::endl;
     initNetwork();
     std::cerr << "After network" << std::endl;
+
+    setNavdataReceive();
 
     // init videoDecoder
     videoDecoder_.init(AV_CODEC_ID_H264);
