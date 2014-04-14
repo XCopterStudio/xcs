@@ -5,7 +5,8 @@ var XcopterState = Backbone.Model.extend({
     defaults : {
         "connection" : "Disconnected",
         "flash" : "",
-        "data" : ""
+        "data" : "",
+        "onboard" : ""
     },
 
     initialize : function() {
@@ -18,6 +19,8 @@ var XcopterState = Backbone.Model.extend({
             } else if (json.type == "data") {
                 model.set('data', json.data);
                 //console.log("incoming");
+            } else if (json.type == "onboard") {
+                model.set('onboard', json.data);
             }
         });
     },

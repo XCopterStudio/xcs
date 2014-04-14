@@ -1,5 +1,8 @@
 'use strict';
 
+Blockly.Blocks['test'] = { };
+Blockly.JavaScript['test'] = function(block) { };
+
 Blockly.Blocks['connect'] = {
   init: function() {
     this.setHelpUrl('');
