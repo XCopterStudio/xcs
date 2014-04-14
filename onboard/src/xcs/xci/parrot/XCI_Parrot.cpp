@@ -149,7 +149,7 @@ void XCI_Parrot::init(){
     std::cerr << "After network" << std::endl;
 
     setNavdataReceive();
-    setDefaultConfiguration();
+    //setDefaultConfiguration();
 
     // init videoDecoder
     videoDecoder_.init(AV_CODEC_ID_H264);
