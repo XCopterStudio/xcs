@@ -44,7 +44,7 @@ void XCI_Parrot::processVideoData(){
             avPacket.size = frame->payload_size - frame->payload_offset;
             if (videoDecoder_.decodeVideo(&avPacket)){
                 AVFrame* avFrame = videoDecoder_.decodedFrame();
-                BitmapType bitmap(avFrame->width, avFrame->height, avFrame->data[0]);
+                BitmapTypeChronologic bitmap(avFrame->width, avFrame->height, avFrame->data[0],frame->timestamp);
                 dataReceiver_.notify("video",bitmap);
             }
             //delete frame;
