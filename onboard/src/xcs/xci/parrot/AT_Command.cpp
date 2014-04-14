@@ -28,7 +28,7 @@ DroneMove::DroneMove(float roll, float pitch, float yaw, float gaz) {
     this->gaz.floatNumber = valueInRange(gaz, 1.0f);
 }
 
-std::string AtCommandRef::toString(const int32_t sequenceNumber) {
+std::string AtCommandRef::toString(const int32_t sequenceNumber) const{
     // create magic bitField for basic behavior (take off, land, etc.)
     // from documentation this bits must be set to 1
     int32_t bitField = (1 << 18) | (1 << 20) | (1 << 22) | (1 << 24) | (1 << 28);
@@ -64,7 +64,7 @@ AtCommandPCMD::AtCommandPCMD(const DroneMove movement, const bool absControl, co
 
 }
 
-std::string AtCommandPCMD::toString(const int32_t sequenceNumber) {
+std::string AtCommandPCMD::toString(const int32_t sequenceNumber) const{
     int32_t bitField = 0;
     // Create bitField according to Boolean arguments. More details in ar drone documentation.
     bitField |= (progressivCommand_ << 0);
@@ -88,7 +88,7 @@ AtCommandPCMD_MAG::AtCommandPCMD_MAG(const DroneMove movement, const float psi, 
     magnetoAccuracy_ = valueInRange(psiAccur, 1.0f);
 }
 
-std::string AtCommandPCMD_MAG::toString(const int32_t sequenceNumber) {
+std::string AtCommandPCMD_MAG::toString(const int32_t sequenceNumber) const{
     std::string pcmd = AtCommandPCMD::toString(sequenceNumber);
 
     std::stringstream out;
@@ -102,7 +102,7 @@ std::string AtCommandPCMD_MAG::toString(const int32_t sequenceNumber) {
     return out.str();
 }
 
-std::string AtCommandFTRIM::toString(const int32_t sequenceNumber) {
+std::string AtCommandFTRIM::toString(const int32_t sequenceNumber) const{
     std::stringstream out;
     out << startOfAtComm << nameOfCommand_ << "=" << sequenceNumber << endOfAtComm;
 
@@ -113,7 +113,7 @@ AtCommandCONFIG::AtCommandCONFIG(const std::string option, const std::string val
 
 }
 
-std::string AtCommandCONFIG::toString(const int32_t sequenceNumber) {
+std::string AtCommandCONFIG::toString(const int32_t sequenceNumber) const{
     std::stringstream out;
     out << startOfAtComm << nameOfCommand_ << "=" << sequenceNumber;
     out << delOfAtCommVal << "\"" << option_ << "\"";
@@ -127,7 +127,7 @@ AtCommandCONFIG_IDS::AtCommandCONFIG_IDS(const std::string sessionID, std::strin
 
 }
 
-std::string AtCommandCONFIG_IDS::toString(const int32_t sequenceNumber) {
+std::string AtCommandCONFIG_IDS::toString(const int32_t sequenceNumber) const{
     std::stringstream out;
     out << startOfAtComm << nameOfCommand_ << "=" << sequenceNumber;
     out << delOfAtCommVal << "\"" << sessionID_ << "\"";
@@ -138,7 +138,7 @@ std::string AtCommandCONFIG_IDS::toString(const int32_t sequenceNumber) {
     return out.str();
 }
 
-std::string AtCommandCOMWDG::toString(const int32_t sequenceNumber) {
+std::string AtCommandCOMWDG::toString(const int32_t sequenceNumber) const{
     std::stringstream out;
     out << startOfAtComm << nameOfCommand_ << "=" << sequenceNumber << endOfAtComm;
 
@@ -149,7 +149,7 @@ AtCommandCALIB::AtCommandCALIB(const int device) : device_(device) {
 
 }
 
-std::string AtCommandCALIB::toString(const int32_t sequenceNumber) {
+std::string AtCommandCALIB::toString(const int32_t sequenceNumber) const{
     std::stringstream out;
     out << startOfAtComm << nameOfCommand_ << "=" << sequenceNumber;
     out << delOfAtCommVal << device_;
@@ -157,7 +157,7 @@ std::string AtCommandCALIB::toString(const int32_t sequenceNumber) {
     return out.str();
 }
 
-std::string AtCommandCTRL::toString(const int32_t sequenceNumber) {
+std::string AtCommandCTRL::toString(const int32_t sequenceNumber) const{
     std::stringstream out;
     out << startOfAtComm << nameOfCommand_ << "=" << sequenceNumber;
     out << delOfAtCommVal << mode_;

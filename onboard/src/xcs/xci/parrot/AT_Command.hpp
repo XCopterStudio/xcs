@@ -70,7 +70,7 @@ namespace parrot{
                 \param sequenceNumber have to be in increasing order. Drone discard all at command with lower seqNumber than last one.
                 \return text representation of an at command according to ar drone 2.0. documentation
                 */
-        virtual std::string toString(const int32_t sequenceNumber) = 0;
+        virtual std::string toString(const int32_t sequenceNumber) const  = 0;
     };
 
     //! Drone take off, landing and emergency stop command.
@@ -88,7 +88,7 @@ namespace parrot{
 
         AtCommandRef(const Behavior basicBehavior) : basicBehavior_(basicBehavior) {
         };
-        std::string toString(const int32_t sequenceNumber);
+        std::string toString(const int32_t sequenceNumber) const;
     };
 
     //! Move drone command.
@@ -107,7 +107,7 @@ namespace parrot{
         \param combYaw enable combined yaw control for generating complete turns (phi+yaw) from phi parameter.
         */
         AtCommandPCMD(const DroneMove movement, const bool absControl = false, const bool combYaw = false, const bool progCmd = false);
-        std::string toString(const int32_t sequenceNumber);
+        std::string toString(const int32_t sequenceNumber) const;
     };
 
     //! Move drone command with absolute control support. 
@@ -125,7 +125,7 @@ namespace parrot{
         \param psi is normalized angle <-1,1> from north provided by magnetometer sensor. Positive value means orientation to the east and negative to the west and 0 north.
         */
         AtCommandPCMD_MAG(const DroneMove movement, const float psi, const float psiAccur, const bool absControl = false, const bool combYaw = false, const bool progCmd = false);
-        std::string toString(const int32_t sequenceNumber);
+        std::string toString(const int32_t sequenceNumber) const;
     };
 
     //! Sets the reference for horizontal plane. Must be on the ground.
@@ -133,7 +133,7 @@ namespace parrot{
     class AtCommandFTRIM : public AtCommand {
         static const std::string nameOfCommand_; /*!< AT command name according to the ar drone 2.0 documentation. */
     public:
-        std::string toString(const int32_t sequenceNumber);
+        std::string toString(const int32_t sequenceNumber) const;
     };
 
     //! Configuration of the drone.
@@ -149,7 +149,7 @@ namespace parrot{
         \param value is value of ar drone parrot 2.0 option
         */
         AtCommandCONFIG(const std::string option, const std::string value);
-        std::string toString(const int32_t sequenceNumber);
+        std::string toString(const int32_t sequenceNumber) const;
     };
 
     //! Identifiers for atCommandConfig.
@@ -162,7 +162,7 @@ namespace parrot{
     public:
         //! Identify to which session in the multi configuration setting will be assigned next AtCommandCONFIG. Have to be send before every AtCommandCONFIG in multi configuration setting.
         AtCommandCONFIG_IDS(const std::string sessionID, std::string userID, std::string applicationID);
-        std::string toString(const int32_t sequenceNumber);
+        std::string toString(const int32_t sequenceNumber) const;
     };
 
     //! Reset the communication watchdog timer.
@@ -170,7 +170,7 @@ namespace parrot{
     class AtCommandCOMWDG : public AtCommand {
         static const std::string nameOfCommand_; /*!< AT command name according to the ar drone 2.0 documentation. */
     public:
-        std::string toString(const int32_t sequenceNumber);
+        std::string toString(const int32_t sequenceNumber) const;
     };
 
     //! Ask the drone to calibrate the magnetometer. Must be flying.
@@ -184,7 +184,7 @@ namespace parrot{
         \param device is identifier of the device to calibrate. Choose this identifier from ardrone_calibration_device_t.
         */
         AtCommandCALIB(const int device);
-        std::string toString(const int32_t sequenceNumber);
+        std::string toString(const int32_t sequenceNumber) const;
     };
 
     //! 
@@ -196,7 +196,7 @@ namespace parrot{
 
         AtCommandCTRL(ArdroneControlMode mode = STATE_NO_CONTROL_MODE) : mode_(mode) {
         };
-        std::string toString(const int32_t sequenceNumber);
+        std::string toString(const int32_t sequenceNumber) const;
     };
 }}}
 #endif
