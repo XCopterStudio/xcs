@@ -241,7 +241,8 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
 // =========================== public functions ============================
 
 Ekf::Ekf() : 
-randomGenerator_(5){
+randomGenerator_(5),
+startTime_(Clock::now()){
 
 }
 
