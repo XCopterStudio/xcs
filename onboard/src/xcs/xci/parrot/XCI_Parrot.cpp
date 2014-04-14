@@ -62,7 +62,7 @@ bool XCI_Parrot::setConfirmedConfigure(AtCommand *command){
         atCommandQueue_.push(new AtCommandCONFIG_IDS("0a1b2c3d", "0a1b2c3d", "0a1b2c3d"));
         atCommandQueue_.push(command->clone());
         this_thread::sleep_for(std::chrono::milliseconds(10));
-        if (++count > 20){
+        if (++count > 10){
             cerr << "Cannot receive ack \n" << endl;
             delete command;
             return false;
@@ -75,7 +75,7 @@ bool XCI_Parrot::setConfirmedConfigure(AtCommand *command){
         atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
         this_thread::sleep_for(std::chrono::milliseconds(10));
 
-        if (++count >= 20){
+        if (++count >= 10){
             cerr << "Cannot receive clear ack \n" << endl;
             return false;
         }

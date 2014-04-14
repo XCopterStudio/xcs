@@ -4,7 +4,7 @@ var xci = XXci.new(xciVersion);
 
 logger.registerData("rotation","ROTATION","xcs::EulerianVectorChronologic",xci.&rotation);
 logger.registerData("battery","BATTERY","double",xci.&battery);
-logger.registerVideo("video.avi","640","360","video","video","video",xci.&video);
+logger.registerVideo("video.avi","640","360","video","CAMERA_FRONT","xcs::BitmapTypeChronologic",xci.&video);
 
 xci.xciInit();
 
