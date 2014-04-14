@@ -1,7 +1,7 @@
 set(PROJECT_NAME xobject)
 project(${PROJECT_NAME})
 
-file(GLOB SOURCES *.cpp)
+file(GLOB SOURCES *.cpp ../../types/*.cpp)
 file(GLOB HEADERS *.hpp)
 file(GLOB SCRIPTS ../../../../urbiscript/*.u)
 file(GLOB BOOT_SCRIPTS ../../../../urbiscript/boot/*.u)
