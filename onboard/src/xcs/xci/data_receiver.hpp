@@ -39,7 +39,7 @@ public:
      * Specialization for non-urbi and special-memory-managed types.
      */
     
-    void notify(const std::string& sensorName, xcs::BitmapType value) {
+    void notify(const std::string& sensorName, xcs::BitmapTypeChronologic value) {
         auto it = outputs_.find(sensorName);
         if (it == outputs_.end()) {
             throw std::runtime_error("Unregistered sensor '" + sensorName + "'."); // TODO is it necessary to link with libxcs, therefore std::runtime_error?

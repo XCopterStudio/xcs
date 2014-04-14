@@ -197,11 +197,13 @@ VideoFileWriter::~VideoFileWriter(){
 }
 
 void VideoFileWriter::writeVideoFrame(const AVFrame& frame){
-    
+
     AVCodecContext *codecContext;
 
     codecContext = videoStream_->codec;
-    
+
+    //cerr << "Video [" << frame.width << "," << frame.height << "]" << " out [" << codecContext->width << "," << codecContext->height << "]" << endl;
+
     if (pictureConvertContext_ == nullptr){
         pictureConvertContext_ = sws_getCachedContext(pictureConvertContext_,
             frame.width,

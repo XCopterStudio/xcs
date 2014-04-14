@@ -31,6 +31,7 @@ void VideoWriter::write(urbi::UImage image) {
     avframe_->width = image.width;
     avframe_->height = image.height;
     avframe_->format = PIX_FMT_BGR24;
+    //cerr << "Video image [" << image.width << "," << image.height << "]" << endl;
     avpicture_fill((AVPicture*) avframe_, image.data, (AVPixelFormat) avframe_->format, image.width, image.height);
     videoFileWriter->writeVideoFrame(*avframe_);
 }

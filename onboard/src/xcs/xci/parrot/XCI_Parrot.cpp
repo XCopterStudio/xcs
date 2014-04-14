@@ -40,10 +40,12 @@ void XCI_Parrot::processVideoData(){
         VideoFramePtr frame = nullptr;
         if (videoReceiver_.tryGetVideoFrame(frame)){
             AVPacket avPacket;
+            //cerr << "Video frame [" << frame->width << "," << frame->height << "]" << endl;
             avPacket.data = &frame->data[frame->payload_offset];
             avPacket.size = frame->payload_size - frame->payload_offset;
             if (videoDecoder_.decodeVideo(&avPacket)){
                 AVFrame* avFrame = videoDecoder_.decodedFrame();
+                //cerr << "Video avframe [" << avFrame->width << "," << avFrame->height << "]" << endl;
                 BitmapTypeChronologic bitmap(avFrame->width, avFrame->height, avFrame->data[0],frame->timestamp);
                 dataReceiver_.notify("video",bitmap);
             }
