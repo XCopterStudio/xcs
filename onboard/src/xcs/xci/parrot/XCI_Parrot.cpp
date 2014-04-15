@@ -64,7 +64,7 @@ bool XCI_Parrot::setConfirmedConfigure(AtCommand *command){
         atCommandQueue_.push(new AtCommandCONFIG_IDS("0a1b2c3d", "0a1b2c3d", "0a1b2c3d"));
         atCommandQueue_.push(command->clone());
         this_thread::sleep_for(std::chrono::milliseconds(10));
-        if (++count > 10){
+        if (++count > 20){
             cerr << "Cannot receive ack \n" << endl;
             delete command;
             return false;
@@ -77,7 +77,7 @@ bool XCI_Parrot::setConfirmedConfigure(AtCommand *command){
         atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
         this_thread::sleep_for(std::chrono::milliseconds(10));
 
-        if (++count >= 10){
+        if (++count >= 20){
             cerr << "Cannot receive clear ack \n" << endl;
             return false;
         }
@@ -96,6 +96,18 @@ bool XCI_Parrot::setDefaultConfiguration(){
     setConfirmedConfigure(new AtCommandCONFIG("video:max_bitrate", "4000"));
     setConfirmedConfigure(new AtCommandCONFIG("video:video_channel", "0"));
 
+    //receive only reduced navdata set
+    setConfirmedConfigure(new AtCommandCONFIG("general:navdata_demo", "TRUE"));
+    unsigned int ndOptions = ((1 << NAVDATA_DEMO_TAG) |
+        (1 << NAVDATA_ALTITUDE_TAG) |
+        (1 << NAVDATA_RAW_MEASURES_TAG) |
+        (1 << NAVDATA_MAGNETO_TAG) |
+        (1 << NAVDATA_TIME_TAG));
+
+    stringstream ndOptionsString;
+    ndOptionsString << ndOptions;
+    setConfirmedConfigure(new AtCommandCONFIG("general:navdata_options", ndOptionsString.str()));
+
     return true;
 }
 
@@ -105,10 +117,10 @@ bool XCI_Parrot::setNavdataReceive(bool full_mode){
 
     do{
         if (full_mode){
-            atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
+            atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "FALSE")); // exit bootstrap mode and drone will send the demo navdata
         }
         else{
-            atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "FALSE")); // exit bootstrap mode and drone will send the demo navdata
+            atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
         }
 
         this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -148,8 +160,8 @@ void XCI_Parrot::init(){
     initNetwork();
     std::cerr << "After network" << std::endl;
 
-    setNavdataReceive();
-    //setDefaultConfiguration();
+    setDefaultConfiguration();
+    //setNavdataReceive(true);
 
     // init videoDecoder
     videoDecoder_.init(AV_CODEC_ID_H264);
@@ -183,6 +195,13 @@ SensorList XCI_Parrot::sensorList() {
 
     sensorList.push_back(Sensor("rotation", "ROTATION"));
     sensorList.push_back(Sensor("velocity", "VELOCITY"));
+
+    sensorList.push_back(Sensor("altitudeAll", "ALTITUDE_ALL"));
+    sensorList.push_back(Sensor("altitudeV", "ALTITUDE_V"));
+    sensorList.push_back(Sensor("acceleration", "ACCELERATION"));
+    sensorList.push_back(Sensor("gyro", "GYRO_RAW"));
+    sensorList.push_back(Sensor("magneto", "MAGNETO_RAW"));
+    sensorList.push_back(Sensor("internalTime", "TIME_LOC"));
 
     sensorList.push_back(Sensor("altitude", "ALTITUDE"));
     sensorList.push_back(Sensor("battery", "BATTERY"));
@@ -237,7 +256,6 @@ void XCI_Parrot::configuration(const InformationMap &configuration) {
 }
 
 void XCI_Parrot::command(const std::string &command) {
-    unsigned int i;
     if (command == "TakeOff") {
         atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
         /*if (!state_.getState(FLAG_ARDRONE_FLY_MASK)){
