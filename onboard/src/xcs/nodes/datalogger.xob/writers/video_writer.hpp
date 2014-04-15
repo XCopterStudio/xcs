@@ -16,12 +16,13 @@ namespace datalogger {
 class VideoWriter : public AbstractWriter {
     unsigned int frameNumber_;
     AVFrame* avframe_;
-    std::unique_ptr<VideoFileWriter> videoFileWriter;
+    std::unique_ptr<VideoFileWriter> videoFileWriter_;
 
 public:
     VideoWriter(const std::string &name);
     virtual ~VideoWriter();
-    void init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar);
+    virtual void init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar);
+    virtual void start();
     void write(::urbi::UImage image);
 };
 

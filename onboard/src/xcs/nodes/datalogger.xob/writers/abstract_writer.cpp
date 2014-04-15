@@ -4,11 +4,12 @@ using namespace std;
 using namespace std::chrono;
 using namespace xcs::nodes::datalogger;
 
-void AbstractWriter::basicInit(const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar) {
+void AbstractWriter::init(const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar) {
     startTime_ = startTime;
     file_ = file;
     dataName_ = dataName;
     lock_ = lock;
+    uvar_ = &uvar;
 }
 
 void AbstractWriter::writeRecordBegin() {

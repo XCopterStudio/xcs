@@ -15,9 +15,12 @@ VideoWriter::~VideoWriter() {
 }
 
 void VideoWriter::init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar) {
-    basicInit(dataName, startTime, file, lock, uvar);
-    videoFileWriter = unique_ptr<VideoFileWriter>(new VideoFileWriter(videoFile, width, height));
-    UNotifyThreadedChange(uvar, &VideoWriter::write, ::urbi::LOCK_FUNCTION);
+    AbstractWriter::init(dataName, startTime, file, lock, uvar);
+    videoFileWriter_ = unique_ptr<VideoFileWriter>(new VideoFileWriter(videoFile, width, height));
+}
+
+void VideoWriter::start() {
+    //UNotifyThreadedChange(*uvar_, &VideoWriter::write, ::urbi::LOCK_FUNCTION);
 }
 
 void VideoWriter::write(urbi::UImage image) {
@@ -33,5 +36,5 @@ void VideoWriter::write(urbi::UImage image) {
     avframe_->format = PIX_FMT_BGR24;
     //cerr << "Video image [" << image.width << "," << image.height << "]" << endl;
     avpicture_fill((AVPicture*) avframe_, image.data, (AVPixelFormat) avframe_->format, image.width, image.height);
-    videoFileWriter->writeVideoFrame(*avframe_);
+    videoFileWriter_->writeVideoFrame(*avframe_);
 }

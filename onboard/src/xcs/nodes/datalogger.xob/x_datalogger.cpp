@@ -22,12 +22,29 @@ XDatalogger::XDatalogger(const std::string& name) :
   startTime_(Clock().now()),
   inited_(false) {
     XBindFunction(XDatalogger, init);
+    XBindFunction(XDatalogger, start);
     XBindFunction(XDatalogger, registerData);
     XBindFunction(XDatalogger, registerVideo);
 }
 
 XDatalogger::~XDatalogger() {
     file_.close();
+}
+
+void XDatalogger::start() {
+    cerr << "Beg" << endl;
+    for (auto it = generalWriterList_.begin(); it != generalWriterList_.end(); ++it) {
+        (*it).get()->start();
+    }
+    cerr << "Beg1" << endl;
+    for (auto it = vectorWriterList_.begin(); it != vectorWriterList_.end(); ++it) {
+        (*it).get()->start();
+    }
+    cerr << "Beg2" << endl;
+    for (auto it = videoWriterList_.begin(); it != videoWriterList_.end(); ++it) {
+        (*it).get()->start();
+    }
+    cerr << "Beg3" << endl;
 }
 
 void XDatalogger::init(const std::string &file) {

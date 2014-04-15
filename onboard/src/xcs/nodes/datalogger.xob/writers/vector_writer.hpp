@@ -23,7 +23,10 @@ namespace datalogger {
 class VectorWriter : public AbstractWriter {
 public:
     VectorWriter(const std::string &name);
-    void init(const std::string &syntacticType, const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar);
+    
+    virtual void init(const std::string &syntacticType, const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar);
+   
+    virtual void start();
 
     template<typename T>
     void write(T value) {
@@ -34,7 +37,8 @@ public:
         value.serialize(*file_);
         *file_ << std::endl;
     }
-
+private:
+    std::string syntacticType_;
 };
 
 

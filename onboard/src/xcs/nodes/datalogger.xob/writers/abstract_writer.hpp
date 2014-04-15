@@ -19,10 +19,14 @@ protected:
     std::ofstream *file_;
 
     std::mutex *lock_;
+    
+    ::urbi::UVar *uvar_;
 
-    void basicInit(const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar);
     void writeRecordBegin();
 public:
+    virtual void init(const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar);
+    
+    virtual void start() = 0;
 
     AbstractWriter(const std::string &name) : urbi::UObject(name) {
     }

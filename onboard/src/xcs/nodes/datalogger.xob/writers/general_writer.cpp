@@ -8,9 +8,10 @@ GeneralWriter::GeneralWriter(const std::string &name) :
   AbstractWriter(name) {
 }
 
-void GeneralWriter::init(const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar) {
-    basicInit(dataName, startTime, file, lock, uvar);
-    UNotifyChange(uvar, &GeneralWriter::write);
+void GeneralWriter::start() {
+    cerr << "GW::start: " << uvar_ << uvar_->val() << endl;
+    
+    UNotifyChange(*uvar_, &GeneralWriter::write);
 }
 
 void GeneralWriter::write(urbi::UVar &uvar) {
