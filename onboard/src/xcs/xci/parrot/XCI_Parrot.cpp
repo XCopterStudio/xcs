@@ -98,6 +98,7 @@ bool XCI_Parrot::setDefaultConfiguration(){
 
     //receive only reduced navdata set
     setConfirmedConfigure(new AtCommandCONFIG("general:navdata_demo", "TRUE"));
+    // set which data will be send
     unsigned int ndOptions = ((1 << NAVDATA_DEMO_TAG) |
         (1 << NAVDATA_ALTITUDE_TAG) |
         (1 << NAVDATA_RAW_MEASURES_TAG) |
@@ -107,6 +108,8 @@ bool XCI_Parrot::setDefaultConfiguration(){
     stringstream ndOptionsString;
     ndOptionsString << ndOptions;
     setConfirmedConfigure(new AtCommandCONFIG("general:navdata_options", ndOptionsString.str()));
+    // disable visual detection
+    setConfirmedConfigure(new AtCommandCONFIG("detect:detect_type","3"));
 
     return true;
 }
