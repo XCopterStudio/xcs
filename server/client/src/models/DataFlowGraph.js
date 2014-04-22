@@ -61,7 +61,7 @@ var DataFlowGraph = Backbone.Model.extend({
         // TODO: parse data and fill properties on this
 
         //DEBUG
-        console.log("setData...........: " + JSON.stringify(data));
+        console.log("setData: " + JSON.stringify(data));
         
         // set default dataFlowGraph
         if(data.dataFlowGraph) {

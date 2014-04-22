@@ -59,13 +59,13 @@
 </div>
 
 <div class="container-fluid" id="script-generator">
-    <div id="screen" style="height: 500px; width: 500px;"></div>
-    <xml id="toolbox" style="display: none"></xml>
-    <textarea id="scriptScreen" rows="5" cols="80"></textarea>
+    <div id="script-generator-screen"></div>
+    <xml id="script-generator-toolbox" style="display: none"></xml>
+    <div id="script-generator-console"></div>
 </div>
 
 <div class="container-fluid" id="flow-graph">
     <div id="flow-graph-toolbox"></div>
     <div id="flow-graph-screen"></div>
-    <textarea id="flow-graph-txt" rows="15" cols="150"></textarea>
+    <div id="flow-graph-console"></div>
 </div>
