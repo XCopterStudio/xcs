@@ -63,3 +63,9 @@
     <xml id="toolbox" style="display: none"></xml>
     <textarea id="scriptScreen" rows="5" cols="80"></textarea>
 </div>
+
+<div class="container-fluid" id="flow-graph">
+    <div id="flow-graph-toolbox"></div>
+    <div id="flow-graph-screen"></div>
+    <textarea id="flow-graph-txt" rows="15" cols="150"></textarea>
+</div>

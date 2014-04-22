@@ -1,16 +1,78 @@
+var scriptGeneratorGraph = {};
+
+var scriptGeneratorModels =  {
+    addModel: function(id, model) {
+        this[id] = model;
+        
+        $('g[model-id="' + id + '"]').dblclick(function(eventObject){
+            scriptGeneratorModels[this.getAttribute('model-id')].remove();
+        }); 
+    }
+};
+
+var ScriptGeneratorDefaultModel = joint.shapes.devs.Model.extend({
+    defaults: joint.util.deepSupplement({
+        id: "m",
+        position: { x: 50, y: 50 },
+        inPorts: ['in1','in2'],
+        outPorts: ['out'],
+        size: { width: 90, height: 90 },
+        attrs: {
+            '.label': { text: 'Model', 'ref-x': .5, 'ref-y': .2 },
+            rect: { fill: '#2ECC71' },
+            '.inPorts circle': { fill: '#16A085', type: 'in' },
+            '.outPorts circle': { fill: '#E74C3C', type: 'out' }
+        },
+    }, joint.shapes.devs.Model.prototype.defaults),
+    
+    setId : function(newId) {
+        this.set('id', newId);
+    },
+    
+    setLabel : function(newLabel) {
+        this.attr('.label/text', newLabel); 
+    },
+    
+    setAutoSize : function(maxCount) {
+        var inCount = this.get('inPorts').length;
+        var outCount = this.get('outPorts').length;
+        var count = (inCount > outCount) ? inCount : outCount;
+        if(!maxCount) {
+            maxCount = 5;
+        }
+        if(count > maxCount) {
+            count = maxCount;
+        }
+        this.get('size').height = count * 30;
+    },
+    
+    addInputPort : function(portId) {
+        var inp = this.get('inPorts').slice();
+        inp.push(portId);
+        this.set('inPorts', inp);
+    },
+    
+    addOutpuPort : function(portId) {
+        var inp = this.get('outPorts').slice();
+        inp.push(portId);
+        this.set('outPorts', inp);
+    },
+});
+
 var ScriptGeneratorView = Backbone.View.extend({
 
     id : 'script-generator',
     
     initialize : function() {
         this.model = new DataFlowGraph();
-        this.onInputChange(app.XcopterState);      
         
-        this.listenTo(app.XcopterState, "change:data", this.onInputChange);
+        this.onInputChange(app.XcopterState);      
+        this.listenTo(app.XcopterState, "change:onboard", this.onInputChange);
         
         this.listenTo(this.model, "change:dataFlowGraph", this.onDataFlowGraphChange);
         this.listenTo(this.model.get("xprototype"), "add", this.onPrototypeAdd);
         this.listenTo(this.model.get("xclone"), "add", this.onCloneAdd);
+        
         
         // NOTE: 4 debug only
 //        var prot = new DataFlowGraphNode();
@@ -32,7 +94,7 @@ var ScriptGeneratorView = Backbone.View.extend({
 //        
 //        this.model.get("xprototype").add(prot);
 //        this.model.get("xclone").add(c);
-//        this.model.set('dataFlowGraph', '<xml></xml>');
+//        //this.model.set('dataFlowGraph', '<xml></xml>');
 //        
 //        prot.set("name", "XXCI");
 //        
@@ -41,9 +103,10 @@ var ScriptGeneratorView = Backbone.View.extend({
 //            synType : "double",
 //            semType : "GAZ"
 //        }));
-//        
-//        this.model.set('dataFlowGraph', '<xml><text>hello world</text></xml>');        
         
+        //this.model.set('dataFlowGraph', '<xml><text>hello world</text></xml>');        
+        
+        this.initializeFlowGraph();
         
         registerBlocks();
         
@@ -88,12 +151,130 @@ var ScriptGeneratorView = Backbone.View.extend({
             });
         
         //window.setTimeout(loadScript, 0);
-        loadScript();
+        //loadScript();
         
         // add change listener 
         Blockly.addChangeListener(scriptWriter);  
     },
     
+    initializeFlowGraph : function() {
+        scriptGeneratoGraph = new joint.dia.Graph;
+        this.listenTo(scriptGeneratoGraph, 'change:target', this.setLink);
+
+        scriptGeneratoGraph.on('change', function(model) {
+            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
+        });
+        scriptGeneratoGraph.on('add', function(cell) {
+            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
+        });
+        scriptGeneratoGraph.on('remove', function(cell) {
+            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
+        });
+
+        var flowGraphToolbox = $('#flow-graph-toolbox');
+        flowGraphToolbox.append('<div id="XXci parrot" class="drag_">XXci - parrot</div>');
+        flowGraphToolbox.append('<div id="XXci dodo" class="drag_">XXci - dodo</div>');
+        this.initializeFlowGraphToolbox();
+        
+        var paper = new joint.dia.Paper({
+            el: $('#flow-graph-screen'),
+            width: 650, height: 200, gridSize: 1,
+            model: scriptGeneratoGraph,
+            validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
+                var valid = magnetT.getAttribute('type') != 'out';
+                return valid;
+            },
+            validateMagnet: function(cellView, magnet) {
+                return magnet.getAttribute('type') != "in";
+            },
+            snapLinks: { radius: 45 }
+        });
+        
+        var m1 = new ScriptGeneratorDefaultModel();
+        m1.setId('m1');
+        m1.setLabel('Model 1');
+        m1.setAutoSize();
+        scriptGeneratoGraph.addCell(m1);
+        
+        var m2 = new ScriptGeneratorDefaultModel({
+            inPorts: ['in1','in2', 'in3', 'in4', 'in5', 'in6'],
+        });
+        m2.translate(300, 0);
+        m2.setId("m2");
+        m2.setLabel('Model 2');      
+        m2.setAutoSize();
+        m2.addInputPort('in7');
+        m2.addOutpuPort('out2');
+        scriptGeneratoGraph.addCell(m2);
+        
+        scriptGeneratorModels.addModel("m1", m1);
+        scriptGeneratorModels.addModel("m2", m2);
+        
+//        var newContent = JSON.parse('{"cells":[{"type":"devs.Model","size":{"width":90,"height":90},"inPorts":["in1","in2"],"outPorts":["out"],"position":{"x":50,"y":50},"angle":0,"id":"14515f13-24ab-4c10-b67a-0e9b55a526a7","z":0,"attrs":{"rect":{"fill":"#2ECC71"},".label":{"ref-x":0.5},".inPorts circle":{"fill":"#16A085","type":"in"},".outPorts circle":{"fill":"#E74C3C","type":"out"},".inPorts>.port0>text":{"text":"in1"},".inPorts>.port0>circle":{"port":{"id":"in1","type":"in"}},".inPorts>.port0":{"ref":"rect","ref-y":0.25},".inPorts>.port1>text":{"text":"in2"},".inPorts>.port1>circle":{"port":{"id":"in2","type":"in"}},".inPorts>.port1":{"ref":"rect","ref-y":0.75},".outPorts>.port0>text":{"text":"out"},".outPorts>.port0>circle":{"port":{"id":"out","type":"out"}},".outPorts>.port0":{"ref":"rect","ref-y":0.5,"ref-dx":0}}},{"type":"devs.Model","size":{"width":90,"height":90},"inPorts":["in1","in2"],"outPorts":["out"],"position":{"x":350,"y":50},"angle":0,"id":"cacddf4b-9244-4624-b1af-30355f4df78b","z":0,"embeds":"","attrs":{"rect":{"fill":"#2ECC71"},".label":{"text":"Model 2","ref-x":0.5},".inPorts circle":{"fill":"#16A085","type":"in"},".outPorts circle":{"fill":"#E74C3C","type":"out"},".inPorts>.port0>text":{"text":"in1"},".inPorts>.port0>circle":{"port":{"id":"in1","type":"in"}},".inPorts>.port0":{"ref":"rect","ref-y":0.25},".inPorts>.port1>text":{"text":"in2"},".inPorts>.port1>circle":{"port":{"id":"in2","type":"in"}},".inPorts>.port1":{"ref":"rect","ref-y":0.75},".outPorts>.port0>text":{"text":"out"},".outPorts>.port0>circle":{"port":{"id":"out","type":"out"}},".outPorts>.port0":{"ref":"rect","ref-y":0.5,"ref-dx":0}}},{"type":"link","id":"855fec63-9210-44a9-92d3-b9d1d4814406","embeds":"","source":{"id":"14515f13-24ab-4c10-b67a-0e9b55a526a7","selector":"g:nth-child(1) g:nth-child(4) g:nth-child(1) circle:nth-child(1)     ","port":"out"},"target":{"id":"cacddf4b-9244-4624-b1af-30355f4df78b","selector":"g:nth-child(1) g:nth-child(3) g:nth-child(1) circle:nth-child(1)     ","port":"in1"},"z":2,"vertices":[{"x":226,"y":43}],"attrs":{".connection":{"stroke":"green"},".marker-target":{"fill":"green","d":"M 10 0 L 0 5 L 10 10 z"}}},{"type":"link","id":"2fafc239-87ca-4b09-9c09-08a62b606976","embeds":"","source":{"id":"14515f13-24ab-4c10-b67a-0e9b55a526a7","selector":"g:nth-child(1) g:nth-child(4) g:nth-child(1) circle:nth-child(1)     ","port":"out"},"target":{"x":261,"y":131},"z":3,"attrs":{".connection":{"stroke":"red"},".marker-target":{"fill":"red","d":"M 10 0 L 0 5 L 10 10 z"}}},{"type":"link","id":"ed391108-0a1e-4723-a4bc-9d2341d684c6","embeds":"","source":{"id":"cacddf4b-9244-4624-b1af-30355f4df78b","selector":"g:nth-child(1) g:nth-child(4) g:nth-child(1) circle:nth-child(1)     ","port":"out"},"target":{"id":"cacddf4b-9244-4624-b1af-30355f4df78b","selector":"g:nth-child(1) g:nth-child(3) g:nth-child(2) circle:nth-child(1)     ","port":"in2"},"z":4,"attrs":{".connection":{"stroke":"green"},".marker-target":{"fill":"green","d":"M 10 0 L 0 5 L 10 10 z"}}}]}');
+//        scriptGeneratoGraph.fromJSON(newContent);    
+    },
+    
+    initializeFlowGraphToolbox : function() {
+        //Counter
+        counter = 0;
+        //Make element draggable
+        $(".drag_").draggable({
+            helper: 'clone',
+            containment: '#flow-graph-screen',
+            //When first dragged
+            stop: function (ev, ui) {
+                var pos = $(ui.helper).offset();
+                objName = "#clonediv" + counter
+                $(objName).css({
+                    "left": pos.left,
+                    "top": pos.top
+                });
+                $(objName).removeClass("drag_");
+            }
+        });
+        //Make element droppable
+        $("#flow-graph-screen").droppable({
+            drop: function (ev, ui) {
+                counter++;
+                
+                var toolId = ui.draggable.attr('id');
+                var modelId = toolId + counter;
+                
+                var m = new ScriptGeneratorDefaultModel();
+                m.setId(modelId);
+                m.setLabel(modelId);
+                m.setAutoSize();
+                scriptGeneratoGraph.addCell(m);
+                scriptGeneratorModels.addModel(modelId, m);
+            }
+        });
+    },
+    
+    setLink : function(link) {
+        
+        if(link.attributes.target.x){
+            this.setBadLink(link);
+        }
+        else {
+            this.setWellLink(link);
+        }
+    },
+    
+    setBadLink : function(link) {
+        link.attr({
+            '.connection': { stroke: 'red' },
+            //'.marker-source': { fill: 'red', d: 'M 10 0 L 0 5 L 10 10 z' },
+            '.marker-target': { fill: 'red', d: 'M 10 0 L 0 5 L 10 10 z' }
+        });
+    },
+    
+    setWellLink : function(link) {
+        link.attr({
+            '.connection': { stroke: 'green' },
+            //'.marker-source': { fill: 'red', d: 'M 10 0 L 0 5 L 10 10 z' },
+            '.marker-target': { fill: 'green', d: 'M 10 0 L 0 5 L 10 10 z' }
+        });
+    },
     
     onDataFlowGraphChange : function(model) {
         var graph = model.get("dataFlowGraph");
@@ -103,6 +284,7 @@ var ScriptGeneratorView = Backbone.View.extend({
         
         //TODO: change default graph
         //...
+        loadScript(graph);
     },
     
     onPrototypeAdd : function(modelPrototype) {
@@ -219,7 +401,7 @@ var ScriptGeneratorView = Backbone.View.extend({
     },
     
     onInputChange : function(xcState) {
-        var data = xcState.get("data");
+        var data = xcState.get("onboard");
         this.model.setData(data);
                 
         //console.log("incoming!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -279,8 +461,9 @@ function scriptWriter() {
     document.getElementById('scriptScreen').value = code;
 };
 
-function loadScript() {
-    var savedXml = Blockly.Xml.textToDom('<xml><block type="connect" id="2" x="148" y="385"><field name="XOB1">subject</field><field name="XVAR1">out</field><field name="XOB2">observer</field><field name="XVAR2">in</field></block></xml>');
+function loadScript(xmlScript) {
+    //var savedXml = Blockly.Xml.textToDom('<xml><block type="connect" id="2" x="148" y="385"><field name="XOB1">subject</field><field name="XVAR1">out</field><field name="XOB2">observer</field><field name="XVAR2">in</field></block></xml>');
+    var savedXml = Blockly.Xml.textToDom(xmlScript);
     Blockly.Xml.domToWorkspace(Blockly.getMainWorkspace(), savedXml);
 };
 

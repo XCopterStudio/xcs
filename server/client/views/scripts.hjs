@@ -1,5 +1,6 @@
 <!-- ...and bit of javascript -->
 <script type="text/javascript" src="js/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.10.4.custom.js"></script>
 <script type="text/javascript" src="js/bootstrap.js"></script>
 <script type="text/javascript" src="js/underscore.js"></script>
 <script type="text/javascript" src="js/backbone.js"></script>
@@ -17,6 +18,10 @@
 <script type="text/javascript" src="js/blockly/msg/js/en.js"></script>
 <script type="text/javascript" src="js/blockly/javascript_compressed.js"></script>
 <script type="text/javascript" src="js/blockly/urbiscript.js"></script>
+<!-- jointJS -->
+<!-- TODO: this version should contain own version of backbone and underscore - change version -->
+<script type="text/javascript" src="js/jointjs/joint.nojquery.js"></script>
+<script type="text/javascript" src="js/jointjs/joint.shapes.devs.js"></script>
 <!-- Custom scripts -->
 <script type="text/javascript" src="js/custom.js"></script>
 <!-- 

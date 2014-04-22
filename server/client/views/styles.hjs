@@ -3,8 +3,12 @@
 <link href="css/bootstrap-theme.css" rel="stylesheet" media="screen">
 <link href="css/font-awesome.css" rel="stylesheet">
 <link href="css/jquery.gridster.css" rel="stylesheet">
+<link href="css/jquery-ui-1.10.4.custom.css" rel="stylesheet">
 <!-- Custom styles -->
 <link href="css/custom.css" rel="stylesheet">
 <!-- code mirror -->
 <link href="css/codemirror/codemirror.css" rel="stylesheet">
 <link href="css/codemirror/night.css" rel="stylesheet">
+<!-- jointJS -->
+<!--<link href="css/jointjs/joint.nojquerynobackbone.css" rel="stylesheet">-->
+<link href="css/jointjs/joint.nojquery.css" rel="stylesheet">
