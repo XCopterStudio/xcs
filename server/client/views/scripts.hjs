@@ -37,6 +37,7 @@
 <script type="text/javascript" src="src/models/ManualControl.js"></script>
 <script type="text/javascript" src="src/models/XcopterState.js"></script>
 <script type="text/javascript" src="src/models/DataFlowGraph.js"></script>
+<script type="text/javascript" src="src/models/DataFlowGraphDefaultModel.js"></script>
 <script type="text/javascript" src="src/views/KeyboardControllerView.js"></script>
 <script type="text/javascript" src="src/views/FlashMessagesView.js"></script>
 <script type="text/javascript" src="src/views/AbstractNavdataView.js"></script>
