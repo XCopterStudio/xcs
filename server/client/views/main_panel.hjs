@@ -65,7 +65,17 @@
 </div>
 
 <div class="container-fluid" id="flow-graph">
-    <div id="flow-graph-toolbox"></div>
-    <div id="flow-graph-screen"></div>
-    <div id="flow-graph-console"></div>
+    <div class="row">
+        <div class="col-xs-2">
+            <div id="flow-graph-toolbox"></div>
+        </div>
+        <div class="col-xs-10">            
+            <div id="flow-graph-screen"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div id="flow-graph-console"></div>
+        </div>
+    </div>
 </div>

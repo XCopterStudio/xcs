@@ -128,15 +128,14 @@ var ScriptGeneratorView = Backbone.View.extend({
         //Make element draggable
         $(".drag_").draggable({
             helper: 'clone',
-            containment: '#flow-graph-screen',
-            //When first dragged
+            containment: '#flow-graph',
             stop: function (ev, ui) {
-                var pos = $(ui.helper).offset();
+//                var pos = ui.position;
                 objName = "#clonediv" + counter
-                $(objName).css({
-                    "left": pos.left,
-                    "top": pos.top
-                });
+//                $(objName).css({
+//                    "left": pos.left,
+//                    "top": pos.top
+//                });
                 $(objName).removeClass("drag_");
             }
         });
@@ -147,8 +146,12 @@ var ScriptGeneratorView = Backbone.View.extend({
                 
                 var toolId = ui.draggable.attr('id');
                 var modelId = toolId + counter;
+                var pos = $(ui.helper).offset();
+                var containerPos = $("#flow-graph-screen").offset();
                 
-                var m = new DataFlowGraphDefaultModel();
+                var m = new DataFlowGraphDefaultModel({
+                    position: { x: pos.left - containerPos.left, y: pos.top - containerPos.top },
+                });
                 m.setId(modelId);
                 m.setLabel(modelId);
                 m.setAutoSize();
