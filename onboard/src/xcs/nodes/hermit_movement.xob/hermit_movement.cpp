@@ -20,4 +20,3 @@ xcs::Checkpoint HermitMovement::computeHermitPoint(const xcs::Checkpoint &start,
     hermitPolynomials << 1.0 << 0.0 << 0.0 << 0.0 << endr;
 };
    
-}
