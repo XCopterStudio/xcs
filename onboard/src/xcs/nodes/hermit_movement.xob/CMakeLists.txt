@@ -1,4 +1,4 @@
-set(PROJECT_NAME hermit_movement)
+set(PROJECT_NAME xhermit_movement)
 project(${PROJECT_NAME})
 
 file(GLOB SOURCES *.cpp)
