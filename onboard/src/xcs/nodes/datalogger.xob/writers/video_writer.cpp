@@ -14,21 +14,21 @@ VideoWriter::~VideoWriter() {
     avcodec_free_frame(&avframe_);
 }
 
-void VideoWriter::init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar) {
-    AbstractWriter::init(dataName, startTime, file, lock, uvar);
-    videoFileWriter_ = unique_ptr<VideoFileWriter>(new VideoFileWriter(videoFile, width, height));
-}
-
-void VideoWriter::start() {
-    //UNotifyThreadedChange(*uvar_, &VideoWriter::write, ::urbi::LOCK_FUNCTION);
+void VideoWriter::init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, LoggerContext &context, ::urbi::UVar &uvar) {
+    basicInit(dataName, context, uvar);
+    videoFileWriter = unique_ptr<VideoFileWriter>(new VideoFileWriter(videoFile, width, height));
+    UNotifyThreadedChange(uvar, &VideoWriter::write, ::urbi::LOCK_FUNCTION);
 }
 
 void VideoWriter::write(urbi::UImage image) {
+    if (!context_->enabled) {
+        return;
+    }
     {
-        std::lock_guard<std::mutex> lck(*lock_);
+        std::lock_guard<std::mutex> lck(context_->lock);
         writeRecordBegin();
 
-        *file_ << frameNumber_++ << endl;
+        context_->file << frameNumber_++ << endl;
     }
 
     avframe_->width = image.width;
@@ -36,5 +36,5 @@ void VideoWriter::write(urbi::UImage image) {
     avframe_->format = PIX_FMT_BGR24;
     //cerr << "Video image [" << image.width << "," << image.height << "]" << endl;
     avpicture_fill((AVPicture*) avframe_, image.data, (AVPixelFormat) avframe_->format, image.width, image.height);
-    videoFileWriter_->writeVideoFrame(*avframe_);
+    videoFileWriter->writeVideoFrame(*avframe_);
 }

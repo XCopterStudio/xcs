@@ -8,15 +8,18 @@ GeneralWriter::GeneralWriter(const std::string &name) :
   AbstractWriter(name) {
 }
 
-void GeneralWriter::start() {
-    cerr << "GW::start: " << uvar_ << uvar_->val() << endl;
-    
-    UNotifyChange(*uvar_, &GeneralWriter::write);
+void GeneralWriter::init(const std::string &dataName, LoggerContext &context, ::urbi::UVar &uvar) {
+    basicInit(dataName, context, uvar);
+    UNotifyChange(uvar, &GeneralWriter::write);
 }
 
 void GeneralWriter::write(urbi::UVar &uvar) {
-    std::lock_guard<std::mutex> lck(*lock_);
+    if (!context_->enabled) {
+        return;
+    }
+    
+    std::lock_guard<std::mutex> lck(context_->lock);
 
     writeRecordBegin();
-    *file_ << uvar.val() << endl;
+    context_->file << uvar.val() << endl;
 }

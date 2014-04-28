@@ -13,7 +13,8 @@ namespace datalogger {
 class GeneralWriter : public AbstractWriter {
 public:
     GeneralWriter(const std::string &name);
-    virtual void start();
+    void init(const std::string &dataName, LoggerContext &context, ::urbi::UVar &uvar);
+
     void write(::urbi::UVar &uvar);
 
 };

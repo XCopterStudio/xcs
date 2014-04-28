@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <mutex>
+#include <atomic>
 
 #include <xcs/nodes/xobject/x_object.hpp>
 
@@ -16,7 +17,7 @@ namespace xcs {
 namespace nodes {
 
 class XDatalogger : public xcs::nodes::XObject {
-    typedef std::list<std::unique_ptr<datalogger::GeneralWriter> > GeneralWriterList;
+    typedef std::list<std::unique_ptr<datalogger::GeneralWriter, std::function<void (datalogger::GeneralWriter *)> > > GeneralWriterList;
     typedef std::list<std::unique_ptr<datalogger::VectorWriter> > VectorWriterList;
     typedef std::list<std::unique_ptr<datalogger::VideoWriter> > VideoWriterList;
 
@@ -25,16 +26,24 @@ class XDatalogger : public xcs::nodes::XObject {
     GeneralWriterList generalWriterList_;
     VectorWriterList vectorWriterList_;
     VideoWriterList videoWriterList_;
-    datalogger::TimePoint startTime_;
-
-    std::mutex lock_;
-
-    std::ofstream file_;
 
     bool inited_;
+    
+    datalogger::LoggerContext context_;
 
     inline void registerHeader(const std::string &name, const std::string &semanticType, const std::string &syntacticType) {
-        file_ << REGISTER << " " << name << " " << semanticType << " " << syntacticType << std::endl;
+        context_.file << REGISTER << " " << name << " " << semanticType << " " << syntacticType << std::endl;
+    }
+
+    inline void closeHeader() {
+        context_.file << std::endl;
+    }
+
+    inline bool validRegister() {
+        if (context_.enabled) {
+            send("throw \"Cannot register input in enabled logger.\";");
+        }
+        return !context_.enabled;
     }
 
     inline bool isVideoType(const std::string &syntacticType) const {

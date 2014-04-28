@@ -19,7 +19,6 @@ const char* XDatalogger::REGISTER = "register";
 
 XDatalogger::XDatalogger(const std::string& name) :
   xcs::nodes::XObject(name),
-  startTime_(Clock().now()),
   inited_(false) {
     XBindFunction(XDatalogger, init);
     XBindFunction(XDatalogger, start);
@@ -28,29 +27,18 @@ XDatalogger::XDatalogger(const std::string& name) :
 }
 
 XDatalogger::~XDatalogger() {
-    file_.close();
+    context_.file.close();
 }
 
 void XDatalogger::start() {
-    cerr << "Beg" << endl;
-    for (auto it = generalWriterList_.begin(); it != generalWriterList_.end(); ++it) {
-        (*it).get()->start();
-    }
-    cerr << "Beg1" << endl;
-    for (auto it = vectorWriterList_.begin(); it != vectorWriterList_.end(); ++it) {
-        (*it).get()->start();
-    }
-    cerr << "Beg2" << endl;
-    for (auto it = videoWriterList_.begin(); it != videoWriterList_.end(); ++it) {
-        (*it).get()->start();
-    }
-    cerr << "Beg3" << endl;
+    closeHeader();
+    context_.enabled = true;
 }
 
 void XDatalogger::init(const std::string &file) {
-    file_.open(file.c_str());
+    context_.file.open(file.c_str());
 
-    if (!file_.is_open()) {
+    if (!context_.file.is_open()) {
         send("throw \"Datalogger cannot open file: " + file + "\";");
         return;
     }
@@ -58,7 +46,7 @@ void XDatalogger::init(const std::string &file) {
 }
 
 void XDatalogger::registerData(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar) {
-    if (!inited_) {
+    if (!inited_ || !validRegister()) {
         return;
     }
 
@@ -70,23 +58,18 @@ void XDatalogger::registerData(const std::string &name, const std::string &seman
     registerHeader(name, semanticType, syntacticType);
 
     if (isVectorType(syntacticType)) {
-        cerr << "Registered vector writer " << endl;
         VectorWriter* function = new VectorWriter(std::string());
-        function->init(syntacticType, name, startTime_, &file_, &lock_, uvar);
+        function->init(syntacticType, name, context_, uvar);
         vectorWriterList_.push_back(std::unique_ptr<VectorWriter>(function));
     } else {
-        cerr << "Registered general writer " << endl;
         GeneralWriter* function = new GeneralWriter(std::string());
-        function->init(name, startTime_, &file_, &lock_, uvar);
+        function->init(name, context_, uvar);
         generalWriterList_.push_back(std::unique_ptr<GeneralWriter>(function));
     }
-
-
-
 }
 
 void XDatalogger::registerVideo(const std::string &videoFile, int width, int height, const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar) {
-    if (!inited_) {
+    if (!inited_ || !validRegister()) {
         return;
     }
 
@@ -97,7 +80,7 @@ void XDatalogger::registerVideo(const std::string &videoFile, int width, int hei
 
     registerHeader(name, semanticType, syntacticType);
     VideoWriter* function = new VideoWriter(std::string());
-    function->init(videoFile, width, height, name, startTime_, &file_, &lock_, uvar);
+    function->init(videoFile, width, height, name, context_, uvar);
     videoWriterList_.push_back(std::unique_ptr<VideoWriter>(function));
 }
 

@@ -23,22 +23,22 @@ namespace datalogger {
 class VectorWriter : public AbstractWriter {
 public:
     VectorWriter(const std::string &name);
-    
-    virtual void init(const std::string &syntacticType, const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar);
-   
-    virtual void start();
+    void init(const std::string &syntacticType, const std::string &dataName, LoggerContext &context, ::urbi::UVar &uvar);
 
     template<typename T>
     void write(T value) {
-        std::lock_guard<std::mutex> lck(*lock_);
+        if (!context_->enabled) {
+            return;
+        }
+        
+        std::lock_guard<std::mutex> lck(context_->lock);
 
         writeRecordBegin();
 
-        value.serialize(*file_);
-        *file_ << std::endl;
+        value.serialize(context_->file);
+        context_->file << std::endl;
     }
-private:
-    std::string syntacticType_;
+
 };
 
 
