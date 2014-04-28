@@ -14,20 +14,23 @@ namespace xcs{
 namespace nodes{
 namespace hermit{
 
-    typedef xcs::Tsqueue<Checkpoint> CheckpointQueue;
+    typedef xcs::Tsqueue<xcs::Checkpoint> CheckpointQueue;
 
     class HermitMovement{
         // constants
-        static const unsigned int pointsOnMeter;
+        static const unsigned int POINTS_ON_METER;
+        static const double EPSILON;
+        static const double MAX_SPEED;
 
         CheckpointQueue checkpointQueue_;
 
         xcs::CartesianVector dronePosition_;
+        xcs::CartesianVector droneVelocity_;
         xcs::EulerianVector droneRotation_;
-        xcs::Checkpoint targetCheckpoint_;
 
         //locking primitive
         std::mutex mtxPosition_;
+        std::mutex mtxVelocity_;
         std::mutex mtxRotation_;
 
         //end variable
@@ -37,15 +40,21 @@ namespace hermit{
         //thread
         std::thread flyOnCheckpointsThread;
 
+        // support functions
+        double computeDistance(const xcs::Checkpoint &targetCheckpoint, const xcs::CartesianVector &actualPosition);
         xcs::Checkpoint computeHermitPoint(const xcs::Checkpoint &start, const xcs::Checkpoint &end, double step);
+
+        // movementFunction
+        void flyOnCheckpoint(const xcs::Checkpoint &targetCheckpoint);
         void flyOnCheckpoints();
     public:
         HermitMovement();
 
         void dronePosition(const xcs::CartesianVector &dronePosition);
+        void droneVelocity(const xcs::CartesianVector &droneVelocity);
         void droneRotation(const xcs::EulerianVector &droneRotation);
 
-        void addCheckpoint(const Checkpoint &checkpoint);
+        void addCheckpoint(const xcs::Checkpoint &checkpoint);
         void deleteCheckpoints();
     };
 

@@ -2,12 +2,20 @@
 
 #include <iostream>
 #include <armadillo>
+#include <cmath>
 
 using namespace arma;
 using namespace xcs;
 using namespace xcs::nodes::hermit;
 
-const unsigned int HermitMovement::pointsOnMeter = 100;
+const unsigned int HermitMovement::POINTS_ON_METER = 100;
+const double HermitMovement::EPSILON = 0.1;
+const double HermitMovement::MAX_SPEED = 1;
+
+double HermitMovement::computeDistance(const xcs::Checkpoint &targetCheckpoint, const xcs::CartesianVector &actualPosition){
+    double temp = _hypot(targetCheckpoint.x - actualPosition.x, targetCheckpoint.y - actualPosition.y);
+    return _hypot(temp,targetCheckpoint.z - actualPosition.z);
+}
 
 xcs::Checkpoint HermitMovement::computeHermitPoint(const xcs::Checkpoint &start, const xcs::Checkpoint &end, double step){
     mat steps;
@@ -35,16 +43,44 @@ xcs::Checkpoint HermitMovement::computeHermitPoint(const xcs::Checkpoint &start,
         tangent.at(0,0),tangent.at(0,1),tangent.at(0,2));
 }
    
-void HermitMovement::flyOnCheckpoints(){
-    Checkpoint last;
-    while (!endAll_){
-        if(checkpointQueue_.tryPop(targetCheckpoint_) && !clear_){
+void HermitMovement::flyOnCheckpoint(const xcs::Checkpoint &targetCheckpoint){
+    do{
+        mtxPosition_.lock();
+        CartesianVector actualPosition = dronePosition_;
+        mtxPosition_.unlock();
 
-            /*for (double i = 0; i <= 1; i = i + 0.1){
-                Checkpoint point = computeHermitPoint(last, targetCheckpoint_, i);
-                std::cerr << point.x << ", " << point.y << ", " << point.z << " ;" << std::endl;
-            }
-            last = targetCheckpoint_;*/
+        mtxVelocity_.lock();
+        CartesianVector actualVelocity = droneVelocity_;
+        mtxVelocity_.unlock();
+
+        double psi = droneRotation_.psi;
+
+        double distance = computeDistance(targetCheckpoint,actualPosition);
+        double step = 1.0 / (distance * POINTS_ON_METER);
+
+        Checkpoint actualCheckpoint(actualPosition.x, actualPosition.y, actualPosition.z,
+            actualVelocity.x, actualVelocity.y, actualVelocity.z);
+
+        Checkpoint interCheckpoint = computeHermitPoint(actualCheckpoint,targetCheckpoint,step);
+        if (distance > EPSILON){
+            double deltaX = interCheckpoint.x - actualPosition.x;
+            double deltaY = interCheckpoint.y - actualPosition.y;
+            double deltaZ = interCheckpoint.z - actualPosition.z;
+
+            double max = std::max(deltaX, std::max(deltaY, deltaZ));
+            // TODO: set drone speed (speed(MAX_SPEED*deltaX/max, ...))
+        }
+        else{
+            break;
+        }
+    } while (true);
+}
+
+void HermitMovement::flyOnCheckpoints(){
+    Checkpoint targetCheckpoint;
+    while (!endAll_){
+        if(checkpointQueue_.tryPop(targetCheckpoint) && !clear_){
+            flyOnCheckpoint(targetCheckpoint);
         }
         else{ // None checkpoint in queue sleep while and try again.
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -67,6 +103,11 @@ HermitMovement::HermitMovement()
 void HermitMovement::dronePosition(const xcs::CartesianVector &dronePosition){
     std::lock_guard<std::mutex> lckPosition(mtxPosition_);
     dronePosition_ = dronePosition;
+}
+
+void HermitMovement::droneVelocity(const xcs::CartesianVector &droneVelocity){
+    std::lock_guard<std::mutex> lckVelocity(mtxVelocity_);
+    droneVelocity_ = droneVelocity;
 }
 
 void HermitMovement::droneRotation(const xcs::EulerianVector &droneRotation){
