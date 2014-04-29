@@ -62,7 +62,7 @@ void HermitMovement::flyOnCheckpoint(const xcs::Checkpoint &targetCheckpoint){
             actualVelocity.x, actualVelocity.y, actualVelocity.z);
 
         Checkpoint interCheckpoint = computeHermitPoint(actualCheckpoint,targetCheckpoint,step);
-        if (distance > EPSILON){
+        if (distance > EPSILON && !clear_){
             double deltaX = interCheckpoint.x - actualPosition.x;
             double deltaY = interCheckpoint.y - actualPosition.y;
             double deltaZ = interCheckpoint.z - actualPosition.z;
