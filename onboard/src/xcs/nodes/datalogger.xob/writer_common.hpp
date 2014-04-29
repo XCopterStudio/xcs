@@ -6,6 +6,7 @@
 #include <chrono>
 #include <mutex>
 #include <fstream>
+#include <atomic>
 
 namespace xcs {
 namespace nodes {
