@@ -21,6 +21,7 @@ void XHermitMovement::onChangeDronePosition(xcs::CartesianVector position){
 
 void XHermitMovement::onChangeDroneRotation(xcs::EulerianVector rotation){
     hermitMovement_.droneRotation(rotation);
+    speedControl = hermitMovement_.flyOnCheckpoint();
 }
 
 //==================== public functions =============
@@ -28,7 +29,8 @@ XHermitMovement::XHermitMovement(const std::string& name) : XObject(name) ,
 command("COMMAND"),
 checkpoint("CHECKPOINT"),
 dronePosition("POSITION_ABS"),
-droneRotation("ROTATION")
+droneRotation("ROTATION"),
+speedControl("SPEED_CONTROL_ABS")
 {
     XBindVarF(command, &XHermitMovement::onChangeCommand);
     XBindVarF(checkpoint, &XHermitMovement::onChangeAddCheckpoint);

@@ -9,6 +9,7 @@
 #include <xcs/types/checkpoint.hpp>
 #include <xcs/types/cartesian_vector.hpp>
 #include <xcs/types/eulerian_vector.hpp>
+#include <xcs/types/speed_control.hpp>
 
 namespace xcs{
 namespace nodes{
@@ -22,37 +23,31 @@ namespace hermit{
         static const double EPSILON;
         static const double MAX_SPEED;
 
+        xcs::Checkpoint targetCheckpoint;
         CheckpointQueue checkpointQueue_;
 
         xcs::CartesianVector dronePosition_;
         xcs::CartesianVector droneVelocity_;
         xcs::EulerianVector droneRotation_;
 
-        //locking primitive
-        std::mutex mtxPosition_;
-        std::mutex mtxVelocity_;
-        std::mutex mtxRotation_;
-
-        //end variable
-        std::atomic_bool endAll_;
+        // command variable
         std::atomic_bool clear_;
-
-        //thread
-        std::thread flyOnCheckpointsThread;
+        std::atomic_bool newCheckpoint_;
+        std::atomic_bool empty_;
 
         // support functions
         double computeDistance(const xcs::Checkpoint &targetCheckpoint, const xcs::CartesianVector &actualPosition);
         xcs::Checkpoint computeHermitPoint(const xcs::Checkpoint &start, const xcs::Checkpoint &end, double step);
 
-        // movementFunction
-        void flyOnCheckpoint(const xcs::Checkpoint &targetCheckpoint);
-        void flyOnCheckpoints();
     public:
         HermitMovement();
 
+        // Programmer have to ensure calling next four function in proper order (position,velocity,rotation,flyOnCheckpoint) and together!!!
         void dronePosition(const xcs::CartesianVector &dronePosition);
         void droneVelocity(const xcs::CartesianVector &droneVelocity);
         void droneRotation(const xcs::EulerianVector &droneRotation);
+
+        xcs::SpeedControl flyOnCheckpoint(const double &speed = MAX_SPEED);
 
         void addCheckpoint(const xcs::Checkpoint &checkpoint);
         void deleteCheckpoints();
