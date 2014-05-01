@@ -1,6 +1,6 @@
 #include <sstream>
 
-#include "basic.hpp"
+#include <xcs/xcs_fce.hpp>
 #include "AT_Command.hpp"
 
 using namespace xcs::xci::parrot;

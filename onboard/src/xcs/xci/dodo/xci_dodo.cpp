@@ -5,6 +5,7 @@
 #include <string>
 #include <boost/log/trivial.hpp>
 
+#include <xcs/xcs_fce.hpp>
 #include <xcs/xci/data_receiver.hpp>
 
 using namespace std;

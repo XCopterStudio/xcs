@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "basic.hpp"
 #include "options_visitor.hpp"
+#include <xcs/xcs_fce.hpp>
 #include <xcs/types/cartesian_vector.hpp>
 #include <xcs/types/eulerian_vector.hpp>
 

@@ -2,7 +2,7 @@
 #include <thread>
 #include <chrono>
 #include <cmath>
-#include <basic.hpp>
+#include <xcs/xcs_fce.hpp>
 
 using namespace xcs::urbi;
 using namespace xcs::urbi::line_finder;

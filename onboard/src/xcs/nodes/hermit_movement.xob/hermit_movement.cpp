@@ -78,7 +78,7 @@ xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
     if (!empty_){
         double distance = computeDistance(targetCheckpoint, dronePosition_);
         double step = 1.0 / (distance * POINTS_ON_METER);
-        double boundSpeed = inBoundary(0.0, MAX_SPEED, speed);
+        double boundSpeed = valueInRange(0.0, MAX_SPEED, speed);
 
         Checkpoint droneCheckpoint(dronePosition_.x, dronePosition_.y, dronePosition_.z,
             droneVelocity_.x, droneVelocity_.y, droneVelocity_.z);
