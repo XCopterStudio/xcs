@@ -27,15 +27,17 @@ namespace control{
         // Drone desire speed
         xcs::SpeedControl desireSpeed_;
 
-        xcs::FlyControl computeControl();
+        
         
     public:
         Control();
-        // Programmer have to assure that firstly change velocity and immediately after that change rotation!!!
-        void updateVelocity(const xcs::CartesianVector &velocity);
-        xcs::FlyControl updateRotation(const xcs::EulerianVector &rotation);
+        // Programmer have to assure that firstly change velocity, rotation and immediately after that call computeControl!!!
+        void velocity(const xcs::CartesianVector &velocity);
+        void rotation(const xcs::EulerianVector &rotation);
 
-        void updateSpeedControl(const xcs::SpeedControl &speedControl);
+        void desireSpeed(const xcs::SpeedControl &speedControl);
+
+        xcs::FlyControl computeControl();
     };
 
 }}}

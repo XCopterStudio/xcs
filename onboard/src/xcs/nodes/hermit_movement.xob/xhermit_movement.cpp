@@ -36,6 +36,7 @@ speedControl("SPEED_CONTROL_ABS")
     XBindVarF(checkpoint, &XHermitMovement::onChangeAddCheckpoint);
     XBindVarF(dronePosition, &XHermitMovement::onChangeDronePosition);
     XBindVarF(droneRotation, &XHermitMovement::onChangeDroneRotation);
+    XBindVar(speedControl);
 }
 
 XStart(XHermitMovement);
