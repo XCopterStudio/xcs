@@ -9,6 +9,7 @@
 
 #include <iostream>
 
+#include <xcs/logging.hpp>
 #include <xcs/nodes/xobject/x.hpp>
 #include <xcs/library_loader.hpp>
 #include <xcs/symbol_loader.hpp>
@@ -76,7 +77,7 @@ void XXci::xciInit() {
         flyControlThread_ = move(thread(&XXci::keepFlyControl, this));
         inited_ = true; // TODO check this variable in all commands to the drone
     } else {
-        cerr << "[XXci] already called init." << endl; //TODO general way for runtime warnings (in Urbi)
+        XCS_LOG_WARN("[XXci] already called init.");
     }
 }
 
@@ -113,7 +114,6 @@ void XXci::setConfiguration(const std::string& key, const std::string& value) {
 
 void XXci::onChangeFly(FlyControl fp) {
     flyControl(fp.roll, fp.pitch, fp.yaw, fp.gaz);
-    //cerr << "***************** " << fp.roll << " - " << fp.pitch << " - " << fp.yaw << " - " << fp.gaz;
 }
 
 void XXci::onChangeRoll(double roll) {

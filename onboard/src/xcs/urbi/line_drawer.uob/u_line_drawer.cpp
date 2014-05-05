@@ -53,7 +53,6 @@ int ULineDrawer::update() {
         for (auto drawTask : drawTasks_) {
             switch (drawTask.type) {
                 case TASK_LINE:
-                    //cerr << drawTask.dataLine.begin << ", " << drawTask.dataLine.end << ", " << drawTask.dataLine.color << ", " << drawTask.dataLine.width << endl;
                     cv::line(src, drawTask.point1, drawTask.point2, drawTask.color, drawTask.dimension1);
                     break;
                 case TASK_CIRCLE:
