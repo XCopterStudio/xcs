@@ -16,11 +16,13 @@ public:
     virtual ~XObject();
     const std::string getType(const std::string& xVarName) const;
 protected:
-    bool RegisterXVar(const std::string& xVarName, std::string synType, std::string semType);
-    bool RegisterXInputPort(const std::string& xVarName, std::string synType, std::string semType);
+    bool RegisterXVar(const std::string& xVarName, const XType& type);
+    bool RegisterXInputPort(const std::string& xVarName, const XType& type);
 private:
-    bool RegisterXChild(const std::string& xVarName, std::string synType, std::string semType, const XType::DataFlowType dataFlowType);
-    std::map<const std::string, XType*>* xVarsType_;
+    typedef std::map<const std::string, XType> XTypesType;
+    
+    bool RegisterXChild(const std::string& xVarName, const XType& type, const XType::DataFlowType dataFlowType);
+    XTypesType xVarsType_;
 
     friend class SimpleXVar;
     friend class SimpleXInputPort;

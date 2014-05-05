@@ -5,16 +5,16 @@ using namespace urbi;
 using namespace std;
 using namespace xcs::nodes;
 
-SimpleXInputPort::SimpleXInputPort(const type_info& synT, const string& semT) :
+SimpleXInputPort::SimpleXInputPort(const XType &type) :
     input_(NULL),
-    xType_(synT, semT, XType::DATAFLOWTYPE_XINPUTPORT) {
+    xType_(type) {
 }
 
 SimpleXInputPort::~SimpleXInputPort() {
 }
 
 void SimpleXInputPort::Init(XObject& parent, const string& varname) {
-    parent.RegisterXInputPort(varname, Type().synType, Type().semType);
+    parent.RegisterXInputPort(varname, Type());
     
     if(input_ != NULL) {
         delete input_;

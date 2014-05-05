@@ -10,19 +10,19 @@ namespace nodes {
 template<class synT>
 class XVar : public SimpleXVar {
 public:
-    XVar(const std::string& semT);
-    XVar(const std::string& semT, const synT defVal);
+    XVar(const SemanticTypeInfo& semT);
+    XVar(const SemanticTypeInfo& semT, const synT defVal);
     XVar& operator=(const synT&);
 };
 
 template<class synT>
-XVar<synT>::XVar(const std::string& semT) :
-    SimpleXVar(typeid(synT), semT) {
+XVar<synT>::XVar(const SemanticTypeInfo& semT) :
+    SimpleXVar(XType(typeid(synT), semT, XType::DATAFLOWTYPE_XVAR)) {
 }
 
 template<class synT>
-XVar<synT>::XVar(const std::string& semT, const synT defVal) :
-    SimpleXVar(typeid(synT), semT) {
+XVar<synT>::XVar(const SemanticTypeInfo& semT, const synT defVal) :
+    SimpleXVar(XType(typeid(synT), semT, XType::DATAFLOWTYPE_XVAR)) {
     XVar::operator= (defVal);
 }
 

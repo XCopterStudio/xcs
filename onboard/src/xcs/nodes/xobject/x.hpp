@@ -7,6 +7,8 @@
 
 # define XBindVar(x) x.Init(*this, #x)
 
+# define XBindVarRename(x, name) x.Init(*this, name)
+
 //TODO: prejmenovat na XBindVar (pretizit)
 # define XBindVarF(x, f)	\
     XBindVar(x);			\
