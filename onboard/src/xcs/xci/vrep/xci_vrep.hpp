@@ -5,6 +5,7 @@
 #include <thread>
 #include <atomic>
 #include <cmath>
+#include <string>
 
 extern "C" {
 #include "vrep/extApi.h"
@@ -18,9 +19,9 @@ namespace vrep{
         static const float MAX_ANGLE;
 
         int clientID_;
-        simxChar* address_;
+        std::string address_;
         int portNumber_;
-        simxChar* name_;
+        std::string name_;
         int droneHandler_;
 
         std::atomic_bool endAll_;
@@ -30,7 +31,7 @@ namespace vrep{
         void updateSensors();
     public:
 
-        XciVrep(DataReceiver& dataReceiver, simxChar* name = "drone#", simxChar* address = "127.0.0.1", int portNumber=0);
+        XciVrep(DataReceiver& dataReceiver, std::string name = "drone#", std::string address = "127.0.0.1", int portNumber = 19997);
         ~XciVrep();
 
         std::string name() override;
