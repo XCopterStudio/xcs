@@ -15,8 +15,8 @@ const double HermitMovement::EPSILON = 0.1;
 const double HermitMovement::MAX_SPEED = 1;
 
 double HermitMovement::computeDistance(const xcs::Checkpoint &targetCheckpoint, const xcs::CartesianVector &actualPosition){
-    double temp = _hypot(targetCheckpoint.x - actualPosition.x, targetCheckpoint.y - actualPosition.y);
-    return _hypot(temp,targetCheckpoint.z - actualPosition.z);
+    double temp = hypot(targetCheckpoint.x - actualPosition.x, targetCheckpoint.y - actualPosition.y);
+    return hypot(temp,targetCheckpoint.z - actualPosition.z);
 }
 
 xcs::Checkpoint HermitMovement::computeHermitPoint(const xcs::Checkpoint &start, const xcs::Checkpoint &end, double step){
