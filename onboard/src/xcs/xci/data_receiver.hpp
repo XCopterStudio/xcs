@@ -30,12 +30,12 @@ private:
     /*! See hack notify() overload for xcs::BitmapTypeChronologic */
     std::mutex bitmapLock_;
 
-    OutputsType::const_iterator getSensorUVar(const std::string& sensorName) const {
+    nodes::SimpleXVar &getSensorXVar(const std::string& sensorName) const {
         auto it = outputs_.find(sensorName);
         if (it == outputs_.end()) {
             throw std::runtime_error("Unregistered sensor '" + sensorName + "'."); // TODO is it necessary to link with libxcs, therefore std::runtime_error?
         }
-        return it; //TODO what about returning reference to the held UVar?
+        return *(it->second);
     }
 
     urbi::UBinary toUBinary(const xcs::BitmapType &value) const {
@@ -59,18 +59,18 @@ public:
 
     template<typename T>
     void notify(const std::string& sensorName, T value) {
-        auto it = getSensorUVar(sensorName);
-        *(it->second) = value;
+        nodes::SimpleXVar &xvar = getSensorXVar(sensorName);
+        xvar = value;
     }
 
     /*!
      * This specialization is needed because of special memory managment.
      */
     void notify(const std::string& sensorName, xcs::BitmapType value) {
-        auto it = getSensorUVar(sensorName);
+        nodes::SimpleXVar &xvar = getSensorXVar(sensorName);
         auto bin = toUBinary(value);
 
-        *(it->second) = bin; // this will do deep copy of the image buffer
+        xvar = bin; // this will do deep copy of the image buffer
         bin.image.data = nullptr;
     }
 
@@ -85,25 +85,23 @@ public:
      * (e.g. *_BIND_THREADED macro was used and processing takes longer than "creation").         * 
      */
     void notify(const std::string& sensorName, xcs::BitmapTypeChronologic value) {
-        auto it = getSensorUVar(sensorName);
+        nodes::SimpleXVar &xvar = getSensorXVar(sensorName);
         auto bin = toUBinary(value);
 
-        /*
-         * 
-         */
         std::lock_guard<std::mutex> lock(bitmapLock_);
-        *(it->second) = value.time;
-        *(it->second) = bin; // this will do deep copy of the image buffer
+        xvar = value.time;
+        xvar = bin; // this will do deep copy of the image buffer
         bin.image.data = nullptr;
     }
 
     /*!
-     * \param sensorName
-     * \param uvar  DataReceiver becomes owner of the pointed UVar (will free memory)
+     * Creates SimpleXVar identified by the name with the specified type.
+     * DataReceiver is (memory) owner of the SimpleXVar and returns reference
+     * valid until data receiver is alive.
      */
-    nodes::SimpleXVar &registerOutput(const std::string& sensorName, const nodes::XType &type) {
-        outputs_[sensorName] = std::unique_ptr<nodes::SimpleXVar>(new nodes::SimpleXVar(type));
-        return (*outputs_.at(sensorName).get());
+    nodes::SimpleXVar &registerOutput(const std::string& name, const nodes::XType &type) {
+        outputs_[name] = std::unique_ptr<nodes::SimpleXVar>(new nodes::SimpleXVar(type));
+        return *(outputs_.at(name).get());
     }
 };
 

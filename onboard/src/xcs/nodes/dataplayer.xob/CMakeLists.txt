@@ -14,3 +14,5 @@ use_urbi(${PROJECT_NAME})
 find_package(LibAV)
 include_directories(${LIBAV_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${LIBAV_LIBRARIES})
+
+use_logging(${PROJECT_NAME})
