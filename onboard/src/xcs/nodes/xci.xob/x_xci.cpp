@@ -11,6 +11,7 @@
 
 #include <xcs/logging.hpp>
 #include <xcs/nodes/xobject/x.hpp>
+#include <xcs/nodes/xobject/x_type.hpp>
 #include <xcs/library_loader.hpp>
 #include <xcs/symbol_loader.hpp>
 
@@ -139,11 +140,9 @@ void XXci::onChangeGaz(double gaz) {
 
 void XXci::initOutputs() {
     for (auto sensor : xci_->sensorList()) {
-        // todo: xvar and uBindVarRename
-        ::urbi::UVar* uvar = new ::urbi::UVar();
-        UBindVarRename(XXci, *uvar, sensor.name);
-        cout << "Registered sensor " << sensor.name << endl;
-        dataReceiver_.registerOutput(sensor.name, uvar);
+        SimpleXVar &xvar = dataReceiver_.registerOutput(sensor.name, XType(typeid(void), sensor.semanticType, XType::DATAFLOWTYPE_XVAR));
+        XBindVarRename(xvar, sensor.name);
+        XCS_LOG_INFO("Registered sensor " << sensor.name << ".");
     }
 }
 

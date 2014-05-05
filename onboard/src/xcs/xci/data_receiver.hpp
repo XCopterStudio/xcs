@@ -8,6 +8,8 @@
 
 #include <urbi/uobject.hh>
 
+#include <xcs/nodes/xobject/simple_x_var.hpp>
+#include <xcs/nodes/xobject/x_type.hpp>
 #include <xcs/types/bitmap_type.hpp>
 
 namespace xcs {
@@ -20,7 +22,7 @@ namespace xci {
  */
 class DataReceiver {
 private:
-    typedef std::map<std::string, std::unique_ptr<::urbi::UVar> > OutputsType;
+    typedef std::map<std::string, std::unique_ptr<nodes::SimpleXVar> > OutputsType;
 
     /*! We are owners of the UVars, kept in the name indexed map. */
     OutputsType outputs_;
@@ -33,7 +35,7 @@ private:
         if (it == outputs_.end()) {
             throw std::runtime_error("Unregistered sensor '" + sensorName + "'."); // TODO is it necessary to link with libxcs, therefore std::runtime_error?
         }
-        return it;
+        return it; //TODO what about returning reference to the held UVar?
     }
 
     urbi::UBinary toUBinary(const xcs::BitmapType &value) const {
@@ -99,8 +101,9 @@ public:
      * \param sensorName
      * \param uvar  DataReceiver becomes owner of the pointed UVar (will free memory)
      */
-    void registerOutput(const std::string& sensorName, ::urbi::UVar* uvar) {
-        outputs_[sensorName] = std::unique_ptr<::urbi::UVar>(uvar);
+    nodes::SimpleXVar &registerOutput(const std::string& sensorName, const nodes::XType &type) {
+        outputs_[sensorName] = std::unique_ptr<nodes::SimpleXVar>(new nodes::SimpleXVar(type));
+        return (*outputs_.at(sensorName).get());
     }
 };
 
