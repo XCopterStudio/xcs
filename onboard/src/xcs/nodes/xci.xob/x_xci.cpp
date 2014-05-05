@@ -62,9 +62,6 @@ void XXci::init(const std::string& driver) {
     SymbolLoader<XciFactoryFunction*> symbolLoader(libraryLoader);
     XciFactoryFunction* factory = symbolLoader.loadSymbol("CreateXci");
     xci_ = factory(dataReceiver_);
-    ::urbi::UBinary bin;
-    ::urbi::UImage img;
-    bin.type;
 
     initOutputs();
 }
@@ -151,9 +148,11 @@ void XXci::initOutputs() {
 }
 
 void XXci::stopFlyControlsThread() {
-    flyControlAlive_ = false;
-    flyControlCond_.notify_one();
-    flyControlThread_.join();
+    if (flyControlThread_.joinable()) {
+        flyControlAlive_ = false;
+        flyControlCond_.notify_one();
+        flyControlThread_.join();
+    }
 }
 
 void XXci::setFlyControlPersistence(unsigned int value) {
