@@ -62,7 +62,6 @@ string XcsObject::getStructs4Reg() {
         delete it->second;
     }
     
-    //cerr << endl << endl << structs.str() << endl << endl;
     structHolder_.clear();
     return structs.str();
 }
