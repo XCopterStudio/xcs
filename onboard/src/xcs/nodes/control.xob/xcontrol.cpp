@@ -28,3 +28,5 @@ flyControl("FLY_CONTROL")
     XBindVarF(desireSpeed, &XControl::onChangeDesireSpeed);
     XBindVar(flyControl);
 }
+
+XStart(XControl);

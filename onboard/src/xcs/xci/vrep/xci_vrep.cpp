@@ -1,10 +1,53 @@
 #include "xci_vrep.hpp"
 
+#include <xcs/types/cartesian_vector.hpp>
+#include <xcs/types/eulerian_vector.hpp>
+#include <xcs/xci/data_receiver.hpp>
+
+using namespace xcs;
 using namespace xcs::xci;
 using namespace xcs::xci::vrep;
 
-XciVrep::XciVrep(DataReceiver& dataReceiver) : XCI(dataReceiver)
+const float XciVrep::MAX_ANGLE = M_PI_4;
+
+void XciVrep::updateSensors(){
+    while (endAll_){
+        if (simxGetConnectionId(clientID_)!=-1){ // we have connection with simulation server
+            // get drone position
+            float vector[3];
+            float angle[3];
+            if (simxGetObjectPosition(clientID_, droneHandler_, -1, vector, simx_opmode_buffer) == simx_return_ok){
+                dataReceiver_.notify("position", CartesianVector(vector[0], vector[1], vector[2]));
+            }
+
+            if (simxGetObjectVelocity(clientID_, droneHandler_, vector, angle, simx_opmode_buffer) == simx_return_ok){
+                dataReceiver_.notify("velocity", CartesianVector(vector[0], vector[1], vector[2]));
+            }
+
+            if (simxGetObjectOrientation(clientID_, droneHandler_, droneHandler_, angle, simx_opmode_buffer) == simx_return_ok){
+                dataReceiver_.notify("rotation", EulerianVector(angle[0], angle[1], angle[2]));
+            }
+        }
+    }
+}
+
+// ================ public functions ================
+
+XciVrep::XciVrep(DataReceiver& dataReceiver, simxChar* name, simxChar* address, int portNumber) :
+XCI(dataReceiver),
+address_(address),
+portNumber_(portNumber)
 {
+    clientID_ = -1;
+    endAll_ = false;
+}
+
+XciVrep::~XciVrep(){
+    if (clientID_ != -1){
+        simxFinish(clientID_);
+    }
+
+    endAll_ = true;
 }
 
 std::string XciVrep::name(){
@@ -12,11 +55,22 @@ std::string XciVrep::name(){
 }
 
 SensorList XciVrep::sensorList(){
-    return SensorList();
+    SensorList sensorList;
+
+    sensorList.push_back(Sensor("position", "POSITION_ABS"));
+    sensorList.push_back(Sensor("velocity", "VELOCITY_ABS"));
+    sensorList.push_back(Sensor("rotation", "ROTATION"));
+    
+    return sensorList;
 }
 
 ParameterValueType XciVrep::parameter(ParameterNameType name){
-    return ParameterValueType();
+    switch (name) {
+    case XCI_PARAM_FP_PERSISTENCE:
+        return "50";
+    default:
+        throw std::runtime_error("Parameter not defined.");
+    }
 }
 
 std::string XciVrep::configuration(const std::string &key){
@@ -37,9 +91,31 @@ void XciVrep::configuration(const InformationMap &configuration){}
 
 void XciVrep::command(const std::string &command){}
 
-void XciVrep::flyControl(float roll, float pitch, float yaw, float gaz){}
+void XciVrep::flyControl(float roll, float pitch, float yaw, float gaz){
+    if (simxGetConnectionId(clientID_) != -1){ // we have connection with simulation server
+        float angle[3];
+        angle[0] = roll * MAX_ANGLE;
+        angle[1] = pitch * MAX_ANGLE;
+        angle[2] = yaw * MAX_ANGLE;
+        simxSetObjectOrientation(clientID_, droneHandler_, droneHandler_, angle, simx_opmode_oneshot);
 
-void XciVrep::init(){}
+        // TODO: implement gaz
+    }
+}
+
+void XciVrep::init(){
+    // connect to the remote simulator with reconnection
+    clientID_ = simxStart(address_, portNumber_, true, false, 2000, 5); 
+    if (clientID_ != -1){
+        simxGetObjectHandle(clientID_, name_, &droneHandler_, simx_opmode_oneshot_wait);
+        // Send request for periodic updates
+        simxGetObjectPosition(clientID_, droneHandler_, -1, NULL,simx_opmode_streaming);
+        simxGetObjectVelocity(clientID_, droneHandler_, NULL, NULL, simx_opmode_streaming);
+        simxGetObjectOrientation(clientID_, droneHandler_, -1, NULL, simx_opmode_streaming);
+    }else{
+        // TODO: error can not connect with simulation
+    }
+}
 
 void XciVrep::reset(){}
 

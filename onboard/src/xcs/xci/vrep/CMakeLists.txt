@@ -1,9 +1,12 @@
 set(PROJECT_NAME xci_vrep)
 project(${PROJECT_NAME})
 
+# include_directories(./vrep)
 
-file(GLOB SOURCES *.cpp ./vrep/*.cpp)
-file(GLOB HEADERS *.hpp ./vrep/*.cpp)
+file(GLOB SOURCES *.cpp ./vrep/*.c)
+file(GLOB HEADERS *.hpp ./vrep/*.h)
+
+add_definitions(-DNON_MATLAB_PARSING -DMAX_EXT_API_CONNECTIONS=255)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
 
@@ -11,3 +14,5 @@ x_target_link_libraries(${PROJECT_NAME} xcs)
 
 find_package(UrbiAll)
 use_urbi(${PROJECT_NAME})
+
+use_logging(${PROJECT_NAME})
