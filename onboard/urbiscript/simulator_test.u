@@ -6,9 +6,18 @@ var xcontrol = XControl.new();
 var xhermit = XHermitMovement.new();
 
 
-// TODO: connect all inputports
-xci.&rotation >> xcontrol.&rotation;
+// xcontrol connections
 xci.&velocity >> xcontrol.&velocity;
-xcontrol.&flyControl >> xci.&flyControl; 
+xci.&rotation >> xcontrol.&rotation;
+xcontrol.&flyControl >> xci.&flyControl;
+
+// xhermit connections
+//   >> xhermit.&command;
+//   >> xhermit.&checkpoint;
+xci.&position >> xhermit.&dronePosition;
+xci.&rotation >> xhermit.&droneRotation;
+xhermit.&speedControl >> xcontrol.&desireSpeed; 
  
 xci.xciInit();
+
+xhermit.checkpoint = Checkpoint.new(1.0,1.0,1.0,1.0,1.0,1.0);
