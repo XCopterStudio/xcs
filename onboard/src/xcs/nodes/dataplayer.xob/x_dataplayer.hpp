@@ -10,7 +10,12 @@
 
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
+#include <xcs/types/timestamp.hpp>
+#include <xcs/types/type_utils.hpp>
 #include <xcs/xci/data_receiver.hpp>
+
+#include "video_player.hpp"
+
 
 namespace xcs {
 namespace nodes {
@@ -24,8 +29,6 @@ enum PlaybackMode {
 };
 
 class XDataplayer : public xcs::nodes::XObject {
-    typedef uint64_t TimestampType;
-
 public:
 
     XDataplayer(const std::string& name);
@@ -35,13 +38,19 @@ public:
     urbi::UVar playbackSpeedUVar;
 
     xcs::nodes::XInputPort<std::string> command;
-    xcs::nodes::XInputPort<TimestampType> seek;
+    xcs::nodes::XInputPort<xcs::Timestamp> seek;
 
 
     void init(const std::string &file);
 private:
+    typedef std::map<std::string, std::string> SyntacticMap;
+
     const static std::string CMD_PLAY;
     const static std::string CMD_PAUSE;
+
+    static xcs::SyntacticCategoryMap syntacticCategoryMap_;
+
+    SyntacticMap channelTypes_;
 
     dataplayer::PlaybackMode playbackMode_;
     double playbackSpeed_;
@@ -49,21 +58,36 @@ private:
     std::ifstream file_;
     std::atomic<bool> isPlaying_;
     std::thread dataLoopThread_;
-    
+
     void playbackSpeed(double value);
     void playbackMode(dataplayer::PlaybackMode value);
 
     void playbackPlay();
     void playbackStop();
     void playbackPause();
-    void playbackSeek(TimestampType timestamp);
+    //void playbackSeek(xcs::TimestampType timestamp);
 
     void loop();
 
     void loadHeader();
 
     void onCommand(const std::string &command);
+
+    template<typename T>
+    T getFrame(FrameInfo frameInfo);
+
 };
+
+template<>
+BitmapType XDataplayer::getFrame<BitmapType>(FrameInfo frameInfo) {
+    return BitmapType();
+}
+
+template<>
+BitmapTypeChronologic XDataplayer::getFrame<BitmapTypeChronologic>(FrameInfo frameInfo) {
+    return BitmapTypeChronologic();
+}
+
 
 }
 }

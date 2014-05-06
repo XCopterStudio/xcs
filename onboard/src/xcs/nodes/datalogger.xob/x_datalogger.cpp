@@ -5,6 +5,7 @@
 #include <boost/bind.hpp>
 
 #include <xcs/nodes/xobject/x.h>
+#include <xcs/logging.hpp>
 
 
 using namespace std;
@@ -15,11 +16,15 @@ using namespace xcs::nodes::datalogger;
 
 const char* XDatalogger::REGISTER = "register";
 
+xcs::SyntacticCategoryMap XDatalogger::syntacticCategoryMap_;
+
 // =================================== public functions ====================
 
 XDatalogger::XDatalogger(const std::string& name) :
   xcs::nodes::XObject(name),
   inited_(false) {
+    fillTypeCategories(syntacticCategoryMap_);
+
     XBindFunction(XDatalogger, init);
     XBindFunction(XDatalogger, start);
     XBindFunction(XDatalogger, registerData);
@@ -50,21 +55,32 @@ void XDatalogger::registerData(const std::string &name, const std::string &seman
         return;
     }
 
-    if (isVideoType(syntacticType)) {
+    SyntacticCategoryType syntacticCategory = syntacticCategoryMap_.at(syntacticType);
+    if (syntacticCategory == CATEGORY_VIDEO) {
         send("throw \"Use registerVideo function for video data (" + name + ")\";");
         return;
     }
 
     registerHeader(name, semanticType, syntacticType);
 
-    if (isVectorType(syntacticType)) {
-        VectorWriter* function = new VectorWriter(std::string());
-        function->init(syntacticType, name, context_, uvar);
-        vectorWriterList_.push_back(std::unique_ptr<VectorWriter>(function));
-    } else {
-        GeneralWriter* function = new GeneralWriter(std::string());
-        function->init(name, context_, uvar);
-        generalWriterList_.push_back(std::unique_ptr<GeneralWriter>(function));
+    /*
+     * Create writer for specied category of types.
+     */
+    AbstractWriter* writer = nullptr;
+    switch (syntacticCategory) {
+        case CATEGORY_SCALAR:
+            writer = new GeneralWriter(std::string());
+            dynamic_cast<GeneralWriter *>(writer)->init(name, context_, uvar);
+            generalWriterList_.push_back(std::unique_ptr<GeneralWriter>(dynamic_cast<GeneralWriter *>(writer)));
+            break;
+        case CATEGORY_VECTOR:
+            writer = new VectorWriter(std::string());
+            dynamic_cast<VectorWriter *>(writer)->init(syntacticType, name, context_, uvar);
+            vectorWriterList_.push_back(std::unique_ptr<VectorWriter>(dynamic_cast<VectorWriter *>(writer)));
+            break;
+        default:
+            XCS_LOG_WARN("Category unhandled " << syntacticCategory);
+            break;
     }
 }
 
@@ -73,7 +89,8 @@ void XDatalogger::registerVideo(const std::string &videoFile, int width, int hei
         return;
     }
 
-    if (!isVideoType(syntacticType)) {
+    SyntacticCategoryType syntacticCategory = syntacticCategoryMap_.at(syntacticType);
+    if (syntacticCategory != CATEGORY_VIDEO) {
         send("throw \"Use registerData function for non-video data (" + name + ")\";");
         return;
     }

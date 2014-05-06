@@ -4,7 +4,7 @@
 #include <string>
 #include <urbi/uobject.hh>
 
-#include "../writer_common.hpp"
+#include "../logger_context.hpp"
 #include "video_file_writer.hpp"
 #include "abstract_writer.hpp"
 

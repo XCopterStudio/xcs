@@ -5,21 +5,30 @@
 
 namespace xcs {
 
-    struct SpeedControl {
-        double vx;
-        double vy;
-        double vz;
-        double psi;
+//TODO rename to velocity control
 
-        SpeedControl(double vx = 0, double vy = 0, double vz = 0, double psi = 0) :
-            vx(vx), vy(vy), vz(vz), psi(psi) {
-        };
+struct SpeedControl {
+    double vx;
+    double vy;
+    double vz;
+    double psi;
 
-        template<typename T>
-        void serialize(T &stream) {
-            stream << vx << "\t" << vy << "\t" << vz << "\t" << psi;
-        }
+    SpeedControl(double vx = 0, double vy = 0, double vz = 0, double psi = 0) :
+      vx(vx), vy(vy), vz(vz), psi(psi) {
     };
+
+    template<typename T>
+            void serialize(T &stream) {
+        stream << vx << "\t" << vy << "\t" << vz << "\t" << psi;
+    }
+
+    template<typename T>
+            static SpeedControl deserialize(T &stream) {
+        double vx, vy, vz, psi;
+        stream >> vx >> vy >> vz >> psi;
+        return SpeedControl(vx, vy, vz);
+    }
+};
 }
 
 X_REGISTER_STRUCT(xcs::SpeedControl, vx, vy, vz, psi);

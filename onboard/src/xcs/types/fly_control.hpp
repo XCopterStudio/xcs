@@ -19,6 +19,13 @@ struct FlyControl {
             void serialize(T &stream) {
         stream << roll << "\t" << pitch << "\t" << yaw << "\t" << gaz;
     }
+
+    template<typename T>
+            static FlyControl deserialize(T &stream) {
+        double roll, pitch, yaw, gaz;
+        stream >> roll >> pitch >> yaw >> gaz;
+        return FlyControl(roll, pitch, yaw, gaz);
+    }
 };
 }
 

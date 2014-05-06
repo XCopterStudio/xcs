@@ -7,8 +7,9 @@
 #include <atomic>
 
 #include <xcs/nodes/xobject/x_object.hpp>
+#include <xcs/types/type_utils.hpp>
 
-#include "writer_common.hpp"
+#include "logger_context.hpp"
 #include "writers/general_writer.hpp"
 #include "writers/video_writer.hpp"
 #include "writers/vector_writer.hpp"
@@ -17,18 +18,20 @@ namespace xcs {
 namespace nodes {
 
 class XDatalogger : public xcs::nodes::XObject {
-    typedef std::list<std::unique_ptr<datalogger::GeneralWriter, std::function<void (datalogger::GeneralWriter *)> > > GeneralWriterList;
+    typedef std::list<std::unique_ptr<datalogger::GeneralWriter> > GeneralWriterList;
     typedef std::list<std::unique_ptr<datalogger::VectorWriter> > VectorWriterList;
     typedef std::list<std::unique_ptr<datalogger::VideoWriter> > VideoWriterList;
 
     static const char* REGISTER;
+
+    static xcs::SyntacticCategoryMap syntacticCategoryMap_;
 
     GeneralWriterList generalWriterList_;
     VectorWriterList vectorWriterList_;
     VideoWriterList videoWriterList_;
 
     bool inited_;
-    
+
     datalogger::LoggerContext context_;
 
     inline void registerHeader(const std::string &name, const std::string &semanticType, const std::string &syntacticType) {
@@ -46,14 +49,6 @@ class XDatalogger : public xcs::nodes::XObject {
         return !context_.enabled;
     }
 
-    inline bool isVideoType(const std::string &syntacticType) const {
-        return syntacticType == "xcs::BitmapType" || syntacticType == "xcs::BitmapTypeChronologic";
-    }
-
-    inline bool isVectorType(const std::string &syntacticType) const {
-#define DECLARE(Type) || (syntacticType == #Type)
-        return false LIBPORT_LIST_APPLY(DECLARE, VECTOR_TYPES);
-    }
 public:
     XDatalogger(const std::string& name);
     ~XDatalogger();

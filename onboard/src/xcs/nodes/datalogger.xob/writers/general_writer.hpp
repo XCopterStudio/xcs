@@ -10,6 +10,7 @@ namespace xcs {
 namespace nodes {
 namespace datalogger {
 
+// TODO rename to ScalarWriter
 class GeneralWriter : public AbstractWriter {
 public:
     GeneralWriter(const std::string &name);

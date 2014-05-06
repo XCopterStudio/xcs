@@ -4,7 +4,7 @@
 #include <string>
 #include <urbi/uobject.hh>
 
-#include "../writer_common.hpp"
+#include "../logger_context.hpp"
 
 
 namespace xcs {
