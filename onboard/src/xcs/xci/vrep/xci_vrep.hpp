@@ -19,9 +19,9 @@ namespace vrep{
         static const float MAX_ANGLE;
 
         int clientID_;
-        std::string address_;
-        int portNumber_;
         std::string name_;
+        std::string address_;
+        int portNumber_;        
         int droneHandler_;
 
         std::atomic_bool endAll_;
