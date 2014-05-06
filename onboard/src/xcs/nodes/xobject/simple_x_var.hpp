@@ -15,7 +15,7 @@ class XOBJECT_EXPORT SimpleXVar {
 public:
     SimpleXVar(const XType &type);
     virtual ~SimpleXVar();
-    inline urbi::UVar& Data();
+    urbi::UVar& Data();
     const XType& Type() const;
     template<class T>
     SimpleXVar& operator=(const T&);
@@ -29,13 +29,6 @@ template<class T>
 SimpleXVar& SimpleXVar::operator=(const T& val) {
     Data() = val;
     return *this;
-}
-
-inline urbi::UVar& SimpleXVar::Data() {
-    if(data_ == NULL) {
-        throw xcs::Exception("Null reference exception - call XBindVar(...) or Init(...) first");
-    }
-    return *data_;
 }
 
 }
