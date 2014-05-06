@@ -6,6 +6,7 @@
 #include <mutex>
 #include <thread>
 #include <cstdint>
+#include <atomic>
 
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
