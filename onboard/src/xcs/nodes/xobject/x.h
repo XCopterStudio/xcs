@@ -1,5 +1,5 @@
-#ifndef X_HPP
-#define X_HPP
+#ifndef XCS_X_H
+#define XCS_X_H
 
 #include <urbi/uobject.hh>
 #include <libport/containers.hh>

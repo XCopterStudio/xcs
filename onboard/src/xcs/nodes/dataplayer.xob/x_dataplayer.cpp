@@ -1,7 +1,7 @@
 #include "x_dataplayer.hpp"
 
 #include <xcs/logging.hpp>
-#include <xcs/nodes/xobject/x.hpp>
+#include <xcs/nodes/xobject/x.h>
 #include <xcs/nodes/xobject/x_type.hpp>
 
 #include <sstream>

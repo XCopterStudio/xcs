@@ -1,7 +1,7 @@
 #ifndef EULERIAN_VECTOR_HPP
 #define	EULERIAN_VECTOR_HPP
 
-#include <xcs/nodes/xobject/x.hpp>
+#include <xcs/nodes/xobject/x.h>
 
 namespace xcs {
 

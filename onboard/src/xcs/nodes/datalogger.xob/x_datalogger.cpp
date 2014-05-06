@@ -4,7 +4,7 @@
 
 #include <boost/bind.hpp>
 
-#include <xcs/nodes/xobject/x.hpp>
+#include <xcs/nodes/xobject/x.h>
 
 
 using namespace std;

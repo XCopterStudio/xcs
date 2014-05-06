@@ -1,7 +1,7 @@
 #ifndef CHECKPOINT_H
 #define	CHECKPOINT_H
 
-#include <xcs/nodes/xobject/x.hpp>
+#include <xcs/nodes/xobject/x.h>
 
 namespace xcs {
 

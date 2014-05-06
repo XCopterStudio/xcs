@@ -1,5 +1,5 @@
 #include "x_object.hpp"
-#include "x.hpp"
+#include "x.h"
 #include <urbi/uobject.hh>
 
 using namespace std;

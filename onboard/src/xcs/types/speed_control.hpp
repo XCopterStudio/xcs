@@ -1,7 +1,7 @@
 #ifndef SPEED_CONTROL_H
 #define	SPEED_CONTROL_H
 
-#include <xcs/nodes/xobject/x.hpp>
+#include <xcs/nodes/xobject/x.h>
 
 namespace xcs {
 

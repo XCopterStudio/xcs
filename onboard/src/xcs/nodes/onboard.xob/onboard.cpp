@@ -1,5 +1,5 @@
 #include "onboard.hpp"
-#include <xcs/nodes/xobject/x.hpp>
+#include <xcs/nodes/xobject/x.h>
 #include <boost/log/trivial.hpp>
 
 using namespace xcs::nodes;

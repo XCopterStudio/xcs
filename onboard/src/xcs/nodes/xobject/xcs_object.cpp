@@ -1,6 +1,6 @@
 #include <sstream>
 #include "x_object.hpp"
-#include "x.hpp"
+#include "x.h"
 #include "xcs_object.hpp"
 
 using namespace std;

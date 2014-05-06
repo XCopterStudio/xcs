@@ -10,7 +10,7 @@
 #include <iostream>
 
 #include <xcs/logging.hpp>
-#include <xcs/nodes/xobject/x.hpp>
+#include <xcs/nodes/xobject/x.h>
 #include <xcs/nodes/xobject/x_type.hpp>
 #include <xcs/library_loader.hpp>
 #include <xcs/symbol_loader.hpp>
