@@ -1,10 +1,11 @@
 set(PROJECT_NAME xci_vrep)
 project(${PROJECT_NAME})
 
-# include_directories(./vrep)
 
-file(GLOB SOURCES *.cpp ./vrep/*.c)
-file(GLOB HEADERS *.hpp ./vrep/*.h)
+include_directories(${VREP_REMOTE_ROOT})
+
+file(GLOB SOURCES *.cpp ${VREP_REMOTE_ROOT}/vrep/*.c)
+file(GLOB HEADERS *.hpp ${VREP_REMOTE_ROOT}/vrep/*.h)
 
 add_definitions(-DNON_MATLAB_PARSING -DMAX_EXT_API_CONNECTIONS=255)
 
