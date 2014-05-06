@@ -52,99 +52,92 @@ void XDataplayer::loadHeader() {
         if (line.empty()) {
             break;
         }
-        stringstream sline(line);
-        string check, name, semanticType, synType;
-        sline >> check >> name >> semanticType >> synType;
-
-        if (check != "register") {
-            continue;
-        }
-
-        SimpleXVar &xvar = dataReceiver_.registerOutput(name, XType(synType, semanticType, XType::DATAFLOWTYPE_XVAR));
-        XBindVarRename(xvar, name);
-
-        channelTypes_[name] = synType;
-
-        // create reader
-        // channelName -> reader
-
-        cerr << "Got: " << name << endl;
-
+        processHeaderLine(line);
     }
 
-    XCS_LOG_INFO("Loaded header...");
+    XCS_LOG_INFO("Loaded header of log.");
+}
+
+void XDataplayer::processHeaderLine(const std::string &line) {
+    stringstream sline(line);
+    string check, name, semanticType, synType;
+    sline >> check >> name >> semanticType >> synType;
+
+    if (check != "register") {
+        XCS_LOG_WARN("Unrecognized header '" << check << "'.");
+        return;
+    }
+
+    SimpleXVar &xvar = dataReceiver_.registerOutput(name, XType(synType, semanticType, XType::DATAFLOWTYPE_XVAR));
+    XBindVarRename(xvar, name);
+
+    channelTypes_[name] = synType;
+
 }
 
 void XDataplayer::loop() {
-    // load initial record
+    string timestamp, name;
+    Timestamp ts(0), prevTs(0);
 
     while (1) {
-        this_thread::sleep_for(chrono::milliseconds(100));
         if (!isPlaying_) {
             continue;
         }
-
-        //string line;
-        //getline(file_, line);
-        //stringstream sline(line);
-        string timestamp, name, rest;
-
+        // load record header
         file_ >> timestamp >> name;
         if (file_.eof()) {
             break;
         }
 
-        string synType;
-        //getline(sline, rest);
-        try {
-            synType = channelTypes_.at(name);
-        } catch (out_of_range &e) {
-            // TODO only read the line and continue on the next one, with warning and not breaking
-            XCS_LOG_ERROR("Unknown channel " << name << ".");
+        // wait for it
+        ts = stol(timestamp);
+        this_thread::sleep_for(chrono::milliseconds(ts - prevTs)); //TODO (consider already passed time)
+
+        // notify it
+        processLogLine(name, ts);
+        prevTs = ts;
+    }
+    XCS_LOG_INFO("Log play finished.");
+}
+
+void XDataplayer::processLogLine(const std::string &channel, const Timestamp timestamp) {
+    string synType;
+    try {
+        synType = channelTypes_.at(channel);
+    } catch (out_of_range &e) {
+        // TODO only read the line and continue on the next one, with warning and not breaking
+        XCS_LOG_ERROR("Unknown channel " << channel << ".");
+    }
+    auto categoryType = syntacticCategoryMap_.at(synType);
+    FrameInfo frameInfo;
+
+    switch (categoryType) {
+        case CATEGORY_SCALAR:
+#define FILTER(Type) if(synType == #Type) {Type tmp; file_ >> tmp; dataReceiver_.notify(channel, tmp); }
+            LIBPORT_LIST_APPLY(FILTER, XCS_SCALAR_TYPES);
+#undef FILTER
             break;
-        }
-        auto categoryType = syntacticCategoryMap_.at(synType);
-        FrameInfo frameInfo;
 
-        switch (categoryType) {
-            case CATEGORY_SCALAR:
-#define FILTER(Type) if(synType == #Type) {Type tmp; file_ >> tmp; dataReceiver_.notify(name, tmp); }
-                LIBPORT_LIST_APPLY(FILTER, XCS_SCALAR_TYPES);
+        case CATEGORY_VECTOR:
+#define FILTER(Type) if (synType == #Type) { dataReceiver_.notify(channel, Type::deserialize(file_)); }
+            LIBPORT_LIST_APPLY(FILTER, XCS_VECTOR_TYPES);
 #undef FILTER
-                break;
+            break;
 
-            case CATEGORY_VECTOR:
-#define FILTER(Type) if (synType == #Type) { dataReceiver_.notify(name, Type::deserialize(file_)); }
-                LIBPORT_LIST_APPLY(FILTER, XCS_VECTOR_TYPES);
-#undef FILTER
-                break;
-
-            case CATEGORY_VIDEO:
+        case CATEGORY_VIDEO:
 
 #define FILTER(Type) if (synType == #Type) {\
         frameInfo = Type::deserialize(file_);\
         Type frame = getFrame<Type>(frameInfo);\
-        dataReceiver_.notify(name, frame);\
+        dataReceiver_.notify(channel, frame);\
         }
-                LIBPORT_LIST_APPLY(FILTER, XCS_VIDEO_TYPES);
+            LIBPORT_LIST_APPLY(FILTER, XCS_VIDEO_TYPES);
 #undef FILTER
-                break;
-            default:
-                XCS_LOG_WARN("Player: unhadled type category " << categoryType << ".");
-                break;
-        }
-
-        //cerr << "Got " << timestamp << ":" << name << ", rest:" << rest << endl;
-
-        // parse record
-
-        // notify record (if video, take it from video buffer)
-
-        // read next record        
-
-        // sleep until next record (consider already passed time)
+            break;
+        default:
+            XCS_LOG_WARN("Player: unhandled type category " << categoryType << ".");
+            break;
     }
-    XCS_LOG_INFO("Log play finished.");
 }
 
 void XDataplayer::onCommand(const std::string &command) {

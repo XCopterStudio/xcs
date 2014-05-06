@@ -67,9 +67,13 @@ private:
     void playbackPause();
     //void playbackSeek(xcs::TimestampType timestamp);
 
-    void loop();
-
     void loadHeader();
+
+    void processHeaderLine(const std::string &line);
+
+    void loop();
+    
+    void processLogLine(const std::string &channel, const Timestamp timestamp);
 
     void onCommand(const std::string &command);
 
