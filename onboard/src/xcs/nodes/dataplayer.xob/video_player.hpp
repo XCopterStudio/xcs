@@ -71,13 +71,13 @@ struct Packet {
 
 class VideoPlayer {
 public:
-    VideoPlayer();
-    void init(const std::string &filename, const std::string &fontFile);
+    VideoPlayer(const std::string &filename);
+    ~VideoPlayer();
     void rewind();
     xcs::BitmapType getFrame();
     size_t framePeriod();
     bool timestamps() const;
-    void timestamps(bool value);
+
 
 private:
     typedef std::unique_ptr<AVFormatContext, std::function<void (AVFormatContext *) >> AVFormatContextPtr;
@@ -112,9 +112,11 @@ private:
     AVFilterContextPtr bufferSrc_;
     AVFilterGraphPtr filterGraph_;
 
+    void init(const std::string &filename, const std::string &fontFile);
+
     void initFilters(const std::string &filterDescription);
 
-
+    void timestamps(bool value); // missing support for font selection, so the method is hidden
 };
 
 

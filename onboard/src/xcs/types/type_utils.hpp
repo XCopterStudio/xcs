@@ -3,6 +3,7 @@
 
 #include <libport/preproc.hh>
 #include <map>
+#include <string>
 
 #include <xcs/types/bitmap_type.hpp>
 #include <xcs/types/cartesian_vector.hpp>

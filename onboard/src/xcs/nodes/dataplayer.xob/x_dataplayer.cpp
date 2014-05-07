@@ -4,16 +4,23 @@
 #include <xcs/nodes/xobject/x.h>
 #include <xcs/nodes/xobject/x_type.hpp>
 
+#include <boost/filesystem/path.hpp>
+
 #include <sstream>
 #include <thread>
 
 using namespace std;
+using namespace boost::filesystem;
 using namespace xcs;
 using namespace xcs::nodes;
+using namespace xcs::nodes::dataplayer;
 
 
 const std::string XDataplayer::CMD_PLAY = "Play";
 const std::string XDataplayer::CMD_PAUSE = "Pause";
+
+const size_t XDataplayer::PRELOAD_OFFSET;
+const size_t XDataplayer::IDLE_SLEEP;
 
 xcs::SyntacticCategoryMap XDataplayer::syntacticCategoryMap_;
 
@@ -21,7 +28,8 @@ XDataplayer::XDataplayer(const std::string& name) :
   xcs::nodes::XObject(name),
   command("COMMAND"),
   seek("INTEGER"),
-  isPlaying_(false) {
+  isPlaying_(false),
+  endAll_(false) {
     fillTypeCategories(syntacticCategoryMap_);
 
     XBindFunction(XDataplayer, init);
@@ -29,20 +37,23 @@ XDataplayer::XDataplayer(const std::string& name) :
 }
 
 XDataplayer::~XDataplayer() {
+    endAll_ = true;
     file_.close();
 }
 
-void XDataplayer::init(const std::string &file) {
-    file_.open(file.c_str());
+void XDataplayer::init(const std::string &filename) {
+    file_.open(filename.c_str());
 
     if (!file_.is_open()) {
-        send("throw \"Dataplayer cannot open file: " + file + "\";");
+        send("throw \"Dataplayer cannot open file: " + filename + "\";");
         return;
     }
-
-    loadHeader();
+    filename_ = filename;
 
     dataLoopThread_ = move(thread(&XDataplayer::loop, this));
+    videoDecodeThread_ = move(thread(&XDataplayer::videoDecoder, this));
+
+    loadHeader();
 }
 
 void XDataplayer::loadHeader() {
@@ -60,26 +71,32 @@ void XDataplayer::loadHeader() {
 
 void XDataplayer::processHeaderLine(const std::string &line) {
     stringstream sline(line);
-    string check, name, semanticType, synType;
-    sline >> check >> name >> semanticType >> synType;
+    string check, channelName, semanticType, synType;
+    sline >> check >> channelName >> semanticType >> synType;
 
     if (check != "register") {
         XCS_LOG_WARN("Unrecognized header '" << check << "'.");
         return;
     }
 
-    SimpleXVar &xvar = dataReceiver_.registerOutput(name, XType(synType, semanticType, XType::DATAFLOWTYPE_XVAR));
-    XBindVarRename(xvar, name);
+    SimpleXVar &xvar = dataReceiver_.registerOutput(channelName, XType(synType, semanticType, XType::DATAFLOWTYPE_XVAR));
+    XBindVarRename(xvar, channelName);
 
-    channelTypes_[name] = synType;
+    channelTypes_[channelName] = synType;
+
+    auto categoryType = syntacticCategoryMap_.at(synType);
+    if (categoryType == CATEGORY_VIDEO) {
+        createVideoPlayer(channelName);
+    }
 }
 
 void XDataplayer::loop() {
     string timestamp, name;
     Timestamp ts(0), prevTs(0);
 
-    while (1) {
+    while (!endAll_) {
         if (!isPlaying_) {
+            this_thread::sleep_for(chrono::milliseconds(IDLE_SLEEP));
             continue;
         }
         // load record header
@@ -127,7 +144,7 @@ void XDataplayer::processLogLine(const std::string &channel, const Timestamp tim
 
 #define FILTER(Type) if (synType == #Type) {\
         frameInfo = Type::deserialize(file_);\
-        Type frame = getFrame<Type>(frameInfo);\
+        Type frame = getFrame<Type>(channel, frameInfo);\
         dataReceiver_.notify(channel, frame);\
         }
             LIBPORT_LIST_APPLY(FILTER, XCS_VIDEO_TYPES);
@@ -136,6 +153,29 @@ void XDataplayer::processLogLine(const std::string &channel, const Timestamp tim
         default:
             XCS_LOG_WARN("Player: unhandled type category " << categoryType << ".");
             break;
+    }
+}
+
+void XDataplayer::createVideoPlayer(const std::string& channel) {
+    path videoFile(filename_);
+    videoFile.replace_extension();
+    videoFile += "-" + channel + ".avi";
+
+    videoPlayers_.emplace(channel, unique_ptr<VideoPlayer>(new VideoPlayer(videoFile.string())));
+    videoResults_.emplace(channel, unique_ptr<VideoResultQueue>(new VideoResultQueue()));
+
+    for (auto i = 0; i < PRELOAD_OFFSET; ++i) {
+        videoJobs_.push(VideoJob(channel, i));
+    }
+}
+
+void XDataplayer::videoDecoder() {
+    while (!endAll_) {
+        auto job = videoJobs_.pop();
+        auto channel = job.first;
+        // Frame number is provisionally ignored, until seeking is needed. 
+        //auto frameNumber = job.second; // frame
+        videoResults_.at(channel)->push(videoPlayers_.at(channel)->getFrame());
     }
 }
 

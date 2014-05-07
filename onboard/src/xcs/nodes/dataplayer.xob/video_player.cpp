@@ -25,11 +25,17 @@ using namespace std;
 using namespace xcs;
 using namespace xcs::nodes::dataplayer;
 
-VideoPlayer::VideoPlayer() :
+VideoPlayer::VideoPlayer(const string &filename) :
   swsContext_(nullptr),
   hasPic_(false),
   timestamps_(false) {
+    init(filename, ""); // hot-fix (font is unused)
+}
 
+VideoPlayer::~VideoPlayer() {
+    if (hasPic_) {
+        avpicture_free(&pic_);
+    }
 }
 
 void VideoPlayer::init(const string &filename, const string &fontFile) {
