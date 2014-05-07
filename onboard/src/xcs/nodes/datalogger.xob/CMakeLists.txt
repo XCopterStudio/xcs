@@ -15,4 +15,6 @@ find_package(LibAV)
 include_directories(${LIBAV_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${LIBAV_LIBRARIES})
 
+find_package(Boost 1.55 REQUIRED COMPONENTS filesystem)
+
 use_logging(${PROJECT_NAME})

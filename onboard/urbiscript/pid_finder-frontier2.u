@@ -73,7 +73,7 @@ xci.&psi >> k.&psi;
 //    logger.registerData("yawE","yawE","double",a.&yawE);    
 //    logger.registerData("gazE","gazE","double",a.&gazE);    
 
-    logger.registerVideo("logs/" + logname + ".avi", 640, 360, "video","CAMERA_BOTTOM","xcs::BitmapType",xci.&video);
+    logger.registerVideo( 640, 360, "video","CAMERA_BOTTOM","xcs::BitmapType",xci.&video);
 
     //logger.registerData("command","command","string",xci.&command);
 

@@ -87,7 +87,7 @@ if(xci.hasSlot("gyro")) logger.registerData("gyro","GYRO_RAW","xcs::CartesianVec
 if(xci.hasSlot("magneto")) logger.registerData("magneto","MAGNETO_RAW","xcs::CartesianVectorChronologic",xci.&magneto);
 if(xci.hasSlot("internalTime")) logger.registerData("internalTime","TIME_LOC","double",xci.&internalTime);
 
-if(xci.hasSlot("video")) logger.registerVideo("experiments/" + logtimestamp + ".avi", 640, 360, "video","CAMERA","xcs::BitmapType",xci.&video);
+if(xci.hasSlot("video")) logger.registerVideo( 640, 360, "video","CAMERA","xcs::BitmapType",xci.&video);
 
 logger.registerData("flyControl","FLY_CONTROL","xcs::FlyControl",xci.&fly);
 
