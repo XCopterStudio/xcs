@@ -33,6 +33,7 @@ class XDatalogger : public xcs::nodes::XObject {
     bool inited_;
 
     datalogger::LoggerContext context_;
+    std::string filename_;
 
     inline void registerHeader(const std::string &name, const std::string &semanticType, const std::string &syntacticType) {
         context_.file << REGISTER << " " << name << " " << semanticType << " " << syntacticType << std::endl;

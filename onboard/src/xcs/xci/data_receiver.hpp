@@ -49,6 +49,21 @@ private:
         return bin;
     }
 
+    /*!
+     * Creates UBinary that caries no data. It's only used to smuggle single number
+     * (beware size_t vs. Timestamp) to the image receiver.
+     */
+    urbi::UBinary stowawayUBinary(const xcs::BitmapTypeChronologic &value) const {
+        urbi::UBinary bin;
+        bin.type = urbi::BINARY_IMAGE;
+        bin.image.width = value.time;
+        bin.image.height = 0;
+        bin.image.size = 0;
+        bin.image.imageFormat = urbi::IMAGE_RGB;
+        bin.image.data = nullptr;
+        return bin;
+    }
+
 public:
 
     DataReceiver() {
@@ -75,8 +90,9 @@ public:
     }
 
     /*!
-     * This overload is a hack because of memory managment of binary data and timestamp notification
-     * (cannot encapsulate pointer and timestamp in one struct correctly).
+     * This overload is a very ugly hack because of memory managment of binary data
+     * and timestamp notification (cannot encapsulate pointer and timestamp 
+     * in one struct correctly).
      * 
      * We send the timestamp in advance to the same UVar/InputPort and
      * it's receiver's responsibility to handle it properly.
@@ -86,10 +102,11 @@ public:
      */
     void notify(const std::string& sensorName, xcs::BitmapTypeChronologic value) {
         nodes::SimpleXVar &xvar = getSensorXVar(sensorName);
+        auto stBin = stowawayUBinary(value);
         auto bin = toUBinary(value);
 
         std::lock_guard<std::mutex> lock(bitmapLock_);
-        xvar = value.time;
+        xvar = stBin;
         xvar = bin; // this will do deep copy of the image buffer
         bin.image.data = nullptr;
     }

@@ -46,8 +46,8 @@ int ULineDrawer::update() {
      */
     cv::Mat src(lastFrame_.height, lastFrame_.width, CV_8UC3, lastFrame_.data);
     CvMat tmp = src;
-    src = cv::Mat(&tmp, true);    
-    
+    src = cv::Mat(&tmp, true);
+
     {
         lock_guard<mutex> lock(drawTasksMtx_);
         for (auto drawTask : drawTasks_) {
@@ -71,6 +71,9 @@ int ULineDrawer::update() {
 
 void ULineDrawer::onChangeVideo(::urbi::UVar& uvar) {
     lastFrame_ = uvar;
+    if (lastFrame_.size == 0) { //!* \see xcs::xci::DataReceiver::notify(const std::string&, xcs::BitmapTypeChronologic).
+        return;
+    }
     hasFrame_ = true;
     lineUtils_.setDimensions(lastFrame_.width, lastFrame_.height);
     lineUtils_.updateReferencePoint(theta, phi, cameraParam);

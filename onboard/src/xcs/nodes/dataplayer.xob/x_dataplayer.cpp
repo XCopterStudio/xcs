@@ -72,7 +72,6 @@ void XDataplayer::processHeaderLine(const std::string &line) {
     XBindVarRename(xvar, name);
 
     channelTypes_[name] = synType;
-
 }
 
 void XDataplayer::loop() {

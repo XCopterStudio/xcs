@@ -58,6 +58,7 @@ private:
     std::ifstream file_;
     std::atomic<bool> isPlaying_;
     std::thread dataLoopThread_;
+    std::thread videoDecodeThread_;
 
     void playbackSpeed(double value);
     void playbackMode(dataplayer::PlaybackMode value);
