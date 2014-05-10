@@ -1,0 +1,216 @@
+//System.system("start cmd.exe /k \"node d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/server/server.js\"")|;
+//sleep(2s);
+
+class Onboard {
+    var loadedXObjects_ = [ => ];   // list of pairs (loaded xobjects, copies)
+    var dataFlowGraph_ = "";        // data flow graph
+    var dfgCommStarted_ = false;    // data flow graph communication started
+    var onboardSender_;
+
+    function init() {
+        echo("init...");
+
+        loadCore_();
+
+        var adapter = Adapter.new();
+        adapter.start("127.0.0.1", 1234);
+        this.onboardSender_ = OnboardSender.new(adapter, UJson);
+
+        // initialize sending information about data flow graph
+        initDfgCommunication_();
+        startDfgCommunication();
+
+        //DEBUG: test send dataflow graph data
+        //this.dataFlowGraph_ = "<xml><block type=\"connect\" id=\"2\" x=\"148\" y=\"385\"><field name=\"XOB1\">subject</field><field name=\"XVAR1\">out</field><field name=\"XOB2\">observer</field><field name=\"XVAR2\">in</field></block></xml>";
+        //this.dataFlowGraph_ = "test data flow graph";
+        //this.loadedXObjects_["xci"] = ["xci_dodo", "xci_parrot"];
+        //this.loadedXObjects_["xci"] = ["xciiiiiiiiii_dodo", "xciiiiiiiiiiii_parrot"];
+        //stopDfgCommunication();
+        //this.dataFlowGraph_ = "test 2 data flow graph";
+        //this.loadedXObjects_["xci2"] = ["xci2_dodo", "xci2_parrot"];
+        //startDfgCommunication();
+        //this.dataFlowGraph_ = "test 3 data flow graph";
+        //this.loadedXObjects_["xci3"] = ["xci3_dodo", "xci3_parrot"];
+
+        // find all possible xobjects
+        var xobjects = loadXObjectsPath_();
+
+        //DEBUG: test load wanted xobjects
+        //var xos = [];
+        //for(var xo: xobjects) {
+        //    if(["xci_dodo", "xci_parrot", "onboard", "datalogger"].has(xo.basename().split(".").front())) {
+        //        xos << xo;
+        //    };
+        //};
+        //xos << "neexsitujici_xobject";
+        //xobjects = xos;
+        //// load wanted xobjects
+        //loadXObjects_(xobjects);
+    };
+
+    // initialize sending information about data flow graph
+    function initDfgCommunication_() {
+        // initialization 4 sending information about current data flow graph
+        this.dataFlowGraph_ = "";
+        at(this.&dataFlowGraph_.changed?) {
+            if(this.dfgCommStarted_) {
+                this.onboardSender_.sendDataFlowGraph(this.dataFlowGraph_);
+            };
+        };
+
+        // initialization 4 sending information about xobjects
+        var this.loadedXObjectsEvent_ = this.loadedXObjects_.elementAdded.'||'(this.loadedXObjects_.elementChanged);
+        at(this.loadedXObjectsEvent_?) {
+            if(this.dfgCommStarted_) {
+                var prototypesData = [];
+                var clonesData = [];
+
+                for(var p: this.loadedXObjects_) {
+                    var pData = [ => ];
+
+                    try {
+                        //TODO: transform module name 2 xobject name - read from ini file?
+
+                        //echo("----------------- " + p.first().asString());
+                        //var xvars = System.eval(p.first().asString() + ".getXVars()");
+                        //echo(xvars.asString());
+
+                        //var xinputPorts = System.eval(p.first().asString() + ".getXInputPorts()");
+                        //echo(xinputPorts.asString());
+                        //echo("++++++++++++++++++ ");
+                    
+
+                        //pData["name"] = ...;
+                        //pData["var"] = ...;
+                        //pData["inputPort"] = ...;
+                    }
+                    catch(var ex) {
+                        echo("chyba: " + ex.asString());
+                    };
+
+                    prototypesData << pData;
+                };
+
+                this.onboardSender_.sendPrototypeClone(prototypesData, clonesData);
+            };
+        };
+    };
+
+    function startDfgCommunication() {
+        this.dfgCommStarted_ = true;
+    };
+
+    function stopDfgCommunication() {
+        this.dfgCommStarted_ = false;
+    };
+
+    function loadXObjects_(xobjectsPath) {
+        for(var xo: xobjectsPath) {
+            loadXObject_(xo);
+        };
+    };
+
+    function loadXObject_(xobjectPath) {
+        //path 2 xobject
+        var xoPath = xobjectPath.asString();
+        
+        //log
+        echo("loading xobject: " + xoPath + "...");
+        
+        // find xobject name
+        var xoName;
+        if(xobjectPath.isA(Path)){
+            xoName = xobjectPath.basename.split(".").front();
+        }
+        else {
+            xoName = xobjectPath.asString();
+        };
+
+        if(loadedXObjects_.has(xoName)) {
+            echo("...xobject already loaded");
+        }
+        else {
+            try {
+                System.loadModule(xoPath)|;
+                loadedXObjects_[xoName] = List.new();
+                echo("...xobject loaded");
+            }
+            catch(var ex) {
+                echo("...xobject not found!");
+            };
+        };
+    };
+
+    function loadXObjectsPath_() {
+        // xobjects 
+        var xobjectsFE = ["dll", "so"];
+        
+        // find all xobjects
+        var xobjectPaths = getXObjectPaths_();
+        var xobjects = [];
+        var otherFiles = [];
+        for(var dirPath: xobjectPaths) {
+            var dir = Directory.new(dirPath);
+            //echo(dir.asString() + ": " + dir.exists);
+            for(var path: dir.asList()) {
+                if(xobjectsFE.has(path.basename().split(".").back())) {
+                    xobjects << path;
+                }
+                else {
+                    otherFiles << path;
+                };
+            };
+        };
+
+        //DEBUG: log
+        //echo("loading xobjects path...");
+        //echo("...founded xobjets: " + xobjects.asString());
+        //echo("...founded other files: " + otherFiles.asString());
+
+        return xobjects;
+    };
+
+    function loadCore_() {
+       // module names to be loaded
+        var moduleList = [
+            //"datalogger",
+            "ujson",
+            "onboard",
+            //"xxci",
+            //"xci_dodo",
+            //"xci_parrot",
+        //  "xcs"
+        ];
+
+        // load listed modules
+        loadXObjects_(moduleList);
+
+        // bootstrap urbiscripts
+        load("boot/boot.u");
+    };
+
+    function getXObjectPaths_() {
+        //TODO: return valid xobject path
+        return [
+            Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/projects/onboard/lib/Release/"),
+            Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/projects/onboard/bin/Release/")
+        ];
+    };
+
+    function getScriptPaths_() {
+        //TODO: return valid script path
+        return [
+            Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/urbiscript/"),
+            Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/urbiscript/boot/")
+        ];
+    };
+
+    function getConfigFilePaths_() {
+        //TODO: return valide config path
+        return [
+            Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/urbiscript/config.xcs")
+        ];
+    };
+}|;
+
+var onboard = Onboard.new();
