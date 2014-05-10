@@ -4,6 +4,7 @@
 #include <urbi/uobject.hh>
 #include <string>
 #include <map>
+#include <list>
 #include "x_type.hpp"
 #include <xcs/nodes/xobject/xobject_export.h>
 
@@ -15,11 +16,16 @@ public:
     XObject(const std::string& name);
     virtual ~XObject();
     const std::string getType(const std::string& xVarName) const;
+    const std::string getSynType(const std::string& xVarName) const;
+    const std::string getSemType(const std::string& xVarName) const;
+    std::list<const std::string> getXVars() const;
+    std::list<const std::string> getXInputPorts() const;
 protected:
     bool RegisterXVar(const std::string& xVarName, std::string synType, std::string semType);
     bool RegisterXInputPort(const std::string& xVarName, std::string synType, std::string semType);
 private:
     bool RegisterXChild(const std::string& xVarName, std::string synType, std::string semType, const XType::DataFlowType dataFlowType);
+    std::list<const std::string> getXChilds(const XType::DataFlowType dataFlowType) const;
     std::map<const std::string, XType*>* xVarsType_;
 
     friend class SimpleXVar;
