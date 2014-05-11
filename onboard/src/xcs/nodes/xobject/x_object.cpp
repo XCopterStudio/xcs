@@ -44,19 +44,19 @@ const string XObject::getType(const string& xVarName) const {
 }
 
 const string XObject::getSynType(const string& xVarName) const {
-    if (xVarsType_->count(xVarName) == 0) {
+    if (xVarsType_.count(xVarName) == 0) {
         return "";
     }
 
-    return (*xVarsType_)[xVarName]->synType;
+    return xVarsType_.at(xVarName).synType;
 }
 
 const string XObject::getSemType(const string& xVarName) const {
-    if (xVarsType_->count(xVarName) == 0) {
+    if (xVarsType_.count(xVarName) == 0) {
         return "";
     }
 
-    return (*xVarsType_)[xVarName]->semType;
+    return xVarsType_.at(xVarName).semType.name;
 }
 
 list<const string> XObject::getXVars() const {
@@ -70,8 +70,8 @@ list<const string> XObject::getXInputPorts() const {
 list<const string> XObject::getXChilds(const XType::DataFlowType dataFlowType) const {
     list<const string> result;
 
-    for (map<const string, XType*>::const_iterator it = xVarsType_->cbegin(); it != xVarsType_->cend(); ++it) {
-        if (it->second->dataFlowType == dataFlowType) {
+    for (map<const string, XType>::const_iterator it = xVarsType_.cbegin(); it != xVarsType_.cend(); ++it) {
+        if (it->second.dataFlowType == dataFlowType) {
             result.push_back(it->first);
         }
     }
