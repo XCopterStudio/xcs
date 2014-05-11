@@ -4,7 +4,26 @@
 #include <cstdint>
 #include <cstddef>
 
+#include "timestamp.hpp"
+
 namespace xcs {
+
+/*!
+ * Structure is used for deserialization of a bitmap.
+ * A video player is needed to obtain BitmapType from the information.
+ */
+struct FrameInfo {
+    int frameNumber;
+    /*! Timestamp of frame creation, relative to reference point. */
+    Timestamp frameTimestamp;
+
+    FrameInfo(int frameNumber = 0, Timestamp frameTimestap = -1) :
+      frameNumber(frameNumber),
+      frameTimestamp(frameTimestamp) {
+
+    }
+
+};
 
 struct BitmapType {
     const size_t width;
@@ -16,20 +35,34 @@ struct BitmapType {
       height(height),
       data(data) {
     }
+
+    template<typename T>
+            static FrameInfo deserialize(T &stream) {
+        int frameNumber;
+        stream >> frameNumber;
+        return FrameInfo(frameNumber);
+    }
 };
 
 struct BitmapTypeChronologic : public BitmapType {
-    long int time; // in milliseconds
+    Timestamp time;
 
-    BitmapTypeChronologic(const size_t width = 0, const size_t height = 0, uint8_t * const data = nullptr, long int time = -1) :
+    BitmapTypeChronologic(const size_t width = 0, const size_t height = 0, uint8_t * const data = nullptr, Timestamp time = -1) :
       BitmapType(width, height, data),
       time(time) {
     }
 
-    BitmapTypeChronologic(const BitmapType &bitmap, long int time = -1) :
+    BitmapTypeChronologic(const BitmapType &bitmap, Timestamp time = -1) :
       BitmapType(bitmap), time(time) {
     }
 
+    template<typename T>
+            static FrameInfo deserialize(T &stream) {
+        int frameNumber;
+        Timestamp time;
+        stream >> frameNumber >> time;
+        return FrameInfo(frameNumber, time);
+    }
 };
 
 }

@@ -9,7 +9,9 @@
 
 #include <iostream>
 
-#include <xcs/nodes/xobject/x.hpp>
+#include <xcs/logging.hpp>
+#include <xcs/nodes/xobject/x.h>
+#include <xcs/nodes/xobject/x_type.hpp>
 #include <xcs/library_loader.hpp>
 #include <xcs/symbol_loader.hpp>
 
@@ -61,9 +63,6 @@ void XXci::init(const std::string& driver) {
     SymbolLoader<XciFactoryFunction*> symbolLoader(libraryLoader);
     XciFactoryFunction* factory = symbolLoader.loadSymbol("CreateXci");
     xci_ = factory(dataReceiver_);
-    ::urbi::UBinary bin;
-    ::urbi::UImage img;
-    bin.type;
 
     initOutputs();
 }
@@ -76,7 +75,7 @@ void XXci::xciInit() {
         flyControlThread_ = move(thread(&XXci::keepFlyControl, this));
         inited_ = true; // TODO check this variable in all commands to the drone
     } else {
-        cerr << "[XXci] already called init." << endl; //TODO general way for runtime warnings (in Urbi)
+        XCS_LOG_WARN("[XXci] already called init.");
     }
 }
 
@@ -113,7 +112,6 @@ void XXci::setConfiguration(const std::string& key, const std::string& value) {
 
 void XXci::onChangeFly(FlyControl fp) {
     flyControl(fp.roll, fp.pitch, fp.yaw, fp.gaz);
-    //cerr << "***************** " << fp.roll << " - " << fp.pitch << " - " << fp.yaw << " - " << fp.gaz;
 }
 
 void XXci::onChangeRoll(double roll) {
@@ -142,18 +140,18 @@ void XXci::onChangeGaz(double gaz) {
 
 void XXci::initOutputs() {
     for (auto sensor : xci_->sensorList()) {
-        // todo: xvar and uBindVarRename
-        ::urbi::UVar* uvar = new ::urbi::UVar();
-        UBindVarRename(XXci, *uvar, sensor.name);
-        cout << "Registered sensor " << sensor.name << endl;
-        dataReceiver_.registerOutput(sensor.name, uvar);
+        SimpleXVar &xvar = dataReceiver_.registerOutput(sensor.name, XType(typeid(void), sensor.semanticType, XType::DATAFLOWTYPE_XVAR));
+        XBindVarRename(xvar, sensor.name);
+        XCS_LOG_INFO("Registered sensor " << sensor.name << ".");
     }
 }
 
 void XXci::stopFlyControlsThread() {
-    flyControlAlive_ = false;
-    flyControlCond_.notify_one();
-    flyControlThread_.join();
+    if (flyControlThread_.joinable()) {
+        flyControlAlive_ = false;
+        flyControlCond_.notify_one();
+        flyControlThread_.join();
+    }
 }
 
 void XXci::setFlyControlPersistence(unsigned int value) {

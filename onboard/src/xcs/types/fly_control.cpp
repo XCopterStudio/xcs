@@ -1,5 +1,5 @@
 #include "fly_control.hpp"
-#include <xcs/nodes/xobject/x.hpp>
+#include <xcs/nodes/xobject/x.h>
 
 using namespace xcs;
 

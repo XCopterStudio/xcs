@@ -12,7 +12,7 @@ namespace nodes {
 
 class XOBJECT_EXPORT SimpleXInputPort {
 public:
-    SimpleXInputPort(const std::type_info& synT, const std::string& semT);
+    SimpleXInputPort(const XType &type);
     virtual ~SimpleXInputPort();
     urbi::InputPort& Data();
     const XType& Type() const;

@@ -8,32 +8,32 @@ using namespace xcs::nodes::ekf;
 using namespace arma;
 
 mat DroneState::getMat() const{
-    mat matrix(10, 1);
-    matrix[1, 1] = position.x;
-    matrix[2, 1] = position.y;
-    matrix[3, 1] = position.z;
-    matrix[4, 1] = velocity.x;
-    matrix[5, 1] = velocity.y;
-    matrix[6, 1] = velocity.z;
-    matrix[7, 1] = angles.phi;
-    matrix[8, 1] = angles.theta;
-    matrix[9, 1] = angles.psi;
-    matrix[10, 1] = angularRotationPsi;
+    mat matrix;
+    matrix << position.x << endr
+        << position.y << endr
+        << position.z << endr
+        << velocity.x << endr
+        << velocity.y << endr
+        << velocity.z << endr
+        << angles.phi << endr
+        << angles.theta << endr
+        << angles.psi << endr
+        << angularRotationPsi << endr;
     return matrix;
 };
 
 void DroneState::Mat(const arma::mat &mat){
     if (mat.n_rows == 10 && mat.n_cols == 1){
-        position.x = mat[1, 1];
-        position.y = mat[2, 1];
-        position.z = mat[3, 1];
-        velocity.x = mat[4, 1];
-        velocity.y = mat[5, 1];
-        velocity.z = mat[6, 1];
-        angles.phi = mat[7, 1];
-        angles.theta = mat[8, 1];
-        angles.psi = mat[9, 1];
-        angularRotationPsi = mat[10, 1];
+        position.x = mat.at(0, 0);
+        position.y = mat.at(1, 0);
+        position.z = mat.at(2, 0);
+        velocity.x = mat.at(3, 0);
+        velocity.y = mat.at(4, 0);
+        velocity.z = mat.at(5, 0);
+        angles.phi = mat.at(6, 0);
+        angles.theta = mat.at(7, 0);
+        angles.psi = mat.at(8, 0);
+        angularRotationPsi = mat.at(9, 0);
     }
     else{
         cerr << "Wrong matrix size" << endl;
@@ -41,14 +41,14 @@ void DroneState::Mat(const arma::mat &mat){
 }
 
 mat DroneStateMeasurement::getMat() const{
-    mat measurement(7, 1);
-    measurement[1, 1] = altitude;
-    measurement[2, 1] = velocity.x;
-    measurement[3, 1] = velocity.y;
-    measurement[4, 1] = velocity.z;
-    measurement[5, 1] = angles.phi;
-    measurement[6, 1] = angles.theta;
-    measurement[7, 1] = angularRotationPsi;
+    mat measurement;
+    measurement << altitude << endr
+        << velocity.x << endr
+        << velocity.y << endr
+        << velocity.z << endr
+        << angles.phi << endr
+        << angles.theta << endr
+        << angularRotationPsi << endr;
     return measurement;
 }
 
@@ -103,70 +103,70 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     // create jacobian matrix 
     mat jacobian(10, 10, fill::zeros);
     // position x
-    jacobian[1, 1] = 1;
-    jacobian[4, 1] = delta;
+    jacobian(0, 0) = 1;
+    jacobian(3, 0) = delta;
     // position y
-    jacobian[2, 2] = 1;
-    jacobian[5, 2] = delta;
+    jacobian(1, 1) = 1;
+    jacobian(4, 1) = delta;
     // position z
-    jacobian[3, 3] = 1;
-    jacobian[6, 3] = delta;
+    jacobian(2, 2) = 1;
+    jacobian(5, 2) = delta;
     // velocity x
-    jacobian[4, 4] = 1 - parameters_[2] * delta - parameters_[3] * 2 * delta * velocityOld.x;
-    jacobian[7, 4] = delta*force * (
+    jacobian(3, 3) = 1 - parameters_[2] * delta - parameters_[3] * 2 * delta * velocityOld.x;
+    jacobian(6, 3) = delta*force * (
         cos(anglesOld.phi) * cos(anglesOld.psi) * cos(anglesOld.theta) 
         );
-    jacobian[8, 4] = delta*force * (
+    jacobian(7, 3) = delta*force * (
         -sin(anglesOld.phi) * cos(anglesOld.psi) * sin(anglesOld.theta)
         -sin(anglesOld.psi) * cos(anglesOld.theta)
         );
-    jacobian[9, 4] = delta*force * (
+    jacobian(8, 3) = delta*force * (
         -sin(anglesOld.phi) * sin(anglesOld.psi) * cos(anglesOld.theta)
         -cos(anglesOld.psi) * sin(anglesOld.theta)
         );
     // velocity y
-    jacobian[5, 5] = 1 - parameters_[2] * delta - parameters_[3] * 2 * delta * velocityOld.y;
-    jacobian[7, 5] = delta*force * (
+    jacobian(4, 4) = 1 - parameters_[2] * delta - parameters_[3] * 2 * delta * velocityOld.y;
+    jacobian(6, 4) = delta*force * (
         -cos(anglesOld.phi) * sin(anglesOld.psi) * cos(anglesOld.theta)
         );
-    jacobian[8, 5] = delta*force * (
+    jacobian(7, 4) = delta*force * (
         sin(anglesOld.phi) * sin(anglesOld.psi) * sin(anglesOld.theta)
         - cos(anglesOld.psi) * cos(anglesOld.theta)
         );
-    jacobian[9, 5] = delta*force * (
+    jacobian(8, 4) = delta*force * (
         -sin(anglesOld.phi) * cos(anglesOld.psi) * cos(anglesOld.theta)
         + sin(anglesOld.psi) * sin(anglesOld.theta)
         );
     // velocity z
-    jacobian[6, 6] = 1 - delta*parameters_[9];
+    jacobian(5, 5) = 1 - delta*parameters_[9];
     // angle phi
-    jacobian[7, 7] = 1 - delta*parameters_[5];
+    jacobian(6, 6) = 1 - delta*parameters_[5];
     // angle theta
-    jacobian[8, 8] = 1 - delta*parameters_[5];
+    jacobian(7, 7) = 1 - delta*parameters_[5];
     // angle psi
-    jacobian[9, 9] = 1;
-    jacobian[10, 9] = delta;
+    jacobian(8, 8) = 1;
+    jacobian(9, 8) = delta;
     // rotation speed psi
-    jacobian[10, 10] = 1 - delta*parameters_[7];
+    jacobian(9, 9) = 1 - delta*parameters_[7];
 
     // normal noise
     mat noiseTransf(4, 10, fill::zeros);
     // gaz
-    noiseTransf[4, 6] = delta * parameters_[8];
+    noiseTransf(3, 5) = delta * parameters_[8];
     // phi
-    noiseTransf[1, 7] = delta * parameters_[4];
+    noiseTransf(0, 6) = delta * parameters_[4];
     // theta
-    noiseTransf[2, 8] = delta * parameters_[4];
+    noiseTransf(1, 7) = delta * parameters_[4];
     // rotation speed psi
-    noiseTransf[3, 10] = delta * parameters_[6];
+    noiseTransf(2, 9) = delta * parameters_[6];
 
     // ======= predict state deviation ===========
 
     mat noise(4, 4, fill::zeros);
-    noise[1, 1] = normalDistribution_(randomGenerator_) * flyControl.roll * flyControl.roll;
-    noise[2, 2] = normalDistribution_(randomGenerator_) * flyControl.pitch * flyControl.pitch;
-    noise[3, 3] = normalDistribution_(randomGenerator_) * flyControl.yaw * flyControl.yaw;
-    noise[4, 4] = normalDistribution_(randomGenerator_) * flyControl.gaz * flyControl.gaz;
+    noise(0, 0) = normalDistribution_(randomGenerator_) * flyControl.roll * flyControl.roll;
+    noise(1, 1) = normalDistribution_(randomGenerator_) * flyControl.pitch * flyControl.pitch;
+    noise(2, 2) = normalDistribution_(randomGenerator_) * flyControl.yaw * flyControl.yaw;
+    noise(3, 3) = normalDistribution_(randomGenerator_) * flyControl.gaz * flyControl.gaz;
 
     predictedState.second = jacobian * state.second * jacobian.t() + noiseTransf * noise * noiseTransf.t();
 
@@ -181,55 +181,53 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     // create jacobian from measurement function
     mat measurementJacobian(7, 10, fill::zeros);
     // altitude
-    measurementJacobian[1, 3] = 1;
+    measurementJacobian(0, 2) = 1;
     // acceleration x
-    measurementJacobian[2, 4] = cos(state.first.angles.psi);
-    measurementJacobian[2, 5] = -sin(state.first.angles.psi);
-    measurementJacobian[2, 9] = -state.first.velocity.x*sin(state.first.angles.psi) 
+    measurementJacobian(1, 3) = cos(state.first.angles.psi);
+    measurementJacobian(1, 4) = -sin(state.first.angles.psi);
+    measurementJacobian(1, 8) = -state.first.velocity.x*sin(state.first.angles.psi) 
         - state.first.velocity.y*cos(state.first.angles.psi);
     // acceleration y
-    measurementJacobian[3, 4] = sin(state.first.angles.psi);
-    measurementJacobian[3, 5] = cos(state.first.angles.psi);
-    measurementJacobian[3, 9] = state.first.velocity.x*cos(state.first.angles.psi)
+    measurementJacobian(2, 3) = sin(state.first.angles.psi);
+    measurementJacobian(2, 4) = cos(state.first.angles.psi);
+    measurementJacobian(2, 8) = state.first.velocity.x*cos(state.first.angles.psi)
         - state.first.velocity.y*sin(state.first.angles.psi);
     // acceleration z
-    measurementJacobian[4, 6] = 1;
+    measurementJacobian(3, 5) = 1;
     // phi
-    measurementJacobian[5, 7] = 1;
+    measurementJacobian(4, 6) = 1;
     // theta
-    measurementJacobian[6, 8] = 1;
+    measurementJacobian(5, 7) = 1;
     // psi
-    measurementJacobian[7, 10] = 1;
+    measurementJacobian(6, 9) = 1;
 
     // additional noise 
     mat noise(7, 7, fill::zeros);
-    noise[1, 1] = normalDistribution_(randomGenerator_) * imuMeasurement.altitude * imuMeasurement.altitude;
-    noise[2, 2] = normalDistribution_(randomGenerator_) * imuMeasurement.velocity.x * imuMeasurement.velocity.x;
-    noise[3, 3] = normalDistribution_(randomGenerator_) * imuMeasurement.velocity.y * imuMeasurement.velocity.y;
-    noise[4, 4] = normalDistribution_(randomGenerator_) * imuMeasurement.velocity.z * imuMeasurement.velocity.z;
-    noise[5, 5] = normalDistribution_(randomGenerator_) * imuMeasurement.angles.phi * imuMeasurement.angles.phi;
-    noise[6, 6] = normalDistribution_(randomGenerator_) * imuMeasurement.angles.theta * imuMeasurement.angles.theta;
-    noise[7, 7] = normalDistribution_(randomGenerator_) * imuMeasurement.angularRotationPsi * imuMeasurement.angularRotationPsi;
+    noise(0, 0) = normalDistribution_(randomGenerator_) * imuMeasurement.altitude * imuMeasurement.altitude;
+    noise(1, 1) = normalDistribution_(randomGenerator_) * imuMeasurement.velocity.x * imuMeasurement.velocity.x;
+    noise(2, 2) = normalDistribution_(randomGenerator_) * imuMeasurement.velocity.y * imuMeasurement.velocity.y;
+    noise(3, 3) = normalDistribution_(randomGenerator_) * imuMeasurement.velocity.z * imuMeasurement.velocity.z;
+    noise(4, 4) = normalDistribution_(randomGenerator_) * imuMeasurement.angles.phi * imuMeasurement.angles.phi;
+    noise(5, 5) = normalDistribution_(randomGenerator_) * imuMeasurement.angles.theta * imuMeasurement.angles.theta;
+    noise(6, 6) = normalDistribution_(randomGenerator_) * imuMeasurement.angularRotationPsi * imuMeasurement.angularRotationPsi;
 
     // compute kalman gain
-    mat gain(10, 7);
-    gain = state.second * measurementJacobian.t() * (measurementJacobian * state.second * measurementJacobian.t() + noise).i();
+    mat gain = state.second * measurementJacobian.t() * (measurementJacobian * state.second * measurementJacobian.t() + noise).i();
 
     // compute predicted measurement 
     mat predictedMeasurment(7, 1, fill::zeros);
-    predictedMeasurment[1, 1] = state.first.position.z;
-    predictedMeasurment[2, 1] = state.first.velocity.x * cos(state.first.angles.psi) 
+    predictedMeasurment(0, 0) = state.first.position.z;
+    predictedMeasurment(1, 0) = state.first.velocity.x * cos(state.first.angles.psi) 
         - state.first.velocity.y * sin(state.first.angles.psi);
-    predictedMeasurment[3, 1] = state.first.velocity.x * sin(state.first.angles.psi)
+    predictedMeasurment(2, 0) = state.first.velocity.x * sin(state.first.angles.psi)
         + state.first.velocity.y * cos(state.first.angles.psi);
-    predictedMeasurment[4, 1] = state.first.velocity.z;
-    predictedMeasurment[5, 1] = state.first.angles.phi;
-    predictedMeasurment[6, 1] = state.first.angles.theta;
-    predictedMeasurment[7, 1] = state.first.angularRotationPsi;
+    predictedMeasurment(3, 0) = state.first.velocity.z;
+    predictedMeasurment(4, 0) = state.first.angles.phi;
+    predictedMeasurment(5, 0) = state.first.angles.theta;
+    predictedMeasurment(6, 0) = state.first.angularRotationPsi;
 
     // update state
-    mat newState(10, 1);
-    newState = state.first.getMat() + gain * (imuMeasurement.getMat() - predictedMeasurment);
+    mat newState = state.first.getMat() + gain * (imuMeasurement.getMat() - predictedMeasurment);
     updatedState.first.Mat(newState);
 
     // update deviation
@@ -246,10 +244,10 @@ startTime_(Clock::now()){
 
 }
 
-void flyControl(const FlyControl &flyControl, const long int &timestamp){
-
+void Ekf::flyControl(const FlyControl &flyControl, const long int &timestamp){
+    flyControls_.push(FlyControlChronologic(flyControl, timestamp));
 };
 
-void measurement(const DroneStateMeasurement &measurement, const long int &timestamp){
-
+void Ekf::measurement(const DroneStateMeasurement &measurement, const long int &timestamp){
+    measurements_.push(MeasurementChronologic(measurement, timestamp));
 };

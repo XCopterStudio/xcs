@@ -4,9 +4,12 @@
 #include <map>
 #include <memory>
 #include <iostream>
+#include <mutex>
 
 #include <urbi/uobject.hh>
 
+#include <xcs/nodes/xobject/simple_x_var.hpp>
+#include <xcs/nodes/xobject/x_type.hpp>
 #include <xcs/types/bitmap_type.hpp>
 
 namespace xcs {
@@ -18,6 +21,49 @@ namespace xci {
  * whole file.
  */
 class DataReceiver {
+private:
+    typedef std::map<std::string, std::unique_ptr<nodes::SimpleXVar> > OutputsType;
+
+    /*! We are owners of the UVars, kept in the name indexed map. */
+    OutputsType outputs_;
+
+    /*! See hack notify() overload for xcs::BitmapTypeChronologic */
+    std::mutex bitmapLock_;
+
+    nodes::SimpleXVar &getSensorXVar(const std::string& sensorName) const {
+        auto it = outputs_.find(sensorName);
+        if (it == outputs_.end()) {
+            throw std::runtime_error("Unregistered sensor '" + sensorName + "'."); // TODO is it necessary to link with libxcs, therefore std::runtime_error?
+        }
+        return *(it->second);
+    }
+
+    urbi::UBinary toUBinary(const xcs::BitmapType &value) const {
+        urbi::UBinary bin;
+        bin.type = urbi::BINARY_IMAGE;
+        bin.image.width = value.width;
+        bin.image.height = value.height;
+        bin.image.size = value.width * value.height * 3;
+        bin.image.imageFormat = urbi::IMAGE_RGB;
+        bin.image.data = value.data;
+        return bin;
+    }
+
+    /*!
+     * Creates UBinary that caries no data. It's only used to smuggle single number
+     * (beware size_t vs. Timestamp) to the image receiver.
+     */
+    urbi::UBinary stowawayUBinary(const xcs::BitmapTypeChronologic &value) const {
+        urbi::UBinary bin;
+        bin.type = urbi::BINARY_IMAGE;
+        bin.image.width = value.time;
+        bin.image.height = 0;
+        bin.image.size = 0;
+        bin.image.imageFormat = urbi::IMAGE_RGB;
+        bin.image.data = nullptr;
+        return bin;
+    }
+
 public:
 
     DataReceiver() {
@@ -28,47 +74,52 @@ public:
 
     template<typename T>
     void notify(const std::string& sensorName, T value) {
-        auto it = outputs_.find(sensorName);
-        if (it == outputs_.end()) {
-            throw std::runtime_error("Unregistered sensor '" + sensorName + "'."); // TODO is it necessary to link with libxcs, therefore std::runtime_error?
-        }
-        *(it->second) = value;
+        nodes::SimpleXVar &xvar = getSensorXVar(sensorName);
+        xvar = value;
     }
-    
-    /*
-     * Specialization for non-urbi and special-memory-managed types.
+
+    /*!
+     * This specialization is needed because of special memory managment.
      */
-    
-    void notify(const std::string& sensorName, xcs::BitmapTypeChronologic value) {
-        auto it = outputs_.find(sensorName);
-        if (it == outputs_.end()) {
-            throw std::runtime_error("Unregistered sensor '" + sensorName + "'."); // TODO is it necessary to link with libxcs, therefore std::runtime_error?
-        }
-        urbi::UBinary bin;
-        bin.type = urbi::BINARY_IMAGE;
-        bin.image.width = value.width;
-        bin.image.height = value.height;
-        bin.image.size = value.width * value.height * 3;
-        bin.image.imageFormat = urbi::IMAGE_RGB;
-        bin.image.data = value.data;
-        
-        *(it->second) = bin; // this will do deep copy of the image buffer
+    void notify(const std::string& sensorName, xcs::BitmapType value) {
+        nodes::SimpleXVar &xvar = getSensorXVar(sensorName);
+        auto bin = toUBinary(value);
+
+        xvar = bin; // this will do deep copy of the image buffer
         bin.image.data = nullptr;
     }
 
     /*!
-     * \param sensorName
-     * \param uvar  DataReceiver becomes owner of the pointed UVar (will free memory)
+     * This overload is a very ugly hack because of memory managment of binary data
+     * and timestamp notification (cannot encapsulate pointer and timestamp 
+     * in one struct correctly).
+     * 
+     * We send the timestamp in advance to the same UVar/InputPort and
+     * it's receiver's responsibility to handle it properly.
+     * 
+     * The lock may be needed when multiple notifies at the moment
+     * (e.g. *_BIND_THREADED macro was used and processing takes longer than "creation").         * 
      */
-    void registerOutput(const std::string& sensorName, ::urbi::UVar* uvar) {
-        outputs_[sensorName] = std::unique_ptr<::urbi::UVar>(uvar);
+    void notify(const std::string& sensorName, xcs::BitmapTypeChronologic value) {
+        nodes::SimpleXVar &xvar = getSensorXVar(sensorName);
+        auto stBin = stowawayUBinary(value);
+        auto bin = toUBinary(value);
+
+        std::lock_guard<std::mutex> lock(bitmapLock_);
+        xvar = stBin;
+        xvar = bin; // this will do deep copy of the image buffer
+        bin.image.data = nullptr;
     }
-private:
+
     /*!
-     * We own the UVar so ensure deallocation in standard destructor.
+     * Creates SimpleXVar identified by the name with the specified type.
+     * DataReceiver is (memory) owner of the SimpleXVar and returns reference
+     * valid until data receiver is alive.
      */
-    typedef std::map<std::string, std::unique_ptr<::urbi::UVar> > OutputsType;
-    OutputsType outputs_;
+    nodes::SimpleXVar &registerOutput(const std::string& name, const nodes::XType &type) {
+        outputs_[name] = std::unique_ptr<nodes::SimpleXVar>(new nodes::SimpleXVar(type));
+        return *(outputs_.at(name).get());
+    }
 };
 
 }

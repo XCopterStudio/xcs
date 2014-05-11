@@ -4,7 +4,7 @@
 #include <string>
 #include <urbi/uobject.hh>
 
-#include "../writer_common.hpp"
+#include "../logger_context.hpp"
 
 
 namespace xcs {
@@ -14,13 +14,10 @@ namespace datalogger {
 class AbstractWriter : public ::urbi::UObject {
 protected:
     Clock highResolutionClock_;
-    TimePoint startTime_;
+    LoggerContext* context_;
     std::string dataName_;
-    std::ofstream *file_;
 
-    std::mutex *lock_;
-
-    void basicInit(const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar);
+    void basicInit(const std::string &dataName, LoggerContext &context, ::urbi::UVar &uvar);
     void writeRecordBegin();
 public:
 

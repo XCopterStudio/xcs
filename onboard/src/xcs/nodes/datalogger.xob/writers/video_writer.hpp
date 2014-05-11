@@ -4,7 +4,9 @@
 #include <string>
 #include <urbi/uobject.hh>
 
-#include "../writer_common.hpp"
+#include <xcs/types/timestamp.hpp>
+
+#include "../logger_context.hpp"
 #include "video_file_writer.hpp"
 #include "abstract_writer.hpp"
 
@@ -15,13 +17,14 @@ namespace datalogger {
 
 class VideoWriter : public AbstractWriter {
     unsigned int frameNumber_;
+    Timestamp lastTimestamp_;
     AVFrame* avframe_;
-    std::unique_ptr<VideoFileWriter> videoFileWriter;
+    std::unique_ptr<VideoFileWriter> videoFileWriter_;
 
 public:
     VideoWriter(const std::string &name);
     virtual ~VideoWriter();
-    void init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, const TimePoint startTime, std::ofstream* file, std::mutex *lock, ::urbi::UVar &uvar);
+    void init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, LoggerContext &context, ::urbi::UVar &uvar);
     void write(::urbi::UImage image);
 };
 

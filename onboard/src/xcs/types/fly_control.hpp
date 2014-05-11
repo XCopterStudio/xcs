@@ -1,7 +1,7 @@
 #ifndef FLY_CONTROL_HPP
 #define	FLY_CONTROL_HPP
 
-#include <xcs/nodes/xobject/x.hpp>
+#include <xcs/nodes/xobject/x.h>
 
 namespace xcs {
 
@@ -18,6 +18,13 @@ struct FlyControl {
     template<typename T>
             void serialize(T &stream) {
         stream << roll << "\t" << pitch << "\t" << yaw << "\t" << gaz;
+    }
+
+    template<typename T>
+            static FlyControl deserialize(T &stream) {
+        double roll, pitch, yaw, gaz;
+        stream >> roll >> pitch >> yaw >> gaz;
+        return FlyControl(roll, pitch, yaw, gaz);
     }
 };
 }

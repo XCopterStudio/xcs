@@ -46,14 +46,13 @@ int ULineDrawer::update() {
      */
     cv::Mat src(lastFrame_.height, lastFrame_.width, CV_8UC3, lastFrame_.data);
     CvMat tmp = src;
-    src = cv::Mat(&tmp, true);    
-    
+    src = cv::Mat(&tmp, true);
+
     {
         lock_guard<mutex> lock(drawTasksMtx_);
         for (auto drawTask : drawTasks_) {
             switch (drawTask.type) {
                 case TASK_LINE:
-                    //cerr << drawTask.dataLine.begin << ", " << drawTask.dataLine.end << ", " << drawTask.dataLine.color << ", " << drawTask.dataLine.width << endl;
                     cv::line(src, drawTask.point1, drawTask.point2, drawTask.color, drawTask.dimension1);
                     break;
                 case TASK_CIRCLE:
@@ -72,6 +71,9 @@ int ULineDrawer::update() {
 
 void ULineDrawer::onChangeVideo(::urbi::UVar& uvar) {
     lastFrame_ = uvar;
+    if (lastFrame_.size == 0) { //!* \see xcs::xci::DataReceiver::notify(const std::string&, xcs::BitmapTypeChronologic).
+        return;
+    }
     hasFrame_ = true;
     lineUtils_.setDimensions(lastFrame_.width, lastFrame_.height);
     lineUtils_.updateReferencePoint(theta, phi, cameraParam);

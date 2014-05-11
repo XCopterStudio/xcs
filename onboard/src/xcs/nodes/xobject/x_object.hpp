@@ -21,12 +21,13 @@ public:
     std::list<const std::string> getXVars() const;
     std::list<const std::string> getXInputPorts() const;
 protected:
-    bool RegisterXVar(const std::string& xVarName, std::string synType, std::string semType);
-    bool RegisterXInputPort(const std::string& xVarName, std::string synType, std::string semType);
+    bool RegisterXVar(const std::string& xVarName, const XType& type);
+    bool RegisterXInputPort(const std::string& xVarName, const XType& type);
 private:
-    bool RegisterXChild(const std::string& xVarName, std::string synType, std::string semType, const XType::DataFlowType dataFlowType);
+    typedef std::map<const std::string, XType> XTypesType;
     std::list<const std::string> getXChilds(const XType::DataFlowType dataFlowType) const;
-    std::map<const std::string, XType*>* xVarsType_;
+    bool RegisterXChild(const std::string& xVarName, const XType& type, const XType::DataFlowType dataFlowType);
+    XTypesType xVarsType_;
 
     friend class SimpleXVar;
     friend class SimpleXInputPort;

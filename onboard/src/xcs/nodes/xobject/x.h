@@ -1,11 +1,13 @@
-#ifndef X_HPP
-#define X_HPP
+#ifndef XCS_X_H
+#define XCS_X_H
 
 #include <urbi/uobject.hh>
 #include <libport/containers.hh>
 #include "xcs_object.hpp"
 
 # define XBindVar(x) x.Init(*this, #x)
+
+# define XBindVarRename(x, name) x.Init(*this, name)
 
 //TODO: prejmenovat na XBindVar (pretizit)
 # define XBindVarF(x, f)	\

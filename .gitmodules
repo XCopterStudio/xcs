@@ -4,3 +4,6 @@
 [submodule "3rd-party/armadillo"]
 	path = 3rd-party/armadillo
 	url = drones.ms.mff.cuni.cz:/srv/xcs/repo/armadillo.git
+[submodule "3rd-party/vrep-remote"]
+	path = 3rd-party/vrep-remote
+	url = drones.ms.mff.cuni.cz:/srv/xcs/repo/vrep-remote.git

@@ -52,7 +52,7 @@ namespace parrot{
 
     struct DroneMove {
         FloatInt roll; /*< Negative values makes the drone tilt to its left and positive to its right. */
-        FloatInt pitch; /*< Negative values makes the drone lower its note and positive raise its nose. */
+        FloatInt pitch; /*< Negative values makes the drone lower its nose and positive raise its nose. */
         FloatInt yaw; /*< Negative values makes the drone spin left and positive right. */
         FloatInt gaz; /*< Is percentage of the maximum vertical speed. Positive values makes the drone raise up and negative go down. */
 

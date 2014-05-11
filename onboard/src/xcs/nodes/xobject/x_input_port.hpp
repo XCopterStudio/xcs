@@ -10,13 +10,13 @@ namespace nodes {
 template<class synT>
 class XInputPort : public SimpleXInputPort {
 public:
-    XInputPort(const std::string& semT);
+    XInputPort(const SemanticTypeInfo& semT);
     virtual ~XInputPort();
 };
 
 template<class synT>
-XInputPort<synT>::XInputPort(const std::string& semT) :
-    SimpleXInputPort(typeid(synT), semT) {
+XInputPort<synT>::XInputPort(const SemanticTypeInfo& semT) :
+    SimpleXInputPort(XType(typeid(synT), semT, XType::DATAFLOWTYPE_XINPUTPORT)) {
 }
 
 template<class synT>

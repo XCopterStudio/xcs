@@ -1,0 +1,23 @@
+// bootstrap urbiscripts
+load("boot/main.u");
+
+var xci = XXci.new("xci_vrep");
+var xcontrol = XControl.new();
+var xhermit = XHermitMovement.new();
+
+
+// xcontrol connections
+xci.&velocity >> xcontrol.&velocity;
+xci.&rotation >> xcontrol.&rotation;
+xcontrol.&flyControl >> xci.&flyControl;
+
+// xhermit connections
+//   >> xhermit.&command;
+//   >> xhermit.&checkpoint;
+xci.&position >> xhermit.&dronePosition;
+xci.&rotation >> xhermit.&droneRotation;
+xhermit.&speedControl >> xcontrol.&desireSpeed; 
+ 
+xci.xciInit();
+
+xhermit.checkpoint = Checkpoint.new(1.0,1.0,1.0,1.0,1.0,1.0);

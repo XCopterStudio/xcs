@@ -9,15 +9,35 @@ namespace xcs {
 namespace nodes {
 
 struct XOBJECT_EXPORT XType {
-    enum DataFlowType { DATAFLOWTYPE_XVAR, DATAFLOWTYPE_XINPUTPORT };
-    const DataFlowType dataFlowType;
+
+    struct SemanticTypeInfo {
+        const std::string name;
+
+        SemanticTypeInfo(const std::string &name) : name(name) {
+        }
+
+        SemanticTypeInfo(const char *name) : name(name) {
+        }
+
+        bool operator==(const SemanticTypeInfo& other) const;
+
+    };
+
+    enum DataFlowType {
+        DATAFLOWTYPE_XVAR, DATAFLOWTYPE_XINPUTPORT
+    };
+
     const std::string synType;
-    const std::string semType;
+    const SemanticTypeInfo semType;
+    const DataFlowType dataFlowType;
+
     XType(const std::string& synT, const std::string& semT, const DataFlowType dataFlowT);
-    XType(const std::type_info& synType, const std::string& semT, const DataFlowType dataFlowT);
+    XType(const std::type_info& synType, const SemanticTypeInfo& semT, const DataFlowType dataFlowT);
     bool operator==(const XType&) const;
     const std::string toString() const;
 };
+
+typedef XType::SemanticTypeInfo SemanticTypeInfo;
 
 }
 }

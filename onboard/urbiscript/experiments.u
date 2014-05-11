@@ -1,0 +1,108 @@
+load("init_onboard.u");
+
+/* 
+ * Common functions
+ */
+/**
+ * Assumes drone is steady in the air.
+ * 
+ * @param double duration
+ * @param double roll
+ * @param double pitch
+ * @param double yaw
+ * @param double gaz 
+ * 
+ */
+function takeSample(duration, roll, pitch, yaw, gaz, zoomed) {
+    var controls = [
+        "R" => roll,
+        "P" => pitch,
+        "Y" => yaw,
+        "G" => gaz
+    ];
+    var id = {if(zoomed) "z-" else ""};
+    for(var pair: controls) {
+        if(pair.second != 0) {
+            id += pair.first + ((pair.second * 1000).round() / 1000).asString();
+        }
+    }|;
+    var logname = logtimestamp + "_" + id;
+    
+    
+    /* Run experiments */
+    var fc = FlyControl.new();
+    fc.roll = roll;
+    fc.pitch = pitch;
+    fc.yaw = yaw;
+    fc.gaz = gaz;
+    
+    var fcZero = FlyControl.new();
+    fcZero.roll = 0;
+    fcZero.pitch = 0;
+    fcZero.yaw = 0;
+    fcZero.gaz = 0;
+    var xci = Global.xci;
+    
+    Global.expName = logname;
+    
+    sleep(1s);
+    xci.gaz = 0.4; sleep(2.5s); xci.gaz = 0; sleep(6000ms);
+    xci.fly = fc;
+    sleep(duration);
+    xci.fly = fcZero;
+    sleep(3s);
+    xci.roll = 0.2; sleep(1500ms); xci.roll = 0;
+    echo("Alive: " + xci.alive);
+    
+    /* End */
+}|;
+
+/*
+ * Parameters
+ */
+//var xciVersion = "xci_dodo";
+var xciVersion = "xci_parrot";
+
+/*
+ * Initialize nodes
+ */
+var Global.xci = XXci.new(xciVersion);
+var xci = Global.xci;
+
+var logtimestamp = Date.now().asString().replace(" ", "_").replace(":", "-");
+    
+var Global.logger = XDatalogger.new("experiments/" + logtimestamp + ".txt");
+var logger = Global.logger;
+
+var Global.expName = "N/A";
+
+/* Register to logger */
+if(xci.hasSlot("rotation")) logger.registerData("rotation","ROTATION","xcs::EulerianVectorChronologic",xci.&rotation);
+if(xci.hasSlot("velocity")) logger.registerData("velocity","VELOCITY","xcs::CartesianVectorChronologic",xci.&velocity);
+if(xci.hasSlot("altitude")) logger.registerData("altitude","ALTITUDE","double",xci.&altitude);
+if(xci.hasSlot("altitudeAll")) logger.registerData("altitudeAll","ALTITUDE_ALL","xcs::CartesianVectorChronologic",xci.&altitudeAll);
+if(xci.hasSlot("altitudeV")) logger.registerData("altitudeV","ALTITUDE_V","double",xci.&altitudeV);
+if(xci.hasSlot("acceleration")) logger.registerData("acceleration","ACCELERATION","xcs::CartesianVectorChronologic",xci.&acceleration);
+if(xci.hasSlot("gyro")) logger.registerData("gyro","GYRO_RAW","xcs::CartesianVectorChronologic",xci.&gyro);
+if(xci.hasSlot("magneto")) logger.registerData("magneto","MAGNETO_RAW","xcs::CartesianVectorChronologic",xci.&magneto);
+if(xci.hasSlot("internalTime")) logger.registerData("internalTime","TIME_LOC","double",xci.&internalTime);
+
+if(xci.hasSlot("video")) logger.registerVideo( 640, 360, "video","CAMERA","xcs::BitmapType",xci.&video);
+
+logger.registerData("flyControl","FLY_CONTROL","xcs::FlyControl",xci.&fly);
+
+logger.registerData("expname","EXPERIMENT_NAME","std::string",Global.&expName);
+
+
+
+Global.xci.xciInit();
+
+if(xciVersion == "xci_dodo") {
+    xci.setConfiguration("video:filename", "tmp/video.mp4");
+    
+    xci.doCommand("Load");
+    xci.doCommand("Play");
+} else if(xciVersion == "xci_parrot") {
+    sleep(1s);
+    xci.setConfiguration("video:video_channel", "0"); // front camera
+};

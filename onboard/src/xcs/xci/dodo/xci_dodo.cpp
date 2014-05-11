@@ -3,8 +3,9 @@
 #include <iostream>
 #include <chrono>
 #include <string>
-#include <boost/log/trivial.hpp>
 
+#include <xcs/xcs_fce.hpp>
+#include <xcs/logging.hpp>
 #include <xcs/xci/data_receiver.hpp>
 
 using namespace std;
@@ -103,7 +104,7 @@ ParameterValueType XciDodo::parameter(ParameterNameType name) {
 
 void XciDodo::command(const std::string& command) {
     if (stoi(configuration(CONFIG_LOG_COMMAND))) {
-        BOOST_LOG_TRIVIAL(info) << "[dodo] command: " << command;
+        XCS_LOG_INFO("[dodo] command: " << command);
     }
 
     switch (videoStatus_) {
@@ -137,7 +138,7 @@ void XciDodo::command(const std::string& command) {
 
 void XciDodo::flyControl(float roll, float pitch, float yaw, float gaz) {
     if (stoi(configuration(CONFIG_LOG_FC))) {
-        BOOST_LOG_TRIVIAL(info) << "[dodo] flyControl: " << roll << ", " << pitch << ", " << yaw << ", " << gaz;
+        XCS_LOG_INFO("[dodo] flyControl: " << roll << ", " << pitch << ", " << yaw << ", " << gaz);
     }
 
     velocity_.x = valueInRange<double>(roll, 1.0) * 0.05; // very simple

@@ -1,6 +1,6 @@
 #include <sstream>
 #include "x_object.hpp"
-#include "x.hpp"
+#include "x.h"
 #include "xcs_object.hpp"
 
 using namespace std;
@@ -62,7 +62,6 @@ string XcsObject::getStructs4Reg() {
         delete it->second;
     }
     
-    //cerr << endl << endl << structs.str() << endl << endl;
     structHolder_.clear();
     return structs.str();
 }

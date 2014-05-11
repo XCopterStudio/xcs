@@ -1,14 +1,14 @@
+#include "XCI_Parrot.hpp"
+
 #include <array>
 #include <iostream>
 #include <cstring>
 
-#include "XCI_Parrot.hpp"
+#include <xcs/types/bitmap_type.hpp>
+#include <xcs/logging.hpp>
+
 #include "video_encapsulation.h"
 #include "video_decode.hpp"
-#include <xcs/types/bitmap_type.hpp>
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/expressions.hpp>
 
 using namespace std;
 using namespace boost::asio;
@@ -65,7 +65,7 @@ bool XCI_Parrot::setConfirmedConfigure(AtCommand *command){
         atCommandQueue_.push(command->clone());
         this_thread::sleep_for(std::chrono::milliseconds(10));
         if (++count > 20){
-            cerr << "Cannot receive ack \n" << endl;
+            XCS_LOG_WARN("Cannot receive ack.");
             delete command;
             return false;
         }
@@ -78,7 +78,7 @@ bool XCI_Parrot::setConfirmedConfigure(AtCommand *command){
         this_thread::sleep_for(std::chrono::milliseconds(10));
 
         if (++count >= 20){
-            cerr << "Cannot receive clear ack \n" << endl;
+            XCS_LOG_WARN("Cannot receive clear ack.");
             return false;
         }
     } while (state_.getState(FLAG_ARDRONE_COMMAND_MASK));
@@ -129,7 +129,7 @@ bool XCI_Parrot::setNavdataReceive(bool full_mode){
         this_thread::sleep_for(std::chrono::milliseconds(10));
 
         if(++count >= 20){
-            cerr << "Cannot receive general:navdata_demo ack \n" << endl;
+            XCS_LOG_WARN("Cannot receive general:navdata_demo ack.");;
             return false;
         }
 
@@ -141,7 +141,7 @@ bool XCI_Parrot::setNavdataReceive(bool full_mode){
         this_thread::sleep_for(std::chrono::milliseconds(10));
 
         if (++count >= 20){
-            cerr << "Cannot receive clear general:navdata_demo ack \n" << endl;
+            XCS_LOG_WARN("Cannot receive clear general:navdata_demo ack.");
             return false;
         }
     } while (state_.getState(FLAG_ARDRONE_COMMAND_MASK));
@@ -152,16 +152,11 @@ bool XCI_Parrot::setNavdataReceive(bool full_mode){
 // ----------------- Public function ---------------- //
 
 void XCI_Parrot::init(){
-    boost::log::core::get()->set_filter
-            (
-            boost::log::trivial::severity >= boost::log::trivial::debug
-            );
-
     endAll_ = false;
 
-    std::cerr << "Before network" << std::endl;
+    XCS_LOG_INFO("Before network");
     initNetwork();
-    std::cerr << "After network" << std::endl;
+    XCS_LOG_INFO("After network");
 
     setDefaultConfiguration();
     //setNavdataReceive(true);

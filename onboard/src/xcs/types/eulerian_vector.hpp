@@ -1,7 +1,8 @@
 #ifndef EULERIAN_VECTOR_HPP
 #define	EULERIAN_VECTOR_HPP
 
-#include <xcs/nodes/xobject/x.hpp>
+#include <xcs/nodes/xobject/x.h>
+#include "timestamp.hpp"
 
 namespace xcs {
 
@@ -17,22 +18,37 @@ struct EulerianVector {
             void serialize(T &stream) {
         stream << phi << "\t" << theta << "\t" << psi;
     }
+
+    template<typename T>
+            static EulerianVector deserialize(T &stream) {
+        double phi, theta, psi;
+        stream >> phi >> theta >> psi;
+        return EulerianVector(phi, theta, psi);
+    }
 };
 
 struct EulerianVectorChronologic : public EulerianVector {
-    long int time; // in milliseconds
+    Timestamp time; // in milliseconds
 
-    EulerianVectorChronologic(double phi = 0, double theta = 0, double psi = 0, long int time = -1) :
+    EulerianVectorChronologic(double phi = 0, double theta = 0, double psi = 0, Timestamp time = -1) :
       EulerianVector(phi, theta, psi), time(time) {
     }
 
-    EulerianVectorChronologic(const EulerianVector &vector, long int time = -1) :
+    EulerianVectorChronologic(const EulerianVector &vector, Timestamp time = -1) :
       EulerianVector(vector), time(time) {
     }
 
     template<typename T>
             void serialize(T &stream) {
         stream << phi << "\t" << theta << "\t" << psi << "\t" << time;
+    }
+
+    template<typename T>
+            static EulerianVectorChronologic deserialize(T &stream) {
+        double phi, theta, psi;
+        Timestamp time;
+        stream >> phi >> theta >> psi >> time;
+        return EulerianVectorChronologic(phi, theta, psi, time);
     }
 };
 

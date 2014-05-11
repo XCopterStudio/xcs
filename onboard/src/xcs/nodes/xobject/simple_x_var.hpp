@@ -6,13 +6,14 @@
 #include "x_object.hpp"
 #include "x_type.hpp"
 #include <xcs/nodes/xobject/xobject_export.h>
+#include <xcs/exception.hpp>
 
 namespace xcs {
 namespace nodes {
 
 class XOBJECT_EXPORT SimpleXVar {
 public:
-    SimpleXVar(const std::type_info& synT, const std::string& semT);
+    SimpleXVar(const XType &type);
     virtual ~SimpleXVar();
     urbi::UVar& Data();
     const XType& Type() const;

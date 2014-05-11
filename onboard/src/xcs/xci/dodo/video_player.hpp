@@ -69,6 +69,10 @@ struct Packet {
     AVPacket packet;
 };
 
+/*!
+ * \deprecated This class is for legacy purposes only.
+ * Use xcs::nodes::dataplayer::VideoPlayer instead.
+ */
 class VideoPlayer {
 public:
     VideoPlayer();
