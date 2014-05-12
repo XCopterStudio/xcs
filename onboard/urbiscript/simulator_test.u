@@ -5,7 +5,6 @@ var xci = XXci.new("xci_vrep");
 var xcontrol = XControl.new();
 var xhermit = XHermitMovement.new();
 
-
 // xcontrol connections
 xci.&velocity >> xcontrol.&velocity;
 xci.&rotation >> xcontrol.&rotation;
@@ -20,4 +19,36 @@ xhermit.&speedControl >> xcontrol.&desireSpeed;
  
 xci.xciInit();
 
-xhermit.checkpoint = Checkpoint.new(1.0,1.0,1.0,1.0,1.0,1.0);
+sleep(4s);
+xci.roll = 1;
+sleep(10);
+xci.roll = -1;
+sleep(10);
+
+var point = Checkpoint.new();
+point.x = 0.0;
+point.y = 1.0;
+point.z = 1.0;
+point.xOut = 0.0;
+point.yOut = 0.0;
+point.zOut = 0.0;
+
+xhermit.checkpoint = point;
+
+point.x = 1.0;
+point.y = 1.0;
+point.z = 1.0;
+point.xOut = 0.0;
+point.yOut = 0.0;
+point.zOut = 0.0;
+
+xhermit.checkpoint = point;
+
+point.x = 0.0;
+point.y = 0.0;
+point.z = 1.0;
+point.xOut = 0.0;
+point.yOut = 0.0;
+point.zOut = 0.0;
+
+xhermit.checkpoint = point;

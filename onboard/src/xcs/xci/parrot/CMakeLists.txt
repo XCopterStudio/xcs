@@ -1,7 +1,6 @@
 set(PROJECT_NAME xci_parrot)
 project(${PROJECT_NAME})
 
-
 file(GLOB SOURCES *.cpp)
 file(GLOB HEADERS *.hpp)
 

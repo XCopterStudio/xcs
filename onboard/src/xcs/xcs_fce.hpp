@@ -30,6 +30,14 @@ namespace xcs{
         return valueInRange(value, -range, range);
     }
 
+    inline double degreesToRadians(double degrees){
+        return M_PI * (degrees / 180.0);
+    }
+
+    inline double radiansToDegrees(double radians){
+        return 180.0 * (radians / M_PI);
+    }
+
     inline double miliDegreesToRadias(int degrees) {
         return (double)(degrees * M_PI / 180000);
     }
@@ -45,6 +53,8 @@ namespace xcs{
 
         return temp;
     }
+
+    
 }
 
 #endif

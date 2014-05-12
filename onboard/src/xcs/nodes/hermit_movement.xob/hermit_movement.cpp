@@ -67,15 +67,17 @@ void HermitMovement::droneRotation(const xcs::EulerianVector &droneRotation){
 
 xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
     if (clear_){
-        return SpeedControl();
+        newCheckpoint_ = true;
         clear_ = false;
+        return SpeedControl();
     }
 
     if (newCheckpoint_){
         empty_ = !(checkpointQueue_.tryPop(targetCheckpoint));
+        newCheckpoint_ = empty_;
     }
 
-    if (!empty_){
+    if (!newCheckpoint_){
         double distance = computeDistance(targetCheckpoint, dronePosition_);
         double step = 1.0 / (distance * POINTS_ON_METER);
         double boundSpeed = valueInRange(0.0, MAX_SPEED, speed);
@@ -89,13 +91,15 @@ xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
         double deltaY = interCheckpoint.y - dronePosition_.y;
         double deltaZ = interCheckpoint.z - dronePosition_.z;
 
-        double norm = boundSpeed / std::max(deltaX, std::max(deltaY, deltaZ));
+        double norm = boundSpeed / std::abs(std::max(deltaX, std::max(deltaY, deltaZ)));
 
         if (distance < EPSILON){
+            printf("Hermit: New checkpoint \n");
             newCheckpoint_ = true;
         }
 
         //TODO: use yaw difference
+        printf("Hermit: Control speed [%f,%f,%f,%f] \n", norm*deltaX, norm*deltaY, norm*deltaZ, 0);
         return SpeedControl(norm*deltaX, norm*deltaY, norm*deltaZ, 0);
     }
     else{
@@ -104,6 +108,7 @@ xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
 }
 
 void HermitMovement::addCheckpoint(const Checkpoint &checkpoint){
+    printf("Hermit: insert checkpoint \n");
     checkpointQueue_.push(checkpoint);
 }
 

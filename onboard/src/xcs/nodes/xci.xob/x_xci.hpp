@@ -26,7 +26,7 @@ public:
     xcs::nodes::XInputPort<double> yaw;
     xcs::nodes::XInputPort<double> gaz;
 
-    xcs::nodes::XVar<xcs::FlyControl> fly;
+    xcs::nodes::XVar<xcs::FlyControl> flyControl;
 
     xcs::nodes::XInputPort<std::string> command;
 
@@ -41,7 +41,7 @@ public:
 
     void doCommand(const std::string& command);
 
-    void flyControl(double roll = 0, double pitch = 0, double yaw = 0, double gaz = 0);
+    void updateFlyControl(double roll = 0, double pitch = 0, double yaw = 0, double gaz = 0);
 
     std::string getConfiguration(const std::string& key);
     xcs::xci::InformationMap dumpConfiguration();

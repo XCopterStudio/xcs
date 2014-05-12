@@ -15,10 +15,10 @@ namespace control{
         static const double MAX_VALUE;
 
         // PID
-        xcs::PID<int, double> vxPID_;
-        xcs::PID<int, double> vyPID_;
-        xcs::PID<int, double> vzPID_;
-        xcs::PID<int, double> psiPID_;
+        xcs::PID<double, double> vxPID_;
+        xcs::PID<double, double> vyPID_;
+        xcs::PID<double, double> vzPID_;
+        xcs::PID<double, double> psiPID_;
 
         // Drone state
         xcs::CartesianVector velocity_;

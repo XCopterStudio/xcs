@@ -27,7 +27,7 @@ XXci::XXci(const std::string& name) :
   pitch("PITCH"),
   yaw("YAW"),
   gaz("GAZ"),
-  fly("FLY_CONTROL"),
+  flyControl("FLY_CONTROL"),
   command("COMMAND"),
   inited_(false),
   roll_(0),
@@ -40,14 +40,14 @@ XXci::XXci(const std::string& name) :
     XBindFunction(XXci, init);
     XBindFunction(XXci, xciInit);
     XBindFunction(XXci, doCommand);
-    XBindFunction(XXci, flyControl);
+    XBindFunction(XXci, updateFlyControl);
     XBindFunction(XXci, getConfiguration);
     XBindFunction(XXci, dumpConfiguration);
     XBindFunction(XXci, setConfiguration);
 
     XBindVarF(flyControlPersistence, &XXci::setFlyControlPersistence);
 
-    XBindVarF(fly, &XXci::onChangeFly);
+    XBindVarF(flyControl, &XXci::onChangeFly);
 
     XBindVarF(roll, &XXci::onChangeRoll);
     XBindVarF(pitch, &XXci::onChangePitch);
@@ -88,7 +88,7 @@ void XXci::doCommand(const std::string& command) {
     xci_->command(command);
 }
 
-void XXci::flyControl(double roll, double pitch, double yaw, double gaz) {
+void XXci::updateFlyControl(double roll, double pitch, double yaw, double gaz) {
     //TODO here should be lock to atomic update of RPYG
     roll_ = roll;
     pitch_ = pitch;
@@ -111,7 +111,7 @@ void XXci::setConfiguration(const std::string& key, const std::string& value) {
 }
 
 void XXci::onChangeFly(FlyControl fp) {
-    flyControl(fp.roll, fp.pitch, fp.yaw, fp.gaz);
+    updateFlyControl(fp.roll, fp.pitch, fp.yaw, fp.gaz);
 }
 
 void XXci::onChangeRoll(double roll) {

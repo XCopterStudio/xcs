@@ -2,6 +2,8 @@
 #define XCI_VREP_H
 
 #include <xcs/xci/xci.hpp>
+#include <xcs/types/cartesian_vector.hpp>
+#include <xcs/types/eulerian_vector.hpp>
 #include <thread>
 #include <atomic>
 #include <cmath>
@@ -16,13 +18,18 @@ namespace xci {
 namespace vrep{
 
     class XciVrep : public virtual XCI {
-        static const float MAX_ANGLE;
+        static const float POS_MULTI;
 
         int clientID_;
-        std::string name_;
+        std::string droneName_;
+        std::string targetName_;
         std::string address_;
         int portNumber_;        
         int droneHandler_;
+        int targetHandler_;
+
+        xcs::CartesianVector dronePosition_;
+        xcs::EulerianVector droneRotation_;
 
         std::atomic_bool endAll_;
 
@@ -31,7 +38,7 @@ namespace vrep{
         void updateSensors();
     public:
 
-        XciVrep(DataReceiver& dataReceiver, std::string name = "drone#", std::string address = "127.0.0.1", int portNumber = 19997);
+        XciVrep(DataReceiver& dataReceiver, std::string droneName = "Quadricopter#", std::string targetName = "Quadricopter_target#", std::string address = "127.0.0.1", int portNumber = 19997);
         ~XciVrep();
 
         std::string name() override;
