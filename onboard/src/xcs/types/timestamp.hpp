@@ -9,7 +9,7 @@
 
 namespace xcs {
 /*! Used to represent timestamp in milliseconds. */
-typedef long int Timestamp;
+typedef double Timestamp;
 }
 
 #endif	/* TIMESTAMP_HPP */

@@ -60,7 +60,7 @@ void XDataplayer::loadHeader() {
     while (true) {
         string line;
         getline(file_, line);
-        if (line.empty()) {
+        if (line.empty() || line == "\r") {
             break;
         }
         processHeaderLine(line);
@@ -107,7 +107,7 @@ void XDataplayer::loop() {
 
         // wait for it
         ts = stol(timestamp);
-        this_thread::sleep_for(chrono::milliseconds(ts - prevTs)); //TODO (consider already passed time)
+        this_thread::sleep_for(chrono::milliseconds(static_cast<int> ((ts - prevTs) * 1000))); //TODO (consider already passed time)
 
         // notify it
         processLogLine(name, ts);

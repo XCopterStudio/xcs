@@ -59,16 +59,16 @@ const string XObject::getSemType(const string& xVarName) const {
     return xVarsType_.at(xVarName).semType.name;
 }
 
-list<const string> XObject::getXVars() const {
+XObject::StringList XObject::getXVars() const {
     return getXChilds(XType::DATAFLOWTYPE_XVAR);
 }
 
-list<const string> XObject::getXInputPorts() const {
+XObject::StringList XObject::getXInputPorts() const {
     return getXChilds(XType::DATAFLOWTYPE_XINPUTPORT);
 }
 
-list<const string> XObject::getXChilds(const XType::DataFlowType dataFlowType) const {
-    list<const string> result;
+XObject::StringList XObject::getXChilds(const XType::DataFlowType dataFlowType) const {
+    XObject::StringList result;
 
     for (map<const string, XType>::const_iterator it = xVarsType_.cbegin(); it != xVarsType_.cend(); ++it) {
         if (it->second.dataFlowType == dataFlowType) {
