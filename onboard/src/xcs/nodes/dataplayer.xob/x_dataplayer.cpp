@@ -107,7 +107,7 @@ void XDataplayer::loop() {
 
         // wait for it
         ts = stol(timestamp);
-        this_thread::sleep_for(chrono::milliseconds(ts - prevTs)); //TODO (consider already passed time)
+        this_thread::sleep_for(chrono::milliseconds(static_cast<int> ((ts - prevTs) * 1000))); //TODO (consider already passed time)
 
         // notify it
         processLogLine(name, ts);

@@ -10,7 +10,7 @@ void AbstractWriter::basicInit(const std::string &dataName, LoggerContext &conte
 }
 
 void AbstractWriter::writeRecordBegin() {
-    auto time = duration_cast<milliseconds>(highResolutionClock_.now() - context_->startTime).count();
+    auto time = (double) duration_cast<milliseconds>(highResolutionClock_.now() - context_->startTime).count() / 1000;
 
     context_->file << time << "\t" << dataName_ << "\t";
 }
