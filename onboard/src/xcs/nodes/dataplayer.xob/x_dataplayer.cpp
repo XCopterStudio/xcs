@@ -91,7 +91,7 @@ void XDataplayer::processHeaderLine(const std::string &line) {
 }
 
 void XDataplayer::loop() {
-    string timestamp, name;
+    string name;
     Timestamp ts(0), prevTs(0);
 
     while (!endAll_) {
@@ -100,13 +100,12 @@ void XDataplayer::loop() {
             continue;
         }
         // load record header
-        file_ >> timestamp >> name;
+        file_ >> ts >> name;
         if (file_.eof()) {
             break;
         }
 
         // wait for it
-        ts = stol(timestamp);
         this_thread::sleep_for(chrono::milliseconds(static_cast<int> ((ts - prevTs) * 1000))); //TODO (consider already passed time)
 
         // notify it
