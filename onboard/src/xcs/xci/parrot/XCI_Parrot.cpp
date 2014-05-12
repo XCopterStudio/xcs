@@ -48,6 +48,7 @@ void XCI_Parrot::processVideoData(){
                 //cerr << "Video avframe [" << avFrame->width << "," << avFrame->height << "]" << endl;
                 BitmapTypeChronologic bitmap(avFrame->width, avFrame->height, avFrame->data[0],frame->timestamp);
                 dataReceiver_.notify("video",bitmap);
+                dataReceiver_.notify("internalTimeVideo", frame->timestamp);
             }
             //delete frame;
         }
@@ -199,11 +200,12 @@ SensorList XCI_Parrot::sensorList() {
     sensorList.push_back(Sensor("acceleration", "ACCELERATION"));
     sensorList.push_back(Sensor("gyro", "GYRO_RAW"));
     sensorList.push_back(Sensor("magneto", "MAGNETO_RAW"));
-    sensorList.push_back(Sensor("internalTime", "TIME_LOC"));
+    sensorList.push_back(Sensor("internalTimeIMU", "TIME_LOC"));
 
     sensorList.push_back(Sensor("altitude", "ALTITUDE"));
     sensorList.push_back(Sensor("battery", "BATTERY"));
     sensorList.push_back(Sensor("video", "VIDEO"));
+    sensorList.push_back(Sensor("internalTimeVideo", "TIME_LOC"));
 
     sensorList.push_back(Sensor("alive", "ALIVE"));
 

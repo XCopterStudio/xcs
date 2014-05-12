@@ -9,7 +9,7 @@ using namespace xcs;
 using namespace xcs::xci;
 using namespace xcs::xci::vrep;
 
-const float XciVrep::POS_MULTI = 1;
+const float XciVrep::POS_MULTI = 2;
 
 void XciVrep::updateSensors(){
     while (!endAll_){

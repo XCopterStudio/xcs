@@ -12,7 +12,7 @@ using namespace xcs::nodes::hermit;
 
 const unsigned int HermitMovement::POINTS_ON_METER = 100;
 const double HermitMovement::EPSILON = 0.1;
-const double HermitMovement::MAX_SPEED = 1;
+const double HermitMovement::MAX_SPEED = 0.3;
 
 double HermitMovement::computeDistance(const xcs::Checkpoint &targetCheckpoint, const xcs::CartesianVector &actualPosition){
     double temp = hypot(targetCheckpoint.x - actualPosition.x, targetCheckpoint.y - actualPosition.y);

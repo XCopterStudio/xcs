@@ -80,7 +80,7 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
                 lastFrame_->payload_size = parrotPave_.payload_size + lastFrame_->payload_offset;
                 lastFrame_->frame_number = parrotPave_.frame_number;
                 lastFrame_->frame_type = parrotPave_.frame_type;
-                lastFrame_->timestamp = parrotPave_.timestamp;
+                lastFrame_->timestamp = parrotPave_.timestamp / 1000.0;
                 lastFrame_->data = (uint8_t*)&buffer[index*BUFFER_SIZE + sizeof(VideoFrame)];
                 index = (index + 1) % BUFFER_COUNT;
                 //cerr << "index " << index << endl;

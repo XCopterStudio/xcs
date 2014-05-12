@@ -10,22 +10,14 @@ using namespace xcs;
 using namespace xcs::xci::parrot;
 
 void OptionVisitor::visit(NavdataDemo* demo){
-    /*dataReceiver_.notify("psi", miliDegreesToRadias(demo->psi));
-    dataReceiver_.notify("theta", miliDegreesToRadias(demo->theta));
-    dataReceiver_.notify("phi", miliDegreesToRadias(demo->phi));
-    dataReceiver_.notify("velocityX", demo->vx);
-    dataReceiver_.notify("velocityY", demo->vy);
-    dataReceiver_.notify("velocityZ", demo->vz);*/
-    EulerianVectorChronologic rotation(miliDegreesToRadias(demo->phi),
+    EulerianVector rotation(miliDegreesToRadias(demo->phi),
         miliDegreesToRadias(demo->theta),
-        miliDegreesToRadias(demo->psi),
-        0);
+        miliDegreesToRadias(demo->psi));
     dataReceiver_.notify("rotation", rotation);
 
-    CartesianVectorChronologic velocity(demo->vx / 1000.0,
+    CartesianVector velocity(demo->vx / 1000.0,
         demo->vy / 1000.0,
-        demo->vz / 1000.0,
-        0);
+        demo->vz / 1000.0);
     dataReceiver_.notify("velocity", velocity);
 
     dataReceiver_.notify("altitude", demo->altitude / 1000.0);
@@ -37,7 +29,7 @@ void OptionVisitor::visit(NavdataCks* cks){
 }
 
 void OptionVisitor::visit(NavdataTime* time){
-    dataReceiver_.notify("internalTime", (time->time >> 21) + ((time->time & 0x001FFFFF) / 1000.0));
+    dataReceiver_.notify("internalTimeIMU", (time->time >> 21) + ((time->time & 0x001FFFFF) / 1000000));
 }
 
 void OptionVisitor::visit(NavdataRawMeasures* rawMeasures){

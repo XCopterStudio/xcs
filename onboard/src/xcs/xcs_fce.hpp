@@ -4,7 +4,6 @@
 #include <cmath>
 
 namespace xcs{
-    
     /*!
     \param value is checked on interval [\param from, \param to]
     \param range set size of interval it should be positive number

@@ -1,4 +1,4 @@
-set(PROJECT_NAME ekf)
+set(PROJECT_NAME xekf)
 project(${PROJECT_NAME})
 
 file(GLOB SOURCES *.cpp)
@@ -13,3 +13,5 @@ use_urbi(${PROJECT_NAME})
 
 find_package(Armadillo)
 use_armadillo(${PROJECT_NAME})
+
+use_logging(${PROJECT_NAME})
