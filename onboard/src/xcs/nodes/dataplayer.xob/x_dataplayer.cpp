@@ -60,7 +60,7 @@ void XDataplayer::loadHeader() {
     while (true) {
         string line;
         getline(file_, line);
-        if (line.empty()) {
+        if (line.empty() || line == "\r") {
             break;
         }
         processHeaderLine(line);
