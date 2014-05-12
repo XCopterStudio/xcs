@@ -25,31 +25,22 @@ using namespace std;
 using namespace xcs;
 using namespace xcs::nodes::dataplayer;
 
-VideoPlayer::VideoPlayer(const string &filename) :
+VideoPlayer::VideoPlayer(const string &filename, const string &fontFile) :
   swsContext_(nullptr),
   hasPic_(false),
   timestamps_(false) {
-    init(filename, ""); // hot-fix (font is unused)
-}
-
-VideoPlayer::~VideoPlayer() {
-    if (hasPic_) {
-        avpicture_free(&pic_);
-    }
-}
-
-void VideoPlayer::init(const string &filename, const string &fontFile) {
     // register all codecs
     av_register_all();
 
-    // prepare context
-    avFormat_ = AVFormatContextPtr(avformat_alloc_context(), &avformat_free_context);
-
     // open file
     auto avFormatPtr = avFormat_.get();
-    if (avformat_open_input(&avFormatPtr, filename.c_str(), nullptr, nullptr) != 0) {
+    AVFormatContext* contextPtr = nullptr;
+    if (avformat_open_input(&contextPtr, filename.c_str(), nullptr, nullptr) != 0) { // avformat_open_input allocates format context
         throw runtime_error("Error while calling avformat_open_input (probably invalid file format, filename '" + filename + "')");
     }
+    
+    // prepare context
+    avFormat_ = AVFormatContextPtr(contextPtr, &avformat_free_context);
 
     if (avformat_find_stream_info(avFormat_.get(), nullptr) < 0) {
         throw runtime_error("Error while calling avformat_find_stream_info");
@@ -95,8 +86,14 @@ void VideoPlayer::init(const string &filename, const string &fontFile) {
 
     // prepare for decoding
     avFrame_ = AVFramePtr(avcodec_alloc_frame(), &av_free);
-    if (timestamps_) {
+    if (!fontFile.empty()) {
         initFilters("drawtext=fontcolor=white:fontfile=" + fontFile + ":text='%T'");
+    }
+}
+
+VideoPlayer::~VideoPlayer() {
+    if (hasPic_) {
+        avpicture_free(&pic_);
     }
 }
 

@@ -50,10 +50,11 @@ void XDataplayer::init(const std::string &filename) {
     }
     filename_ = filename;
 
+    loadHeader();
+
     dataLoopThread_ = move(thread(&XDataplayer::loop, this));
     videoDecodeThread_ = move(thread(&XDataplayer::videoDecoder, this));
 
-    loadHeader();
 }
 
 void XDataplayer::loadHeader() {
@@ -144,7 +145,7 @@ void XDataplayer::processLogLine(const std::string &channel, const Timestamp tim
 #define FILTER(Type) if (synType == #Type) {\
         frameInfo = Type::deserialize(file_);\
         Type frame = getFrame<Type>(channel, frameInfo);\
-        dataReceiver_.notify(channel, frame);\
+        /*dataReceiver_.notify(channel, frame);*/\
         }
             LIBPORT_LIST_APPLY(FILTER, XCS_VIDEO_TYPES);
 #undef FILTER

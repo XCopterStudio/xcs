@@ -71,13 +71,12 @@ struct Packet {
 
 class VideoPlayer {
 public:
-    VideoPlayer(const std::string &filename);
+    VideoPlayer(const std::string &filename, const std::string &fontFile = "");
     ~VideoPlayer();
     void rewind();
     xcs::BitmapType getFrame();
     size_t framePeriod();
     bool timestamps() const;
-
 
 private:
     typedef std::unique_ptr<AVFormatContext, std::function<void (AVFormatContext *) >> AVFormatContextPtr;
@@ -112,7 +111,6 @@ private:
     AVFilterContextPtr bufferSrc_;
     AVFilterGraphPtr filterGraph_;
 
-    void init(const std::string &filename, const std::string &fontFile);
 
     void initFilters(const std::string &filterDescription);
 
