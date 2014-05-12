@@ -13,19 +13,20 @@ namespace nodes {
 
 class XOBJECT_EXPORT XObject : public urbi::UObject {
 public:
+    typedef std::list<std::string> StringList;
     XObject(const std::string& name);
     virtual ~XObject();
     const std::string getType(const std::string& xVarName) const;
     const std::string getSynType(const std::string& xVarName) const;
     const std::string getSemType(const std::string& xVarName) const;
-    std::list<const std::string> getXVars() const;
-    std::list<const std::string> getXInputPorts() const;
+    StringList getXVars() const;
+    StringList getXInputPorts() const;
 protected:
     bool RegisterXVar(const std::string& xVarName, const XType& type);
     bool RegisterXInputPort(const std::string& xVarName, const XType& type);
 private:
     typedef std::map<const std::string, XType> XTypesType;
-    std::list<const std::string> getXChilds(const XType::DataFlowType dataFlowType) const;
+    StringList getXChilds(const XType::DataFlowType dataFlowType) const;
     bool RegisterXChild(const std::string& xVarName, const XType& type, const XType::DataFlowType dataFlowType);
     XTypesType xVarsType_;
 
