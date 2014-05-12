@@ -83,7 +83,7 @@ public:
      */
     void notify(const std::string& sensorName, xcs::BitmapType value) {
         nodes::SimpleXVar &xvar = getSensorXVar(sensorName);
-        auto bin = toUBinary(value);
+        auto bin = toUBinary(value); //TODO here is unnecessary copying-and-destroying of the binary data
 
         xvar = bin; // this will do deep copy of the image buffer
         bin.image.data = nullptr;
@@ -99,6 +99,8 @@ public:
      * 
      * The lock may be needed when multiple notifies at the moment
      * (e.g. *_BIND_THREADED macro was used and processing takes longer than "creation").         * 
+     * 
+     * \deprecated Use parallel channel to transfer proper timestamp of the frame.
      */
     void notify(const std::string& sensorName, xcs::BitmapTypeChronologic value) {
         nodes::SimpleXVar &xvar = getSensorXVar(sensorName);

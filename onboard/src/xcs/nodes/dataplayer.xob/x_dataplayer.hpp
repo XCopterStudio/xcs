@@ -127,27 +127,31 @@ private:
     void onCommand(const std::string &command);
 
     /*!
-     * Obtain ready frame from correct queue and prepare another job.
+     * Obtain ready frame from correct queue, notify it and prepare another job.
      */
     template<typename T>
-    T getFrame(const std::string &channel, FrameInfo frameInfo);
+    void notifyFrame(const std::string &channel, FrameInfo frameInfo);
 
 };
 
 template<>
-BitmapType XDataplayer::getFrame<BitmapType>(const std::string &channel, FrameInfo frameInfo) {
+void XDataplayer::notifyFrame<BitmapType>(const std::string &channel, FrameInfo frameInfo) {
     auto resultQueue = videoResults_.at(channel).get();
     auto frame = resultQueue->pop();
+    dataReceiver_.notify(channel, frame);
 
     auto nextFrameNumber = frameInfo.frameNumber + PRELOAD_OFFSET;
     videoJobs_.push(VideoJob(channel, nextFrameNumber));
-
-    return frame;
 }
 
 template<>
-BitmapTypeChronologic XDataplayer::getFrame<BitmapTypeChronologic>(const std::string &channel, FrameInfo frameInfo) {
-    return BitmapTypeChronologic(getFrame<BitmapType>(channel, frameInfo.frameTimestamp));
+void XDataplayer::notifyFrame<BitmapTypeChronologic>(const std::string &channel, FrameInfo frameInfo) {
+    auto resultQueue = videoResults_.at(channel).get();
+    auto frame = resultQueue->pop();
+    dataReceiver_.notify(channel, BitmapTypeChronologic(frame, frameInfo.frameTimestamp));
+
+    auto nextFrameNumber = frameInfo.frameNumber + PRELOAD_OFFSET;
+    videoJobs_.push(VideoJob(channel, nextFrameNumber));
 }
 
 

@@ -144,8 +144,7 @@ void XDataplayer::processLogLine(const std::string &channel, const Timestamp tim
 
 #define FILTER(Type) if (synType == #Type) {\
         frameInfo = Type::deserialize(file_);\
-        Type frame = getFrame<Type>(channel, frameInfo);\
-        /*dataReceiver_.notify(channel, frame);*/\
+        notifyFrame<Type>(channel, frameInfo);\
         }
             LIBPORT_LIST_APPLY(FILTER, XCS_VIDEO_TYPES);
 #undef FILTER
