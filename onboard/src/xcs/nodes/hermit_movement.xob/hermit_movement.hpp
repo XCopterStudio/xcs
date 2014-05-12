@@ -31,9 +31,9 @@ namespace hermit{
         xcs::EulerianVector droneRotation_;
 
         // command variable
-        std::atomic_bool clear_;
-        std::atomic_bool newCheckpoint_;
-        std::atomic_bool empty_;
+        std::atomic<bool> clear_;
+        bool newCheckpoint_;
+        bool empty_;
 
         // support functions
         double computeDistance(const xcs::Checkpoint &targetCheckpoint, const xcs::CartesianVector &actualPosition);
