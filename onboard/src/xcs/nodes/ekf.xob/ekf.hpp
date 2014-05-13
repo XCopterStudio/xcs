@@ -1,7 +1,7 @@
 #ifndef EKF_H
 #define EKF_H
 
-#include <queue>
+#include <deque>
 #include <utility>
 #include <random>
 #include <chrono>
@@ -22,6 +22,7 @@ namespace ekf{
         xcs::EulerianVector angles;
         double angularRotationPsi;
 
+        DroneState() : angularRotationPsi(0) {  };
         arma::mat getMat() const;
         void Mat(const arma::mat &mat);
     };
@@ -32,47 +33,49 @@ namespace ekf{
         double altitude;
         double angularRotationPsi;
 
+        DroneStateMeasurement() : altitude(0), angularRotationPsi(0){};
         arma::mat getMat() const;
     };
 
     typedef std::pair<DroneState, arma::mat> DroneStateDistribution;
-    typedef std::pair<DroneStateMeasurement, long int> MeasurementChronologic;
-    typedef std::pair<DroneStateDistribution, long int> DroneStateDistributionChronologic;
-    typedef std::pair<xcs::FlyControl, long int> FlyControlChronologic;
+    typedef std::pair<DroneStateMeasurement, double> MeasurementChronologic;
+    typedef std::pair<DroneStateDistribution, double> DroneStateDistributionChronologic;
+    typedef std::pair<xcs::FlyControl, double> FlyControlChronologic;
 
     // Measurement consist from measurement of the drone state and timestamp. Timestamp is the time in milliseconds when measurement was created.
-    typedef std::queue< MeasurementChronologic > Measurements;
+    typedef std::deque< MeasurementChronologic > Measurements;
     // Drone state consist from the drone state and timestamp. Timestamp is the time in milliseconds when drone state was created.
-    typedef std::queue< DroneStateDistributionChronologic > DroneStates;
+    typedef std::deque< DroneStateDistributionChronologic > DroneStates;
     // FlyControl consist from send fly controls and timestamp. Timestamp is the time in milliseconds when drone received fly controls.
-    typedef std::queue< FlyControlChronologic > FlyControls;
+    typedef std::deque< FlyControlChronologic > FlyControls;
 
     typedef std::mt19937 Generator;
     typedef std::normal_distribution<double> NormalDistribution;
 
-    typedef std::chrono::high_resolution_clock Clock;
-
     class Ekf{
         DroneStates droneStates_;
-        DroneStates droneStateDeviation_;
         Measurements measurements_;
         FlyControls flyControls_;
 
+        double lastStateTime; // Time of state which was fully computed from all available sensors.
         double parameters_[10];
 
         Generator randomGenerator_;
         NormalDistribution normalDistribution_;
 
-        std::chrono::high_resolution_clock::time_point startTime_;
+        template <typename Deque>
+        int findNearest(Deque &deque, const double &time);
+        template <typename Deque>
+        Deque findAllBetween(Deque &deque, const double &beginTime, const double &endTime);
+        DroneStateDistributionChronologic predictAndUpdateFromImu(const double &beginTime, const double &endTime);
 
         DroneStateDistribution predict(const DroneStateDistribution &state, const xcs::FlyControl &flyControl, const double &delta);
         DroneStateDistribution updateIMU(const DroneStateDistribution &state, const DroneStateMeasurement &imuMeasurement);
     public:
         Ekf();
-        void flyControl(const xcs::FlyControl &flyControl, const long int &timestamp);
-        void measurement(const DroneStateMeasurement &measurement, const long int &timestamp);
-        DroneStateDistribution predict();
-        
+        void flyControl(const xcs::FlyControl &flyControl, const double &timestamp);
+        void measurement(const DroneStateMeasurement &measurement, const double &timestamp);  
+        DroneState computeState(const double &time); // compute prediction state up to this time 
     };
 
 }}}

@@ -1,5 +1,7 @@
 #include "ekf.hpp"
 
+#include <xcs/logging.hpp>
+
 #include <cmath>
 
 using namespace std;
@@ -52,6 +54,96 @@ mat DroneStateMeasurement::getMat() const{
     return measurement;
 }
 
+template <typename Deque>
+int Ekf::findNearest(Deque &deque, const double &time){
+    int first = 0;
+    int last = deque.size() - 1;
+
+    // bisect interval
+    while ((first+1) != last && first != last){
+        int middle = (first + last) / 2;
+        if (deque[middle].second <= time){
+            first = middle;
+        }
+        else if (deque[middle].second > time){
+            last = middle;
+        }
+    }
+
+    if (deque[first].second > time){ // We do not have any elements in deque which time is lesser than input time
+        return -1;
+    }
+
+    return first;
+}
+
+// Result have to have first and last element with beginTime and endTime!!!
+template <typename Deque>
+Deque Ekf::findAllBetween(Deque &deque, const double &beginTime, const double &endTime){
+    Deque dequeOut;
+
+    int index = findNearest(deque, beginTime);
+    if (index < 0){
+        XCS_LOG_FATAL("EKF: We cannot find any flyControl with time lesser than beginTime.");
+    }
+    else{
+        // We set same time as beginTime for the first element in dequeOut
+        dequeOut.push_back(deque[index++]);
+        dequeOut.back().second == beginTime;
+
+        while (index < deque.size() && deque[index].second <= endTime){
+            dequeOut.push_back(deque[index++]);
+        }
+
+        if (deque.back().second != endTime){ // Ensure that we always have last element with endTime
+            dequeOut.push_back(deque.back()); 
+            dequeOut.back().second = endTime;
+        }
+    }
+    return dequeOut;
+}
+
+DroneStateDistributionChronologic Ekf::predictAndUpdateFromImu(const double &beginTime, const double &endTime){
+    int index = findNearest(droneStates_, beginTime);
+    
+    if (index >= 0){
+        DroneStateDistributionChronologic& updatedState = droneStates_[index];
+        FlyControls selectedflyControls = findAllBetween(flyControls_,updatedState.second,endTime);
+        Measurements selectedMeasurments = findAllBetween(measurements_, updatedState.second, endTime);
+        if (selectedMeasurments.front().second == updatedState.second){ // updatedState was created from first measurement in deque -> erase first
+            selectedMeasurments.pop_front();
+        }
+
+        double time = updatedState.second;
+        DroneStateDistribution state = updatedState.first;
+        do{
+            double measurementTime = selectedMeasurments.front().second;
+            double flyControlTime = time;
+            do{ // predict state up to the measurement time
+                double delta = std::min(selectedflyControls[1].second, measurementTime) - flyControlTime;
+                state = predict(state, selectedflyControls.front().first, delta);
+                if (selectedflyControls[1].second < measurementTime){
+                    flyControlTime = selectedflyControls[1].second;
+                    selectedflyControls.pop_front();
+                }
+            } while (selectedflyControls[1].second < measurementTime);
+            state = updateIMU(state, selectedMeasurments.front().first);
+            time = measurementTime;
+            selectedMeasurments.pop_front();
+        } while (time < endTime);
+
+        printf("EKF: Computed drone state [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]",
+            state.first.position.x, state.first.position.y, state.first.position.z,
+            state.first.velocity.x, state.first.velocity.x, state.first.velocity.x,
+            state.first.angles.phi, state.first.angles.theta, state.first.angles.psi,
+            state.first.angularRotationPsi);
+        return DroneStateDistributionChronologic(state,endTime);
+    }else{
+        XCS_LOG_FATAL("EKF: We cannot find any State for update step.");
+        return DroneStateDistributionChronologic();
+    }
+}
+
 DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const FlyControl &flyControl, const double &delta){
     DroneStateDistribution predictedState = state;
     const CartesianVector &positionOld = state.first.position;
@@ -100,40 +192,40 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     predictedState.first.angularRotationPsi += angularRotation.psi*delta;
     // =========== end predict new state ========
 
-    // create jacobian matrix 
+    // create jacobian matrix // TODO: check 
     mat jacobian(10, 10, fill::zeros);
     // position x
     jacobian(0, 0) = 1;
-    jacobian(3, 0) = delta;
+    jacobian(0, 3) = delta;
     // position y
     jacobian(1, 1) = 1;
-    jacobian(4, 1) = delta;
+    jacobian(1, 4) = delta;
     // position z
     jacobian(2, 2) = 1;
-    jacobian(5, 2) = delta;
+    jacobian(2, 5) = delta;
     // velocity x
     jacobian(3, 3) = 1 - parameters_[2] * delta - parameters_[3] * 2 * delta * velocityOld.x;
-    jacobian(6, 3) = delta*force * (
+    jacobian(3, 6) = delta*force * (
         cos(anglesOld.phi) * cos(anglesOld.psi) * cos(anglesOld.theta) 
         );
-    jacobian(7, 3) = delta*force * (
+    jacobian(3, 7) = delta*force * (
         -sin(anglesOld.phi) * cos(anglesOld.psi) * sin(anglesOld.theta)
         -sin(anglesOld.psi) * cos(anglesOld.theta)
         );
-    jacobian(8, 3) = delta*force * (
+    jacobian(3, 8) = delta*force * (
         -sin(anglesOld.phi) * sin(anglesOld.psi) * cos(anglesOld.theta)
         -cos(anglesOld.psi) * sin(anglesOld.theta)
         );
     // velocity y
     jacobian(4, 4) = 1 - parameters_[2] * delta - parameters_[3] * 2 * delta * velocityOld.y;
-    jacobian(6, 4) = delta*force * (
+    jacobian(4, 6) = delta*force * (
         -cos(anglesOld.phi) * sin(anglesOld.psi) * cos(anglesOld.theta)
         );
-    jacobian(7, 4) = delta*force * (
+    jacobian(4, 7) = delta*force * (
         sin(anglesOld.phi) * sin(anglesOld.psi) * sin(anglesOld.theta)
         - cos(anglesOld.psi) * cos(anglesOld.theta)
         );
-    jacobian(8, 4) = delta*force * (
+    jacobian(4, 8) = delta*force * (
         -sin(anglesOld.phi) * cos(anglesOld.psi) * cos(anglesOld.theta)
         + sin(anglesOld.psi) * sin(anglesOld.theta)
         );
@@ -145,28 +237,28 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     jacobian(7, 7) = 1 - delta*parameters_[5];
     // angle psi
     jacobian(8, 8) = 1;
-    jacobian(9, 8) = delta;
+    jacobian(8, 9) = delta;
     // rotation speed psi
     jacobian(9, 9) = 1 - delta*parameters_[7];
 
     // normal noise
-    mat noiseTransf(4, 10, fill::zeros);
+    mat noiseTransf(10, 4, fill::zeros);
     // gaz
-    noiseTransf(3, 5) = delta * parameters_[8];
+    noiseTransf(5, 3) = delta * parameters_[8];
     // phi
-    noiseTransf(0, 6) = delta * parameters_[4];
+    noiseTransf(6, 0) = delta * parameters_[4];
     // theta
-    noiseTransf(1, 7) = delta * parameters_[4];
+    noiseTransf(7, 1) = delta * parameters_[4];
     // rotation speed psi
-    noiseTransf(2, 9) = delta * parameters_[6];
+    noiseTransf(9, 2) = delta * parameters_[6];
 
     // ======= predict state deviation ===========
 
-    mat noise(4, 4, fill::zeros);
-    noise(0, 0) = normalDistribution_(randomGenerator_) * flyControl.roll * flyControl.roll;
-    noise(1, 1) = normalDistribution_(randomGenerator_) * flyControl.pitch * flyControl.pitch;
-    noise(2, 2) = normalDistribution_(randomGenerator_) * flyControl.yaw * flyControl.yaw;
-    noise(3, 3) = normalDistribution_(randomGenerator_) * flyControl.gaz * flyControl.gaz;
+    mat noise(4, 4, fill::zeros); // TODO: compute better noise
+    noise(0, 0) = normalDistribution_(randomGenerator_) * 0.25;
+    noise(1, 1) = normalDistribution_(randomGenerator_) * 0.25;
+    noise(2, 2) = normalDistribution_(randomGenerator_) * 0.25;
+    noise(3, 3) = normalDistribution_(randomGenerator_) * 0.25;
 
     predictedState.second = jacobian * state.second * jacobian.t() + noiseTransf * noise * noiseTransf.t();
 
@@ -201,15 +293,15 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     // psi
     measurementJacobian(6, 9) = 1;
 
-    // additional noise 
+    // additional noise // TODO: compute better values
     mat noise(7, 7, fill::zeros);
-    noise(0, 0) = normalDistribution_(randomGenerator_) * imuMeasurement.altitude * imuMeasurement.altitude;
-    noise(1, 1) = normalDistribution_(randomGenerator_) * imuMeasurement.velocity.x * imuMeasurement.velocity.x;
-    noise(2, 2) = normalDistribution_(randomGenerator_) * imuMeasurement.velocity.y * imuMeasurement.velocity.y;
-    noise(3, 3) = normalDistribution_(randomGenerator_) * imuMeasurement.velocity.z * imuMeasurement.velocity.z;
-    noise(4, 4) = normalDistribution_(randomGenerator_) * imuMeasurement.angles.phi * imuMeasurement.angles.phi;
-    noise(5, 5) = normalDistribution_(randomGenerator_) * imuMeasurement.angles.theta * imuMeasurement.angles.theta;
-    noise(6, 6) = normalDistribution_(randomGenerator_) * imuMeasurement.angularRotationPsi * imuMeasurement.angularRotationPsi;
+    noise(0, 0) = normalDistribution_(randomGenerator_) * 0.25;
+    noise(1, 1) = normalDistribution_(randomGenerator_) * 0.25;
+    noise(2, 2) = normalDistribution_(randomGenerator_) * 0.25;
+    noise(3, 3) = normalDistribution_(randomGenerator_) * 0.25;
+    noise(4, 4) = normalDistribution_(randomGenerator_) * 0.25;
+    noise(5, 5) = normalDistribution_(randomGenerator_) * 0.25;
+    noise(6, 6) = normalDistribution_(randomGenerator_) * 0.25;
 
     // compute kalman gain
     mat gain = state.second * measurementJacobian.t() * (measurementJacobian * state.second * measurementJacobian.t() + noise).i();
@@ -218,8 +310,8 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     mat predictedMeasurment(7, 1, fill::zeros);
     predictedMeasurment(0, 0) = state.first.position.z;
     predictedMeasurment(1, 0) = state.first.velocity.x * cos(state.first.angles.psi) 
-        - state.first.velocity.y * sin(state.first.angles.psi);
-    predictedMeasurment(2, 0) = state.first.velocity.x * sin(state.first.angles.psi)
+        + state.first.velocity.y * sin(state.first.angles.psi);
+    predictedMeasurment(2, 0) = - state.first.velocity.x * sin(state.first.angles.psi)
         + state.first.velocity.y * cos(state.first.angles.psi);
     predictedMeasurment(3, 0) = state.first.velocity.z;
     predictedMeasurment(4, 0) = state.first.angles.phi;
@@ -239,15 +331,41 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
 // =========================== public functions ============================
 
 Ekf::Ekf() : 
-randomGenerator_(5),
-startTime_(Clock::now()){
+randomGenerator_(5){
+
+    // add default element in all queue
+    lastStateTime = 0;
+    flyControls_.push_back(FlyControlChronologic(FlyControl(),0));
+    measurements_.push_back(MeasurementChronologic(DroneStateMeasurement(),0));
+    droneStates_.push_back(DroneStateDistributionChronologic(
+        DroneStateDistribution(DroneState(), arma::mat(10, 10, fill::eye)),
+        0));
+
+    // Constants taken from tum_ardrone 
+    parameters_[0] = 0.58;
+    parameters_[1] = 0; // TODO: compute
+    parameters_[2] = 17.8;
+    parameters_[3] = 0; // TODO: compute
+    parameters_[4] = 10;
+    parameters_[5] = 35;
+    parameters_[6] = 10;
+    parameters_[7] = 25;
+    parameters_[8] = 1.4;
+    parameters_[9] = 1.0;
 
 }
 
-void Ekf::flyControl(const FlyControl &flyControl, const long int &timestamp){
-    flyControls_.push(FlyControlChronologic(flyControl, timestamp));
+void Ekf::flyControl(const FlyControl &flyControl, const double &timestamp){
+    XCS_LOG_INFO("Inserted new flyControl with timestamp: " << timestamp);
+    flyControls_.push_back(FlyControlChronologic(flyControl, timestamp));
 };
 
-void Ekf::measurement(const DroneStateMeasurement &measurement, const long int &timestamp){
-    measurements_.push(MeasurementChronologic(measurement, timestamp));
+void Ekf::measurement(const DroneStateMeasurement &measurement, const double &timestamp){
+    XCS_LOG_INFO("Inserted new imu measurement with timestamp: " << timestamp);
+    measurements_.push_back(MeasurementChronologic(measurement, timestamp));
+    droneStates_.push_back(predictAndUpdateFromImu(timestamp, timestamp));
 };
+
+DroneState Ekf::computeState(const double &time){
+    return DroneState();
+}
