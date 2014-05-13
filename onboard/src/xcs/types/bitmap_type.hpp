@@ -44,27 +44,6 @@ struct BitmapType {
     }
 };
 
-struct BitmapTypeChronologic : public BitmapType {
-    Timestamp time;
-
-    BitmapTypeChronologic(const size_t width = 0, const size_t height = 0, uint8_t * const data = nullptr, Timestamp time = -1) :
-      BitmapType(width, height, data),
-      time(time) {
-    }
-
-    BitmapTypeChronologic(const BitmapType &bitmap, Timestamp time = -1) :
-      BitmapType(bitmap), time(time) {
-    }
-
-    template<typename T>
-            static FrameInfo deserialize(T &stream) {
-        int frameNumber;
-        Timestamp time;
-        stream >> frameNumber >> time;
-        return FrameInfo(frameNumber, time);
-    }
-};
-
 }
 
 #endif	/* BITMAPTYPE_HPP */

@@ -158,7 +158,6 @@ xcs::BitmapType VideoPlayer::getFrame() {
                 throw runtime_error("Error while calling sws_getContext");
             }
             sws_scale(swsContext_, avFrame_->data, avFrame_->linesize, 0, avFrame_->height, pic_.data, pic_.linesize);
-
             // format result
             return BitmapType(avFrame_->width, avFrame_->height, pic_.data[0]);
         }

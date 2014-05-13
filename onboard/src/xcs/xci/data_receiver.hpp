@@ -27,9 +27,6 @@ private:
     /*! We are owners of the UVars, kept in the name indexed map. */
     OutputsType outputs_;
 
-    /*! See hack notify() overload for xcs::BitmapTypeChronologic */
-    std::mutex bitmapLock_;
-
     nodes::SimpleXVar &getSensorXVar(const std::string& sensorName) const {
         auto it = outputs_.find(sensorName);
         if (it == outputs_.end()) {
@@ -38,31 +35,7 @@ private:
         return *(it->second);
     }
 
-    urbi::UBinary toUBinary(const xcs::BitmapType &value) const {
-        urbi::UBinary bin;
-        bin.type = urbi::BINARY_IMAGE;
-        bin.image.width = value.width;
-        bin.image.height = value.height;
-        bin.image.size = value.width * value.height * 3;
-        bin.image.imageFormat = urbi::IMAGE_RGB;
-        bin.image.data = value.data;
-        return bin;
-    }
 
-    /*!
-     * Creates UBinary that caries no data. It's only used to smuggle single number
-     * (beware size_t vs. Timestamp) to the image receiver.
-     */
-    urbi::UBinary stowawayUBinary(const xcs::BitmapTypeChronologic &value) const {
-        urbi::UBinary bin;
-        bin.type = urbi::BINARY_IMAGE;
-        bin.image.width = value.time;
-        bin.image.height = 0;
-        bin.image.size = 0;
-        bin.image.imageFormat = urbi::IMAGE_RGB;
-        bin.image.data = nullptr;
-        return bin;
-    }
 
 public:
 
@@ -83,34 +56,18 @@ public:
      */
     void notify(const std::string& sensorName, xcs::BitmapType value) {
         nodes::SimpleXVar &xvar = getSensorXVar(sensorName);
-        auto bin = toUBinary(value); //TODO here is unnecessary copying-and-destroying of the binary data
+
+        // Prepare the binary
+        urbi::UBinary bin;
+        bin.type = urbi::BINARY_IMAGE;
+        bin.image.width = value.width;
+        bin.image.height = value.height;
+        bin.image.size = value.width * value.height * 3;
+        bin.image.imageFormat = urbi::IMAGE_RGB;
+        bin.image.data = value.data;
 
         xvar = bin; // this will do deep copy of the image buffer
-        bin.image.data = nullptr;
-    }
-
-    /*!
-     * This overload is a very ugly hack because of memory managment of binary data
-     * and timestamp notification (cannot encapsulate pointer and timestamp 
-     * in one struct correctly).
-     * 
-     * We send the timestamp in advance to the same UVar/InputPort and
-     * it's receiver's responsibility to handle it properly.
-     * 
-     * The lock may be needed when multiple notifies at the moment
-     * (e.g. *_BIND_THREADED macro was used and processing takes longer than "creation").         * 
-     * 
-     * \deprecated Use parallel channel to transfer proper timestamp of the frame.
-     */
-    void notify(const std::string& sensorName, xcs::BitmapTypeChronologic value) {
-        nodes::SimpleXVar &xvar = getSensorXVar(sensorName);
-        auto stBin = stowawayUBinary(value);
-        auto bin = toUBinary(value);
-
-        std::lock_guard<std::mutex> lock(bitmapLock_);
-        xvar = stBin;
-        xvar = bin; // this will do deep copy of the image buffer
-        bin.image.data = nullptr;
+        bin.image.data = nullptr; // not to deallocate in dtor
     }
 
     /*!

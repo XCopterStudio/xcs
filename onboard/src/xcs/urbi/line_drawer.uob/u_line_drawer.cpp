@@ -71,9 +71,6 @@ int ULineDrawer::update() {
 
 void ULineDrawer::onChangeVideo(::urbi::UVar& uvar) {
     lastFrame_ = uvar;
-    if (lastFrame_.size == 0) { //!* \see xcs::xci::DataReceiver::notify(const std::string&, xcs::BitmapTypeChronologic).
-        return;
-    }
     hasFrame_ = true;
     lineUtils_.setDimensions(lastFrame_.width, lastFrame_.height);
     lineUtils_.updateReferencePoint(theta, phi, cameraParam);

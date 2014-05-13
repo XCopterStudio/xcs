@@ -6,8 +6,7 @@ using namespace xcs::nodes::datalogger;
 
 VideoWriter::VideoWriter(const std::string &name) :
   AbstractWriter(name),
-  frameNumber_(0),
-  lastTimestamp_(-1) {
+  frameNumber_(0) {
     avframe_ = avcodec_alloc_frame();
 }
 
@@ -25,23 +24,12 @@ void VideoWriter::write(urbi::UImage image) {
     if (!context_->enabled) {
         return;
     }
-    /*!
-     * For explanation of timestamp transfer
-     * \see xcs::xci::DataReceiver::notify(const std::string&, xcs::BitmapTypeChronologic).
-     */
-    if (image.size == 0) {
-        lastTimestamp_ = image.width;
-        return;
-    }
 
     {
         std::lock_guard<std::mutex> lck(context_->lock);
         writeRecordBegin();
 
         context_->file << frameNumber_++;
-        if (lastTimestamp_ > -1) {
-            context_->file << " " << lastTimestamp_;
-        }
         context_->file << endl;
     }
 

@@ -121,9 +121,6 @@ void ULineFinder::setLineDrawer(UObject *drawer) {
 
 void ULineFinder::onChangeVideo(::urbi::UVar& uvar) {
     lastFrame_ = uvar;
-    if (lastFrame_.size == 0) { //!* \see xcs::xci::DataReceiver::notify(const std::string&, xcs::BitmapTypeChronologic).
-        return;
-    }
     hasFrame_ = true;
     lastReceivedFrameNo_ += 1;
     stuckCounter_ = 0;

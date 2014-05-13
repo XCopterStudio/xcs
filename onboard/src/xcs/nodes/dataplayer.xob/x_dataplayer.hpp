@@ -128,6 +128,7 @@ private:
 
     /*!
      * Obtain ready frame from correct queue, notify it and prepare another job.
+     * Templating is legacy from BitmapTypeChronologic.
      */
     template<typename T>
     void notifyFrame(const std::string &channel, FrameInfo frameInfo);
@@ -139,16 +140,6 @@ void XDataplayer::notifyFrame<BitmapType>(const std::string &channel, FrameInfo 
     auto resultQueue = videoResults_.at(channel).get();
     auto frame = resultQueue->pop();
     dataReceiver_.notify(channel, frame);
-
-    auto nextFrameNumber = frameInfo.frameNumber + PRELOAD_OFFSET;
-    videoJobs_.push(VideoJob(channel, nextFrameNumber));
-}
-
-template<>
-void XDataplayer::notifyFrame<BitmapTypeChronologic>(const std::string &channel, FrameInfo frameInfo) {
-    auto resultQueue = videoResults_.at(channel).get();
-    auto frame = resultQueue->pop();
-    dataReceiver_.notify(channel, BitmapTypeChronologic(frame, frameInfo.frameTimestamp));
 
     auto nextFrameNumber = frameInfo.frameNumber + PRELOAD_OFFSET;
     videoJobs_.push(VideoJob(channel, nextFrameNumber));

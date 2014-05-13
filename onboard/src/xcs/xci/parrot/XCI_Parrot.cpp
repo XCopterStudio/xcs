@@ -46,7 +46,7 @@ void XCI_Parrot::processVideoData(){
             if (videoDecoder_.decodeVideo(&avPacket)){
                 AVFrame* avFrame = videoDecoder_.decodedFrame();
                 //cerr << "Video avframe [" << avFrame->width << "," << avFrame->height << "]" << endl;
-                BitmapTypeChronologic bitmap(avFrame->width, avFrame->height, avFrame->data[0],frame->timestamp);
+                BitmapType bitmap(avFrame->width, avFrame->height, avFrame->data[0]);
                 dataReceiver_.notify("video",bitmap);
                 dataReceiver_.notify("internalTimeVideo", frame->timestamp);
             }

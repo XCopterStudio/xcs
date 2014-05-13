@@ -27,8 +27,7 @@
         xcs::Checkpoint, )
 
 #define XCS_VIDEO_TYPES LIBPORT_LIST( \
-        xcs::BitmapType, \
-        xcs::BitmapTypeChronologic , )
+        xcs::BitmapType, )
 
 namespace xcs {
 

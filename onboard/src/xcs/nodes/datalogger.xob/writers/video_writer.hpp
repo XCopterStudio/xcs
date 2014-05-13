@@ -4,7 +4,6 @@
 #include <string>
 #include <urbi/uobject.hh>
 
-#include <xcs/types/timestamp.hpp>
 
 #include "../logger_context.hpp"
 #include "video_file_writer.hpp"
@@ -17,7 +16,6 @@ namespace datalogger {
 
 class VideoWriter : public AbstractWriter {
     unsigned int frameNumber_;
-    Timestamp lastTimestamp_;
     AVFrame* avframe_;
     std::unique_ptr<VideoFileWriter> videoFileWriter_;
 
