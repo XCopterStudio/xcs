@@ -175,19 +175,19 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     // =========== predict new state ============
     // position
     CartesianVector &position = predictedState.first.position;
-    position.x += velocityOld.x*delta + acceleration.x*delta*delta / 2.0;
-    position.y += velocityOld.y*delta + acceleration.y*delta*delta / 2.0;
-    position.z += velocityOld.z*delta + acceleration.z*delta*delta / 2.0;
+    position.x += velocityOld.x*delta;
+    position.y += velocityOld.y*delta;
+    position.z += velocityOld.z*delta;
     // velocity
     CartesianVector &velocity = predictedState.first.velocity;
-    velocity.x += delta*acceleration.x;
-    velocity.y += delta*acceleration.y;
-    velocity.z += delta*acceleration.z;
+    velocity.x += acceleration.x*delta;
+    velocity.y += acceleration.y*delta;
+    velocity.z += acceleration.z*delta;
     // angles
     EulerianVector &angles = predictedState.first.angles;
     angles.phi += angularRotation.phi*delta;
     angles.theta += angularRotation.theta*delta;
-    angles.psi += state.first.angularRotationPsi*delta + angularRotation.psi*delta*delta / 2.0;
+    angles.psi += state.first.angularRotationPsi*delta;
     // angular rotation psi
     predictedState.first.angularRotationPsi += angularRotation.psi*delta;
     // =========== end predict new state ========
@@ -243,6 +243,12 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
 
     // normal noise
     mat noiseTransf(10, 4, fill::zeros);
+    noiseTransf(3, 3) = delta*parameters_[0] * parameters_[1] * (
+        cos(anglesOld.psi)*sin(anglesOld.phi)*cos(anglesOld.theta)
+        -sin(anglesOld.psi)*sin(anglesOld.theta));
+    noiseTransf(4, 3) = delta*parameters_[0] * parameters_[1] * (
+        -sin(anglesOld.psi)*sin(anglesOld.phi)*cos(anglesOld.theta)
+        -cos(anglesOld.psi)*sin(anglesOld.theta));
     // gaz
     noiseTransf(5, 3) = delta * parameters_[8];
     // phi
@@ -255,10 +261,10 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     // ======= predict state deviation ===========
 
     mat noise(4, 4, fill::zeros); // TODO: compute better noise
-    noise(0, 0) = normalDistribution_(randomGenerator_) * 0.25;
-    noise(1, 1) = normalDistribution_(randomGenerator_) * 0.25;
-    noise(2, 2) = normalDistribution_(randomGenerator_) * 0.25;
-    noise(3, 3) = normalDistribution_(randomGenerator_) * 0.25;
+    noise(0, 0) = normalDistribution_(randomGenerator_) * 0.01;
+    noise(1, 1) = normalDistribution_(randomGenerator_) * 0.01;
+    noise(2, 2) = normalDistribution_(randomGenerator_) * 0.01;
+    noise(3, 3) = normalDistribution_(randomGenerator_) * 0.01;
 
     predictedState.second = jacobian * state.second * jacobian.t() + noiseTransf * noise * noiseTransf.t();
 
@@ -295,13 +301,13 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
 
     // additional noise // TODO: compute better values
     mat noise(7, 7, fill::zeros);
-    noise(0, 0) = normalDistribution_(randomGenerator_) * 0.25;
-    noise(1, 1) = normalDistribution_(randomGenerator_) * 0.25;
-    noise(2, 2) = normalDistribution_(randomGenerator_) * 0.25;
-    noise(3, 3) = normalDistribution_(randomGenerator_) * 0.25;
-    noise(4, 4) = normalDistribution_(randomGenerator_) * 0.25;
-    noise(5, 5) = normalDistribution_(randomGenerator_) * 0.25;
-    noise(6, 6) = normalDistribution_(randomGenerator_) * 0.25;
+    noise(0, 0) = normalDistribution_(randomGenerator_) * 0.0025;
+    noise(1, 1) = normalDistribution_(randomGenerator_) * 0.01;
+    noise(2, 2) = normalDistribution_(randomGenerator_) * 0.01;
+    noise(3, 3) = normalDistribution_(randomGenerator_) * 0.01;
+    noise(4, 4) = normalDistribution_(randomGenerator_) * 0.003;
+    noise(5, 5) = normalDistribution_(randomGenerator_) * 0.003;
+    noise(6, 6) = normalDistribution_(randomGenerator_) * 0.003;
 
     // compute kalman gain
     mat gain = state.second * measurementJacobian.t() * (measurementJacobian * state.second * measurementJacobian.t() + noise).i();
@@ -310,8 +316,8 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     mat predictedMeasurment(7, 1, fill::zeros);
     predictedMeasurment(0, 0) = state.first.position.z;
     predictedMeasurment(1, 0) = state.first.velocity.x * cos(state.first.angles.psi) 
-        + state.first.velocity.y * sin(state.first.angles.psi);
-    predictedMeasurment(2, 0) = - state.first.velocity.x * sin(state.first.angles.psi)
+        - state.first.velocity.y * sin(state.first.angles.psi);
+    predictedMeasurment(2, 0) =  state.first.velocity.x * sin(state.first.angles.psi)
         + state.first.velocity.y * cos(state.first.angles.psi);
     predictedMeasurment(3, 0) = state.first.velocity.z;
     predictedMeasurment(4, 0) = state.first.angles.phi;
