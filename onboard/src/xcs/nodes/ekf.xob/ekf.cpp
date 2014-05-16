@@ -55,12 +55,16 @@ mat DroneStateMeasurement::getMat() const{
 }
 
 template <typename Deque>
-int Ekf::findNearest(Deque &deque, const double &time){
+int Ekf::findNearest(Deque &deque, const double &time){ // TODO: error rewrite !!!
+    if (deque.front().second > time){ // We do not have any elements in deque which time is lesser than input time
+        return -1;
+    }
+
     int first = 0;
     int last = deque.size() - 1;
-
+    // TODO: Instead of testing first != last in every loop use before loop simple test if dequeu have only one element?
     // bisect interval
-    while ((first+1) != last && first != last){
+    while (first != last ){ 
         int middle = (first + last) / 2;
         if (deque[middle].second <= time){
             first = middle;
@@ -68,10 +72,6 @@ int Ekf::findNearest(Deque &deque, const double &time){
         else if (deque[middle].second > time){
             last = middle;
         }
-    }
-
-    if (deque[first].second > time){ // We do not have any elements in deque which time is lesser than input time
-        return -1;
     }
 
     return first;
@@ -89,7 +89,7 @@ Deque Ekf::findAllBetween(Deque &deque, const double &beginTime, const double &e
     else{
         // We set same time as beginTime for the first element in dequeOut
         dequeOut.push_back(deque[index++]);
-        dequeOut.back().second == beginTime;
+        dequeOut.back().second = beginTime;
 
         while (index < deque.size() && deque[index].second <= endTime){
             dequeOut.push_back(deque[index++]);
@@ -132,11 +132,16 @@ DroneStateDistributionChronologic Ekf::predictAndUpdateFromImu(const double &beg
             selectedMeasurments.pop_front();
         } while (time < endTime);
 
-        printf("EKF: Computed drone state [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]",
+        printf("EKF: Computed drone state [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
             state.first.position.x, state.first.position.y, state.first.position.z,
             state.first.velocity.x, state.first.velocity.x, state.first.velocity.x,
             state.first.angles.phi, state.first.angles.theta, state.first.angles.psi,
             state.first.angularRotationPsi);
+        printf("EKF: Deviation drone state [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
+            state.second[0, 0], state.second[1, 1], state.second[2, 2],
+            state.second[3, 3], state.second[4, 4], state.second[5, 5],
+            state.second[6, 6], state.second[7, 7], state.second[8, 8],
+            state.second[9, 9]);
         return DroneStateDistributionChronologic(state,endTime);
     }else{
         XCS_LOG_FATAL("EKF: We cannot find any State for update step.");
@@ -192,7 +197,7 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     predictedState.first.angularRotationPsi += angularRotation.psi*delta;
     // =========== end predict new state ========
 
-    // create jacobian matrix // TODO: check 
+    // create jacobian matrix
     mat jacobian(10, 10, fill::zeros);
     // position x
     jacobian(0, 0) = 1;

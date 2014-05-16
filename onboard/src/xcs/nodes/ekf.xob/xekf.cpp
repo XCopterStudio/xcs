@@ -1,18 +1,19 @@
 #include "xekf.hpp"
 #include <limits>
 #include <xcs/logging.hpp>
+#include <xcs/xcs_fce.hpp>
 
 using namespace xcs::nodes;
 
 const double XEkf::IMU_DELAY = 0.060; // 60ms
-const double XEkf::FLY_CONTROL_SEND_TIME = 0.40; // 40ms
+const double XEkf::FLY_CONTROL_SEND_TIME = 0.040; // 40ms
 
 void XEkf::onChangeVelocity(xcs::CartesianVector measuredVelocity){
     lastMeasurement_.velocity = measuredVelocity;
 }
 
 void XEkf::onChangeRotation(xcs::EulerianVector measuredAnglesRotation){
-    lastMeasurement_.angularRotationPsi = measuredAnglesRotation.psi - lastMeasurement_.angles.psi;
+    lastMeasurement_.angularRotationPsi = xcs::normAngle(measuredAnglesRotation.psi - lastMeasurement_.angles.psi);
     lastMeasurement_.angles = measuredAnglesRotation;
 }
 
@@ -25,9 +26,10 @@ void XEkf::onChangeTimeImu(double timeImu){
     if (imuTimeShift_ == std::numeric_limits<double>::max()){
         imuTimeShift_ = timeImu - timeFromStart();
     }
+
     double actualTime = timeImu - imuTimeShift_ - IMU_DELAY;
     lastMeasurement_.angularRotationPsi /= (actualTime - lastMeasurementTime_);
-    ekf_.measurement(lastMeasurement_, timeImu - imuTimeShift_ - IMU_DELAY); // TODO: compute measurement time delay
+    ekf_.measurement(lastMeasurement_, actualTime); // TODO: compute measurement time delay
 }
 
 void XEkf::onChangeFlyControl(xcs::FlyControl flyControl){
