@@ -22,7 +22,9 @@ namespace ekf{
         xcs::EulerianVector angles;
         double angularRotationPsi;
 
-        DroneState() : angularRotationPsi(0) {  };
+        unsigned int updateMeasurementID;
+
+        DroneState() : angularRotationPsi(0), updateMeasurementID(0) {  };
         arma::mat getMat() const;
         void Mat(const arma::mat &mat);
     };
@@ -33,7 +35,9 @@ namespace ekf{
         double altitude;
         double angularRotationPsi;
 
-        DroneStateMeasurement() : altitude(0), angularRotationPsi(0){};
+        unsigned int measurementID;
+
+        DroneStateMeasurement() : altitude(0), angularRotationPsi(0), measurementID(0){};
         arma::mat getMat() const;
     };
 
@@ -57,19 +61,20 @@ namespace ekf{
         Measurements measurements_;
         FlyControls flyControls_;
 
-        double lastStateTime; // Time of state which was fully computed from all available sensors.
         double parameters_[10];
+        unsigned int IDCounter_;
 
         Generator randomGenerator_;
         NormalDistribution normalDistribution_;
 
         template <typename Deque>
         int findNearest(Deque &deque, const double &time);
-        template <typename Deque>
-        Deque findAllBetween(Deque &deque, const double &beginTime, const double &endTime);
+        int findMeasurementIndex(const int &ID);
+
+        void predict(DroneStateDistribution& state, const double& beginTime, const double &endTime); // predict from state up to end time
         DroneStateDistributionChronologic predictAndUpdateFromImu(const double &beginTime, const double &endTime);
 
-        DroneStateDistribution predict(const DroneStateDistribution &state, const xcs::FlyControl &flyControl, const double &delta);
+        DroneStateDistribution predict(const DroneStateDistribution &state, const xcs::FlyControl &flyControl, const double &delta); // predict only one step
         DroneStateDistribution updateIMU(const DroneStateDistribution &state, const DroneStateMeasurement &imuMeasurement);
     public:
         Ekf();

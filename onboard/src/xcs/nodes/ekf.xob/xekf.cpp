@@ -18,7 +18,7 @@ void XEkf::onChangeRotation(xcs::EulerianVector measuredAnglesRotation){
 }
 
 void XEkf::onChangeAltitude(double altitude){
-    lastMeasurement_.velocity.z = altitude - lastAltitude_;
+    lastMeasurement_.velocity.z = (altitude - lastAltitude_);
     lastMeasurement_.altitude = altitude;
 }
 
@@ -28,6 +28,7 @@ void XEkf::onChangeTimeImu(double timeImu){
     }
 
     double actualTime = timeImu - imuTimeShift_ - IMU_DELAY;
+    lastMeasurement_.velocity.z /= (actualTime - lastMeasurementTime_);
     lastMeasurement_.angularRotationPsi /= (actualTime - lastMeasurementTime_);
     ekf_.measurement(lastMeasurement_, actualTime); // TODO: compute measurement time delay
 }
