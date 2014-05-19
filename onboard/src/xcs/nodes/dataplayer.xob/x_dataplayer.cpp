@@ -93,7 +93,7 @@ void XDataplayer::processHeaderLine(const std::string &line) {
 
 void XDataplayer::loop() {
     string name;
-    Timestamp ts(0), prevTs(0);
+    Timestamp ts(0);
 
     while (!endAll_) {
         if (!isPlaying_) {
@@ -106,12 +106,14 @@ void XDataplayer::loop() {
             break;
         }
 
+        auto actualTime = Clock::now();
+        int sleepTime = ts*1000000 - std::chrono::duration_cast<std::chrono::microseconds>(actualTime - startTime_).count();
         // wait for it
-        this_thread::sleep_for(chrono::milliseconds(static_cast<int> ((ts - prevTs) * 1000))); //TODO (consider already passed time)
+        if (sleepTime > 0)
+        this_thread::sleep_for(chrono::microseconds(sleepTime)); //TODO implement pause functionality
 
         // notify it
         processLogLine(name, ts);
-        prevTs = ts;
     }
     XCS_LOG_INFO("Log play finished.");
 }
@@ -181,6 +183,7 @@ void XDataplayer::videoDecoder() {
 void XDataplayer::onCommand(const std::string &command) {
     if (command == CMD_PLAY) {
         isPlaying_ = true;
+        startTime_ = Clock::now();
     } else if (command == CMD_PAUSE) {
         isPlaying_ = false;
     }

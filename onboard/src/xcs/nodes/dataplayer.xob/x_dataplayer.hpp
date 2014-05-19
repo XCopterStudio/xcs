@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <atomic>
 #include <memory>
+#include <chrono>
 
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
@@ -53,6 +54,8 @@ private:
     typedef xcs::Tsqueue<VideoJob> VideoJobsQueue;
     typedef xcs::Tsqueue<xcs::BitmapType> VideoResultQueue;
     typedef std::map<std::string, std::unique_ptr<VideoResultQueue >> VideoResultQueueMap;
+    typedef std::chrono::high_resolution_clock Clock;
+    typedef std::chrono::time_point<Clock> TimePoint;
 
     const static std::string CMD_PLAY;
     const static std::string CMD_PAUSE;
@@ -89,6 +92,8 @@ private:
 
     /*! Do we produce data? */
     std::atomic<bool> isPlaying_;
+
+    TimePoint startTime_;
 
     /*! Thread control (termination). */
     std::atomic<bool> endAll_;
