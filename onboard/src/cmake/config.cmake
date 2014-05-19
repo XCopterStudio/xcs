@@ -3,12 +3,13 @@
 #
 
 # Paths
-set(URBI_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/urbi)
-set(URBI_D_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/urbi_d)
-set(LIBAV_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/libav)
-set(OPENCV_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/opencv)
 set(BLAS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/blas)
 set(LAPACK_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/lapack)
+set(LIBAV_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/libav)
+set(OPENCV_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/opencv)
+set(PTAM_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/ptam)
+set(URBI_D_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/urbi_d)
+set(URBI_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/urbi)
 set(VREP_REMOTE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/vrep-remote)
 
 
