@@ -36,8 +36,8 @@ enum PlaybackMode {
 class XDataplayer : public xcs::nodes::XObject {
 public:
 
-    XDataplayer(const std::string& filename);
-    ~XDataplayer();
+    XDataplayer(const std::string& name);
+    virtual ~XDataplayer();
 
     urbi::UVar playbackModeUVar;
     urbi::UVar playbackSpeedUVar;
