@@ -1,29 +1,29 @@
 #include <boost/property_tree/info_parser.hpp>
-#include "x_settings.hpp"
+#include "settings.hpp"
 
 using namespace std;
 using namespace xcs;
 
-XSettings::XSettings(const string& filename) :
+Settings::Settings(const string& filename) :
     filename_(filename) {
     reset();
 }
 
-XSettings::~XSettings() {
+Settings::~Settings() {
 }
 
-void XSettings::reset() {
+void Settings::reset() {
     if (isInit()) {
         boost::property_tree::info_parser::read_info(filename_, settings_);
     }
 }
 
-void XSettings::reset(const string& filename) {
+void Settings::reset(const string& filename) {
     filename_ = filename;
     reset();
 }
 
-bool XSettings::save() {
+bool Settings::save() {
     if (isInit()) {
         boost::property_tree::info_parser::write_info(filename_, settings_);
         return true;
@@ -32,10 +32,10 @@ bool XSettings::save() {
     return false;            
 }
 
-boost::property_tree::ptree& XSettings::getTree() {
+boost::property_tree::ptree& Settings::getTree() {
     return settings_;
 }
 
-bool XSettings::isInit() const {
+bool Settings::isInit() const {
     return !filename_.empty();
 }

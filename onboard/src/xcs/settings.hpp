@@ -1,5 +1,5 @@
-#ifndef X_SETTINGS_HPP
-#define X_SETTINGS_HPP
+#ifndef SETTINGS_HPP
+#define SETTINGS_HPP
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/info_parser.hpp>
@@ -8,10 +8,10 @@
 
 namespace xcs {
 
-class XCS_EXPORT XSettings {
+class XCS_EXPORT Settings {
 public:
-    XSettings(const std::string& filename = "");
-    ~XSettings();
+    Settings(const std::string& filename = "");
+    ~Settings();
     void reset();
     void reset(const std::string& filename);
     template<class Type = std::string>
@@ -29,19 +29,19 @@ private:
 };
 
 template<class Type>
-Type XSettings::get(const std::string& path, const Type& defaultValue) const {
+Type Settings::get(const std::string& path, const Type& defaultValue) const {
     return settings_.get<Type>(path, defaultValue);
 }
 
 template<class Type>
-Type XSettings::get(const std::string& path) const {
+Type Settings::get(const std::string& path) const {
     return settings_.get<Type>(path);
 }
 
 template<class Type = std::string>
-void XSettings::set(const std::string& path, const Type& value) {
+void Settings::set(const std::string& path, const Type& value) {
     settings_.put(path, value);
 }
 }
 
-#endif // X_SETTINGS_HPP
+#endif // SETTINGS_HPP
