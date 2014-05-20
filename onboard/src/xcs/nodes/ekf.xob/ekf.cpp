@@ -196,17 +196,17 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     double force = parameters_[0] * (1.0 + parameters_[1] * flyControl.gaz);
     double forceX = force * sin(anglesOld.phi)*cos(anglesOld.theta);
     double forceY = -force * sin(anglesOld.theta);
-    printf("EKF: Force [%f,%f] \n",forceX,forceY);
+    //printf("EKF: Force [%f,%f] \n",forceX,forceY);
     // drag
     double dragX = parameters_[2] * velocityOld.x + parameters_[3] * velocityOld.x * velocityOld.x;
     double dragY = parameters_[2] * velocityOld.y + parameters_[3] * velocityOld.y * velocityOld.y;
-    printf("EKF: Drag[%f,%f] \n", dragX,dragY);
+    //printf("EKF: Drag[%f,%f] \n", dragX,dragY);
     // drone acceleration in global frame
     CartesianVector acceleration;
     acceleration.x = (cos(anglesOld.psi)*forceX + sin(anglesOld.psi)*forceY) - dragX;
     acceleration.y = (-sin(anglesOld.psi)*forceX + cos(anglesOld.psi)*forceY) - dragY;
     acceleration.z = parameters_[8] * flyControl.gaz - parameters_[9] * velocityOld.z;
-    printf("EKF: Acceleration [%f,%f,%f] \n", acceleration.x, acceleration.y, acceleration.z);
+    //printf("EKF: Acceleration [%f,%f,%f] \n", acceleration.x, acceleration.y, acceleration.z);
 
     // angular rotation speed
     EulerianVector angularRotation;
@@ -514,7 +514,6 @@ void Ekf::measurementCam(const CameraMeasurement &measurement, const double &tim
 
 DroneState Ekf::computeState(const double &time){
     int index = findNearest(droneStates_, time);
-    DroneStateDistribution state = droneStates_[index].first;
-    predict(state, droneStates_[index].second, time);
-    return state.first;
+    DroneStateDistributionChronologic state = droneStates_[index];
+    return predict(state, time).first.first;
 }

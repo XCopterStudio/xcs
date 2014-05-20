@@ -4,6 +4,7 @@
 #include <xcs/xcs_fce.hpp>
 
 using namespace xcs::nodes;
+using namespace xcs::nodes::ekf;
 
 const double XEkf::IMU_DELAY = 0.040; // 40ms
 const double XEkf::FLY_CONTROL_SEND_TIME = 0.075; // 75ms
@@ -34,6 +35,12 @@ void XEkf::onChangeTimeImu(double timeImu){
     lastMeasurement_.angularRotationPsi /= (actualTime - lastMeasurementTime_);
     ekf_.measurementImu(lastMeasurement_, actualTime); // TODO: compute measurement time delay
     //printf("Measurement time %f actual time %f \n", actualTime, timeFromStart());
+
+    // update actual position of drone
+    DroneState state = ekf_.computeState(timeFromStart());
+    position = state.position;
+    velocity = state.velocity;
+    rotation = state.angles;
 }
 
 void XEkf::onChangePosition(xcs::CartesianVector measuredPosition){
@@ -47,6 +54,12 @@ void XEkf::onChangeAngles(xcs::EulerianVector measuredAngles){
 void XEkf::onChangeTimeCam(double timeCam){
     double time = timeCam - imuTimeShift_ - CAM_DELAY;
     ekf_.measurementCam(lastCameraMeasurement_, time);
+
+    // update actual position of drone
+    DroneState state = ekf_.computeState(timeFromStart());
+    position = state.position;
+    velocity = state.velocity;
+    rotation = state.angles;
 }
 
 void XEkf::onChangeClearTime(double time){
