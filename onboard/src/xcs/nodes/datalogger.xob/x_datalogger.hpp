@@ -52,7 +52,7 @@ class XDatalogger : public xcs::nodes::XObject {
 
 public:
     XDatalogger(const std::string& name);
-    ~XDatalogger();
+    virtual ~XDatalogger();
 
     void init(const std::string &file);
     void start();

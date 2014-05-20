@@ -22,11 +22,14 @@ namespace nodes{
     class XEkf : public XObject{
         static const double IMU_DELAY;
         static const double FLY_CONTROL_SEND_TIME;
+        static const double CAM_DELAY;
 
         ekf::Ekf ekf_;
-        double lastAltitude_;
+
         ekf::DroneStateMeasurement lastMeasurement_;
         double lastMeasurementTime_;
+
+        ekf::CameraMeasurement lastCameraMeasurement_;
 
         Clock clock_;
         TimePoint startTime_;
@@ -38,6 +41,13 @@ namespace nodes{
         // change time after you change all imu measurements (velocity etc.) 
         // because this add new imu measurement in ekf queue
         void onChangeTimeImu(double timeImu); 
+
+        void onChangePosition(xcs::CartesianVector measuredPosition);
+        void onChangeAngles(xcs::EulerianVector measuredAngles);
+        void onChangeTimeCam(double timeCam);
+
+        void onChangeClearTime(double time);
+
         void onChangeFlyControl(xcs::FlyControl flyControl);
 
         inline double timeFromStart(){ return std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -48,6 +58,12 @@ namespace nodes{
         XInputPort<xcs::EulerianVector> measuredAnglesRotation;
         XInputPort<double> measuredAltitude;
         XInputPort<double> timeImu;
+        // cam measurements
+        XInputPort<xcs::CartesianVector> measuredPosition;
+        XInputPort<xcs::EulerianVector> measuredAngles;
+        XInputPort<double> timeCam;
+        // clear channel
+        XInputPort<double> clearTime;
         // drone fly control
         XInputPort<xcs::FlyControl> flyControl;
 
