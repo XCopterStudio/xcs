@@ -45,6 +45,7 @@ add_subdirectory(xcs/nodes/hermit_movement.xob)
 add_subdirectory(xcs/nodes/onboard.xob)
 add_subdirectory(xcs/nodes/xci.xob)
 add_subdirectory(xcs/nodes/xobject)
+add_subdirectory(xcs/nodes/settings.xob)
 
 # Subprojects (urbiscript)
 #add_subdirectory(../urbiscript ./urbiscript)
