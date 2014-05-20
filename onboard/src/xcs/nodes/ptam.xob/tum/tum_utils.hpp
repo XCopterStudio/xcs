@@ -3,12 +3,29 @@
 
 #include <TooN/TooN.h>
 #include <TooN/so3.h>
+#include <chrono>
 
 namespace xcs {
 namespace nodes {
 namespace ptam {
 
 class TumUtils {
+private:
+    /* TODO Those are only dummy values to have compilable/linkable code.
+     They should be properly obtained from EKF.
+     */
+    constexpr static double yaw = 0;
+    
+    constexpr static double x_offset = 0;
+    constexpr static double y_offset = 0;
+    constexpr static double z_offset = 0;
+    
+    constexpr static double roll_offset = 0;
+    constexpr static double pitch_offset = 0;
+    constexpr static double yaw_offset = 0;
+    
+    constexpr static double xy_scale = 1;
+    constexpr static double z_scale = 1;
 public:
 
     static TooN::Vector<3> transformPTAMObservation(double x, double y, double z);
@@ -80,6 +97,11 @@ inline static void rod2rpy(TooN::SO3<> trans, double* roll, double* pitch, doubl
     while (*roll < -180) *roll += 360;
     while (*yaw > 180) *yaw -= 360;
     while (*yaw < -180) *yaw += 360;
+}
+
+template<typename RepT, typename DurationT>
+inline static double duration2sec(const std::chrono::duration<RepT, DurationT> &duration) {
+    return (double) std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count() / 1e9;
 }
 }
 }

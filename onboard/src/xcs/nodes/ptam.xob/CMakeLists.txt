@@ -1,8 +1,8 @@
 set(PROJECT_NAME xptam)
 project(${PROJECT_NAME})
 
-file(GLOB SOURCES *.cpp)
-file(GLOB HEADERS *.hpp)
+file(GLOB SOURCES *.cpp tum/*.cpp)
+file(GLOB HEADERS *.hpp tum/*.hpp tum/*.h)
 
 include_directories(${PTAM_ROOT}/include)
 find_library(PTAM_LIBRARIES ptam PATHS ${PTAM_ROOT}/lib)

@@ -15,7 +15,9 @@ var nodeList = [
     "xcs",
     "onboard",
     "xxci",
-    "xdatalogger"
+    "xdatalogger",
+    "xdataplayer",
+    "xptam"
 ];
 
 moduleList += nodeList;

@@ -23,6 +23,8 @@
 #include "Predictor.h"
 #include "tum_utils.hpp"
 
+using namespace xcs::nodes::ptam;
+
 const TooN::SE3<double> Predictor::droneToBottom = TooN::SE3<double>(TooN::SO3<double>(TooN::makeVector(3.14159265,0,0)),TooN::makeVector(0,0,0));
 const TooN::SE3<double> Predictor::bottomToDrone = Predictor::droneToBottom.inverse();
 
@@ -121,7 +123,7 @@ void Predictor::predictOneStep(const xcs::Timestamp timestamp, const double alti
 	double dxDrone = velocity.x * timespan / 1000000000;	// in meters
 	double dyDrone = velocity.y * timespan / 1000000000;	// in meters
 
-	double yawRad = (nfo->rotZ/1000.0) / (180.0/3.1415);
+	double yawRad = (rotation.psi/1000.0) / (180.0/3.1415); // TODO units
 	x += sin(yawRad)*dxDrone+cos(yawRad)*dyDrone;
 	y += cos(yawRad)*dxDrone-sin(yawRad)*dyDrone;
 

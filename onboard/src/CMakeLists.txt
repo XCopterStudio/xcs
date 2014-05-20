@@ -43,7 +43,7 @@ add_subdirectory(xcs/nodes/dataplayer.xob)
 add_subdirectory(xcs/nodes/ekf.xob)
 add_subdirectory(xcs/nodes/hermit_movement.xob)
 add_subdirectory(xcs/nodes/onboard.xob)
-#add_subdirectory(xcs/nodes/ptam.xob)
+add_subdirectory(xcs/nodes/ptam.xob)
 add_subdirectory(xcs/nodes/xci.xob)
 add_subdirectory(xcs/nodes/xobject)
 
