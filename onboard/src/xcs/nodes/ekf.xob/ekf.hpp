@@ -41,13 +41,20 @@ namespace ekf{
         arma::mat getMat() const;
     };
 
+    struct CameraMeasurement{
+        xcs::CartesianVector position;
+        xcs::EulerianVector angles;
+
+        arma::mat getMat() const;
+    };
+
     typedef std::pair<DroneState, arma::mat> DroneStateDistribution;
-    typedef std::pair<DroneStateMeasurement, double> MeasurementChronologic;
+    typedef std::pair<DroneStateMeasurement, double> ImuMeasurementChronologic;
     typedef std::pair<DroneStateDistribution, double> DroneStateDistributionChronologic;
     typedef std::pair<xcs::FlyControl, double> FlyControlChronologic;
 
     // Measurement consist from measurement of the drone state and timestamp. Timestamp is the time in milliseconds when measurement was created.
-    typedef std::deque< MeasurementChronologic > Measurements;
+    typedef std::deque< ImuMeasurementChronologic > ImuMeasurements;
     // Drone state consist from the drone state and timestamp. Timestamp is the time in milliseconds when drone state was created.
     typedef std::deque< DroneStateDistributionChronologic > DroneStates;
     // FlyControl consist from send fly controls and timestamp. Timestamp is the time in milliseconds when drone received fly controls.
@@ -58,7 +65,7 @@ namespace ekf{
 
     class Ekf{
         DroneStates droneStates_;
-        Measurements measurements_;
+        ImuMeasurements imuMeasurements_;
         FlyControls flyControls_;
 
         double parameters_[10];
@@ -68,18 +75,24 @@ namespace ekf{
         NormalDistribution normalDistribution_;
 
         template <typename Deque>
+        void clearUpToTime(Deque &deque, const double &time);
+
+        template <typename Deque>
         int findNearest(Deque &deque, const double &time);
         int findMeasurementIndex(const int &ID);
 
-        void predict(DroneStateDistribution& state, const double& beginTime, const double &endTime); // predict from state up to end time
-        DroneStateDistributionChronologic predictAndUpdateFromImu(const double &beginTime, const double &endTime);
+        DroneStateDistributionChronologic predict(const DroneStateDistributionChronologic& state, const double &endTime); // predict from state up to end time
+        DroneStateDistributionChronologic predictAndUpdateFromImu(const DroneStateDistributionChronologic& state, const double &endTime, bool saveInterResults = false);
 
         DroneStateDistribution predict(const DroneStateDistribution &state, const xcs::FlyControl &flyControl, const double &delta); // predict only one step
         DroneStateDistribution updateIMU(const DroneStateDistribution &state, const DroneStateMeasurement &imuMeasurement);
+        DroneStateDistribution updateCam(const DroneStateDistribution &state, const CameraMeasurement &camMeasurement);
     public:
         Ekf();
+        void clearUpToTime(const double timestamp);
         void flyControl(const xcs::FlyControl &flyControl, const double &timestamp);
-        void measurement(const DroneStateMeasurement &measurement, const double &timestamp);  
+        void measurementImu(const DroneStateMeasurement &measurement, const double &timestamp);  
+        void measurementCam(const CameraMeasurement &measurement, const double &timestamp);
         DroneState computeState(const double &time); // compute prediction state up to this time 
     };
 
