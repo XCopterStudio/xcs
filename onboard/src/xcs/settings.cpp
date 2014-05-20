@@ -39,3 +39,7 @@ boost::property_tree::ptree& Settings::getTree() {
 bool Settings::isInit() const {
     return !filename_.empty();
 }
+
+bool Settings::contains(const string& path) const {
+    return settings_.count(path) > 0;
+}

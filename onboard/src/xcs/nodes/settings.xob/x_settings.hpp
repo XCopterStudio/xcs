@@ -19,6 +19,7 @@ public:
     void set(const std::string& path, const std::string& value);
     void setAndSave(const std::string& path, const std::string& value);
     bool save();
+    bool contains(const std::string& path);
 private:
     xcs::Settings settings_;
 };

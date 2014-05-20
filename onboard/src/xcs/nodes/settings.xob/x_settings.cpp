@@ -4,9 +4,6 @@
 using namespace xcs::nodes;
 using namespace std;
 
-namespace xcs {
-namespace nodes {
-
 XSettings::XSettings(const std::string &name) :
     xcs::nodes::XObject(name) {
     XBindFunction(XSettings, init);
@@ -15,6 +12,7 @@ XSettings::XSettings(const std::string &name) :
     XBindFunction(XSettings, set);
     XBindFunction(XSettings, setAndSave);
     XBindFunction(XSettings, save);
+    XBindFunction(XSettings, contains);
 }
 
 void XSettings::init(const string& filepath) {
@@ -42,7 +40,8 @@ bool XSettings::save() {
     return settings_.save();
 }
 
-}
+bool XSettings::contains(const string& path) {
+    return settings_.contains(path);
 }
 
 XStart(XSettings);

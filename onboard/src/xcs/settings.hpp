@@ -23,6 +23,7 @@ public:
     boost::property_tree::ptree& getTree();
     bool isInit() const;
     bool save();
+    bool contains(const std::string& path) const;
 private:
     boost::property_tree::ptree settings_;
     std::string filename_;
