@@ -48,7 +48,7 @@ Predictor::~Predictor(void)
 {
 }
 
-void Predictor::calcCombinedTransformations()
+ void Predictor::calcCombinedTransformations()
 {
 	globalToFront = droneToFront * globaltoDrone;
 	globalToBottom = droneToBottom * globaltoDrone;
