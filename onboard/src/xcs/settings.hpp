@@ -12,17 +12,26 @@ class XCS_EXPORT Settings {
 public:
     Settings(const std::string& filename = "");
     ~Settings();
+    
     void reset();
+    
     void reset(const std::string& filename);
+    
     template<class Type = std::string>
     Type get(const std::string& path, const Type& defaultValue) const;
+    
     template<class Type = std::string>
     Type get(const std::string& path) const;
+    
     template<class Type = std::string>
     void set(const std::string& path, const Type& value);
+    
     boost::property_tree::ptree& getTree();
+    
     bool isInit() const;
+    
     bool save();
+    
     bool contains(const std::string& path) const;
 private:
     boost::property_tree::ptree settings_;
@@ -39,7 +48,7 @@ Type Settings::get(const std::string& path) const {
     return settings_.get<Type>(path);
 }
 
-template<class Type = std::string>
+template<class Type>
 void Settings::set(const std::string& path, const Type& value) {
     settings_.put(path, value);
 }
