@@ -21,7 +21,7 @@ public:
     Type get(const std::string& key) const;    
     template<class Type = std::string>
     std::map<std::string, Type> getMap(const std::string& key) const;
-    template<class Type = std::string>
+    template<class Type>
     void set(const std::string& key, const Type& value);
     boost::property_tree::ptree& getTree();
     bool isInit() const;
