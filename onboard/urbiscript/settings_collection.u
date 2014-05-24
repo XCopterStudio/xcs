@@ -1,0 +1,56 @@
+class SettingsCollection {
+    var xobjectsSettings_ = [];
+
+    function init(settingPaths) {
+        load(settingPaths);
+    };
+
+    // read config 4 all xobjects
+    function load(settingPaths) {
+        // empty old settings
+        xobjectsSettings_.clear();
+
+        // read new settings
+        for(var path: settingPaths) {
+            //echo("read settings file: " + path.asString());
+            xobjectsSettings_ << XSettings.new(path.asString());
+        };
+    };
+
+    function containsPath(path) {
+        var key = path.basename().split(".").front();
+        return contains(key);
+    };
+
+    function contains(key) {
+        for(var setting: xobjectsSettings_) {
+            if(setting.contains(key)) {
+                return true;
+            };
+        };      
+        return false;
+    };
+
+    function getOrDefault(key, defaultValue) {
+        for(var setting: xobjectsSettings_) {
+            if(setting.contains(key)) {
+                return setting.get(key);
+            };
+        };
+
+        return defaultValue;
+    };
+
+    function getMap(key) {
+        var map = [ => ];
+        for(var setting: xobjectsSettings_) {
+            var m = setting.getMap(key);
+            if(!m.isNil) {
+                for(var child: m) {
+                    map[child.first] = child.second;
+                };
+            };
+        };
+        return map;
+    };
+} |;
