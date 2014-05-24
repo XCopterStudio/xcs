@@ -1,17 +1,23 @@
-//System.system("start cmd.exe /k \"node d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/server/server.js\"")|;
-//sleep(2s);
+System.system("start cmd.exe /k \"node d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/server/server.js\"")|;
+sleep(2s);
 
 class Onboard {
     var loadedXObjects_ = [ => ];   // list of pairs (loaded xobjects, copies)
+    var loadedPrivateObjects_ = [ => ];   // list of pairs (loaded uobjects, copies)
+    var privateObjects_ = [];        // objects, which are not visible for user
     var dataFlowGraph_ = "";        // data flow graph
     var dfgCommStarted_ = false;    // data flow graph communication started
     var onboardSender_;
+    var xobjectsSettings_;
 
     function init() {
         echo("init...");
 
+        loadSettings_();
+
         loadCore_();
 
+        // initialize onboard sender 4 communication with server
         var adapter = Adapter.new();
         adapter.start("127.0.0.1", 1234);
         this.onboardSender_ = OnboardSender.new(adapter, UJson);
@@ -23,7 +29,13 @@ class Onboard {
         //DEBUG: test send dataflow graph data
         //this.dataFlowGraph_ = "<xml><block type=\"connect\" id=\"2\" x=\"148\" y=\"385\"><field name=\"XOB1\">subject</field><field name=\"XVAR1\">out</field><field name=\"XOB2\">observer</field><field name=\"XVAR2\">in</field></block></xml>";
         //this.dataFlowGraph_ = "test data flow graph";
-        //this.loadedXObjects_["xci"] = ["xci_dodo", "xci_parrot"];
+        
+
+        this.loadedXObjects_["xxci"] = ["xci_dodooo"];
+        //sleep(1s);
+        //this.loadedXObjects_["xci"] = ["xci1", "xci2"];
+        
+
         //this.loadedXObjects_["xci"] = ["xciiiiiiiiii_dodo", "xciiiiiiiiiiii_parrot"];
         //stopDfgCommunication();
         //this.dataFlowGraph_ = "test 2 data flow graph";
@@ -46,6 +58,59 @@ class Onboard {
         //xobjects = xos;
         //// load wanted xobjects
         //loadXObjects_(xobjects);
+        //echo(Onboard.localSlotNames());
+
+        /// SETTINGS
+        //var this.settings = XSettings.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/projects/onboard/lib/Release/onboard.xs");
+        //echo(">>>" + this.settings.getOrDefault("test1", "aaaaaaa"));
+        //echo(">>>" + this.settings.getOrDefault("section1.test2", "bbbbbb"));
+        //echo(">>>" + this.settings.getOrDefault("test3", "cccccc"));
+        //echo(">>>" + this.settings.getOrDefault("test4", "ddddddd"));
+        ////echo(">>>" + this.settings.get("test5"));
+        ////this.settings.setAndSave("test5", "tramtadaaaaaaaaaaa");
+        //echo(">>>" + this.settings.get("test5"));
+
+        //var settings = XSettings.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/xsetting/xobjects.xs");
+        //echo(">>>" + settings.getOrDefault("onboard", "???"));
+        //echo(">>>" + settings.getOrDefault("onboarddddd", "???"));
+        //echo(">>>" + settings.contains("onboard"));
+        //echo(">>>" + settings.contains("onboarddddd"));
+        //echo(">>>" + settings.contains("onboard.name"));
+        //echo(">>>" + settings.contains("onboard.init"));
+        //echo(">>>" + settings.getOrDefault("onboard.name", "XXX"));
+        //echo(">>>" + settings.getOrDefault("onboard.init", "XXX"));
+
+        //echo(">>>" + this.xobjectsSettings_.getOrDefault("onboard", "???"));
+        //echo(">>>" + this.xobjectsSettings_.getOrDefault("onboarddddd", "???"));
+        //echo(">>>" + this.xobjectsSettings_.contains("onboard"));
+        //echo(">>>" + this.xobjectsSettings_.contains("onboarddddd"));
+
+        ///
+        /// Debug: create new clone by settings
+        ///
+
+        //var initText = 
+        //    this.xobjectsSettings_.getOrDefault("onboard.name", "onboard") + 
+        //    ".new(" + 
+        //        this.xobjectsSettings_.getOrDefault("onboard.init", "") + 
+        //    ");";
+        //echo(">>>" + initText);
+
+        //echo(">>>" + this.xobjectsSettings_.contains("onboard.name"));
+        //echo(">>>" + this.xobjectsSettings_.contains("onboard.init"));
+
+
+        ///
+        /// read multiple init settings
+        ///
+
+        //var m = this.xobjectsSettings_.getMap("xxci.init");
+        ////var m = this.xobjectsSettings_.getMap("oonboard.init");
+        //echo("........................");
+        //for(var i: m) {
+        //    echo(i.first + " => " + i.second); 
+        //};
+        //echo("........................");
     };
 
     // initialize sending information about data flow graph
@@ -69,15 +134,62 @@ class Onboard {
                     var pData = [ => ];
 
                     try {
-                        //TODO: transform module name 2 xobject name - read from ini file?
+                    //TODO: transform module name 2 xobject name - read from ini file?
 
-                        //echo("----------------- " + p.first().asString());
-                        //var xvars = System.eval(p.first().asString() + ".getXVars()");
-                        //echo(xvars.asString());
+                        //var xvarName = p.first().asString();
 
-                        //var xinputPorts = System.eval(p.first().asString() + ".getXInputPorts()");
-                        //echo(xinputPorts.asString());
-                        //echo("++++++++++++++++++ ");
+
+                        //var xvarNames = [];
+                        
+                        //var xvarName = p.first().asString();
+                        //xvarNames << xvarName;
+                        
+                        //var xvarNameParths = xvarName.split("_");
+                        //xvarName = "";
+                        //for(var parth: xvarNameParths) {
+                        //    if(parth.size() > 0) {
+                        //        xvarName = xvarName + parth[0].toUpper();
+                        //        xvarName = xvarName + parth[1, parth.size()];
+                        //    };
+                        //};
+                        //xvarNames << xvarName;
+
+                        //var xvarFound = false;
+                        //for(var name: xvarNames) {
+                        //    echo("----------------- " + name);
+                            
+                        //    xvarFound = false;
+                        //    try {
+                        //        var xvars = System.eval(name + ".getXVars()");
+                        //        echo(xvars.asString());
+
+                        //        var xinputPorts = System.eval(name + ".getXInputPorts()");
+                        //        echo(xinputPorts.asString());
+                        //        xvarFound = true;
+                        //    }
+                        //    catch(var ex) {
+                        //        echo(name + " not found");
+                        //        xvarFound = false;
+                        //    };
+
+                        //    echo("++++++++++++++++++ ");
+
+                        //    if(xvarFound) {
+                        //        break;
+                        //    };
+                        //};
+
+                        var key = p.first().asString();
+                        echo("----------------------------------------------------------");
+                        try {
+                            var name = this.xobjectsSettings_.getOrDefault(key + ".name", key);
+                            var xvars = System.eval(name + ".getXVars()");
+                            echo(xvars.asString());
+                        }
+                        catch(var ex) {
+                            echo(key + " not found: " + ex.asString());
+                        };
+                        
                     
 
                         //pData["name"] = ...;
@@ -102,6 +214,23 @@ class Onboard {
 
     function stopDfgCommunication() {
         this.dfgCommStarted_ = false;
+    };
+
+    function loadScripts_(uscriptList) {
+        for(var script: uscriptList) {
+            this.loadScript_(script);
+        };
+    };
+
+    function loadScript_(script) {
+        try {
+            echo("loading script: " + script + "...");
+            load(script);
+            echo("...script loaded");
+        }
+        catch(var ex){
+            echo("...script cannot be load: " + ex.asString());
+        };
     };
 
     function loadXObjects_(xobjectsPath) {
@@ -131,29 +260,53 @@ class Onboard {
         }
         else {
             try {
-                System.loadModule(xoPath)|;
-                loadedXObjects_[xoName] = List.new();
+                System.loadModule(xoPath);
+                
+                if(this.privateObjects_.has(xoName) || !this.isXObject_(xoName)) {
+                    loadedPrivateObjects_[xoName] = List.new();
+                    echo("...xobject is private");
+                }
+                else {
+                    loadedXObjects_[xoName] = List.new();
+                };
                 echo("...xobject loaded");
             }
             catch(var ex) {
-                echo("...xobject not found!");
+                echo("...xobject not found! " + ex.asString());
             };
         };
+    };
+
+    function isXObject_(key) {
+        var name = this.xobjectsSettings_.getOrDefault(key + ".name", key);
+
+        try {
+            if(System.eval(name + ".hasSlot(\"getXVars\");")) {
+                echo("///////////////" + key + " true");
+                return true;
+            };
+        }
+        catch(var ex) {
+          echo("///////////////" + key + " exception: " + ex.asString());
+        };
+
+        echo("///////////////" + key + " false");
+        return false;
     };
 
     function loadXObjectsPath_() {
         // xobjects 
         var xobjectsFE = ["dll", "so"];
-        
+
         // find all xobjects
-        var xobjectPaths = getXObjectPaths_();
+        var xobjectPaths = this.getXObjectPaths_();
         var xobjects = [];
         var otherFiles = [];
         for(var dirPath: xobjectPaths) {
             var dir = Directory.new(dirPath);
-            //echo(dir.asString() + ": " + dir.exists);
             for(var path: dir.asList()) {
-                if(xobjectsFE.has(path.basename().split(".").back())) {
+                if(xobjectsFE.has(path.basename().split(".").back())
+                    && this.xobjectsSettings_.containsPath(path)) {
                     xobjects << path;
                 }
                 else {
@@ -170,23 +323,45 @@ class Onboard {
         return xobjects;
     };
 
+    function loadSettings_() {
+        var key = "xsettings";
+
+        // mark settings as private object
+        if(!privateObjects_.has(key)) {
+            privateObjects_ << key;
+        };
+        
+        loadXObject_(key);
+        loadScript_("settings_collection.u");
+        
+        // load settings from files
+        xobjectsSettings_ = SettingsCollection.new(this.getXObjectSettingFilePaths_());
+    };
+
     function loadCore_() {
        // module names to be loaded
         var moduleList = [
+            //"xcs",
             //"datalogger",
-            "ujson",
-            "onboard",
-            //"xxci",
+            //"xobject",
             //"xci_dodo",
+            "ujson",
+            //"onboard",
+            "xxci",
+            
             //"xci_parrot",
-        //  "xcs"
         ];
 
         // load listed modules
         loadXObjects_(moduleList);
 
         // bootstrap urbiscripts
-        load("boot/boot.u");
+        //load("boot/boot.u");
+        var uscriptList = [
+            "boot/boot.u",
+        ];
+
+        loadScripts_(uscriptList);
     };
 
     function getXObjectPaths_() {
@@ -205,12 +380,12 @@ class Onboard {
         ];
     };
 
-    function getConfigFilePaths_() {
+    function getXObjectSettingFilePaths_() {
         //TODO: return valide config path
         return [
-            Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/urbiscript/config.xcs")
+            Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/xsetting/xobjects.xs")
         ];
     };
 }|;
 
-var onboard = Onboard.new();
+var onboard = Onboard.new() |;
