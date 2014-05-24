@@ -123,7 +123,7 @@ void XPtam::onChangeVideo(urbi::UImage image) {
     TooN::SE3<> PTAMResultSE3 = ptamTracker_->GetCurrentPose();
     //lastPTAMMessage = msg = ptamTracker_->GetMessageForUser(); TODO necessary?
 
-    TooN::Vector<6> PTAMResultSE3TwistOrg = PTAMResultSE3.ln();
+    TooN::Vector<6> PTAMResultSE3TwistOrg = PTAMResultSE3.ln(); // TODO logarithm of the matrix, probably unnecessary
 
     // TODO store into XVar
     //node->publishTf(ptamTracker_->GetCurrentPose(), mimFrameTimeRos_workingCopy, frameNo_, "cam_front");
@@ -133,9 +133,11 @@ void XPtam::onChangeVideo(urbi::UImage image) {
     // 2. convert to xyz,rpy
     predConvert_->setPosSE3_globalToDrone(predConvert_->frontToDroneNT * PTAMResultSE3);
     TooN::Vector<6> PTAMResult = TooN::makeVector(predConvert_->x, predConvert_->y, predConvert_->z, predConvert_->roll, predConvert_->pitch, predConvert_->yaw);
-
+    // Michal: PTAMResult is now pose of the drone in basic coordinates
+    
     // 3. transform with filter
     TooN::Vector<6> PTAMResultTransformed = TumUtils::transformPTAMObservation(PTAMResult);
+    // Michal: apply "current"/last scale to result
 
 
 
@@ -146,7 +148,7 @@ void XPtam::onChangeVideo(urbi::UImage image) {
         resetPtamRequested_ = true;
     }
     if (ptamTracker_->lastStepResult == ptamTracker_->I_SECOND) {
-        //PTAMInitializedClock = getMS(); TODO where is it used        
+        //PTAMInitializedClock = getMS(); TODO this is used in MapView to redraw something(?) only after 200 ms
         auto scaleVector = TooN::makeVector(ptamMapMaker_->initialScaleFactor * 1.2, ptamMapMaker_->initialScaleFactor * 1.2, ptamMapMaker_->initialScaleFactor * 1.2);
         //        filter->setCurrentScales(scaleVector); // TODO what is interface with Kalmann filter?
         //        ptamMapMaker_->currentScaleFactor = filter->getCurrentScales()[0];
@@ -552,7 +554,7 @@ TooN::Vector<3> XPtam::evalNavQue(unsigned int from, unsigned int to, bool* zCor
     //			if(curStampMs >= (int)to-pressureAverageRange && curStampMs <= (int)to+pressureAverageRange)
     //			{
     //				sum_last += cur->pressure;
-    //				num_last++;
+    //                  		num_last++;
     //			}
     //			cur++;
     //		}

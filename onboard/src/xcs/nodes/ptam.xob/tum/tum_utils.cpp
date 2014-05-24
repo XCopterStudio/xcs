@@ -25,6 +25,9 @@ TooN::Vector<6> TumUtils::transformPTAMObservation(TooN::Vector<6> obs) {
     return obs;
 }
 
+/*!
+ * Convert EKF state (part of) to PTAM coordinates (i.e. removes scaling)
+ */
 TooN::Vector<6> TumUtils::backTransformPTAMObservation(TooN::Vector<6> obs) {
     obs[3] -= roll_offset;
     obs[4] -= pitch_offset;

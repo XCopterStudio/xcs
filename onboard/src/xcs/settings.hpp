@@ -18,7 +18,7 @@ public:
     template<class Type = std::string>
     Type get(const std::string& key, const Type& defaultValue) const;
     template<class Type = std::string>
-    Type get(const std::string& key) const;
+    Type get(const std::string& key) const;    
     template<class Type = std::string>
     std::map<std::string, Type> getMap(const std::string& key) const;
     template<class Type = std::string>
@@ -56,7 +56,7 @@ std::map<std::string, Type> Settings::getMap(const std::string& key) const {
     return m;
 }
 
-template<class Type = std::string>
+template<class Type>
 void Settings::set(const std::string& key, const Type& value) {
     settings_.put(key, value);
 }
