@@ -40,13 +40,13 @@ bool Settings::isInit() const {
     return !filename_.empty();
 }
 
-bool Settings::contains(const string& path) const {
-    //return settings_.count(path) > 0;
-    //return settings_.find(path) != settings_.not_found();
+bool Settings::contains(const string& key) const {
+    //return settings_.count(key) > 0;
+    //return settings_.find(key) != settings_.not_found();
     
     //TODO: use somethig faster then exception?
     try  {
-        settings_.get_child(path);
+        settings_.get_child(key);
         return true;
     }
     catch (boost::property_tree::ptree_bad_path ex) {

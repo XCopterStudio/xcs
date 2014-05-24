@@ -16,39 +16,39 @@ public:
     void reset();
     void reset(const std::string& filename);
     template<class Type = std::string>
-    Type get(const std::string& path, const Type& defaultValue) const;
+    Type get(const std::string& key, const Type& defaultValue) const;
     template<class Type = std::string>
-    Type get(const std::string& path) const;
+    Type get(const std::string& key) const;
     template<class Type = std::string>
-    std::map<std::string, Type> getMap(const std::string& path) const;
+    std::map<std::string, Type> getMap(const std::string& key) const;
     template<class Type = std::string>
-    void set(const std::string& path, const Type& value);
+    void set(const std::string& key, const Type& value);
     boost::property_tree::ptree& getTree();
     bool isInit() const;
     bool save();
-    bool contains(const std::string& path) const;
+    bool contains(const std::string& key) const;
 private:
     boost::property_tree::ptree settings_;
     std::string filename_;
 };
 
 template<class Type>
-Type Settings::get(const std::string& path, const Type& defaultValue) const {
-    return settings_.get<Type>(path, defaultValue);
+Type Settings::get(const std::string& key, const Type& defaultValue) const {
+    return settings_.get<Type>(key, defaultValue);
 }
 
 template<class Type>
-Type Settings::get(const std::string& path) const {
-    return settings_.get<Type>(path);
+Type Settings::get(const std::string& key) const {
+    return settings_.get<Type>(key);
 }
 
 template<class Type>
-std::map<std::string, Type> Settings::getMap(const std::string& path) const {
+std::map<std::string, Type> Settings::getMap(const std::string& key) const {
     std::map<std::string, Type> m;
     
     // read all settings and fill the map
-    if (contains(path)) {
-        for (const auto& kvp : settings_.get_child(path)) {
+    if (contains(key)) {
+        for (const auto& kvp : settings_.get_child(key)) {
             m.emplace(kvp.first, kvp.second.data());
         }
     }
@@ -57,8 +57,8 @@ std::map<std::string, Type> Settings::getMap(const std::string& path) const {
 }
 
 template<class Type = std::string>
-void Settings::set(const std::string& path, const Type& value) {
-    settings_.put(path, value);
+void Settings::set(const std::string& key, const Type& value) {
+    settings_.put(key, value);
 }
 }
 

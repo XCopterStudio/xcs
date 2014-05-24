@@ -20,17 +20,17 @@ void XSettings::init(const string& filepath) {
     settings_.reset(filepath);
 }
 
-string XSettings::get(const string& path) {
-    return settings_.get(path);
+string XSettings::get(const string& key) {
+    return settings_.get(key);
 }
 
-string XSettings::getOrDefault(const string& path, const string& defaultValue) {
-    return settings_.get(path, defaultValue);
+string XSettings::getOrDefault(const string& key, const string& defaultValue) {
+    return settings_.get(key, defaultValue);
 }
 
-boost::unordered_map<string, string> XSettings::getMap(const string& path) const {
+boost::unordered_map<string, string> XSettings::getMap(const string& key) const {
     // get map
-    map<string, string> m = settings_.getMap(path);
+    map<string, string> m = settings_.getMap(key);
     
     // convert map 2 boost unordered map, which can be bind to urbiscript dictionary
     boost::unordered_map<string, string> um;
@@ -42,12 +42,12 @@ boost::unordered_map<string, string> XSettings::getMap(const string& path) const
 }
 
 
-void XSettings::set(const std::string& path, const std::string& value) {
-    settings_.set(path, value);
+void XSettings::set(const std::string& key, const std::string& value) {
+    settings_.set(key, value);
 }
 
-void XSettings::setAndSave(const std::string& path, const std::string& value) {
-    settings_.set(path, value);
+void XSettings::setAndSave(const std::string& key, const std::string& value) {
+    settings_.set(key, value);
     save();
 }
 
@@ -55,8 +55,8 @@ bool XSettings::save() {
     return settings_.save();
 }
 
-bool XSettings::contains(const string& path) {
-    return settings_.contains(path);
+bool XSettings::contains(const string& key) {
+    return settings_.contains(key);
 }
 
 XStart(XSettings);
