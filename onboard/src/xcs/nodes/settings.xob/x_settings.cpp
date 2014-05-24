@@ -9,6 +9,7 @@ XSettings::XSettings(const std::string &name) :
     XBindFunction(XSettings, init);
     XBindFunction(XSettings, get);
     XBindFunction(XSettings, getOrDefault);
+    XBindFunction(XSettings, getMap);
     XBindFunction(XSettings, set);
     XBindFunction(XSettings, setAndSave);
     XBindFunction(XSettings, save);
@@ -23,9 +24,23 @@ string XSettings::get(const string& path) {
     return settings_.get(path);
 }
 
-std::string XSettings::getOrDefault(const std::string& path, const std::string& defaultValue) {
+string XSettings::getOrDefault(const string& path, const string& defaultValue) {
     return settings_.get(path, defaultValue);
 }
+
+boost::unordered_map<string, string> XSettings::getMap(const string& path) const {
+    // get map
+    map<string, string> m = settings_.getMap(path);
+    
+    // convert map 2 boost unordered map, which can be bind to urbiscript dictionary
+    boost::unordered_map<string, string> um;
+    for (const auto& kvp : m) {
+        um.emplace(kvp.first, kvp.second);
+    }
+
+    return um;
+}
+
 
 void XSettings::set(const std::string& path, const std::string& value) {
     settings_.set(path, value);

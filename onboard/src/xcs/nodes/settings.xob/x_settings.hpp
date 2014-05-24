@@ -2,6 +2,7 @@
 #define X_SETTINGS_HPP
 
 #include <string>
+#include <boost/unordered_map.hpp>
 #include <xcs/settings.hpp>
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_var.hpp>
@@ -16,6 +17,7 @@ public:
     void init(const std::string& filepath);
     std::string get(const std::string& path);
     std::string getOrDefault(const std::string& path, const std::string& defaultValue);
+    boost::unordered_map<std::string, std::string> getMap(const std::string& path) const;
     void set(const std::string& path, const std::string& value);
     void setAndSave(const std::string& path, const std::string& value);
     bool save();

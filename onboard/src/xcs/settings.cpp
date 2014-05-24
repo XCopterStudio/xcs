@@ -41,5 +41,15 @@ bool Settings::isInit() const {
 }
 
 bool Settings::contains(const string& path) const {
-    return settings_.count(path) > 0;
+    //return settings_.count(path) > 0;
+    //return settings_.find(path) != settings_.not_found();
+    
+    //TODO: use somethig faster then exception?
+    try  {
+        settings_.get_child(path);
+        return true;
+    }
+    catch (boost::property_tree::ptree_bad_path ex) {
+        return false;
+    }
 }

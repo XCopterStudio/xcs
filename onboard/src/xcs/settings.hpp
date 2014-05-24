@@ -4,6 +4,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/info_parser.hpp>
 #include <string>
+#include <map>
 #include <xcs/xcs_export.h>
 
 namespace xcs {
@@ -18,6 +19,8 @@ public:
     Type get(const std::string& path, const Type& defaultValue) const;
     template<class Type = std::string>
     Type get(const std::string& path) const;
+    template<class Type = std::string>
+    std::map<std::string, Type> getMap(const std::string& path) const;
     template<class Type = std::string>
     void set(const std::string& path, const Type& value);
     boost::property_tree::ptree& getTree();
@@ -37,6 +40,20 @@ Type Settings::get(const std::string& path, const Type& defaultValue) const {
 template<class Type>
 Type Settings::get(const std::string& path) const {
     return settings_.get<Type>(path);
+}
+
+template<class Type>
+std::map<std::string, Type> Settings::getMap(const std::string& path) const {
+    std::map<std::string, Type> m;
+    
+    // read all settings and fill the map
+    if (contains(path)) {
+        for (const auto& kvp : settings_.get_child(path)) {
+            m.emplace(kvp.first, kvp.second.data());
+        }
+    }
+
+    return m;
 }
 
 template<class Type = std::string>
