@@ -2,13 +2,15 @@ System.system("start cmd.exe /k \"node d:/skola/MFF/Mgr/swProjekt/quadricopter/r
 sleep(2s);
 
 class Onboard {
-    var loadedXObjects_ = [ => ];   // list of pairs (loaded xobjects, copies)
-    var loadedPrivateObjects_ = [ => ];   // list of pairs (loaded uobjects, copies)
-    var privateObjects_ = [];        // objects, which are not visible for user
-    var dataFlowGraph_ = "";        // data flow graph
-    var dfgCommStarted_ = false;    // data flow graph communication started
+    var xobjects4load_ = [ => ];            // list of pairs (xobjects, which are yet not loaded; path)
+    var loadedXObjects_ = [ => ];           // list of pairs (loaded xobjects; copies)
+    var loadedPrivateObjects_ = [ => ];     // list of pairs (loaded uobjects; copies)
+    var privateObjects_ = [];               // objects, which are not visible for user
+    var dataFlowGraph_ = "";                // data flow graph
+    var dfgCommStarted_ = false;            // data flow graph communication started
     var onboardSender_;
     var xobjectsSettings_;
+    var xobjectInfo_ = [ => ];
 
     function init() {
         echo("init...");
@@ -26,26 +28,8 @@ class Onboard {
         initDfgCommunication_();
         startDfgCommunication();
 
-        //DEBUG: test send dataflow graph data
-        //this.dataFlowGraph_ = "<xml><block type=\"connect\" id=\"2\" x=\"148\" y=\"385\"><field name=\"XOB1\">subject</field><field name=\"XVAR1\">out</field><field name=\"XOB2\">observer</field><field name=\"XVAR2\">in</field></block></xml>";
-        //this.dataFlowGraph_ = "test data flow graph";
-        
-
-        this.loadedXObjects_["xxci"] = ["xci_dodooo"];
-        //sleep(1s);
-        //this.loadedXObjects_["xci"] = ["xci1", "xci2"];
-        
-
-        //this.loadedXObjects_["xci"] = ["xciiiiiiiiii_dodo", "xciiiiiiiiiiii_parrot"];
-        //stopDfgCommunication();
-        //this.dataFlowGraph_ = "test 2 data flow graph";
-        //this.loadedXObjects_["xci2"] = ["xci2_dodo", "xci2_parrot"];
-        //startDfgCommunication();
-        //this.dataFlowGraph_ = "test 3 data flow graph";
-        //this.loadedXObjects_["xci3"] = ["xci3_dodo", "xci3_parrot"];
-
         // find all possible xobjects
-        var xobjects = loadXObjectsPath_();
+        loadXObjectsPath_();
 
         //DEBUG: test load wanted xobjects
         //var xos = [];
@@ -60,7 +44,29 @@ class Onboard {
         //loadXObjects_(xobjects);
         //echo(Onboard.localSlotNames());
 
-        /// SETTINGS
+        //DEBUG: test send dataflow graph data
+        //this.dataFlowGraph_ = "<xml><block type=\"connect\" id=\"2\" x=\"148\" y=\"385\"><field name=\"XOB1\">subject</field><field name=\"XVAR1\">out</field><field name=\"XOB2\">observer</field><field name=\"XVAR2\">in</field></block></xml>";
+        //this.dataFlowGraph_ = "test data flow graph";
+        
+
+        //this.loadedXObjects_["xxci"] = ["xci_dodooo"];
+        
+        //sleep(1s);
+        //this.loadedXObjects_["xci"] = ["xci1", "xci2"];
+        
+
+        //this.loadedXObjects_["xci"] = ["xciiiiiiiiii_dodo", "xciiiiiiiiiiii_parrot"];
+        //stopDfgCommunication();
+        //this.dataFlowGraph_ = "test 2 data flow graph";
+        //this.loadedXObjects_["xci2"] = ["xci2_dodo", "xci2_parrot"];
+        //startDfgCommunication();
+        //this.dataFlowGraph_ = "test 3 data flow graph";
+        //this.loadedXObjects_["xci3"] = ["xci3_dodo", "xci3_parrot"];
+
+        ///
+        /// DEBUG: SETTINGS
+        ///
+
         //var this.settings = XSettings.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/projects/onboard/lib/Release/onboard.xs");
         //echo(">>>" + this.settings.getOrDefault("test1", "aaaaaaa"));
         //echo(">>>" + this.settings.getOrDefault("section1.test2", "bbbbbb"));
@@ -111,6 +117,21 @@ class Onboard {
         //    echo(i.first + " => " + i.second); 
         //};
         //echo("........................");
+
+
+        //var l = ["onboard", "xxci", "xsettings"];
+        //echo(".......................................................");
+        //for(var xo: l){
+        //    var m = this.xobjectsSettings_.getXObjectSettings(xo);
+        //    for(var kvp: m) {
+        //        echo("... " + kvp.first);
+        //        echo("...... name = " + kvp.second.name);
+        //        echo("...... filename = " + kvp.second.filename);
+        //        echo("...... init param = " + kvp.second.initParam);
+        //    };
+        //};
+        //echo(".......................................................");
+
     };
 
     // initialize sending information about data flow graph
@@ -124,11 +145,30 @@ class Onboard {
         };
 
         // initialization 4 sending information about xobjects
-        var this.loadedXObjectsEvent_ = this.loadedXObjects_.elementAdded.'||'(this.loadedXObjects_.elementChanged);
+        var this.loadedXObjectsEvent_ = this.loadedXObjects_.elementAdded.'||'(this.loadedXObjects_.elementChanged).'||'(this.xobjects4load_.elementAdded);
         at(this.loadedXObjectsEvent_?) {
             if(this.dfgCommStarted_) {
                 var prototypesData = [];
                 var clonesData = [];
+
+                // prepare data for yet not loaded xobjects
+                for(var kvpXO: this.xobjects4load_) {
+                    var pData = [ => ];
+                    
+                    try {
+                        pData["name"] = kvpXO.first();
+                        //pData["var"] = ...;
+                        //pData["inputPort"] = ...;
+                    }
+                    catch(var ex){
+                        echo("!!!!!ERROR: " + ex.asString());
+                        pData.clear();
+                    };
+
+                    if(!pData.empty()) {
+                        prototypesData << pData;
+                    };
+                };
 
                 for(var p: this.loadedXObjects_) {
                     var pData = [ => ];
@@ -180,7 +220,7 @@ class Onboard {
                         //};
 
                         var key = p.first().asString();
-                        echo("----------------------------------------------------------");
+                        echo("--- " + key);
                         try {
                             var name = this.xobjectsSettings_.getOrDefault(key + ".name", key);
                             var xvars = System.eval(name + ".getXVars()");
@@ -203,6 +243,7 @@ class Onboard {
                     prototypesData << pData;
                 };
 
+                // send data
                 this.onboardSender_.sendPrototypeClone(prototypesData, clonesData);
             };
         };
@@ -282,15 +323,13 @@ class Onboard {
 
         try {
             if(System.eval(name + ".hasSlot(\"getXVars\");")) {
-                echo("///////////////" + key + " true");
                 return true;
             };
         }
         catch(var ex) {
-          echo("///////////////" + key + " exception: " + ex.asString());
+          //echo("///////////////" + key + " exception: " + ex.asString());
         };
 
-        echo("///////////////" + key + " false");
         return false;
     };
 
@@ -298,29 +337,46 @@ class Onboard {
         // xobjects 
         var xobjectsFE = ["dll", "so"];
 
-        // find all xobjects
-        var xobjectPaths = this.getXObjectPaths_();
-        var xobjects = [];
-        var otherFiles = [];
-        for(var dirPath: xobjectPaths) {
-            var dir = Directory.new(dirPath);
-            for(var path: dir.asList()) {
-                if(xobjectsFE.has(path.basename().split(".").back())
-                    && this.xobjectsSettings_.containsPath(path)) {
-                    xobjects << path;
-                }
-                else {
-                    otherFiles << path;
+        // remember dfg communication state
+        var commStarted = this.dfgCommStarted_;
+
+        try {
+            // stop dfg communication
+            this.stopDfgCommunication();
+
+            // find all xobjects
+            var xobjectPaths = this.getXObjectPaths_();
+            var otherFiles = [];
+            for(var dirPath: xobjectPaths) {
+                var dir = Directory.new(dirPath);
+                for(var path: dir.asList()) {
+                    if(xobjectsFE.has(path.basename().split(".").back())
+                        && this.xobjectsSettings_.containsPath(path)) {
+                        var m = this.xobjectsSettings_.getXObjectSettingsFromPath(path);
+                        for(var kvp: m) {
+                            if(!this.xobjects4load_.has(kvp.first())) {
+                                this.xobjectInfo_[kvp.first()] = kvp.second();
+                                this.xobjects4load_[kvp.first()] = path;
+                            };
+                        };
+                    }
+                    else {
+                        otherFiles << path;
+                    };
                 };
+            };
+        }
+        finally {
+            if(commStarted) {
+                this.startDfgCommunication();
+                this.xobjects4load_.elementAdded!;
             };
         };
 
         //DEBUG: log
         //echo("loading xobjects path...");
-        //echo("...founded xobjets: " + xobjects.asString());
+        //echo("...founded xobjets: " + this.xobjects4load_.asString());
         //echo("...founded other files: " + otherFiles.asString());
-
-        return xobjects;
     };
 
     function loadSettings_() {
@@ -347,7 +403,7 @@ class Onboard {
             //"xci_dodo",
             "ujson",
             //"onboard",
-            "xxci",
+            //"xxci",
             
             //"xci_parrot",
         ];
