@@ -12,7 +12,6 @@
 #include <ptam/MouseKeyHandler.h>
 
 #include <xcs/logging.hpp>
-#include <urbi/uconversion.hh>
 
 
 using namespace std;
@@ -71,7 +70,7 @@ void Ptam::init() {
 
 }
 
-void Ptam::handleFrame(urbi::UImage &bwImage, Timestamp timestamp) {
+void Ptam::handleFrame(char *bwImage, Timestamp timestamp) {
     frameNo_ += 1;
 
     /*
@@ -84,13 +83,13 @@ void Ptam::handleFrame(urbi::UImage &bwImage, Timestamp timestamp) {
     /*
      * Copy image data to CVD representation
      */
-    if (frame_.size().x != bwImage.width || frame_.size().y != bwImage.height) {
-        frame_.resize(CVD::ImageRef(bwImage.width, bwImage.height));
-    }
-
-    memcpy(frame_.data(), bwImage.data, bwImage.width * bwImage.height);
-    frameTimestamp_ = timestamp;
-
+//    if (frame_.size().x != bwImage.width || frame_.size().y != bwImage.height) {
+//        frame_.resize(CVD::ImageRef(bwImage.width, bwImage.height));
+//    }
+//
+//    memcpy(frame_.data(), bwImage.data, bwImage.width * bwImage.height);
+//    frameTimestamp_ = timestamp;
+//
 
     TooN::Vector<10> filterPosePrePTAM; // TODO get state from EKF in correct time
     //= filter->getPoseAtAsVec(mimFrameTime_workingCopy - filter->delayVideo, true);

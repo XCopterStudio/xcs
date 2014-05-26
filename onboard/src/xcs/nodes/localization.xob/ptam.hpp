@@ -4,6 +4,8 @@
 #include "tum/Predictor.h"
 #include "tum/scale_estimation.hpp"
 
+#include <xcs/types/timestamp.hpp>
+
 #include <TooN/TooN.h>
 #include <cvd/image.h>
 #include <cvd/byte.h>
@@ -36,7 +38,7 @@ public:
 
     void init();
 
-    void handleFrame(urbi::UImage &bwImage, Timestamp timestamp);
+    void handleFrame(char *bwImage, Timestamp timestamp);
 
 private:
     typedef std::unique_ptr<Tracker> TrackerPtr;

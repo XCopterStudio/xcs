@@ -1,5 +1,5 @@
 #pragma once
- /**
+/**
  *  This file is part of tum_ardrone.
  *
  *  Copyright 2012 Jakob Engel <jajuengel@gmail.com> (Technical University of Munich)
@@ -20,18 +20,21 @@
  */
 #ifndef __PREDICTOR_H
 #define __PREDICTOR_H
- 
- 
- 
- 
+
+
+
+
 #include <TooN/TooN.h>
 #include <TooN/so3.h>
 #include <TooN/se3.h>
 #include <string>
 
 #include <xcs/types/timestamp.hpp>
-#include <xcs/types/cartesian_vector.hpp>
-#include <xcs/types/eulerian_vector.hpp>
+namespace xcs {
+struct CartesianVector;
+struct EulerianVector;
+}
+
 
 
 // handles the drone's coordinate frames.
@@ -53,68 +56,68 @@
 //		  center at (0,0,0)_drone
 
 // scale is meters.
-class Predictor
-{
+
+class Predictor {
 private:
-	void calcGtDRodTransFromSE3();
-	void calcDtGRodTransFromSE3();
-	void calcRPYXYZFromRodDisp();
-	void calcCombinedTransformations();
+    void calcGtDRodTransFromSE3();
+    void calcDtGRodTransFromSE3();
+    void calcRPYXYZFromRodDisp();
+    void calcCombinedTransformations();
 
 public:
 
-	// --------------------- static transformation matrices ------------------------
-	// matrix from bottom cam CO to drone CO
-	static const TooN::SE3<double> bottomToDrone;
-	static const TooN::SE3<double> droneToBottom;
+    // --------------------- static transformation matrices ------------------------
+    // matrix from bottom cam CO to drone CO
+    static const TooN::SE3<double> bottomToDrone;
+    static const TooN::SE3<double> droneToBottom;
 
-	// matrix from front cam CO to drone CO
-	static const TooN::SE3<double> frontToDrone;
-	static const TooN::SE3<double> droneToFront;
+    // matrix from front cam CO to drone CO
+    static const TooN::SE3<double> frontToDrone;
+    static const TooN::SE3<double> droneToFront;
 
-	// matrix from front cam CO to drone CO, without translation (!)
-	static const TooN::SE3<double> frontToDroneNT;
-	static const TooN::SE3<double> droneToFrontNT;
+    // matrix from front cam CO to drone CO, without translation (!)
+    static const TooN::SE3<double> frontToDroneNT;
+    static const TooN::SE3<double> droneToFrontNT;
 
-	// --------------------- current drone state in various represenatations -----------------------
-	// current quadcopter position saved in three ways:
-	// as SE3 transformation (matrix+displacement)
-	TooN::SE3<double> globaltoDrone;	//translation is globalToDroneDisp; rotation is matrix of globalToDroneRod
-	TooN::SE3<double> droneToGlobal;	//translation is droneToGlobalDisp=(x,y,z); rotation is matrix of droneToGlobalRod
+    // --------------------- current drone state in various represenatations -----------------------
+    // current quadcopter position saved in three ways:
+    // as SE3 transformation (matrix+displacement)
+    TooN::SE3<double> globaltoDrone; //translation is globalToDroneDisp; rotation is matrix of globalToDroneRod
+    TooN::SE3<double> droneToGlobal; //translation is droneToGlobalDisp=(x,y,z); rotation is matrix of droneToGlobalRod
 
-	TooN::SE3<double> globalToFront;
-	TooN::SE3<double> frontToGlobal;
-	TooN::SE3<double> globalToBottom;
-	TooN::SE3<double> bottmoToGlobal;
-
-
-	// xyz-position is center of drone CS in global coordinates.
-	// rpy-rotation is rpy of drone.
-	double roll;
-	double pitch;
-	double yaw;
-	double x;
-	double y;
-	double z;
-	bool zCorrupted;
-	double lastAddedDronetime;
-	double zCorruptedJump;
+    TooN::SE3<double> globalToFront;
+    TooN::SE3<double> frontToGlobal;
+    TooN::SE3<double> globalToBottom;
+    TooN::SE3<double> bottmoToGlobal;
 
 
+    // xyz-position is center of drone CS in global coordinates.
+    // rpy-rotation is rpy of drone.
+    double roll;
+    double pitch;
+    double yaw;
+    double x;
+    double y;
+    double z;
+    bool zCorrupted;
+    double lastAddedDronetime;
+    double zCorruptedJump;
 
-	// ------------------------- set internal pose from some representation.-----------------------------------------
-	// all representations are automatically adjusted.
-	void setPosRPY(double newX, double newY, double newZ, double newRoll, double newPitch, double newYaw);
-	void setPosSE3_globalToDrone(TooN::SE3<double> newGlobaltoDrone);
-	void setPosSE3_droneToGlobal(TooN::SE3<double> newDroneToGlobal);
 
-	// -------------------------- prediction -----------------------------------------------------------------------
 
-	void predictOneStep(const xcs::Timestamp timestamp, const double altitude, const xcs::CartesianVector velocity, const xcs::EulerianVector rotation);
-	void resetPos();
-	
-	Predictor(std::string basePath="");
-	~Predictor(void);
+    // ------------------------- set internal pose from some representation.-----------------------------------------
+    // all representations are automatically adjusted.
+    void setPosRPY(double newX, double newY, double newZ, double newRoll, double newPitch, double newYaw);
+    void setPosSE3_globalToDrone(TooN::SE3<double> newGlobaltoDrone);
+    void setPosSE3_droneToGlobal(TooN::SE3<double> newDroneToGlobal);
+
+    // -------------------------- prediction -----------------------------------------------------------------------
+
+    void predictOneStep(const xcs::Timestamp timestamp, const double altitude, const xcs::CartesianVector velocity, const xcs::EulerianVector rotation);
+    void resetPos();
+
+    Predictor(std::string basePath = "");
+    ~Predictor(void);
 };
 #endif /* __PREDICTOR_H */
 
