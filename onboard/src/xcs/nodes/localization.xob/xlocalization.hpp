@@ -37,6 +37,7 @@ namespace nodes{
         Clock clock_;
         TimePoint startTime_;
         double imuTimeShift_;
+        ::urbi::UImage lastFrame_;
 
         void onChangeVelocity(xcs::CartesianVector measuredVelocity);
         void onChangeRotation(xcs::EulerianVector measuredAnglesRotation);
@@ -52,6 +53,7 @@ namespace nodes{
         void onChangeClearTime(double time);
 
         void onChangeVideo(::urbi::UImage image);
+        void onChangeVideoTime(xcs::Timestamp timestamp);
         
         void onChangeFlyControl(xcs::FlyControl flyControl);
 
@@ -71,6 +73,7 @@ namespace nodes{
         XInputPort<double> clearTime; // TODO change to tight composition with PTAM
         // visual data
         XInputPort<::urbi::UImage> video;
+        XInputPort<double> videoTime;
         // drone fly control
         XInputPort<xcs::FlyControl> flyControl;
 

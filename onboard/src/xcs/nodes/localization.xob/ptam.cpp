@@ -22,11 +22,15 @@ const int Ptam::FRAME_WIDTH = 360;
 const int Ptam::FRAME_HEIGHT = 640;
 
 Ptam::Ptam() {
-    // TODO move init here?
+    // TODO load camera parameters from configuration (these are for AR Drone Parrot 2.0)
+    cameraParameters_[0] = 0.771557;
+    cameraParameters_[1] = 1.368560;
+    cameraParameters_[2] = 0.552779;
+    cameraParameters_[3] = 0.444056;
+    cameraParameters_[4] = 1.156010;
 }
 
 Ptam::~Ptam() {
-    delete glWindow_;
 }
 
 void Ptam::init() {
@@ -35,30 +39,18 @@ void Ptam::init() {
     // (G)UI type
 
     // KF parameters
+    
 
 
-
-
-    // TODO load camera parameters from configuration (these are for AR Drone Parrot 2.0)
-    TooN::Vector<5> cameraParameters;
-    cameraParameters[0] = 0.771557;
-    cameraParameters[1] = 1.368560;
-    cameraParameters[2] = 0.552779;
-    cameraParameters[3] = 0.444056;
-    cameraParameters[4] = 1.156010;
 
     // TODO wrap this inside a reset method (and allow user to reset whole PTAM)
-    ptamCamera_ = ATANCameraPtr(new ATANCamera(cameraParameters));
+    ptamCamera_ = ATANCameraPtr(new ATANCamera(cameraParameters_));
     ptamMap_ = MapPtr(new Map());
     ptamMapMaker_ = MapMakerPtr(new MapMaker(*ptamMap_, *ptamCamera_));
     ptamTracker_ = TrackerPtr(new Tracker(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), *ptamCamera_, *ptamMap_, *ptamMapMaker_)); // TODO video resolution (metadata??
 
-    glWindowKeyHandler_ = new MouseKeyHandler();
-    glWindow_ = new GLWindow2(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), "PTAM Drone Camera Feed", glWindowKeyHandler_);
-
-    predConvert_ = new Predictor();
-    imuOnlyPred_ = new Predictor(); // TODO navdata should be fed to this predictor
-    predIMUOnlyForScale_ = new Predictor(); // TODO navdata should be fed to this predictor
+    glWindowKeyHandler_ = MouseKeyHandlerPtr(new MouseKeyHandler());
+    glWindow_ = GLWindow2Ptr(new GLWindow2(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), "PTAM Drone Camera Feed", glWindowKeyHandler_.get()));
 
     goodCount_ = 0;
     frameNo_ = 0;
@@ -70,7 +62,7 @@ void Ptam::init() {
 
 }
 
-void Ptam::handleFrame(char *bwImage, Timestamp timestamp) {
+void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     frameNo_ += 1;
 
     /*
@@ -83,13 +75,13 @@ void Ptam::handleFrame(char *bwImage, Timestamp timestamp) {
     /*
      * Copy image data to CVD representation
      */
-//    if (frame_.size().x != bwImage.width || frame_.size().y != bwImage.height) {
-//        frame_.resize(CVD::ImageRef(bwImage.width, bwImage.height));
-//    }
-//
-//    memcpy(frame_.data(), bwImage.data, bwImage.width * bwImage.height);
-//    frameTimestamp_ = timestamp;
-//
+    if (frame_.size().x != bwImage.width || frame_.size().y != bwImage.height) {
+        frame_.resize(CVD::ImageRef(bwImage.width, bwImage.height));
+    }
+
+    memcpy(frame_.data(), bwImage.data, bwImage.width * bwImage.height);
+    frameTimestamp_ = timestamp;
+
 
     TooN::Vector<10> filterPosePrePTAM; // TODO get state from EKF in correct time
     //= filter->getPoseAtAsVec(mimFrameTime_workingCopy - filter->delayVideo, true);
@@ -104,9 +96,9 @@ void Ptam::handleFrame(char *bwImage, Timestamp timestamp) {
     // 1. transform with filter
     TooN::Vector<6> PTAMPoseGuess = scaleEstimation_.backTransformPTAMObservation(filterPosePrePTAM.slice<0, 6>());
     // 2. convert to se3
-    predConvert_->setPosRPY(PTAMPoseGuess[0], PTAMPoseGuess[1], PTAMPoseGuess[2], PTAMPoseGuess[3], PTAMPoseGuess[4], PTAMPoseGuess[5]);
+    predConvert_.setPosRPY(PTAMPoseGuess[0], PTAMPoseGuess[1], PTAMPoseGuess[2], PTAMPoseGuess[3], PTAMPoseGuess[4], PTAMPoseGuess[5]);
     // 3. multiply with rotation matrix	
-    TooN::SE3<> PTAMPoseGuessSE3 = predConvert_->droneToFrontNT * predConvert_->globaltoDrone;
+    TooN::SE3<> PTAMPoseGuessSE3 = predConvert_.droneToFrontNT * predConvert_.globaltoDrone;
 
 
     // set
@@ -127,8 +119,8 @@ void Ptam::handleFrame(char *bwImage, Timestamp timestamp) {
 
     // 1. multiply from left by frontToDroneNT.
     // 2. convert to xyz,rpy
-    predConvert_->setPosSE3_globalToDrone(predConvert_->frontToDroneNT * PTAMResultSE3);
-    TooN::Vector<6> PTAMResult = TooN::makeVector(predConvert_->x, predConvert_->y, predConvert_->z, predConvert_->roll, predConvert_->pitch, predConvert_->yaw);
+    predConvert_.setPosSE3_globalToDrone(predConvert_.frontToDroneNT * PTAMResultSE3);
+    TooN::Vector<6> PTAMResult = TooN::makeVector(predConvert_.x, predConvert_.y, predConvert_.z, predConvert_.roll, predConvert_.pitch, predConvert_.yaw);
     // Michal: PTAMResult is now pose of the drone in basic coordinates
 
     // 3. transform with filter
@@ -146,15 +138,15 @@ void Ptam::handleFrame(char *bwImage, Timestamp timestamp) {
     if (ptamTracker_->lastStepResult == ptamTracker_->I_SECOND) {
         //PTAMInitializedClock = getMS(); TODO this is used in MapView to redraw something(?) only after 200 ms
         const auto scaleVector = TooN::makeVector(ptamMapMaker_->initialScaleFactor * 1.2, ptamMapMaker_->initialScaleFactor * 1.2, ptamMapMaker_->initialScaleFactor * 1.2);
-        scaleEstimation_.setCurrentScales(scaleVector); 
+        scaleEstimation_.setCurrentScales(scaleVector);
         ptamMapMaker_->currentScaleFactor = scaleEstimation_.getCurrentScales()[0]; // M: why not directly?
-        
+
         XCS_LOG_INFO("PTAM initialized!");
         XCS_LOG_INFO("initial scale: " << ptamMapMaker_->initialScaleFactor * 1.2);
         //node->publishCommand("u l PTAM initialized (took second KF)"); // TODO what is this for
         framesIncludedForScaleXYZ_ = -1;
         lockNextFrame_ = true;
-        imuOnlyPred_->resetPos();
+        imuOnlyPred_.resetPos();
     }
     if (ptamTracker_->lastStepResult == ptamTracker_->I_FIRST) {
         // node->publishCommand("u l PTAM initialization started (took first KF)"); // TODO what is this for
@@ -352,11 +344,11 @@ void Ptam::handleFrame(char *bwImage, Timestamp timestamp) {
     //        mapPointsTransformed.clear();
     //        keyFramesTransformed.clear();
     //        for (unsigned int i = 0; i < ptamMap_->vpKeyFrames.size(); i++) {
-    //            predConvert_->setPosSE3_globalToDrone(predConvert_->frontToDroneNT * ptamMap_->vpKeyFrames[i]->se3CfromW);
-    //            TooN::Vector<6> CamPos = TooN::makeVector(predConvert_->x, predConvert_->y, predConvert_->z, predConvert_->roll, predConvert_->pitch, predConvert_->yaw);
+    //            predConvert_.setPosSE3_globalToDrone(predConvert_.frontToDroneNT * ptamMap_->vpKeyFrames[i]->se3CfromW);
+    //            TooN::Vector<6> CamPos = TooN::makeVector(predConvert_.x, predConvert_.y, predConvert_.z, predConvert_.roll, predConvert_.pitch, predConvert_.yaw);
     //            CamPos = filter->transformPTAMObservation(CamPos);
-    //            predConvert_->setPosRPY(CamPos[0], CamPos[1], CamPos[2], CamPos[3], CamPos[4], CamPos[5]);
-    //            keyFramesTransformed.push_back(predConvert_->droneToGlobal);
+    //            predConvert_.setPosRPY(CamPos[0], CamPos[1], CamPos[2], CamPos[3], CamPos[4], CamPos[5]);
+    //            keyFramesTransformed.push_back(predConvert_.droneToGlobal);
     //        }
     //        TooN::Vector<3> PTAMScales = filter->getCurrentScales();
     //        TooN::Vector<3> PTAMOffsets = filter->getCurrentOffsets().slice<0, 3>();
@@ -443,7 +435,7 @@ void Ptam::handleFrame(char *bwImage, Timestamp timestamp) {
     //
     //    if (drawUI != UI_NONE) {
     //        // render grid
-    //        predConvert_->setPosRPY(filterPosePostPTAM[0], filterPosePostPTAM[1], filterPosePostPTAM[2], filterPosePostPTAM[3], filterPosePostPTAM[4], filterPosePostPTAM[5]);
+    //        predConvert_.setPosRPY(filterPosePostPTAM[0], filterPosePostPTAM[1], filterPosePostPTAM[2], filterPosePostPTAM[3], filterPosePostPTAM[4], filterPosePostPTAM[5]);
     //
     //        //renderGrid(predConvert->droneToFrontNT * predConvert->globaltoDrone);
     //        //renderGrid(PTAMResultSE3);
@@ -611,6 +603,9 @@ TooN::Vector<3> Ptam::evalNavQue(unsigned int from, unsigned int to, bool* zCorr
     //	*out_end_pressure = sum_last/num_last;
     //	*out_start_pressure = sum_first/num_first;
 
-    return TooN::makeVector(predIMUOnlyForScale_->x, predIMUOnlyForScale_->y, predIMUOnlyForScale_->z);
+    return TooN::makeVector(predIMUOnlyForScale_.x, predIMUOnlyForScale_.y, predIMUOnlyForScale_.z);
 }
 
+void resetPtam() {
+    
+}
