@@ -2,6 +2,7 @@
 #define PTAM_H
 
 #include "tum/Predictor.h"
+#include "tum/scale_estimation.hpp"
 
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
@@ -48,6 +49,8 @@ private:
     ATANCameraPtr ptamCamera_;
     MapPtr ptamMap_;
     MapMakerPtr ptamMapMaker_;
+    
+    localization::ScaleEstimation scaleEstimation_;
 
     Predictor* predConvert_; // used ONLY to convert from rpy to se3 and back, i.e. never kept in some state.
     Predictor* imuOnlyPred_;

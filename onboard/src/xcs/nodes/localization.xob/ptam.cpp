@@ -103,7 +103,7 @@ void Ptam::onChangeVideo(urbi::UImage image) {
 
 
     // 1. transform with filter
-    TooN::Vector<6> PTAMPoseGuess = TumUtils::backTransformPTAMObservation(filterPosePrePTAM.slice<0, 6>());
+    TooN::Vector<6> PTAMPoseGuess = scaleEstimation_.backTransformPTAMObservation(filterPosePrePTAM.slice<0, 6>());
     // 2. convert to se3
     predConvert_->setPosRPY(PTAMPoseGuess[0], PTAMPoseGuess[1], PTAMPoseGuess[2], PTAMPoseGuess[3], PTAMPoseGuess[4], PTAMPoseGuess[5]);
     // 3. multiply with rotation matrix	
@@ -133,7 +133,7 @@ void Ptam::onChangeVideo(urbi::UImage image) {
     // Michal: PTAMResult is now pose of the drone in basic coordinates
 
     // 3. transform with filter
-    TooN::Vector<6> PTAMResultTransformed = TumUtils::transformPTAMObservation(PTAMResult);
+    TooN::Vector<6> PTAMResultTransformed = scaleEstimation_.transformPTAMObservation(PTAMResult);
     // Michal: apply "current"/last scale to result
 
 
@@ -146,10 +146,10 @@ void Ptam::onChangeVideo(urbi::UImage image) {
     }
     if (ptamTracker_->lastStepResult == ptamTracker_->I_SECOND) {
         //PTAMInitializedClock = getMS(); TODO this is used in MapView to redraw something(?) only after 200 ms
-        auto scaleVector = TooN::makeVector(ptamMapMaker_->initialScaleFactor * 1.2, ptamMapMaker_->initialScaleFactor * 1.2, ptamMapMaker_->initialScaleFactor * 1.2);
-        //        filter->setCurrentScales(scaleVector); // TODO what is interface with Kalmann filter?
-        //        ptamMapMaker_->currentScaleFactor = filter->getCurrentScales()[0];
-        ptamMapMaker_->currentScaleFactor = scaleVector[0];
+        const auto scaleVector = TooN::makeVector(ptamMapMaker_->initialScaleFactor * 1.2, ptamMapMaker_->initialScaleFactor * 1.2, ptamMapMaker_->initialScaleFactor * 1.2);
+        scaleEstimation_.setCurrentScales(scaleVector); 
+        ptamMapMaker_->currentScaleFactor = scaleEstimation_.getCurrentScales()[0]; // M: why not directly?
+        
         XCS_LOG_INFO("PTAM initialized!");
         XCS_LOG_INFO("initial scale: " << ptamMapMaker_->initialScaleFactor * 1.2);
         //node->publishCommand("u l PTAM initialized (took second KF)"); // TODO what is this for
@@ -252,7 +252,7 @@ void Ptam::onChangeVideo(urbi::UImage image) {
 
     // filterPosePostPTAM = filter->getCurrentPoseSpeedAsVec(); // TODO obtain results from EKF with updated position
 
-    TooN::Vector<6> filterPosePostPTAMBackTransformed = TumUtils::backTransformPTAMObservation(filterPosePostPTAM.slice<0, 6>());
+    TooN::Vector<6> filterPosePostPTAMBackTransformed = scaleEstimation_.backTransformPTAMObservation(filterPosePostPTAM.slice<0, 6>());
 
 
     // if interval is started: add one step.
@@ -292,8 +292,8 @@ void Ptam::onChangeVideo(urbi::UImage image) {
                 diffIMU[2] *= zFactor;
 
                 // TODO here is hidden helluva calculations for scale estimate that takes place in filter though!!
-                //                filter->updateScaleXYZ(diffPTAM, diffIMU, PTAMResult.slice<0, 3>());
-                //                ptamMapMaker_->currentScaleFactor = filter->getCurrentScales()[0];
+                scaleEstimation_.updateScaleXYZ(diffPTAM, diffIMU, PTAMResult.slice<0, 3>());
+                ptamMapMaker_->currentScaleFactor = scaleEstimation_.getCurrentScales()[0];
             }
             framesIncludedForScaleXYZ_ = -1; // causing reset afterwards
         }

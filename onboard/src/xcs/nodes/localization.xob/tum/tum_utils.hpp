@@ -9,31 +9,6 @@ namespace xcs {
 namespace nodes {
 namespace localization {
 
-class TumUtils {
-private:
-    /* TODO Those are only dummy values to have compilable/linkable code.
-     They should be properly obtained from EKF.
-     */
-    constexpr static double yaw = 0;
-    
-    constexpr static double x_offset = 0;
-    constexpr static double y_offset = 0;
-    constexpr static double z_offset = 0;
-    
-    constexpr static double roll_offset = 0;
-    constexpr static double pitch_offset = 0;
-    constexpr static double yaw_offset = 0;
-    
-    constexpr static double xy_scale = 1;
-    constexpr static double z_scale = 1;
-public:
-
-    static TooN::Vector<3> transformPTAMObservation(double x, double y, double z);
-    static TooN::Vector<3> transformPTAMObservation(double x, double y, double z, double yaw);
-    static TooN::Vector<6> transformPTAMObservation(TooN::Vector<6> obs);
-    static TooN::Vector<6> backTransformPTAMObservation(TooN::Vector<6> obs);
-};
-
 /****************************************************
  *********** Pose-Representation Conversion **********
  ****************************************************/
