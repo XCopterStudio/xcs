@@ -1,6 +1,6 @@
 #include "tum_utils.hpp"
 
-using namespace xcs::nodes::ptam;
+using namespace xcs::nodes::localization;
 
 TooN::Vector<3> TumUtils::transformPTAMObservation(double x, double y, double z) {
     //return transformPTAMObservation(x, y, z, yaw.state[0]); TODO changed

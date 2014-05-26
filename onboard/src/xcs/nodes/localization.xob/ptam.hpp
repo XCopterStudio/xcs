@@ -1,5 +1,5 @@
-#ifndef X_PTAM_H
-#define X_PTAM_H
+#ifndef PTAM_H
+#define PTAM_H
 
 #include "tum/Predictor.h"
 
@@ -20,19 +20,17 @@
 namespace xcs {
 namespace nodes {
 
-namespace ptam {
+namespace localization {
 
 enum PtamStatusType {
     PTAM_IDLE = 0, PTAM_INITIALIZING = 1, PTAM_LOST = 2, PTAM_GOOD = 3, PTAM_BEST = 4, PTAM_TOOKKF = 5, PTAM_FALSEPOSITIVE = 6
 };
 }
 
-class XPtam : public XObject, private MouseKeyHandler {
+class Ptam : private MouseKeyHandler {
 public:
-    XPtam(const std::string &name);
-    virtual ~XPtam();
-
-    xcs::nodes::XInputPort<::urbi::UImage> video;
+    Ptam(const std::string &name); //TODO remove XObject inheritors
+    virtual ~Ptam();
 
     void init();
 private:
@@ -73,7 +71,7 @@ private:
     Timestamp ptamPositionForScaleTakenTimestamp_;
     Timestamp lastScaleEKFtimestamp_;
     
-    ptam::PtamStatusType ptamStatus_; // XVar candidate
+    localization::PtamStatusType ptamStatus_; // XVar candidate
 
 
     GLWindow2* glWindow_;

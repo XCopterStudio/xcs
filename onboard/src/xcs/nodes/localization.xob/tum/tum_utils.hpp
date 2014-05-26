@@ -7,7 +7,7 @@
 
 namespace xcs {
 namespace nodes {
-namespace ptam {
+namespace localization {
 
 class TumUtils {
 private:

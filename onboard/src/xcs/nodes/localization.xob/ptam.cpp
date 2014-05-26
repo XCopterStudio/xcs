@@ -1,4 +1,4 @@
-#include "x_ptam.hpp"
+#include "ptam.hpp"
 
 #include "tum/tum_utils.hpp"
 
@@ -10,23 +10,20 @@
 
 using namespace std;
 using namespace xcs::nodes;
-using namespace xcs::nodes::ptam;
+using namespace xcs::nodes::localization;
 
-const int XPtam::FRAME_WIDTH = 360;
-const int XPtam::FRAME_HEIGHT = 640;
+const int Ptam::FRAME_WIDTH = 360;
+const int Ptam::FRAME_HEIGHT = 640;
 
-XPtam::XPtam(const std::string &name) :
-  XObject(name),
-  video("FRONT_CAMERA") {
-    XBindVarF(video, &XPtam::onChangeVideo);
-    XBindFunction(XPtam, init);
+Ptam::Ptam(const std::string &name) {
+    // TODO move init here?
 }
 
-XPtam::~XPtam() {
+Ptam::~Ptam() {
 
 }
 
-void XPtam::init() {
+void Ptam::init() {
     // predictors
 
     // (G)UI type
@@ -66,7 +63,7 @@ void XPtam::init() {
 
 }
 
-void XPtam::onChangeVideo(urbi::UImage image) {
+void Ptam::onChangeVideo(urbi::UImage image) {
     XCS_LOG_INFO("new video frame");
     frameNo_ += 1;
 
@@ -134,7 +131,7 @@ void XPtam::onChangeVideo(urbi::UImage image) {
     predConvert_->setPosSE3_globalToDrone(predConvert_->frontToDroneNT * PTAMResultSE3);
     TooN::Vector<6> PTAMResult = TooN::makeVector(predConvert_->x, predConvert_->y, predConvert_->z, predConvert_->roll, predConvert_->pitch, predConvert_->yaw);
     // Michal: PTAMResult is now pose of the drone in basic coordinates
-    
+
     // 3. transform with filter
     TooN::Vector<6> PTAMResultTransformed = TumUtils::transformPTAMObservation(PTAMResult);
     // Michal: apply "current"/last scale to result
@@ -350,171 +347,171 @@ void XPtam::onChangeVideo(urbi::UImage image) {
     /*
      * No map and no logging so far.
      */
-//    // ----------------------------- update shallow map --------------------------
-//    if (!mapLocked_ && rand() % 5 == 0) { // TODO clarify purpose of this rand()
-//        pthread_mutex_lock(&shallowMapCS);
-//        mapPointsTransformed.clear();
-//        keyFramesTransformed.clear();
-//        for (unsigned int i = 0; i < ptamMap_->vpKeyFrames.size(); i++) {
-//            predConvert_->setPosSE3_globalToDrone(predConvert_->frontToDroneNT * ptamMap_->vpKeyFrames[i]->se3CfromW);
-//            TooN::Vector<6> CamPos = TooN::makeVector(predConvert_->x, predConvert_->y, predConvert_->z, predConvert_->roll, predConvert_->pitch, predConvert_->yaw);
-//            CamPos = filter->transformPTAMObservation(CamPos);
-//            predConvert_->setPosRPY(CamPos[0], CamPos[1], CamPos[2], CamPos[3], CamPos[4], CamPos[5]);
-//            keyFramesTransformed.push_back(predConvert_->droneToGlobal);
-//        }
-//        TooN::Vector<3> PTAMScales = filter->getCurrentScales();
-//        TooN::Vector<3> PTAMOffsets = filter->getCurrentOffsets().slice<0, 3>();
-//        for (unsigned int i = 0; i < ptamMap_->vpPoints.size(); i++) {
-//            TooN::Vector<3> pos = (ptamMap_->vpPoints)[i]->v3WorldPos;
-//            pos[0] *= PTAMScales[0];
-//            pos[1] *= PTAMScales[1];
-//            pos[2] *= PTAMScales[2];
-//            pos += PTAMOffsets;
-//            mapPointsTransformed.push_back(pos);
-//        }
-//
-//        // flush map keypoints
-//        if (flushMapKeypoints) {
-//            std::ofstream* fle = new std::ofstream();
-//            fle->open("pointcloud.txt");
-//
-//            for (unsigned int i = 0; i < mapPointsTransformed.size(); i++) {
-//                (*fle) << mapPointsTransformed[i][0] << " "
-//                        << mapPointsTransformed[i][1] << " "
-//                        << mapPointsTransformed[i][2] << std::endl;
-//            }
-//
-//            fle->flush();
-//            fle->close();
-//
-//            printf("FLUSHED %d KEYPOINTS to file pointcloud.txt\n\n", mapPointsTransformed.size());
-//
-//            flushMapKeypoints = false;
-//        }
-//
-//
-//        pthread_mutex_unlock(&shallowMapCS);
-//
-//    }
-//
-//
-//
-//    // ---------------------- output and render! ---------------------------
-//    ros::Duration timeALL = ros::Time::now() - startedFunc;
-//    if (isVeryGood) snprintf(charBuf, 1000, "\nQuality: best            ");
-//    else if (isGood) snprintf(charBuf, 1000, "\nQuality: good           ");
-//    else snprintf(charBuf, 1000, "\nQuality: lost                       ");
-//
-//    snprintf(charBuf + 20, 800, "scale: %.3f (acc: %.3f)                            ", filter->getCurrentScales()[0], (double) filter->getScaleAccuracy());
-//    snprintf(charBuf + 50, 800, "PTAM time: %i ms                            ", (int) (1000 * timeALL.toSec()));
-//    snprintf(charBuf + 68, 800, "(%i ms total)  ", (int) (1000 * timeALL.toSec()));
-//    if (mapLocked_) snprintf(charBuf + 83, 800, "m.l. ");
-//    else snprintf(charBuf + 83, 800, "     ");
-//    if (filter->allSyncLocked) snprintf(charBuf + 88, 800, "s.l. ");
-//    else snprintf(charBuf + 88, 800, "     ");
-//
-//
-//    msg += charBuf;
-//
-//    if (ptamMap_->IsGood()) {
-//        if (drawUI == UI_DEBUG) {
-//            snprintf(charBuf, 1000, "\nPTAM Diffs:              ");
-//            snprintf(charBuf + 13, 800, "x: %.3f                          ", diffs[0]);
-//            snprintf(charBuf + 23, 800, "y: %.3f                          ", diffs[1]);
-//            snprintf(charBuf + 33, 800, "z: %.3f                          ", diffs[2]);
-//            snprintf(charBuf + 43, 800, "r: %.2f                          ", diffs[3]);
-//            snprintf(charBuf + 53, 800, "p: %.2f                          ", diffs[4]);
-//            snprintf(charBuf + 63, 800, "y: %.2f", diffs[5]);
-//            msg += charBuf;
-//
-//
-//            snprintf(charBuf, 1000, "\nPTAM Pose:              ");
-//            snprintf(charBuf + 13, 800, "x: %.3f                          ", PTAMResultTransformed[0]);
-//            snprintf(charBuf + 23, 800, "y: %.3f                          ", PTAMResultTransformed[1]);
-//            snprintf(charBuf + 33, 800, "z: %.3f                          ", PTAMResultTransformed[2]);
-//            snprintf(charBuf + 43, 800, "r: %.2f                          ", PTAMResultTransformed[3]);
-//            snprintf(charBuf + 53, 800, "p: %.2f                          ", PTAMResultTransformed[4]);
-//            snprintf(charBuf + 63, 800, "y: %.2f", PTAMResultTransformed[5]);
-//            msg += charBuf;
-//
-//
-//            snprintf(charBuf, 1000, "\nPTAM WiggleDist:              ");
-//            snprintf(charBuf + 18, 800, "%.3f                          ", ptamMapMaker_->lastWiggleDist);
-//            snprintf(charBuf + 24, 800, "MetricDist: %.3f", ptamMapMaker_->lastMetricDist);
-//            msg += charBuf;
-//        }
-//    }
-//
-//    if (drawUI != UI_NONE) {
-//        // render grid
-//        predConvert_->setPosRPY(filterPosePostPTAM[0], filterPosePostPTAM[1], filterPosePostPTAM[2], filterPosePostPTAM[3], filterPosePostPTAM[4], filterPosePostPTAM[5]);
-//
-//        //renderGrid(predConvert->droneToFrontNT * predConvert->globaltoDrone);
-//        //renderGrid(PTAMResultSE3);
-//
-//
-//        // draw HUD
-//        //if(mod->getControlSystem()->isControlling())
-//        {
-//            glWindow_->SetupViewport();
-//            glWindow_->SetupVideoOrtho();
-//            glWindow_->SetupVideoRasterPosAndZoom();
-//
-//            //glDisable(GL_LINE_SMOOTH);
-//            glLineWidth(2);
-//            glBegin(GL_LINES);
-//            glColor3f(0, 0, 1);
-//
-//            glVertex2f(0, frameHeight / 2);
-//            glVertex2f(frameWidth, frameHeight / 2);
-//
-//            glVertex2f(frameWidth / 2, 0);
-//            glVertex2f(frameWidth / 2, frameHeight);
-//
-//            // 1m lines
-//            glVertex2f(0.25 * frameWidth, 0.48 * frameHeight);
-//            glVertex2f(0.25 * frameWidth, 0.52 * frameHeight);
-//            glVertex2f(0.75 * frameWidth, 0.48 * frameHeight);
-//            glVertex2f(0.75 * frameWidth, 0.52 * frameHeight);
-//            glVertex2f(0.48 * frameWidth, 0.25 * frameHeight);
-//            glVertex2f(0.52 * frameWidth, 0.25 * frameHeight);
-//            glVertex2f(0.48 * frameWidth, 0.75 * frameHeight);
-//            glVertex2f(0.52 * frameWidth, 0.75 * frameHeight);
-//
-//            glEnd();
-//        }
-//
-//
-//        glWindow_->DrawCaption(msg);
-//    }
-//
-//    lastPTAMResultRaw = PTAMResultSE3;
-//    // ------------------------ LOG --------------------------------------
-//    // log!
-//    if (node->logfilePTAM != NULL) {
-//        TooN::Vector<3> scales = filter->getCurrentScalesForLog();
-//        TooN::Vector<3> sums = TooN::makeVector(0, 0, 0);
-//        TooN::Vector<6> offsets = filter->getCurrentOffsets();
-//        pthread_mutex_lock(&(node->logPTAM_CS));
-//        // log:
-//        // - filterPosePrePTAM estimated for videoFrameTimestamp-delayVideo.
-//        // - PTAMResulttransformed estimated for videoFrameTimestamp-delayVideo. (using imu only for last step)
-//        // - predictedPoseSpeed estimated for lastNfoTimestamp+filter->delayControl	(actually predicting)
-//        // - predictedPoseSpeedATLASTNFO estimated for lastNfoTimestamp	(using imu only)
-//        if (node->logfilePTAM != NULL)
-//            (*(node->logfilePTAM)) << (isGood ? (isVeryGood ? 2 : 1) : 0) << " " <<
-//            (mimFrameTime_workingCopy - filter->delayVideo) << " " << filterPosePrePTAM[0] << " " << filterPosePrePTAM[1] << " " << filterPosePrePTAM[2] << " " << filterPosePrePTAM[3] << " " << filterPosePrePTAM[4] << " " << filterPosePrePTAM[5] << " " << filterPosePrePTAM[6] << " " << filterPosePrePTAM[7] << " " << filterPosePrePTAM[8] << " " << filterPosePrePTAM[9] << " " <<
-//                filterPosePostPTAM[0] << " " << filterPosePostPTAM[1] << " " << filterPosePostPTAM[2] << " " << filterPosePostPTAM[3] << " " << filterPosePostPTAM[4] << " " << filterPosePostPTAM[5] << " " << filterPosePostPTAM[6] << " " << filterPosePostPTAM[7] << " " << filterPosePostPTAM[8] << " " << filterPosePostPTAM[9] << " " <<
-//                PTAMResultTransformed[0] << " " << PTAMResultTransformed[1] << " " << PTAMResultTransformed[2] << " " << PTAMResultTransformed[3] << " " << PTAMResultTransformed[4] << " " << PTAMResultTransformed[5] << " " <<
-//                scales[0] << " " << scales[1] << " " << scales[2] << " " <<
-//                offsets[0] << " " << offsets[1] << " " << offsets[2] << " " << offsets[3] << " " << offsets[4] << " " << offsets[5] << " " <<
-//                sums[0] << " " << sums[1] << " " << sums[2] << " " <<
-//                PTAMResult[0] << " " << PTAMResult[1] << " " << PTAMResult[2] << " " << PTAMResult[3] << " " << PTAMResult[4] << " " << PTAMResult[5] << " " <<
-//                PTAMResultSE3TwistOrg[0] << " " << PTAMResultSE3TwistOrg[1] << " " << PTAMResultSE3TwistOrg[2] << " " << PTAMResultSE3TwistOrg[3] << " " << PTAMResultSE3TwistOrg[4] << " " << PTAMResultSE3TwistOrg[5] << " " <<
-//                videoFramePing << " " << mimFrameTimeRos_workingCopy << " " << frameNo_ << std::endl;
-//
-//        pthread_mutex_unlock(&(node->logPTAM_CS));
-//    }
+    //    // ----------------------------- update shallow map --------------------------
+    //    if (!mapLocked_ && rand() % 5 == 0) { // TODO clarify purpose of this rand()
+    //        pthread_mutex_lock(&shallowMapCS);
+    //        mapPointsTransformed.clear();
+    //        keyFramesTransformed.clear();
+    //        for (unsigned int i = 0; i < ptamMap_->vpKeyFrames.size(); i++) {
+    //            predConvert_->setPosSE3_globalToDrone(predConvert_->frontToDroneNT * ptamMap_->vpKeyFrames[i]->se3CfromW);
+    //            TooN::Vector<6> CamPos = TooN::makeVector(predConvert_->x, predConvert_->y, predConvert_->z, predConvert_->roll, predConvert_->pitch, predConvert_->yaw);
+    //            CamPos = filter->transformPTAMObservation(CamPos);
+    //            predConvert_->setPosRPY(CamPos[0], CamPos[1], CamPos[2], CamPos[3], CamPos[4], CamPos[5]);
+    //            keyFramesTransformed.push_back(predConvert_->droneToGlobal);
+    //        }
+    //        TooN::Vector<3> PTAMScales = filter->getCurrentScales();
+    //        TooN::Vector<3> PTAMOffsets = filter->getCurrentOffsets().slice<0, 3>();
+    //        for (unsigned int i = 0; i < ptamMap_->vpPoints.size(); i++) {
+    //            TooN::Vector<3> pos = (ptamMap_->vpPoints)[i]->v3WorldPos;
+    //            pos[0] *= PTAMScales[0];
+    //            pos[1] *= PTAMScales[1];
+    //            pos[2] *= PTAMScales[2];
+    //            pos += PTAMOffsets;
+    //            mapPointsTransformed.push_back(pos);
+    //        }
+    //
+    //        // flush map keypoints
+    //        if (flushMapKeypoints) {
+    //            std::ofstream* fle = new std::ofstream();
+    //            fle->open("pointcloud.txt");
+    //
+    //            for (unsigned int i = 0; i < mapPointsTransformed.size(); i++) {
+    //                (*fle) << mapPointsTransformed[i][0] << " "
+    //                        << mapPointsTransformed[i][1] << " "
+    //                        << mapPointsTransformed[i][2] << std::endl;
+    //            }
+    //
+    //            fle->flush();
+    //            fle->close();
+    //
+    //            printf("FLUSHED %d KEYPOINTS to file pointcloud.txt\n\n", mapPointsTransformed.size());
+    //
+    //            flushMapKeypoints = false;
+    //        }
+    //
+    //
+    //        pthread_mutex_unlock(&shallowMapCS);
+    //
+    //    }
+    //
+    //
+    //
+    //    // ---------------------- output and render! ---------------------------
+    //    ros::Duration timeALL = ros::Time::now() - startedFunc;
+    //    if (isVeryGood) snprintf(charBuf, 1000, "\nQuality: best            ");
+    //    else if (isGood) snprintf(charBuf, 1000, "\nQuality: good           ");
+    //    else snprintf(charBuf, 1000, "\nQuality: lost                       ");
+    //
+    //    snprintf(charBuf + 20, 800, "scale: %.3f (acc: %.3f)                            ", filter->getCurrentScales()[0], (double) filter->getScaleAccuracy());
+    //    snprintf(charBuf + 50, 800, "PTAM time: %i ms                            ", (int) (1000 * timeALL.toSec()));
+    //    snprintf(charBuf + 68, 800, "(%i ms total)  ", (int) (1000 * timeALL.toSec()));
+    //    if (mapLocked_) snprintf(charBuf + 83, 800, "m.l. ");
+    //    else snprintf(charBuf + 83, 800, "     ");
+    //    if (filter->allSyncLocked) snprintf(charBuf + 88, 800, "s.l. ");
+    //    else snprintf(charBuf + 88, 800, "     ");
+    //
+    //
+    //    msg += charBuf;
+    //
+    //    if (ptamMap_->IsGood()) {
+    //        if (drawUI == UI_DEBUG) {
+    //            snprintf(charBuf, 1000, "\nPTAM Diffs:              ");
+    //            snprintf(charBuf + 13, 800, "x: %.3f                          ", diffs[0]);
+    //            snprintf(charBuf + 23, 800, "y: %.3f                          ", diffs[1]);
+    //            snprintf(charBuf + 33, 800, "z: %.3f                          ", diffs[2]);
+    //            snprintf(charBuf + 43, 800, "r: %.2f                          ", diffs[3]);
+    //            snprintf(charBuf + 53, 800, "p: %.2f                          ", diffs[4]);
+    //            snprintf(charBuf + 63, 800, "y: %.2f", diffs[5]);
+    //            msg += charBuf;
+    //
+    //
+    //            snprintf(charBuf, 1000, "\nPTAM Pose:              ");
+    //            snprintf(charBuf + 13, 800, "x: %.3f                          ", PTAMResultTransformed[0]);
+    //            snprintf(charBuf + 23, 800, "y: %.3f                          ", PTAMResultTransformed[1]);
+    //            snprintf(charBuf + 33, 800, "z: %.3f                          ", PTAMResultTransformed[2]);
+    //            snprintf(charBuf + 43, 800, "r: %.2f                          ", PTAMResultTransformed[3]);
+    //            snprintf(charBuf + 53, 800, "p: %.2f                          ", PTAMResultTransformed[4]);
+    //            snprintf(charBuf + 63, 800, "y: %.2f", PTAMResultTransformed[5]);
+    //            msg += charBuf;
+    //
+    //
+    //            snprintf(charBuf, 1000, "\nPTAM WiggleDist:              ");
+    //            snprintf(charBuf + 18, 800, "%.3f                          ", ptamMapMaker_->lastWiggleDist);
+    //            snprintf(charBuf + 24, 800, "MetricDist: %.3f", ptamMapMaker_->lastMetricDist);
+    //            msg += charBuf;
+    //        }
+    //    }
+    //
+    //    if (drawUI != UI_NONE) {
+    //        // render grid
+    //        predConvert_->setPosRPY(filterPosePostPTAM[0], filterPosePostPTAM[1], filterPosePostPTAM[2], filterPosePostPTAM[3], filterPosePostPTAM[4], filterPosePostPTAM[5]);
+    //
+    //        //renderGrid(predConvert->droneToFrontNT * predConvert->globaltoDrone);
+    //        //renderGrid(PTAMResultSE3);
+    //
+    //
+    //        // draw HUD
+    //        //if(mod->getControlSystem()->isControlling())
+    //        {
+    //            glWindow_->SetupViewport();
+    //            glWindow_->SetupVideoOrtho();
+    //            glWindow_->SetupVideoRasterPosAndZoom();
+    //
+    //            //glDisable(GL_LINE_SMOOTH);
+    //            glLineWidth(2);
+    //            glBegin(GL_LINES);
+    //            glColor3f(0, 0, 1);
+    //
+    //            glVertex2f(0, frameHeight / 2);
+    //            glVertex2f(frameWidth, frameHeight / 2);
+    //
+    //            glVertex2f(frameWidth / 2, 0);
+    //            glVertex2f(frameWidth / 2, frameHeight);
+    //
+    //            // 1m lines
+    //            glVertex2f(0.25 * frameWidth, 0.48 * frameHeight);
+    //            glVertex2f(0.25 * frameWidth, 0.52 * frameHeight);
+    //            glVertex2f(0.75 * frameWidth, 0.48 * frameHeight);
+    //            glVertex2f(0.75 * frameWidth, 0.52 * frameHeight);
+    //            glVertex2f(0.48 * frameWidth, 0.25 * frameHeight);
+    //            glVertex2f(0.52 * frameWidth, 0.25 * frameHeight);
+    //            glVertex2f(0.48 * frameWidth, 0.75 * frameHeight);
+    //            glVertex2f(0.52 * frameWidth, 0.75 * frameHeight);
+    //
+    //            glEnd();
+    //        }
+    //
+    //
+    //        glWindow_->DrawCaption(msg);
+    //    }
+    //
+    //    lastPTAMResultRaw = PTAMResultSE3;
+    //    // ------------------------ LOG --------------------------------------
+    //    // log!
+    //    if (node->logfilePTAM != NULL) {
+    //        TooN::Vector<3> scales = filter->getCurrentScalesForLog();
+    //        TooN::Vector<3> sums = TooN::makeVector(0, 0, 0);
+    //        TooN::Vector<6> offsets = filter->getCurrentOffsets();
+    //        pthread_mutex_lock(&(node->logPTAM_CS));
+    //        // log:
+    //        // - filterPosePrePTAM estimated for videoFrameTimestamp-delayVideo.
+    //        // - PTAMResulttransformed estimated for videoFrameTimestamp-delayVideo. (using imu only for last step)
+    //        // - predictedPoseSpeed estimated for lastNfoTimestamp+filter->delayControl	(actually predicting)
+    //        // - predictedPoseSpeedATLASTNFO estimated for lastNfoTimestamp	(using imu only)
+    //        if (node->logfilePTAM != NULL)
+    //            (*(node->logfilePTAM)) << (isGood ? (isVeryGood ? 2 : 1) : 0) << " " <<
+    //            (mimFrameTime_workingCopy - filter->delayVideo) << " " << filterPosePrePTAM[0] << " " << filterPosePrePTAM[1] << " " << filterPosePrePTAM[2] << " " << filterPosePrePTAM[3] << " " << filterPosePrePTAM[4] << " " << filterPosePrePTAM[5] << " " << filterPosePrePTAM[6] << " " << filterPosePrePTAM[7] << " " << filterPosePrePTAM[8] << " " << filterPosePrePTAM[9] << " " <<
+    //                filterPosePostPTAM[0] << " " << filterPosePostPTAM[1] << " " << filterPosePostPTAM[2] << " " << filterPosePostPTAM[3] << " " << filterPosePostPTAM[4] << " " << filterPosePostPTAM[5] << " " << filterPosePostPTAM[6] << " " << filterPosePostPTAM[7] << " " << filterPosePostPTAM[8] << " " << filterPosePostPTAM[9] << " " <<
+    //                PTAMResultTransformed[0] << " " << PTAMResultTransformed[1] << " " << PTAMResultTransformed[2] << " " << PTAMResultTransformed[3] << " " << PTAMResultTransformed[4] << " " << PTAMResultTransformed[5] << " " <<
+    //                scales[0] << " " << scales[1] << " " << scales[2] << " " <<
+    //                offsets[0] << " " << offsets[1] << " " << offsets[2] << " " << offsets[3] << " " << offsets[4] << " " << offsets[5] << " " <<
+    //                sums[0] << " " << sums[1] << " " << sums[2] << " " <<
+    //                PTAMResult[0] << " " << PTAMResult[1] << " " << PTAMResult[2] << " " << PTAMResult[3] << " " << PTAMResult[4] << " " << PTAMResult[5] << " " <<
+    //                PTAMResultSE3TwistOrg[0] << " " << PTAMResultSE3TwistOrg[1] << " " << PTAMResultSE3TwistOrg[2] << " " << PTAMResultSE3TwistOrg[3] << " " << PTAMResultSE3TwistOrg[4] << " " << PTAMResultSE3TwistOrg[5] << " " <<
+    //                videoFramePing << " " << mimFrameTimeRos_workingCopy << " " << frameNo_ << std::endl;
+    //
+    //        pthread_mutex_unlock(&(node->logPTAM_CS));
+    //    }
 
     glWindow_->swap_buffers();
     glWindow_->HandlePendingEvents();
@@ -522,7 +519,7 @@ void XPtam::onChangeVideo(urbi::UImage image) {
 
 // TODO port this method
 
-TooN::Vector<3> XPtam::evalNavQue(unsigned int from, unsigned int to, bool* zCorrupted, bool* allCorrupted, float* out_start_pressure, float* out_end_pressure) {
+TooN::Vector<3> Ptam::evalNavQue(unsigned int from, unsigned int to, bool* zCorrupted, bool* allCorrupted, float* out_start_pressure, float* out_end_pressure) {
     //	predIMUOnlyForScale->resetPos();
     //
     //	int firstAdded = 0, lastAdded = 0;
@@ -618,4 +615,3 @@ TooN::Vector<3> XPtam::evalNavQue(unsigned int from, unsigned int to, bool* zCor
     return TooN::makeVector(predIMUOnlyForScale_->x, predIMUOnlyForScale_->y, predIMUOnlyForScale_->z);
 }
 
-XStart(XPtam);

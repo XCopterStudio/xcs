@@ -1,31 +1,31 @@
-#include "xekf.hpp"
+#include "xlocalization.hpp"
 #include <limits>
 #include <xcs/logging.hpp>
 #include <xcs/xcs_fce.hpp>
 
 using namespace xcs::nodes;
-using namespace xcs::nodes::ekf;
+using namespace xcs::nodes::localization;
 
-const double XEkf::IMU_DELAY = 0.040; // 40ms
-const double XEkf::FLY_CONTROL_SEND_TIME = 0.075; // 75ms
-const double XEkf::CAM_DELAY = 0.100; // 
+const double XLocalization::IMU_DELAY = 0.040; // 40ms
+const double XLocalization::FLY_CONTROL_SEND_TIME = 0.075; // 75ms
+const double XLocalization::CAM_DELAY = 0.100; // 
 
-void XEkf::onChangeVelocity(xcs::CartesianVector measuredVelocity){
+void XLocalization::onChangeVelocity(xcs::CartesianVector measuredVelocity){
     lastMeasurement_.velocity.x = measuredVelocity.y;
     lastMeasurement_.velocity.y = measuredVelocity.x;
 }
 
-void XEkf::onChangeRotation(xcs::EulerianVector measuredAnglesRotation){
+void XLocalization::onChangeRotation(xcs::EulerianVector measuredAnglesRotation){
     lastMeasurement_.angularRotationPsi = xcs::normAngle(measuredAnglesRotation.psi - lastMeasurement_.angles.psi);
     lastMeasurement_.angles = measuredAnglesRotation;
 }
 
-void XEkf::onChangeAltitude(double altitude){
+void XLocalization::onChangeAltitude(double altitude){
     lastMeasurement_.velocity.z = (altitude - lastMeasurement_.altitude);
     lastMeasurement_.altitude = altitude;
 }
 
-void XEkf::onChangeTimeImu(double timeImu){
+void XLocalization::onChangeTimeImu(double timeImu){
     if (imuTimeShift_ == std::numeric_limits<double>::max()){
         imuTimeShift_ = timeImu - timeFromStart();
     }
@@ -43,15 +43,15 @@ void XEkf::onChangeTimeImu(double timeImu){
     rotation = state.angles;
 }
 
-void XEkf::onChangePosition(xcs::CartesianVector measuredPosition){
+void XLocalization::onChangePosition(xcs::CartesianVector measuredPosition){
     lastCameraMeasurement_.position = measuredPosition;
 }
 
-void XEkf::onChangeAngles(xcs::EulerianVector measuredAngles){
+void XLocalization::onChangeAngles(xcs::EulerianVector measuredAngles){
     lastCameraMeasurement_.angles = measuredAngles;
 }
 
-void XEkf::onChangeTimeCam(double timeCam){
+void XLocalization::onChangeTimeCam(double timeCam){
     double time = timeCam - imuTimeShift_ - CAM_DELAY;
     ekf_.measurementCam(lastCameraMeasurement_, time);
 
@@ -62,19 +62,19 @@ void XEkf::onChangeTimeCam(double timeCam){
     rotation = state.angles;
 }
 
-void XEkf::onChangeClearTime(double time){
+void XLocalization::onChangeClearTime(double time){
     double droneTime = time - imuTimeShift_ - CAM_DELAY;
     ekf_.clearUpToTime(droneTime);
 }
 
-void XEkf::onChangeFlyControl(xcs::FlyControl flyControl){
+void XLocalization::onChangeFlyControl(xcs::FlyControl flyControl){
     //printf("FlyControl time %f\n", timeFromStart());
     ekf_.flyControl(flyControl, timeFromStart() + FLY_CONTROL_SEND_TIME); // TODO: compute flyControl delay
 }
 
 //================ public functions ==================
 
-XEkf::XEkf(const std::string &name) : 
+XLocalization::XLocalization(const std::string &name) : 
 XObject(name), 
 measuredVelocity("VELOCITY"),
 measuredAnglesRotation("ROTATION"),
@@ -92,21 +92,21 @@ rotation("ROTATION"){
     lastMeasurementTime_ = 0;
     imuTimeShift_ = std::numeric_limits<double>::max();
 
-    XBindVarF(measuredVelocity,&XEkf::onChangeVelocity);
-    XBindVarF(measuredAnglesRotation,&XEkf::onChangeRotation);
-    XBindVarF(measuredAltitude,&XEkf::onChangeAltitude);
-    XBindVarF(timeImu,&XEkf::onChangeTimeImu);
+    XBindVarF(measuredVelocity,&XLocalization::onChangeVelocity);
+    XBindVarF(measuredAnglesRotation,&XLocalization::onChangeRotation);
+    XBindVarF(measuredAltitude,&XLocalization::onChangeAltitude);
+    XBindVarF(timeImu,&XLocalization::onChangeTimeImu);
 
-    XBindVarF(measuredPosition,&XEkf::onChangePosition);
-    XBindVarF(measuredAngles,&XEkf::onChangeAngles);
-    XBindVarF(timeCam,&XEkf::onChangeTimeCam);
-    XBindVarF(clearTime,&XEkf::onChangeClearTime);
+    XBindVarF(measuredPosition,&XLocalization::onChangePosition);
+    XBindVarF(measuredAngles,&XLocalization::onChangeAngles);
+    XBindVarF(timeCam,&XLocalization::onChangeTimeCam);
+    XBindVarF(clearTime,&XLocalization::onChangeClearTime);
 
-    XBindVarF(flyControl,&XEkf::onChangeFlyControl);
+    XBindVarF(flyControl,&XLocalization::onChangeFlyControl);
 
     XBindVar(position);
     XBindVar(velocity);
     XBindVar(rotation);
 }
 
-XStart(XEkf);
+XStart(XLocalization);

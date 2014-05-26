@@ -19,17 +19,17 @@ namespace nodes{
     typedef std::chrono::high_resolution_clock Clock;
     typedef std::chrono::time_point<std::chrono::high_resolution_clock> TimePoint;
 
-    class XEkf : public XObject{
+    class XLocalization : public XObject{
         static const double IMU_DELAY;
         static const double FLY_CONTROL_SEND_TIME;
         static const double CAM_DELAY;
 
-        ekf::Ekf ekf_;
+        localization::Ekf ekf_;
 
-        ekf::DroneStateMeasurement lastMeasurement_;
+        localization::DroneStateMeasurement lastMeasurement_;
         double lastMeasurementTime_;
 
-        ekf::CameraMeasurement lastCameraMeasurement_;
+        localization::CameraMeasurement lastCameraMeasurement_;
 
         Clock clock_;
         TimePoint startTime_;
@@ -72,7 +72,7 @@ namespace nodes{
         XVar<xcs::CartesianVector> velocity;
         XVar<xcs::EulerianVector> rotation;
 
-        XEkf(const std::string &name);
+        XLocalization(const std::string &name);
     };
     
 }}
