@@ -1,3 +1,15 @@
+class Global.XObjectSettings {
+    var filename;
+    var name;
+    var initParam;
+
+    function init(fn, n, ip) {
+        this.filename = fn;
+        this.name = n;
+        this.initParam = ip;
+    };
+};
+
 class SettingsCollection {
     var xobjectsSettings_ = [];
 
@@ -51,6 +63,44 @@ class SettingsCollection {
                 };
             };
         };
+        return map;
+    };
+
+    function getXObjectSettingsFromPath(path) {
+        var key = path.basename().split(".").front();
+        return getXObjectSettings(key);
+    };
+
+    function getXObjectSettings(key) {
+        var map = [ => ];
+        for(var setting: this.xobjectsSettings_) {
+            if(setting.contains(key)) {
+                try {
+                    var name = setting.get(key + ".name");
+                    var initParam = setting.get(key + ".init");
+                    var hasInit = false;
+
+                    if(initParam.isNil || initParam == "") {
+                        var mInit = setting.getMap(key + ".init");
+                        if(!mInit.isNil) {
+                            for(var i: mInit) {
+                                hasInit = true;
+                                map[i.first] = Global.XObjectSettings.new(key, name, i.second);
+                            };
+                        };
+                    };
+
+                    if(!hasInit) {
+                        map[key] = Global.XObjectSettings.new(key, name, initParam);
+                    };
+
+                }
+                catch(var ex) {
+                    echo("............ERROR - getXObjectSettings: " + ex.asString());
+                };
+            };
+        };
+
         return map;
     };
 } |;
