@@ -4,6 +4,7 @@
 #include <chrono>
 
 #include "ekf.hpp"
+#include "ptam.hpp"
 #include <xcs/xcs_fce.hpp>
 
 #include <xcs/nodes/xobject/x_object.hpp>
@@ -25,6 +26,8 @@ namespace nodes{
         static const double CAM_DELAY;
 
         localization::Ekf ekf_;
+        
+        localization::Ptam ptam_;
 
         localization::DroneStateMeasurement lastMeasurement_;
         double lastMeasurementTime_;
@@ -48,6 +51,8 @@ namespace nodes{
 
         void onChangeClearTime(double time);
 
+        void onChangeVideo(::urbi::UImage image);
+        
         void onChangeFlyControl(xcs::FlyControl flyControl);
 
         inline double timeFromStart(){ return std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -59,11 +64,13 @@ namespace nodes{
         XInputPort<double> measuredAltitude;
         XInputPort<double> timeImu;
         // cam measurements
-        XInputPort<xcs::CartesianVector> measuredPosition;
-        XInputPort<xcs::EulerianVector> measuredAngles;
-        XInputPort<double> timeCam;
+        XInputPort<xcs::CartesianVector> measuredPosition; // TODO change to tight composition with PTAM
+        XInputPort<xcs::EulerianVector> measuredAngles; // TODO change to tight composition with PTAM
+        XInputPort<double> timeCam; // TODO change to tight composition with PTAM
         // clear channel
-        XInputPort<double> clearTime;
+        XInputPort<double> clearTime; // TODO change to tight composition with PTAM
+        // visual data
+        XInputPort<::urbi::UImage> video;
         // drone fly control
         XInputPort<xcs::FlyControl> flyControl;
 

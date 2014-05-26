@@ -4,19 +4,20 @@
 #include "tum/Predictor.h"
 #include "tum/scale_estimation.hpp"
 
-#include <xcs/nodes/xobject/x_object.hpp>
-#include <xcs/nodes/xobject/x_input_port.hpp>
-
-#include <ptam/Tracker.h>
-#include <ptam/ATANCamera.h>
-#include <ptam/Map.h>
-#include <ptam/MapMaker.h>
-#include <ptam/GLWindow2.h>
-#include <ptam/MouseKeyHandler.h>
 #include <TooN/TooN.h>
+#include <cvd/image.h>
+#include <cvd/byte.h>
 
 #include <memory>
 #include <chrono>
+
+class Tracker;
+class ATANCamera;
+class Map;
+class MapMaker;
+class GLWindow2;
+class MouseKeyHandler;
+
 
 namespace xcs {
 namespace nodes {
@@ -26,14 +27,17 @@ namespace localization {
 enum PtamStatusType {
     PTAM_IDLE = 0, PTAM_INITIALIZING = 1, PTAM_LOST = 2, PTAM_GOOD = 3, PTAM_BEST = 4, PTAM_TOOKKF = 5, PTAM_FALSEPOSITIVE = 6
 };
-}
 
-class Ptam : private MouseKeyHandler {
+
+class Ptam  {
 public:
-    Ptam(const std::string &name); //TODO remove XObject inheritors
+    Ptam();
     virtual ~Ptam();
 
     void init();
+
+    void handleFrame(urbi::UImage &bwImage, Timestamp timestamp);
+
 private:
     typedef std::unique_ptr<Tracker> TrackerPtr;
     typedef std::unique_ptr<ATANCamera> ATANCameraPtr;
@@ -49,7 +53,7 @@ private:
     ATANCameraPtr ptamCamera_;
     MapPtr ptamMap_;
     MapMakerPtr ptamMapMaker_;
-    
+
     localization::ScaleEstimation scaleEstimation_;
 
     Predictor* predConvert_; // used ONLY to convert from rpy to se3 and back, i.e. never kept in some state.
@@ -73,20 +77,20 @@ private:
     TooN::Vector<3> ptamPositionForScale_;
     Timestamp ptamPositionForScaleTakenTimestamp_;
     Timestamp lastScaleEKFtimestamp_;
-    
+
     localization::PtamStatusType ptamStatus_; // XVar candidate
 
 
     GLWindow2* glWindow_;
+    MouseKeyHandler* glWindowKeyHandler_;
 
 
-
-    void onChangeVideo(::urbi::UImage image);
 
     TooN::Vector<3> evalNavQue(unsigned int from, unsigned int to, bool* zCorrupted, bool* allCorrupted, float* out_start_pressure, float* out_end_pressure);
 
 };
 
+}
 }
 }
 

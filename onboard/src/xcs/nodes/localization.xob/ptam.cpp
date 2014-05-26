@@ -4,6 +4,13 @@
 
 #include <TooN/TooN.h>
 
+#include <ptam/Tracker.h>
+#include <ptam/ATANCamera.h>
+#include <ptam/Map.h>
+#include <ptam/MapMaker.h>
+#include <ptam/GLWindow2.h>
+#include <ptam/MouseKeyHandler.h>
+
 #include <xcs/logging.hpp>
 #include <urbi/uconversion.hh>
 
@@ -15,12 +22,12 @@ using namespace xcs::nodes::localization;
 const int Ptam::FRAME_WIDTH = 360;
 const int Ptam::FRAME_HEIGHT = 640;
 
-Ptam::Ptam(const std::string &name) {
+Ptam::Ptam() {
     // TODO move init here?
 }
 
 Ptam::~Ptam() {
-
+    delete glWindow_;
 }
 
 void Ptam::init() {
@@ -47,7 +54,8 @@ void Ptam::init() {
     ptamMapMaker_ = MapMakerPtr(new MapMaker(*ptamMap_, *ptamCamera_));
     ptamTracker_ = TrackerPtr(new Tracker(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), *ptamCamera_, *ptamMap_, *ptamMapMaker_)); // TODO video resolution (metadata??
 
-    glWindow_ = new GLWindow2(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), "PTAM Drone Camera Feed", this);
+    glWindowKeyHandler_ = new MouseKeyHandler();
+    glWindow_ = new GLWindow2(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), "PTAM Drone Camera Feed", glWindowKeyHandler_);
 
     predConvert_ = new Predictor();
     imuOnlyPred_ = new Predictor(); // TODO navdata should be fed to this predictor
@@ -63,8 +71,7 @@ void Ptam::init() {
 
 }
 
-void Ptam::onChangeVideo(urbi::UImage image) {
-    XCS_LOG_INFO("new video frame");
+void Ptam::handleFrame(urbi::UImage &bwImage, Timestamp timestamp) {
     frameNo_ += 1;
 
     /*
@@ -75,21 +82,14 @@ void Ptam::onChangeVideo(urbi::UImage image) {
     }
 
     /*
-     * Convert image to grayscale and to correct format for CVD
+     * Copy image data to CVD representation
      */
-    urbi::UImage bwImage;
-    bwImage.imageFormat = urbi::IMAGE_GREY8;
-    bwImage.data = nullptr;
-    bwImage.size = 0;
-    bwImage.width = 0;
-    bwImage.height = 0;
-    urbi::convert(image, bwImage);
-
     if (frame_.size().x != bwImage.width || frame_.size().y != bwImage.height) {
         frame_.resize(CVD::ImageRef(bwImage.width, bwImage.height));
     }
 
     memcpy(frame_.data(), bwImage.data, bwImage.width * bwImage.height);
+    frameTimestamp_ = timestamp;
 
 
     TooN::Vector<10> filterPosePrePTAM; // TODO get state from EKF in correct time
