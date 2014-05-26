@@ -14,6 +14,8 @@ var ScriptGeneratorView = Backbone.View.extend({
 
     id : 'script-generator',
     
+    dfgToolboxNodes : {},
+    
     initialize : function() {
         this.model = new DataFlowGraph();
         
@@ -57,7 +59,7 @@ var ScriptGeneratorView = Backbone.View.extend({
         
 //        this.model.set('dataFlowGraph', '<xml><text>hello world</text></xml>');        
         
-        this.initializeFlowGraph();
+        this.initializeDfg();
         
         //this.initializeBlockly();
     },
@@ -66,7 +68,7 @@ var ScriptGeneratorView = Backbone.View.extend({
     /****************************
     ** DATA FLOW GRAPH SECTION **
     ****************************/
-    initializeFlowGraph : function() {
+    initializeDfg : function() {
         var flowGraphConsole = $('#flow-graph-console');
         flowGraphConsole.append('<textarea id="flow-graph-txt" rows="15" cols="150"></textarea>');
         
@@ -83,10 +85,11 @@ var ScriptGeneratorView = Backbone.View.extend({
             $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
         });
 
-        var flowGraphToolbox = $('#flow-graph-toolbox');
-        flowGraphToolbox.append('<div id="XXci parrot" class="drag_">XXci - parrot</div>');
-        flowGraphToolbox.append('<div id="XXci dodo" class="drag_">XXci - dodo</div>');
-        this.initializeFlowGraphToolbox();
+        this.initializeDfgToolbox4Drop();
+        
+        //debug: init toolbox
+//        this.addNode2FgToolbox("XXci parrot", "XXci - parrot");
+//        this.addNode2FgToolbox("XXci dodo", "XXci - dodo");
         
         var paper = new joint.dia.Paper({
             el: $('#flow-graph-screen'),
@@ -126,15 +129,32 @@ var ScriptGeneratorView = Backbone.View.extend({
 //        scriptGeneratoGraph.fromJSON(newContent);    
     },
     
-    initializeFlowGraphToolbox : function() {
-        //Counter
-        counter = 0;
+    addNode2FgToolbox : function(id, title) {
+        if(!title) {
+            title = id;
+        }
+        
+        var flowGraphToolbox = $('#flow-graph-toolbox');
+        flowGraphToolbox.append('<div id="' + id + '" class="drag_init">' + title + '</div>');
+        this.initializeDfgToolbox4Drag();
+    },
+    
+    initializeDfgToolbox4Drag : function() {
         //Make element draggable
-        $(".drag_").draggable({
+        var dragInit = $(".drag_init");
+        dragInit.draggable({
             helper: 'clone',
             containment: '#flow-graph',
             //stop: function (ev, ui) { }
         });
+        
+        // remove drag_init class and add just drug_
+        dragInit.removeClass("drag_init").addClass("drag_");
+    },
+    
+    initializeDfgToolbox4Drop : function() {
+        //Counter
+        counter = 0;
         //Make element droppable
         $("#flow-graph-screen").droppable({
             drop: function (ev, ui) {
@@ -145,12 +165,43 @@ var ScriptGeneratorView = Backbone.View.extend({
                 var pos = $(ui.helper).offset();
                 var containerPos = $("#flow-graph-screen").offset();
                 
+                //TODO: create appropriate model
+//          //get prototype name
+//        var prototypeName = modelPrototype.get("name");
+//        //console.log(".prototypeName: " + JSON.stringify(prototypeName));
+//        
+//        // get all xvars
+                
+//        //console.log(".xvars:");
+//        modelPrototype.get("xvar").forEach(function(xvar) {
+//            var xvarName = xvar.get("name");
+//            var xvarSynType = xvar.get("synType");
+//            var xvarSemType = xvar.get("semType");
+//            //console.log("..xvarName: " + JSON.stringify(xvarName));
+//            //console.log("..xvarSynType: " + JSON.stringify(xvarSynType));
+//            //console.log("..xvarSemType: " + JSON.stringify(xvarSemType));
+//        });
+//        
+//        // get all xinputports
+//        //console.log(".xinputPorts:");
+//        modelPrototype.get("xinputPort").forEach(function(xvar) {
+//            var xinputPortName = xvar.get("name");
+//            var xinputPortSynType = xvar.get("synType");
+//            var xinputPortSemType = xvar.get("semType");
+//            //console.log("..xinputPortName: " + JSON.stringify(xinputPortName));
+//            //console.log("..xinputPortSynType: " + JSON.stringify(xinputPortSynType));
+//            //console.log("..xinputPortSemType: " + JSON.stringify(xinputPortSemType));
+//        });
+//        
+//        //console.log(".end");
+                
                 var m = new DataFlowGraphDefaultModel({
                     position: { x: pos.left - containerPos.left, y: pos.top - containerPos.top },
                 });
                 m.setId(modelId);
                 m.setLabel(modelId);
                 m.setAutoSize();
+                
                 scriptGeneratoGraph.addCell(m);
                 scriptGeneratorModels.addModel(modelId, m);
             }
@@ -197,35 +248,20 @@ var ScriptGeneratorView = Backbone.View.extend({
         //DEBUG
         console.log("onPrototypeAdd " + JSON.stringify(modelPrototype.toJSON()));
         
-        //watch 4 changes
-        this.listenTo(modelPrototype, "change", this.onPrototypeChange);
-        
-        // TODO: add new Prototype 2 toolbox
-        //...
-        
         // get prototype name
         var prototypeName = modelPrototype.get("name");
-//        console.log(".prototypeName: " + JSON.stringify(prototypeName));
         
-        // get all xvars
-        modelPrototype.get("xvar").forEach(function(xvar) {
-            var xvarName = xvar.get("name");
-            var xvarSynType = xvar.get("synType");
-            var xvarSemType = xvar.get("semType");
-//            console.log("..xvarName: " + JSON.stringify(xvarName));
-//            console.log("..xvarSynType: " + JSON.stringify(xvarSynType));
-//            console.log("..xvarSemType: " + JSON.stringify(xvarSemType));
-        });
+        if(this.dfgToolboxNodes[prototypeName]) {
+            console.error("ERROR(onPrototypeAdd): " + prototypeName + " was already loaded!");
+            return;
+        }
         
-        // get all xinputports
-        modelPrototype.get("xinputPort").forEach(function(xvar) {
-            var xinputPortName = xvar.get("name");
-            var xinputPortSynType = xvar.get("synType");
-            var xinputPortSemType = xvar.get("semType");
-//            console.log("..xinputPortName: " + JSON.stringify(xinputPortName));
-//            console.log("..xinputPortSynType: " + JSON.stringify(xinputPortSynType));
-//            console.log("..xinputPortSemType: " + JSON.stringify(xinputPortSemType));
-        });
+        // add 2 toolbox - show to user
+        this.addNode2FgToolbox(prototypeName);
+        this.dfgToolboxNodes[prototypeName] = modelPrototype;
+        
+        //watch 4 changes
+        this.listenTo(modelPrototype, "change", this.onPrototypeChange);
     },
     
     onCloneAdd : function(modelClone) {
@@ -260,25 +296,23 @@ var ScriptGeneratorView = Backbone.View.extend({
         //DEBUG
         console.log("onPrototypeChange " + JSON.stringify(modelPrototype.toJSON()));
         
-        //TODO: change existed prototype
-        //...
-        
         // get prototype name
         var prototypeName = modelPrototype.get("name");
         
-        // get all xvars
-        modelPrototype.get("xvar").forEach(function(xvar) {
-            var xvarName = xvar.get("name");
-            var xvarSynType = xvar.get("synType");
-            var xvarSemType = xvar.get("semType");
-        });
+        // add 2 toolbox - show to user
+        if(!this.dfgToolboxNodes[prototypeName]) {
+            console.error("ERROR(onPrototypeChange): " + prototypeName + " was not yet loaded!");
+            return;
+        }
         
-        // get all xinputports
-        modelPrototype.get("xinputPort").forEach(function(xvar) {
-            var xinputPortName = xvar.get("name");
-            var xinputPortSynType = xvar.get("synType");
-            var xinputPortSemType = xvar.get("semType");
-        });
+        // stop listening to old model
+        this.stopListening(this.dfgToolboxNodes[prototypeName]);
+        
+        // remove old model and add new one
+        this.dfgToolboxNodes[prototypeName] = modelPrototype;
+        
+        //watch 4 changes
+        this.listenTo(modelPrototype, "change", this.onPrototypeChange);
     },
     
     onCloneChange : function(modelClone) {

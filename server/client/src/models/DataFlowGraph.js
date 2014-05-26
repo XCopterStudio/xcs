@@ -69,5 +69,43 @@ var DataFlowGraph = Backbone.Model.extend({
             this.set("dataFlowGraph", data.dataFlowGraph);
         }
         
-    }
+        if(data.prototype) {
+            for(var i = 0; i < data.prototype.length; ++i) {
+                var p = data.prototype[i];
+                
+                if(p.name) {
+                    
+                    var prot;
+                    var oldProt = this.get("xprototype").findWhere({"name": p.name});
+                    if(oldProt) {
+                        prot = oldProt;
+                    }
+                    else {
+                        //create new prototype node
+                        prot = new DataFlowGraphNode();
+                        prot.set("name", p.name);
+                        
+                        // add prototype to collection
+                        this.get("xprototype").add(prot);
+                    }
+                    
+                    //TODO: read vars and inputports
+                    //read vars and inputports
+//                    if(p.var && p.inputPort) {
+//                        prot.get("xvar").add(new DataFlowGraphNodeIO({
+//                            name : "fly",
+//                            synType : "xcs::nodes::xci::FlyParam",
+//                            semType : "FLY_PARAM"
+//                        }));
+//                        
+//                        prot.get("xinputPort").add(new DataFlowGraphNodeIO({
+//                            name : "command",
+//                            synType : "std::string",
+//                            semType : "COMMAND"
+//                        }));
+//                    }
+                }
+            }
+        }
+    },
 });
