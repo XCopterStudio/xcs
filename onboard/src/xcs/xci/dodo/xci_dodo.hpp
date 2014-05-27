@@ -67,15 +67,6 @@ public:
 
     //! A pure virtual member initializing XCI for use
     virtual void init();
-
-    //! Resets settings to default values and re-calibrates the sensors (if supported).
-    virtual void reset();
-
-    //! Turns on the engines.
-    virtual void start();
-
-    //! Turns off the engines.
-    virtual void stop();
 private:
 
     enum VideoStatus {

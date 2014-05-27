@@ -94,15 +94,6 @@ public:
 
     //! A pure virtual member initializing XCI for use
     virtual void init() = 0;
-
-    //! Resets settings to default values and re-calibrates the sensors (if supported).
-    virtual void reset() = 0;
-
-    //! Turns on the engines.
-    virtual void start() = 0;
-
-    //! Turns off the engines.
-    virtual void stop() = 0;
 };
 }
 }

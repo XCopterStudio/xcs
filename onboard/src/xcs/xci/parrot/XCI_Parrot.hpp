@@ -74,27 +74,14 @@ class XCI_Parrot : public virtual XCI {
   
     bool setConfirmedConfigure(AtCommand *command);
     bool setDefaultConfiguration();
-    bool setNavdataReceive(bool full_mode = false);
 
 public:
 
-    XCI_Parrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1")
-        : XCI(dataReceiver),
-        atCommandSender_(atCommandQueue_, io_serviceCMD_ ,ipAddress),
-        videoReceiver_(io_serviceVideo_, ipAddress),
-        navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceNavdata_, ipAddress)
-        //configurationReceiver_(atCommandQueue_,io_serviceCMD_,ipAddress)
-      {
-        configuration_["XCI_PARAM_FP_PERSISTENCE"] = "50";
-    };
+    XCI_Parrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1");
+    ~XCI_Parrot();
+
     //! Initialize XCI for use
     void init();
-    //! Resets settings to default values and re-calibrates the sensors (if supported).
-    void reset();
-    //! Turns on the engines.
-    void start();
-    //! Turns off the engines.
-    void stop();
     //! Return name of x-copter XCI
     std::string name();
     //!Return list of available sensor on x-copter
@@ -112,14 +99,10 @@ public:
     void configuration(const std::string &key, const std::string &value);
     //! Take new x-copter�s configuration and send this configuration to the x-copter
     void configuration(const InformationMap &configuration);
-    //! Take instance of the DataReceiver
-    void dataReceiver(DataReceiver* dataReceiver);
     //! Take command from list of x-copter�s special commands and send it to the x-copter
     void command(const std::string &command);
     //! Take four fly controls and send it to the x-copter
     void flyControl(float roll, float pitch, float yaw, float gaz);
-
-    ~XCI_Parrot();
 };
 }
 }

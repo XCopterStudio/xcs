@@ -143,12 +143,6 @@ void XciVrep::init(){
     }
 }
 
-void XciVrep::reset(){}
-
-void XciVrep::start(){}
-
-void XciVrep::stop(){}
-
 extern "C" {
 
     XCI* CreateXci(DataReceiver &dataReceiver) {

@@ -62,12 +62,6 @@ namespace vrep{
         void flyControl(float roll, float pitch, float yaw, float gaz) override;
 
         void init() override;
-
-        void reset() override;
-
-        void start() override;
-
-        void stop() override;
     };
 
 }}}

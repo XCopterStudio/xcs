@@ -205,23 +205,8 @@ void XciDodo::configuration(const InformationMap & configuration) { //TODO: chan
     configuration_ = configuration;
 }
 
-/*
- * NOT IMPLEMENTED (only for linker)
- */
-void XciDodo::reset() {
-
-}
-
 SpecialCMDList XciDodo::specialCMD() {
     return specialCommands_;
-}
-
-void XciDodo::start() {
-
-}
-
-void XciDodo::stop() {
-
 }
 
 extern "C" {
