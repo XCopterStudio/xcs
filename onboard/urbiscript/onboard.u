@@ -30,6 +30,10 @@ class Onboard {
 
         // find all possible xobjects
         loadXObjectsPath_();
+        sleep(1s);
+        this.xobjects4load_.elementAdded!;
+
+        loadXObject_("xci dodo");
 
         //DEBUG: test load wanted xobjects
         //var xos = [];
@@ -46,7 +50,7 @@ class Onboard {
 
         //DEBUG: test send dataflow graph data
         //this.dataFlowGraph_ = "<xml><block type=\"connect\" id=\"2\" x=\"148\" y=\"385\"><field name=\"XOB1\">subject</field><field name=\"XVAR1\">out</field><field name=\"XOB2\">observer</field><field name=\"XVAR2\">in</field></block></xml>";
-        //this.dataFlowGraph_ = "test data flow graph";
+        this.dataFlowGraph_ = "test data flow graph";
         
 
         //this.loadedXObjects_["xxci"] = ["xci_dodooo"];
@@ -220,21 +224,45 @@ class Onboard {
                         //};
 
                         var key = p.first().asString();
-                        echo("--- " + key);
-                        try {
-                            var name = this.xobjectsSettings_.getOrDefault(key + ".name", key);
+                        echo("...sending info about loaded xobject: " + key);
+                        //var titles
+                        if(this.xobjectInfo_.has(key)) {
+                            var name = this.xobjectInfo_[key].name;
+
                             var xvars = System.eval(name + ".getXVars()");
                             echo(xvars.asString());
-                        }
-                        catch(var ex) {
-                            echo(key + " not found: " + ex.asString());
-                        };
-                        
-                    
+                            var xinputPorts = System.eval(name + ".getXInputPorts()");
+                            echo(xinputPorts.asString());
 
-                        //pData["name"] = ...;
-                        //pData["var"] = ...;
-                        //pData["inputPort"] = ...;
+                            var varList = [];
+                            for(var xv: xvars) {
+                                var pVar = [ => ];
+                                pVar["name"] = xv;
+                                pVar["synType"] = System.eval(name + ".getSynType(\"" + xv + "\")");
+                                pVar["semType"] = System.eval(name + ".getSemType(\"" + xv + "\")");
+                                varList << pVar;
+                            };
+
+                            var portList = [];
+                            for(var xv: xvars) {
+                                var pPort = [ => ];
+                                pPort["name"] = xv;
+                                pPort["synType"] = System.eval(name + ".getSynType(\"" + xv + "\")");
+                                pPort["semType"] = System.eval(name + ".getSemType(\"" + xv + "\")");
+                                portList  << pPort;
+                            };
+
+                            pData["name"] = key;
+                            pData["var"] = varList;
+                            pData["inputPort"] = portList;
+                        }
+                        else {
+                            echo("...there is no info for: " + key);
+                            //TODO: move object t loadedPrivateObjects and erase it from loadedXObject (we are in foreach loop...)
+                            //if(!this.loadedPrivateObjects_.has(key)) {
+                            //    this.loadedPrivateObjects_[p.first()] = p.second()
+                            //}
+                        };
                     }
                     catch(var ex) {
                         echo("chyba: " + ex.asString());
@@ -244,6 +272,7 @@ class Onboard {
                 };
 
                 // send data
+                echo("///sending info");
                 this.onboardSender_.sendPrototypeClone(prototypesData, clonesData);
             };
         };
@@ -288,38 +317,101 @@ class Onboard {
         echo("loading xobject: " + xoPath + "...");
         
         // find xobject name
-        var xoName;
-        if(xobjectPath.isA(Path)){
-            xoName = xobjectPath.basename.split(".").front();
+        //var xoName;
+        var filename;
+        if(xobjectPath.isA(Path)){  // param is exact path
+            //xoName = xobjectPath.basename.split(".").front();
+            filename = xobjectPath.basename.split(".").front();
+            echo("...filename from path: " + filename);
         }
-        else {
-            xoName = xobjectPath.asString();
-        };
+        else if(this.xobjects4load_.has(xobjectPath)) {   // param from registred xobjects load 
+            //xoName = this.xobjects4load_[xobjectPath].basename.split(".").front();
+            filename = this.xobjects4load_[xobjectPath].basename.split(".").front();
+            echo("...filename from load: " + filename);
+        }
+        else if(this.xobjectInfo_.has(xobjectPath)) { // param from settings
+            //xoName = this.xobjectInfo_[xobjectPath].filename;
+            filename = this.xobjectInfo_[xobjectPath].filename;
+            echo("...filename from info: " + filename);
+        }
+        else {  //param is filename
+            //xoName = xobjectPath.asString();
+            filename = xobjectPath.asString();
+            echo("...filename: " + filename);
+        };      
 
-        if(loadedXObjects_.has(xoName)) {
-            echo("...xobject already loaded");
-        }
-        else {
-            try {
-                System.loadModule(xoPath);
-                
-                if(this.privateObjects_.has(xoName) || !this.isXObject_(xoName)) {
-                    loadedPrivateObjects_[xoName] = List.new();
-                    echo("...xobject is private");
-                }
-                else {
-                    loadedXObjects_[xoName] = List.new();
-                };
-                echo("...xobject loaded");
-            }
-            catch(var ex) {
-                echo("...xobject not found! " + ex.asString());
+        //find all xobject in file with current filename
+        var xobjectsNames = [];
+        for(var xoi: this.xobjectInfo_) {
+            if(xoi.second().filename == filename) {
+                xobjectsNames << xoi.first();
             };
         };
+        if(xobjectsNames.empty()) {
+            xobjectsNames << filename;
+        };
+
+        //for(var xoName: xobjectsNames) {
+            // check if it is not already loaded
+            var xoName = xobjectsNames.front();
+            if(this.loadedXObjects_.has(xoName) || this.loadedPrivateObjects_.has(xoName)) {
+                echo("...xobject already loaded");
+            }
+            else {  //load module
+                try {
+                    echo("...loading module: " + filename);
+                    System.loadModule(filename);
+                
+                    var started = this.dfgCommStarted_;
+                    var added = false;
+                    try
+                    {
+                        this.stopDfgCommunication();
+
+                        for(var xon: xobjectsNames) {
+                            echo("...loading xobject: " + xon);
+                            if(this.privateObjects_.has(xon) || !this.isXObject_(xon)) {
+                                this.loadedPrivateObjects_[xon] = List.new();
+                                echo("...xobject is private");
+                            }
+                            else {
+                                this.loadedXObjects_[xon] = List.new();
+                                added = true;
+                            };
+                            //echo("...xobject loaded");
+                        };
+                    }
+                    finally {
+                        if(started) {
+                            this.startDfgCommunication();
+                            if(added) {
+                                this.loadedXObjects_.elementAdded!;
+                            };
+                        };
+                    };
+
+                    if(this.xobjects4load_.has(filename)) {
+                        this.xobjects4load_.erase(filename);
+                        echo("...xobject erase from array of xobjects 4 load");
+                    };
+                }
+                catch(var ex) {
+                    echo("...xobject not found! " + ex.asString());
+                };
+            };
+        //};
     };
 
     function isXObject_(key) {
-        var name = this.xobjectsSettings_.getOrDefault(key + ".name", key);
+        var name;
+        if(this.xobjectInfo_.has(key)) {
+            name = this.xobjectInfo_[key].name;
+        }
+        else {
+            name = key;
+        };
+
+        //var name = this.xobjectsSettings_.getOrDefault(key + ".name", key);
 
         try {
             if(System.eval(name + ".hasSlot(\"getXVars\");")) {
