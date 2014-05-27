@@ -1,5 +1,6 @@
 #include "configuration_receiver.hpp"
 
+#include <xcs/logging.hpp>
 #include <thread>
 
 #include <boost/bind.hpp>
@@ -25,7 +26,7 @@ void ConfigurationReceiver::connect(){
 
     socket_.open(tcp::v4());
 
-    cerr << "Try connect configuration socket." << endl;
+    XCS_LOG_INFO("Try connect configuration socket.");
 
     deadline_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
     socket_.async_connect(parrot_,
@@ -40,15 +41,16 @@ void ConfigurationReceiver::handleConnectedConfiguration(const boost::system::er
     }
 
     if (!socket_.is_open()) {
-        cerr << "Connect configuration socket timed out." << endl;
+        XCS_LOG_WARN("Connect configuration socket timed out.");
         //connect();
     }
     else if (ec){
-        cerr << "Connect configuration socket error: " << ec.message() << endl;
+        XCS_LOG_WARN("Connect configuration socket error : " + ec.message());
         //socketNavdata_.close();
         //connect();
     }
     else{
+        XCS_LOG_INFO("Configuration receiver connected.");
         connected_ = true;
         atCommandQueue_.push(new AtCommandCTRL(STATE_CFG_GET_CONTROL_MODE));
         receiveConfiguration();
@@ -70,7 +72,7 @@ void ConfigurationReceiver::handleReceivedConfiguration(const boost::system::err
     }
 
     if (ec) {
-        cerr << "Configuration receive error: " << ec.message() << endl;
+        XCS_LOG_WARN("Configuration receive error : " + ec.message());
         //socketNavdata_.close();
         //connect();
     }
