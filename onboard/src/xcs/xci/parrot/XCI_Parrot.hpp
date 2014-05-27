@@ -1,15 +1,17 @@
 #ifndef XCI_PARROT_H
 #define XCI_PARROT_H
 
-#include "navdata_receiver.hpp"
+
 #include <xcs/xci/xci.hpp>
-#include "AT_Command.hpp"
 #include <xcs/tsqueue.hpp>
-#include "ardrone_state.hpp"
 #include <xcs/xci/connection_error_exception.hpp>
+
+#include "at_command.hpp"
+#include "navdata_receiver.hpp"
+#include "ardrone_state.hpp"
 #include "video_decode.hpp"
 #include "video_receive.hpp"
-#include "atcommand_sender.hpp"
+#include "at_command_sender.hpp"
 #include "configuration_receiver.hpp"
 
 #include <thread>
@@ -33,7 +35,7 @@ enum ParrotFrameType {
 
 typedef xcs::Tsqueue< AtCommand* > AtCommandQueue;
 
-class XCI_Parrot : public virtual XCI {
+class XciParrot : public virtual Xci {
     // Constant
     static const float EPSILON;
 
@@ -77,12 +79,12 @@ class XCI_Parrot : public virtual XCI {
 
 public:
 
-    XCI_Parrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1");
-    ~XCI_Parrot();
+    XciParrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1");
+    ~XciParrot();
 
-    //! Initialize XCI for use
+    //! Initialize Xci for use
     void init();
-    //! Return name of x-copter XCI
+    //! Return name of x-copter Xci
     std::string name();
     //!Return list of available sensor on x-copter
     SensorList sensorList();

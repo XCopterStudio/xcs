@@ -17,7 +17,7 @@ namespace xcs {
 namespace xci {
 namespace vrep{
 
-    class XciVrep : public virtual XCI {
+    class XciVrep : public virtual Xci {
         static const float POS_MULTI;
 
         int clientID_;

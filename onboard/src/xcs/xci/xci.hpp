@@ -32,7 +32,7 @@ class DataReceiver;
 //! Information about sensor
 
 struct Sensor {
-    std::string name; /*!< Unique name in XCI for sensor. */
+    std::string name; /*!< Unique name in Xci for sensor. */
     std::string semanticType; /*!< Type of sensor (ACCELEROMETR, CAMERA etc.). */
     InformationMap additionalInformation; /*!< Additional information about sensor in plain text. Example: "Resolution:1280x720,FPS:20" */
 
@@ -47,11 +47,11 @@ struct Sensor {
 typedef std::vector<Sensor> SensorList;
 typedef std::vector<std::string> SpecialCMDList;
 typedef std::string ParameterValueType;
-typedef class XCI* (XciFactoryFunction) (DataReceiver &dataReceiver);
+typedef class Xci* (XciFactoryFunction) (DataReceiver &dataReceiver);
 
 //! Virtual class for unified x-copter interface
 //! Every drone have to set XCI_PARAM_FP_PERSISTENCE configuration parameter 
-class XCI {
+class Xci {
 protected:
     DataReceiver& dataReceiver_;
 public:
@@ -59,9 +59,9 @@ public:
     // Bellow are methods that are subject to change based on the discussions and real-world needs.
     //
 
-    XCI(DataReceiver& dataReceiver) : dataReceiver_(dataReceiver) {
+    Xci(DataReceiver& dataReceiver) : dataReceiver_(dataReceiver) {
     };
-    //! A pure virtual member returning name of x-copter XCI
+    //! A pure virtual member returning name of x-copter Xci
     virtual std::string name() = 0;
 
     //! A pure virtual member returning list of available sensors on x-copter
@@ -92,13 +92,13 @@ public:
     //! A pure virtual member taking four fly controls and send it to the x-copter
     virtual void flyControl(float roll, float pitch, float yaw, float gaz) = 0;
 
-    //! A pure virtual member initializing XCI for use
+    //! A pure virtual member initializing Xci for use
     virtual void init() = 0;
 };
 }
 }
 
 extern "C" {
-XCI_LIB_EXPORT xcs::xci::XCI* CreateXci(xcs::xci::DataReceiver &dataReceiver);
+XCI_LIB_EXPORT xcs::xci::Xci* CreateXci(xcs::xci::DataReceiver &dataReceiver);
 }
 #endif

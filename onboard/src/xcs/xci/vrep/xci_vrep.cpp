@@ -45,7 +45,7 @@ void XciVrep::updateSensors(){
 // ================ public functions ================
 
 XciVrep::XciVrep(DataReceiver& dataReceiver, std::string droneName, std::string targetName, std::string address, int portNumber) :
-XCI(dataReceiver),
+Xci(dataReceiver),
 droneName_(droneName),
 targetName_(targetName),
 address_(address),
@@ -145,7 +145,7 @@ void XciVrep::init(){
 
 extern "C" {
 
-    XCI* CreateXci(DataReceiver &dataReceiver) {
+    Xci* CreateXci(DataReceiver &dataReceiver) {
         return new XciVrep(dataReceiver);
     }
 }
