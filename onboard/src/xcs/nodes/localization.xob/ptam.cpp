@@ -15,6 +15,7 @@
 
 
 using namespace std;
+using namespace xcs;
 using namespace xcs::nodes;
 using namespace xcs::nodes::localization;
 
