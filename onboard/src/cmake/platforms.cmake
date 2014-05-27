@@ -26,6 +26,7 @@ if(X_WIN)
     set(PTHREADS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/pthreads)
 elseif(X_LIN)
     set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined") # show unresolved symbols during link time
+    set(CMAKE_MODULE_LINKER_FLAGS "-Wl,--no-undefined") # show unresolved symbols during link time
     set(CMAKE_CXX_FLAGS "-std=c++11 -Wreorder") # initializers list match fields declaration
     set(PATH_SEPARATOR ":")
     set(OpenCV_DIR "${OPENCV_ROOT}/share/OpenCV")
