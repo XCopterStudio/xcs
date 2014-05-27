@@ -54,6 +54,7 @@ XciDodo::XciDodo(DataReceiver& dataReceiver) :
   videoFps_(0),
   videoStatus_(VIDEO_UNLOADED) {
 
+    configuration_["XCI_PARAM_FP_PERSISTENCE"] = "50";
 }
 
 XciDodo::~XciDodo() {
@@ -91,15 +92,6 @@ SensorList XciDodo::sensorList() {
     result.push_back(Sensor("rotation", "ROTATION"));
     result.push_back(Sensor("velocity", "VELOCITY_LOC"));
     return result;
-}
-
-ParameterValueType XciDodo::parameter(ParameterNameType name) {
-    switch (name) {
-        case XCI_PARAM_FP_PERSISTENCE:
-            return "50";
-        default:
-            throw std::runtime_error("Parameter not defined.");
-    }
 }
 
 void XciDodo::command(const std::string& command) {
@@ -209,7 +201,7 @@ void XciDodo::configuration(const std::string& key, const std::string & value) {
     configuration_[key] = value;
 }
 
-void XciDodo::configuration(const InformationMap & configuration) {
+void XciDodo::configuration(const InformationMap & configuration) { //TODO: change only part of configuration_
     configuration_ = configuration;
 }
 

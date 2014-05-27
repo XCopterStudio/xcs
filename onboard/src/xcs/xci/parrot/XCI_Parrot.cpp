@@ -212,27 +212,21 @@ SensorList XCI_Parrot::sensorList() {
     return sensorList;
 }
 
-ParameterValueType XCI_Parrot::parameter(ParameterNameType name) {
-    switch (name) {
-        case XCI_PARAM_FP_PERSISTENCE:
-            return "30";
-        default:
-            throw std::runtime_error("Parameter not defined.");
-    }
-}
-
 void* XCI_Parrot::sensorData(const Sensor &sensor) {
     return NULL;
 }
 
 std::string XCI_Parrot::configuration(const std::string &key) {
-    return "";
+    if (configuration_.count(key) > 0){
+        return configuration_[key];
+    }
+    else{
+        return "";
+    }
 }
 
 InformationMap XCI_Parrot::configuration() {
-    //configurationReceiver_.getConfiguration();
-
-    return InformationMap();
+    return configuration_;
 }
 
 SpecialCMDList XCI_Parrot::specialCMD() {
