@@ -29,10 +29,12 @@ void XciParrot::initNetwork() {
     atCommandSender_.connect();
     videoReceiver_.connect();
     navdataReceiver_.connect();
+    configurationReceiver_.connect();
 
     threadSendingATCmd_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceCMD_)));
 	threadReadVideoReceiver_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceVideo_)));
 	threadReceiveNavData_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceNavdata_)));
+    threadConfiguration_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceConfiguration_)));
 }
 
 void XciParrot::processVideoData(){
@@ -121,8 +123,8 @@ XciParrot::XciParrot(DataReceiver &dataReceiver, std::string ipAddress)
     : Xci(dataReceiver),
     atCommandSender_(atCommandQueue_, io_serviceCMD_, ipAddress),
     videoReceiver_(io_serviceVideo_, ipAddress),
-    navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceNavdata_, ipAddress)
-    //configurationReceiver_(atCommandQueue_,io_serviceCMD_,ipAddress)
+    navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceNavdata_, ipAddress),
+    configurationReceiver_(atCommandQueue_,configuration_,io_serviceConfiguration_,ipAddress)
 {
     configuration_["XCI_PARAM_FP_PERSISTENCE"] = "50";
 };
@@ -137,6 +139,7 @@ void XciParrot::init(){
     threadReadVideoData_ = std::move(std::thread(&XciParrot::processVideoData, this));
 
     setDefaultConfiguration();
+    configurationReceiver_.update();
 }
 
 std::string XciParrot::name() {

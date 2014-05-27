@@ -55,6 +55,7 @@ class XciParrot : public virtual Xci {
     std::thread threadReceiveNavData_;
 	std::thread threadReadVideoReceiver_;
     std::thread threadReadVideoData_;
+    std::thread threadConfiguration_;
 
     // end all thread
     volatile std::atomic<bool> endAll_;
@@ -64,11 +65,12 @@ class XciParrot : public virtual Xci {
     boost::asio::io_service io_serviceCMD_;
     boost::asio::io_service io_serviceNavdata_;
 	boost::asio::io_service io_serviceVideo_;
+    boost::asio::io_service io_serviceConfiguration_;
 
     AtCommandSender atCommandSender_;
     VideoReceiver videoReceiver_;
     NavdataReceiver navdataReceiver_;
-    //ConfigurationReceiver configurationReceiver_;
+    ConfigurationReceiver configurationReceiver_;
 
     void initNetwork();
     void processVideoData();
