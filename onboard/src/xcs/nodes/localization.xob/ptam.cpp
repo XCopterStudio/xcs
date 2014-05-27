@@ -50,6 +50,7 @@ void Ptam::init() {
 }
 
 void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
+    cerr << "handle frame " << endl;
     frameNo_ += 1;
 
     if (resetPtamRequested_) {
@@ -65,7 +66,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
     memcpy(frame_.data(), bwImage.data, bwImage.width * bwImage.height);
 
-    TooN::Vector<10> filterPosePrePTAM = ekf_.computeState(timestamp).getVector();
+    TooN::Vector<10> filterPosePrePTAM = ekf_.computeState(timestamp);
 
     // ------------------------ do PTAM -------------------------
     glWindow_->SetupViewport();
@@ -215,8 +216,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
     // TODO: make shure filter is handled properly with permanent roll-forwards.
     if (goodCount_ >= 3) {
-        CameraMeasurement ptamResultForEkf;
-        ptamResultForEkf.Vector(PTAMResult);
+        CameraMeasurement ptamResultForEkf(PTAMResult);
         ekf_.measurementCam(ptamResultForEkf, timestamp);
         goodObservations_ += 1;
     } else {
@@ -224,7 +224,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     }
 
     // obtain results from EKF with updated position
-    filterPosePostPTAM = ekf_.computeState(timestamp).getVector();
+    filterPosePostPTAM = ekf_.computeState(timestamp);
 
     TooN::Vector<6> filterPosePostPTAMBackTransformed = scaleEstimation_.backTransformPTAMObservation(filterPosePostPTAM.slice<0, 6>());
 

@@ -10,74 +10,13 @@
 #include <xcs/types/cartesian_vector.hpp>
 #include <xcs/types/eulerian_vector.hpp>
 
-#include <armadillo>
-#include <TooN/TooN.h>
+
+#include "ekf_structs.hpp"
 
 namespace xcs {
 namespace nodes {
 namespace localization {
 
-struct DroneState {
-    xcs::CartesianVector position;
-    xcs::CartesianVector velocity;
-    xcs::EulerianVector angles;
-    double angularRotationPsi;
-
-    unsigned int updateMeasurementID;
-
-    DroneState() : angularRotationPsi(0), updateMeasurementID(0) {
-    };
-    // TODO operators
-    arma::mat getMat() const;
-    void Mat(const arma::mat &mat);
-
-    inline TooN::Vector<10> getVector() const {
-        return TooN::makeVector(position.x, position.y, position.z, velocity.x, velocity.y, velocity.z, angles.phi, angles.theta, angles.psi, angularRotationPsi);
-    }
-
-    inline void Vector(const TooN::Vector<10> &vector) {
-        position.x = vector[0];
-        position.y = vector[1];
-        position.z = vector[2];
-        velocity.x = vector[3];
-        velocity.y = vector[4];
-        velocity.z = vector[5];
-        angles.phi = vector[6];
-        angles.theta = vector[7];
-        angles.psi = vector[8];
-        angularRotationPsi = vector[9];
-    }
-};
-
-struct DroneStateMeasurement {
-    xcs::CartesianVector velocity;
-    xcs::EulerianVector angles;
-    double altitude;
-    double angularRotationPsi;
-
-    unsigned int measurementID;
-
-    DroneStateMeasurement() : altitude(0), angularRotationPsi(0), measurementID(0) {
-    };
-    // TODO operators
-    arma::mat getMat() const;
-};
-
-struct CameraMeasurement {
-    xcs::CartesianVector position;
-    xcs::EulerianVector angles;
-    // TODO operators
-    arma::mat getMat() const;
-
-    inline void Vector(const TooN::Vector<6> &vector) {
-        position.x = vector[0];
-        position.y = vector[1];
-        position.z = vector[2];
-        angles.phi = vector[3];
-        angles.theta = vector[4];
-        angles.psi = vector[5];
-    }
-};
 
 typedef std::pair<DroneState, arma::mat> DroneStateDistribution;
 typedef std::pair<DroneStateMeasurement, double> ImuMeasurementChronologic;

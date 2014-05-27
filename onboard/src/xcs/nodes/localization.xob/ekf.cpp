@@ -10,62 +10,6 @@ using namespace xcs;
 using namespace xcs::nodes::localization;
 using namespace arma;
 
-mat DroneState::getMat() const{
-    mat matrix;
-    matrix << position.x << endr
-        << position.y << endr
-        << position.z << endr
-        << velocity.x << endr
-        << velocity.y << endr
-        << velocity.z << endr
-        << angles.phi << endr
-        << angles.theta << endr
-        << angles.psi << endr
-        << angularRotationPsi << endr;
-    return matrix;
-};
-
-void DroneState::Mat(const arma::mat &mat){
-    if (mat.n_rows == 10 && mat.n_cols == 1){
-        position.x = mat.at(0, 0);
-        position.y = mat.at(1, 0);
-        position.z = mat.at(2, 0);
-        velocity.x = mat.at(3, 0);
-        velocity.y = mat.at(4, 0);
-        velocity.z = mat.at(5, 0);
-        angles.phi = mat.at(6, 0);
-        angles.theta = mat.at(7, 0);
-        angles.psi = mat.at(8, 0);
-        angularRotationPsi = mat.at(9, 0);
-    }
-    else{
-        cerr << "Wrong matrix size" << endl;
-    }
-}
-
-mat DroneStateMeasurement::getMat() const{
-    mat measurement;
-    measurement << altitude << endr
-        << velocity.x << endr
-        << velocity.y << endr
-        << velocity.z << endr
-        << angles.phi << endr
-        << angles.theta << endr
-        << angularRotationPsi << endr;
-    return measurement;
-}
-
-mat CameraMeasurement::getMat() const{
-    mat measurement;
-    measurement << position.x << endr
-        << position.y << endr
-        << position.z << endr
-        << angles.phi << endr
-        << angles.theta << endr
-        << angles.psi << endr;
-    return measurement;
-}
-
 template <typename Deque>
 void Ekf::clearUpToTime(Deque &deque, const double &time){
     int index = findNearest(deque, time);
@@ -379,10 +323,10 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     predictedMeasurement(6, 0) = state.first.angularRotationPsi;
 
     // update state
-    mat newStateMean = state.first.getMat() + gain * (imuMeasurement.getMat() - predictedMeasurement);
+    mat newStateMean = static_cast<mat>(state.first) + gain * (static_cast<mat>(imuMeasurement) - predictedMeasurement);
 
     DroneStateDistribution newState;
-    newState.first.Mat(newStateMean);
+    newState.first = newStateMean;
     newState.first.updateMeasurementID = imuMeasurement.measurementID;
 
     // update deviation
@@ -429,8 +373,8 @@ DroneStateDistribution Ekf::updateCam(const DroneStateDistribution &state, const
 
     // update state
     DroneStateDistribution newState;
-    mat newStateMean = state.first.getMat() + gain * (camMeasurement.getMat() - predictedMeasurement);
-    newState.first.Mat(newStateMean);
+    mat newStateMean = static_cast<mat>(state.first) + gain * (static_cast<mat>(camMeasurement) - predictedMeasurement);
+    newState.first = newStateMean;
 
     // update deviation
     newState.second = (mat(10, 10).eye() - gain*measurementJacobian) * state.second;
