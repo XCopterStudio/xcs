@@ -24,7 +24,7 @@ find_package(OpenGL)
 find_package(GLUT)
 
 find_library(PTAM_LIB ptam PATHS ${PTAM_ROOT}/lib)
-find_library(GVARS_LIB gvars3 PATHS ${PTAM_ROOT}/lib)
+find_library(GVARS_LIB GVars3 PATHS ${PTAM_ROOT}/lib)
 find_library(CVD_LIB cvd PATHS ${PTAM_ROOT}/lib)
 set(PTAM_LIBRARIES ${PTAM_LIB} ${GVARS_LIB} ${CVD_LIB})
 

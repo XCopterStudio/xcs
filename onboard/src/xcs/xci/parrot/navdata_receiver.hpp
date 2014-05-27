@@ -6,7 +6,7 @@
 
 #include <xcs/tsqueue.hpp>
 #include <xcs/xci/xci.hpp>
-#include "AT_Command.hpp"
+#include "at_command.hpp"
 #include "ardrone_state.hpp"
 #include "navdata_options.hpp"
 #include "options_visitor.hpp"
