@@ -2,6 +2,7 @@
 #include <limits>
 #include <xcs/logging.hpp>
 #include <xcs/xcs_fce.hpp>
+#include <urbi/uconversion.hh>
 
 using namespace xcs::nodes;
 using namespace xcs::nodes::localization;
@@ -67,34 +68,22 @@ void XLocalization::onChangeClearTime(double time) {
     ekf_.clearUpToTime(droneTime);
 }
 
-void XLocalization::onChangeVideo(urbi::UImage bwImage) {
-    XCS_LOG_INFO("new video frame");
-//    frameNo_ += 1;
-//
-//    /*
-//     * TODO reset PTAM
-//     */
-//    if (resetPtamRequested_) {
-//        //resetPTAMRequested_ = false;
-//    }
-//
-//    /*
-//     * Convert image to grayscale and to correct format for CVD
-//     */
-//    urbi::UImage bwImage;
-//    bwImage.imageFormat = urbi::IMAGE_GREY8;
-//    bwImage.data = nullptr;
-//    bwImage.size = 0;
-//    bwImage.width = 0;
-//    bwImage.height = 0;
-//    urbi::convert(image, bwImage);
-//
-//    if (frame_.size().x != bwImage.width || frame_.size().y != bwImage.height) {
-//        frame_.resize(CVD::ImageRef(bwImage.width, bwImage.height));
-//    }
-//
-//    memcpy(frame_.data(), bwImage.data, bwImage.width * bwImage.height);
+void XLocalization::onChangeVideo(urbi::UImage image) {
+    // store image until onChangeVideoTime
+    lastFrame_ = image;
+}
 
+void XLocalization::onChangeVideoTime(xcs::Timestamp timestamp) {
+    // convert image to grayscale for PTAM
+    urbi::UImage bwImage;
+    bwImage.imageFormat = urbi::IMAGE_GREY8;
+    bwImage.data = nullptr;
+    bwImage.size = 0;
+    bwImage.width = 0;
+    bwImage.height = 0;
+    urbi::convert(lastFrame_, bwImage);
+
+    ptam_.handleFrame(bwImage, timestamp);
 }
 
 void XLocalization::onChangeFlyControl(xcs::FlyControl flyControl) {
@@ -115,6 +104,7 @@ XLocalization::XLocalization(const std::string &name) :
   timeCam("TIME_LOC"),
   clearTime("TIME_LOC"),
   video("FRONT_CAMERA"),
+  videoTime("TIME_LOC"),
   flyControl("FLY_CONTROL"),
   position("POSITION_ABS"),
   velocity("VELOCITY_ABS"),
@@ -134,7 +124,7 @@ XLocalization::XLocalization(const std::string &name) :
     XBindVarF(clearTime, &XLocalization::onChangeClearTime);
 
     XBindVarF(video, &XLocalization::onChangeVideo);
-    
+
     XBindVarF(flyControl, &XLocalization::onChangeFlyControl);
 
     XBindVar(position);
