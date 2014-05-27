@@ -166,10 +166,6 @@ SensorList XciParrot::sensorList() {
     return sensorList;
 }
 
-void* XciParrot::sensorData(const Sensor &sensor) {
-    return NULL;
-}
-
 std::string XciParrot::configuration(const std::string &key) {
     if (configuration_.count(key) > 0){
         return configuration_[key];
@@ -189,7 +185,6 @@ SpecialCMDList XciParrot::specialCMD() {
     CMDList.push_back("Land");
     CMDList.push_back("EmergencyStop");
     CMDList.push_back("Normal");
-    CMDList.push_back("Reset");
     return CMDList;
 }
 
@@ -216,15 +211,12 @@ void XciParrot::command(const std::string &command) {
         if (state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)) {
             atCommandQueue_.push(new AtCommandRef(STATE_NORMAL));
         }
-    } else if (command == "Reset") {
-
     } else {
-
+        XCS_LOG_WARN("Unsupported command " + command);
     }
 }
 
 void XciParrot::flyControl(float roll, float pitch, float yaw, float gaz) {
-    //printf("Roll %f Pitch %f YAW %f GAZ %f \n", roll,pitch,yaw,gaz);
     if (std::abs(pitch) < EPSILON && std::abs(roll) < EPSILON) {
         atCommandQueue_.push(new AtCommandPCMD(DroneMove(roll, pitch, yaw, gaz)));
     } else {

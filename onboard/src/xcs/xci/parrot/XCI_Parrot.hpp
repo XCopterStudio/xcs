@@ -88,8 +88,6 @@ public:
     std::string name();
     //!Return list of available sensor on x-copter
     SensorList sensorList();
-    //! Take specification of sensor and return void pointer to data from desired sensor
-    void* sensorData(const Sensor &sensor);
     //! Return x-copter�s configuration
     std::string configuration(const std::string &key);
     //! Return x-copter�s configuration
