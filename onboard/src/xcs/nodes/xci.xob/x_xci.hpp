@@ -39,10 +39,6 @@ public:
 
     void xciInit();
 
-    void doCommand(const std::string& command);
-
-    void updateFlyControl(double roll = 0, double pitch = 0, double yaw = 0, double gaz = 0);
-
     std::string getConfiguration(const std::string& key);
     xcs::xci::InformationMap dumpConfiguration();
 
@@ -74,6 +70,8 @@ private:
     //! InputPort doesn't provide its current value, we keep it ourselves
     double gaz_;
     void onChangeGaz(double gaz);
+
+    void onChangeCommand(const std::string& command);
 
     /*!
      * Setter for flyControl persistence.

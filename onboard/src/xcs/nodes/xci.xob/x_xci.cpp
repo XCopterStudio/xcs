@@ -39,8 +39,6 @@ XXci::XXci(const std::string& name) :
   flyControlPersistence_(0) {
     XBindFunction(XXci, init);
     XBindFunction(XXci, xciInit);
-    XBindFunction(XXci, doCommand);
-    XBindFunction(XXci, updateFlyControl);
     XBindFunction(XXci, getConfiguration);
     XBindFunction(XXci, dumpConfiguration);
     XBindFunction(XXci, setConfiguration);
@@ -53,8 +51,8 @@ XXci::XXci(const std::string& name) :
     XBindVarF(pitch, &XXci::onChangePitch);
     XBindVarF(yaw, &XXci::onChangeYaw);
     XBindVarF(gaz, &XXci::onChangeGaz);
+    XBindVarF(command, &XXci::onChangeCommand);
 
-    XBindVarF(command, &XXci::doCommand);
 }
 
 void XXci::init(const std::string& driver) {
@@ -83,25 +81,6 @@ void XXci::xciInit() {
     }
 }
 
-void XXci::doCommand(const std::string& command) {
-    setFlyControlActive(false);
-    roll_ = 0;
-    pitch_ = 0;
-    yaw_ = 0;
-    gaz_ = 0;
-    xci_->command(command);
-}
-
-void XXci::updateFlyControl(double roll, double pitch, double yaw, double gaz) {
-    //TODO here should be lock to atomic update of RPYG
-    roll_ = roll;
-    pitch_ = pitch;
-    yaw_ = yaw;
-    gaz_ = gaz;
-    sendFlyControl();
-    setFlyControlActive();
-}
-
 std::string XXci::getConfiguration(const std::string &key) {
     return xci_->configuration(key);
 }
@@ -115,7 +94,13 @@ void XXci::setConfiguration(const std::string& key, const std::string& value) {
 }
 
 void XXci::onChangeFly(FlyControl fp) {
-    updateFlyControl(fp.roll, fp.pitch, fp.yaw, fp.gaz);
+    //TODO here should be lock to atomic update of RPYG
+    roll_ = fp.roll;
+    pitch_ = fp.pitch;
+    yaw_ = fp.yaw;
+    gaz_ = fp.gaz;
+    sendFlyControl();
+    setFlyControlActive();
 }
 
 void XXci::onChangeRoll(double roll) {
@@ -140,6 +125,15 @@ void XXci::onChangeGaz(double gaz) {
     gaz_ = gaz;
     sendFlyControl();
     setFlyControlActive();
+}
+
+void XXci::onChangeCommand(const std::string& command) {
+    setFlyControlActive(false);
+    roll_ = 0;
+    pitch_ = 0;
+    yaw_ = 0;
+    gaz_ = 0;
+    xci_->command(command);
 }
 
 void XXci::initOutputs() {
