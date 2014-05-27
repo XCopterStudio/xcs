@@ -4,6 +4,7 @@
 #include <chrono>
 
 #include "ekf.hpp"
+#include "ptam.hpp"
 #include <xcs/xcs_fce.hpp>
 
 #include <xcs/nodes/xobject/x_object.hpp>
@@ -19,21 +20,24 @@ namespace nodes{
     typedef std::chrono::high_resolution_clock Clock;
     typedef std::chrono::time_point<std::chrono::high_resolution_clock> TimePoint;
 
-    class XEkf : public XObject{
+    class XLocalization : public XObject{
         static const double IMU_DELAY;
         static const double FLY_CONTROL_SEND_TIME;
         static const double CAM_DELAY;
 
-        ekf::Ekf ekf_;
+        localization::Ekf ekf_;
+        
+        localization::Ptam ptam_;
 
-        ekf::DroneStateMeasurement lastMeasurement_;
+        localization::DroneStateMeasurement lastMeasurement_;
         double lastMeasurementTime_;
 
-        ekf::CameraMeasurement lastCameraMeasurement_;
+        localization::CameraMeasurement lastCameraMeasurement_;
 
         Clock clock_;
         TimePoint startTime_;
         double imuTimeShift_;
+        ::urbi::UImage lastFrame_;
 
         void onChangeVelocity(xcs::CartesianVector measuredVelocity);
         void onChangeRotation(xcs::EulerianVector measuredAnglesRotation);
@@ -48,6 +52,9 @@ namespace nodes{
 
         void onChangeClearTime(double time);
 
+        void onChangeVideo(::urbi::UImage image);
+        void onChangeVideoTime(xcs::Timestamp timestamp);
+        
         void onChangeFlyControl(xcs::FlyControl flyControl);
 
         inline double timeFromStart(){ return std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -59,11 +66,14 @@ namespace nodes{
         XInputPort<double> measuredAltitude;
         XInputPort<double> timeImu;
         // cam measurements
-        XInputPort<xcs::CartesianVector> measuredPosition;
-        XInputPort<xcs::EulerianVector> measuredAngles;
-        XInputPort<double> timeCam;
+        XInputPort<xcs::CartesianVector> measuredPosition; // TODO change to tight composition with PTAM
+        XInputPort<xcs::EulerianVector> measuredAngles; // TODO change to tight composition with PTAM
+        XInputPort<double> timeCam; // TODO change to tight composition with PTAM
         // clear channel
-        XInputPort<double> clearTime;
+        XInputPort<double> clearTime; // TODO change to tight composition with PTAM
+        // visual data
+        XInputPort<::urbi::UImage> video;
+        XInputPort<double> videoTime;
         // drone fly control
         XInputPort<xcs::FlyControl> flyControl;
 
@@ -72,7 +82,7 @@ namespace nodes{
         XVar<xcs::CartesianVector> velocity;
         XVar<xcs::EulerianVector> rotation;
 
-        XEkf(const std::string &name);
+        XLocalization(const std::string &name);
     };
     
 }}

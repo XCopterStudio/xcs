@@ -57,6 +57,8 @@ class XCI_Parrot : public virtual XCI {
     // end all thread
     volatile std::atomic<bool> endAll_;
 
+    InformationMap configuration_;
+
     boost::asio::io_service io_serviceCMD_;
     boost::asio::io_service io_serviceNavdata_;
 	boost::asio::io_service io_serviceVideo_;
@@ -83,6 +85,7 @@ public:
         navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceNavdata_, ipAddress)
         //configurationReceiver_(atCommandQueue_,io_serviceCMD_,ipAddress)
       {
+        configuration_["XCI_PARAM_FP_PERSISTENCE"] = "50";
     };
     //! Initialize XCI for use
     void init();
@@ -96,8 +99,6 @@ public:
     std::string name();
     //!Return list of available sensor on x-copter
     SensorList sensorList();
-    //! A pure virtual member returning specific x-copter's parameter.
-    ParameterValueType parameter(ParameterNameType name);
     //! Take specification of sensor and return void pointer to data from desired sensor
     void* sensorData(const Sensor &sensor);
     //! Return x-copter�s configuration

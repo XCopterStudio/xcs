@@ -70,7 +70,11 @@ void XXci::init(const std::string& driver) {
 void XXci::xciInit() {
     if (!inited_) {
         xci_->init();
-        setFlyControlPersistence(stoi(xci_->parameter(xcs::xci::XCI_PARAM_FP_PERSISTENCE)));
+        std::string controlPersistence = xci_->configuration("XCI_PARAM_FP_PERSISTENCE");
+        if (controlPersistence == ""){
+            XCS_LOG_FATAL("We cannot obtain XCI_PARAM_FP_PERSISTENCE from xci.");
+        }
+        setFlyControlPersistence(stoi(controlPersistence));
         flyControlAlive_ = true;
         flyControlThread_ = move(thread(&XXci::keepFlyControl, this));
         inited_ = true; // TODO check this variable in all commands to the drone

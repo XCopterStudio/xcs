@@ -53,6 +53,7 @@ portNumber_(portNumber)
 {
     clientID_ = -1;
     endAll_ = false;
+    configuration_["XCI_PARAM_FP_PERSISTENCE"] = "50";
 }
 
 XciVrep::~XciVrep(){
@@ -77,21 +78,17 @@ SensorList XciVrep::sensorList(){
     return sensorList;
 }
 
-ParameterValueType XciVrep::parameter(ParameterNameType name){
-    switch (name) {
-    case XCI_PARAM_FP_PERSISTENCE:
-        return "50";
-    default:
-        throw std::runtime_error("Parameter not defined.");
+std::string XciVrep::configuration(const std::string &key){
+    if (configuration_.count(key) > 0){
+        return configuration_[key];
+    }
+    else{
+        return "";
     }
 }
 
-std::string XciVrep::configuration(const std::string &key){
-    return "";
-}
-
 InformationMap XciVrep::configuration(){
-    return InformationMap();
+    return configuration_;
 }
 
 SpecialCMDList XciVrep::specialCMD(){

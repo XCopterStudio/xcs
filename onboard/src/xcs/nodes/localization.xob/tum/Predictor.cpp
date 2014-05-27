@@ -23,7 +23,11 @@
 #include "Predictor.h"
 #include "tum_utils.hpp"
 
-using namespace xcs::nodes::ptam;
+#include <xcs/types/timestamp.hpp>
+#include <xcs/types/cartesian_vector.hpp>
+#include <xcs/types/eulerian_vector.hpp>
+
+using namespace xcs::nodes::localization;
 
 const TooN::SE3<double> Predictor::droneToBottom = TooN::SE3<double>(TooN::SO3<double>(TooN::makeVector(3.14159265,0,0)),TooN::makeVector(0,0,0));
 const TooN::SE3<double> Predictor::bottomToDrone = Predictor::droneToBottom.inverse();

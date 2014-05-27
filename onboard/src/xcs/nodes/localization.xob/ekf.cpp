@@ -7,7 +7,7 @@
 
 using namespace std;
 using namespace xcs;
-using namespace xcs::nodes::ekf;
+using namespace xcs::nodes::localization;
 using namespace arma;
 
 mat DroneState::getMat() const{

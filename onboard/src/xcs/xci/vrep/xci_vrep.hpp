@@ -28,6 +28,8 @@ namespace vrep{
         int droneHandler_;
         int targetHandler_;
 
+        InformationMap configuration_;
+
         xcs::CartesianVector dronePosition_;
         xcs::EulerianVector droneRotation_;
 
@@ -44,8 +46,6 @@ namespace vrep{
         std::string name() override;
 
         xcs::xci::SensorList sensorList() override;
-
-        xcs::xci::ParameterValueType parameter(xcs::xci::ParameterNameType name) override;
 
         std::string configuration(const std::string &key) override;
 

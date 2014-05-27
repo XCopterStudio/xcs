@@ -40,10 +40,8 @@ struct Sensor {
     };
 };
 
-enum ParameterNameType {
-    //! How long is non-zero fly param active before it's zeroed (in milliseconds).
-    XCI_PARAM_FP_PERSISTENCE
-};
+
+
 
 // Some useful typedefs
 typedef std::vector<Sensor> SensorList;
@@ -52,7 +50,7 @@ typedef std::string ParameterValueType;
 typedef class XCI* (XciFactoryFunction) (DataReceiver &dataReceiver);
 
 //! Virtual class for unified x-copter interface
-
+//! Every drone have to set XCI_PARAM_FP_PERSISTENCE configuration parameter 
 class XCI {
 protected:
     DataReceiver& dataReceiver_;
@@ -68,9 +66,6 @@ public:
 
     //! A pure virtual member returning list of available sensors on x-copter
     virtual SensorList sensorList() = 0;
-
-    //! A pure virtual member returning specific x-copter's parameter.
-    virtual ParameterValueType parameter(ParameterNameType name) = 0;
 
     //! A pure virtual member returning x-copter's configuration value
     virtual std::string configuration(const std::string &key) = 0;

@@ -44,9 +44,6 @@ public:
     //! A pure virtual member returning list of available sensors on x-copter
     virtual SensorList sensorList();
 
-    //! A pure virtual member returning specific x-copter's parameter.
-    virtual ParameterValueType parameter(ParameterNameType name);
-
     //! A pure virtual member returning x-copter's configuration value
     virtual std::string configuration(const std::string &key);
 
