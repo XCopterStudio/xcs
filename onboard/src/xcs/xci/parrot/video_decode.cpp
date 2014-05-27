@@ -1,4 +1,5 @@
 #include "video_decode.hpp"
+#include <xcs/logging.hpp>
 
 using namespace xcs::xci::parrot;
 
@@ -9,13 +10,13 @@ void VideoDecoder::init(const AVCodecID avCodec) {
     // find adequate codec 
     codec_ = avcodec_find_decoder(avCodec);
     if (!codec_) { // TODO: throw exception
-        fprintf(stderr, "Could not find encoder\n");
+        XCS_LOG_FATAL("Could not find encoder");
         exit(1);
     }
 
     context_ = avcodec_alloc_context3(codec_);
     if (!context_) { // TODO: throw exception
-        fprintf(stderr, "Could not open context\n");
+        XCS_LOG_FATAL("Could not open context");
         exit(1);
     }
 
@@ -40,19 +41,19 @@ void VideoDecoder::init(const AVCodecID avCodec) {
 
     /* open it */
     if (avcodec_open2(context_, codec_, NULL) < 0) { // TODO: throw exception
-        fprintf(stderr, "Could not open codec\n");
+        XCS_LOG_FATAL("Could not open codec");
         exit(1);
     }
 
     frame_ = avcodec_alloc_frame();
     if (!frame_) {
-        fprintf(stderr, "Could not allocate video frame\n");
+        XCS_LOG_FATAL("Could not allocate video frame");
         exit(1);
     }
 
     frameOut_ = avcodec_alloc_frame();
     if (!frameOut_) {
-        fprintf(stderr, "Could not allocate video frame\n");
+        XCS_LOG_FATAL("Could not allocate video frame");
         exit(1);
     }
 }

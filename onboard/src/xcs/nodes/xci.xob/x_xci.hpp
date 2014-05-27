@@ -33,7 +33,7 @@ public:
     XXci(const std::string& name);
 
     /*!
-     * \param driver Name of the library with XCI implementation.
+     * \param driver Name of the library with Xci implementation.
      */
     void init(const std::string& driver);
 
@@ -46,7 +46,7 @@ public:
 
     virtual ~XXci();
 private:
-    xcs::xci::XCI* xci_;
+    xcs::xci::Xci* xci_;
 
     xcs::xci::DataReceiver dataReceiver_;
 
@@ -103,7 +103,7 @@ private:
     volatile bool flyControlAlive_;
 
     /*!
-     * How often is fly param sent to XCI (in ms).
+     * How often is fly param sent to Xci (in ms).
      * When set to 0, no persistence is enforced.
      */
     unsigned int flyControlPersistence_;
