@@ -17,7 +17,7 @@ var nodeList = [
     "xxci",
     "xdatalogger",
     "xdataplayer",
-    "xptam"
+    "xlocalization"
 ];
 
 moduleList += nodeList;

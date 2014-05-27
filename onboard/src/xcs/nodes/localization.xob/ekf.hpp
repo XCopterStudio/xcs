@@ -11,6 +11,7 @@
 #include <xcs/types/eulerian_vector.hpp>
 
 #include <armadillo>
+#include <TooN/TooN.h>
 
 namespace xcs {
 namespace nodes {
@@ -26,8 +27,26 @@ struct DroneState {
 
     DroneState() : angularRotationPsi(0), updateMeasurementID(0) {
     };
+    // TODO operators
     arma::mat getMat() const;
     void Mat(const arma::mat &mat);
+
+    inline TooN::Vector<10> getVector() const {
+        return TooN::makeVector(position.x, position.y, position.z, velocity.x, velocity.y, velocity.z, angles.phi, angles.theta, angles.psi, angularRotationPsi);
+    }
+
+    inline void Vector(const TooN::Vector<10> &vector) {
+        position.x = vector[0];
+        position.y = vector[1];
+        position.z = vector[2];
+        velocity.x = vector[3];
+        velocity.y = vector[4];
+        velocity.z = vector[5];
+        angles.phi = vector[6];
+        angles.theta = vector[7];
+        angles.psi = vector[8];
+        angularRotationPsi = vector[9];
+    }
 };
 
 struct DroneStateMeasurement {
@@ -40,14 +59,24 @@ struct DroneStateMeasurement {
 
     DroneStateMeasurement() : altitude(0), angularRotationPsi(0), measurementID(0) {
     };
+    // TODO operators
     arma::mat getMat() const;
 };
 
 struct CameraMeasurement {
     xcs::CartesianVector position;
     xcs::EulerianVector angles;
-
+    // TODO operators
     arma::mat getMat() const;
+
+    inline void Vector(const TooN::Vector<6> &vector) {
+        position.x = vector[0];
+        position.y = vector[1];
+        position.z = vector[2];
+        angles.phi = vector[3];
+        angles.theta = vector[4];
+        angles.psi = vector[5];
+    }
 };
 
 typedef std::pair<DroneState, arma::mat> DroneStateDistribution;
@@ -91,10 +120,30 @@ class Ekf {
     DroneStateDistribution updateCam(const DroneStateDistribution &state, const CameraMeasurement &camMeasurement);
 public:
     Ekf();
+
+    /*!
+     * \param timestamp EKF time.
+     */
     void clearUpToTime(const double timestamp);
+
+    /*!
+     * \param timestamp EKF time.
+     */
     void flyControl(const xcs::FlyControl &flyControl, const double &timestamp);
+
+    /*!
+     * \param timestamp EKF time.
+     */
     void measurementImu(const DroneStateMeasurement &measurement, const double &timestamp);
+
+    /*!
+     * \param timestamp EKF time.
+     */
     void measurementCam(const CameraMeasurement &measurement, const double &timestamp);
+
+    /*!
+     * \param time EKF time.
+     */
     DroneState computeState(const double &time); // compute prediction state up to this time 
 };
 

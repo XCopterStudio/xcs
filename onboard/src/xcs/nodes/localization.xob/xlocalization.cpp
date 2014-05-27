@@ -26,15 +26,18 @@ void XLocalization::onChangeAltitude(double altitude) {
     lastMeasurement_.altitude = altitude;
 }
 
-void XLocalization::onChangeTimeImu(double timeImu) {
+void XLocalization::onChangeTimeImu(double internalTime) {
     if (imuTimeShift_ == std::numeric_limits<double>::max()) {
-        imuTimeShift_ = timeImu - timeFromStart();
+        imuTimeShift_ = internalTime - timeFromStart();
     }
 
-    double actualTime = timeImu - imuTimeShift_ - IMU_DELAY;
-    lastMeasurement_.velocity.z /= (actualTime - lastMeasurementTime_);
-    lastMeasurement_.angularRotationPsi /= (actualTime - lastMeasurementTime_);
-    ekf_.measurementImu(lastMeasurement_, actualTime); // TODO: compute measurement time delay
+    double ekfTime = internalTime - imuTimeShift_ - IMU_DELAY;
+    lastMeasurement_.velocity.z /= (ekfTime - lastMeasurementTime_);
+    lastMeasurement_.angularRotationPsi /= (ekfTime - lastMeasurementTime_);
+     // TODO: compute measurement time delay
+    ekf_.measurementImu(lastMeasurement_, ekfTime);
+    ptam_->measurementImu(lastMeasurement_, ekfTime);
+    
     //printf("Measurement time %f actual time %f \n", actualTime, timeFromStart());
 
     // update actual position of drone
@@ -44,36 +47,16 @@ void XLocalization::onChangeTimeImu(double timeImu) {
     rotation = state.angles;
 }
 
-void XLocalization::onChangePosition(xcs::CartesianVector measuredPosition) {
-    lastCameraMeasurement_.position = measuredPosition;
-}
 
-void XLocalization::onChangeAngles(xcs::EulerianVector measuredAngles) {
-    lastCameraMeasurement_.angles = measuredAngles;
-}
-
-void XLocalization::onChangeTimeCam(double timeCam) {
-    double time = timeCam - imuTimeShift_ - CAM_DELAY;
-    ekf_.measurementCam(lastCameraMeasurement_, time);
-
-    // update actual position of drone
-    DroneState state = ekf_.computeState(timeFromStart());
-    position = state.position;
-    velocity = state.velocity;
-    rotation = state.angles;
-}
-
-void XLocalization::onChangeClearTime(double time) {
-    double droneTime = time - imuTimeShift_ - CAM_DELAY;
-    ekf_.clearUpToTime(droneTime);
-}
 
 void XLocalization::onChangeVideo(urbi::UImage image) {
     // store image until onChangeVideoTime
     lastFrame_ = image;
 }
 
-void XLocalization::onChangeVideoTime(xcs::Timestamp timestamp) {
+void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
+    double ekfTime = internalTime - imuTimeShift_ - CAM_DELAY;
+    
     // convert image to grayscale for PTAM
     urbi::UImage bwImage;
     bwImage.imageFormat = urbi::IMAGE_GREY8;
@@ -83,7 +66,13 @@ void XLocalization::onChangeVideoTime(xcs::Timestamp timestamp) {
     bwImage.height = 0;
     urbi::convert(lastFrame_, bwImage);
 
-    ptam_.handleFrame(bwImage, timestamp);
+    ptam_->handleFrame(bwImage, ekfTime); // TODO should push results to EKF
+    
+    // update current state of drone
+    DroneState state = ekf_.computeState(timeFromStart());
+    position = state.position;
+    velocity = state.velocity;
+    rotation = state.angles;
 }
 
 void XLocalization::onChangeFlyControl(xcs::FlyControl flyControl) {
@@ -99,10 +88,6 @@ XLocalization::XLocalization(const std::string &name) :
   measuredAnglesRotation("ROTATION"),
   measuredAltitude("ALTITUDE"),
   timeImu("TIME_LOC"),
-  measuredPosition("POSITION_ABS"),
-  measuredAngles("ROTATION"),
-  timeCam("TIME_LOC"),
-  clearTime("TIME_LOC"),
   video("FRONT_CAMERA"),
   videoTime("TIME_LOC"),
   flyControl("FLY_CONTROL"),
@@ -118,18 +103,16 @@ XLocalization::XLocalization(const std::string &name) :
     XBindVarF(measuredAltitude, &XLocalization::onChangeAltitude);
     XBindVarF(timeImu, &XLocalization::onChangeTimeImu);
 
-    XBindVarF(measuredPosition, &XLocalization::onChangePosition);
-    XBindVarF(measuredAngles, &XLocalization::onChangeAngles);
-    XBindVarF(timeCam, &XLocalization::onChangeTimeCam);
-    XBindVarF(clearTime, &XLocalization::onChangeClearTime);
-
     XBindVarF(video, &XLocalization::onChangeVideo);
+    XBindVarF(videoTime, &XLocalization::onChangeVideoTime);
 
     XBindVarF(flyControl, &XLocalization::onChangeFlyControl);
 
     XBindVar(position);
     XBindVar(velocity);
     XBindVar(rotation);
+    
+    ptam_ = PtamPtr(new Ptam(ekf_));
 }
 
 XStart(XLocalization);
