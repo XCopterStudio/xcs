@@ -17,8 +17,6 @@ x_target_link_libraries(${PROJECT_NAME} xobject)
 find_package(UrbiAll)
 use_urbi(${PROJECT_NAME})
 
-find_package(Armadillo)
-use_armadillo(${PROJECT_NAME})
 
 find_package(OpenGL)
 find_package(GLUT)
@@ -34,5 +32,9 @@ if(X_WIN)
 elseif(X_LIN)
     target_link_libraries(${PROJECT_NAME} ${PTAM_LIBRARIES} ${OPENGL_LIBRARY} ${GLUT_LIBRARY})
 endif()
+
+# Must be after PTAM library.
+find_package(Armadillo)
+use_armadillo(${PROJECT_NAME})
 
 use_logging(${PROJECT_NAME})
