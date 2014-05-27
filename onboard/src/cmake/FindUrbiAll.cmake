@@ -22,9 +22,9 @@ set(Serialize_DIR ${URBI_ROOT}/share/cmake/serialize)
 find_package(Serialize)
 mark_as_advanced(SERIALIZE_LIBRARIES)
 
-#set(Urbi_DIR ${URBI_ROOT}/share/cmake/urbi)
-#find_package(Urbi)
-#mark_as_advanced(URBI_LIBRARIES)
+set(Urbi_DIR ${URBI_ROOT}/share/cmake/urbi)
+find_package(Urbi)
+mark_as_advanced(URBI_LIBRARIES)
 
 set(Uobject_DIR ${URBI_ROOT}/share/cmake/uobject)
 find_package(Uobject)
@@ -35,7 +35,7 @@ mark_as_advanced(UOBJECT_LIBRARIES)
 find_package(Boost 1.55 REQUIRED COMPONENTS system)
 
 set(URBIALL_INCLUDE_DIRS ${PORT_INCLUDE_DIRS};${QIJPEG_INCLUDE_DIRS};${SCHED_INCLUDE_DIRS};${SERIALIZE_INCLUDE_DIRS};${UOBJECT_INCLUDE_DIRS};${Boost_INCLUDE_DIRS})
-set(URBIALL_LIBRARIES ${PORT_LIBRARIES};${QIJPEG_LIBRARIES};${SCHED_LIBRARIES};${SERIALIZE_LIBRARIES};${UOBJECT_LIBRARIES};${Boost_LIBRARIES})
+set(URBIALL_LIBRARIES ${PORT_LIBRARIES};${QIJPEG_LIBRARIES};${SCHED_LIBRARIES};${SERIALIZE_LIBRARIES};${URBI_LIBRARIES};${UOBJECT_LIBRARIES};${Boost_LIBRARIES})
 
 function(use_urbi TARGET_NAME)
 include_directories(${URBIALL_INCLUDE_DIRS})
