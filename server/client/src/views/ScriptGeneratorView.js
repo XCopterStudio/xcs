@@ -155,6 +155,7 @@ var ScriptGeneratorView = Backbone.View.extend({
     initializeDfgToolbox4Drop : function() {
         //Counter
         counter = 0;
+        var self = this;
         //Make element droppable
         $("#flow-graph-screen").droppable({
             drop: function (ev, ui) {
@@ -165,35 +166,42 @@ var ScriptGeneratorView = Backbone.View.extend({
                 var pos = $(ui.helper).offset();
                 var containerPos = $("#flow-graph-screen").offset();
                 
-                //TODO: create appropriate model
-//          //get prototype name
-//        var prototypeName = modelPrototype.get("name");
-//        //console.log(".prototypeName: " + JSON.stringify(prototypeName));
-//        
-//        // get all xvars
                 
-//        //console.log(".xvars:");
-//        modelPrototype.get("xvar").forEach(function(xvar) {
-//            var xvarName = xvar.get("name");
-//            var xvarSynType = xvar.get("synType");
-//            var xvarSemType = xvar.get("semType");
-//            //console.log("..xvarName: " + JSON.stringify(xvarName));
-//            //console.log("..xvarSynType: " + JSON.stringify(xvarSynType));
-//            //console.log("..xvarSemType: " + JSON.stringify(xvarSemType));
-//        });
-//        
-//        // get all xinputports
-//        //console.log(".xinputPorts:");
-//        modelPrototype.get("xinputPort").forEach(function(xvar) {
-//            var xinputPortName = xvar.get("name");
-//            var xinputPortSynType = xvar.get("synType");
-//            var xinputPortSemType = xvar.get("semType");
-//            //console.log("..xinputPortName: " + JSON.stringify(xinputPortName));
-//            //console.log("..xinputPortSynType: " + JSON.stringify(xinputPortSynType));
-//            //console.log("..xinputPortSemType: " + JSON.stringify(xinputPortSemType));
-//        });
-//        
-//        //console.log(".end");
+                //TODO: create appropriate model
+                var modelPrototype = self.dfgToolboxNodes[toolId];
+                var xvars = modelPrototype.get("xvar");
+                var xinputPorts = modelPrototype.get("xinputPorts");
+                if((!xvars || xvars.length == 0) && (!xinputPorts || xinputPorts.length ==0)) {
+                    console.log("not defined");
+                }
+                
+                //get prototype name
+                //var prototypeName = modelPrototype.get("name");
+                //console.log(".prototypeName: " + JSON.stringify(prototypeName));
+                
+                // get all xvars        
+//                console.log(".xvars:");
+//                modelPrototype.get("xvar").forEach(function(xvar) {
+//                    var xvarName = xvar.get("name");
+//                    var xvarSynType = xvar.get("synType");
+//                    var xvarSemType = xvar.get("semType");
+//                    console.log("..xvarName: " + JSON.stringify(xvarName));
+//                    console.log("..xvarSynType: " + JSON.stringify(xvarSynType));
+//                    console.log("..xvarSemType: " + JSON.stringify(xvarSemType));
+//                });
+//                
+//                // get all xinputports
+//                console.log(".xinputPorts:");
+//                modelPrototype.get("xinputPort").forEach(function(xvar) {
+//                    var xinputPortName = xvar.get("name");
+//                    var xinputPortSynType = xvar.get("synType");
+//                    var xinputPortSemType = xvar.get("semType");
+//                    console.log("..xinputPortName: " + JSON.stringify(xinputPortName));
+//                    console.log("..xinputPortSynType: " + JSON.stringify(xinputPortSynType));
+//                    console.log("..xinputPortSemType: " + JSON.stringify(xinputPortSemType));
+//                });
+//                
+//                console.log(".end");
                 
                 var m = new DataFlowGraphDefaultModel({
                     position: { x: pos.left - containerPos.left, y: pos.top - containerPos.top },
@@ -259,6 +267,7 @@ var ScriptGeneratorView = Backbone.View.extend({
         // add 2 toolbox - show to user
         this.addNode2FgToolbox(prototypeName);
         this.dfgToolboxNodes[prototypeName] = modelPrototype;
+        console.log("added: " + prototypeName + " = " + this.dfgToolboxNodes[prototypeName].get("name"));
         
         //watch 4 changes
         this.listenTo(modelPrototype, "change", this.onPrototypeChange);
