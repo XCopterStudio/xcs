@@ -1,4 +1,4 @@
-set(PROJECT_NAME ulinedrawer)
+set(PROJECT_NAME xlinedrawer)
 project(${PROJECT_NAME})
 
 file(GLOB SOURCES *.cpp)
@@ -6,7 +6,7 @@ file(GLOB HEADERS *.hpp)
 
 x_add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
 
-x_target_link_libraries(${PROJECT_NAME} xcs)
+x_target_link_libraries(${PROJECT_NAME} xcs xobject)
 
 #if(X_LIN)
 #add_definitions(-rdynamic)

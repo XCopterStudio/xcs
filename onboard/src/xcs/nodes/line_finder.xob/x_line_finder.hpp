@@ -5,24 +5,26 @@
 
 #include <vector>
 #include <cstdint>
-#include <urbi/uobject.hh>
+#include <xcs/nodes/xobject/x_object.hpp>
+#include <xcs/nodes/xobject/x_var.hpp>
+#include <xcs/types/eulerian_vector.hpp>
+
 #include <opencv2/opencv.hpp>
 
-#include <xcs/urbi/line_drawer.uob/u_line_drawer.hpp>
+#include <xcs/nodes/line_drawer.xob/x_line_drawer.hpp>
 #include "line_utils.hpp"
 
 
 namespace xcs {
-namespace urbi {
+namespace nodes {
 
-class ULineFinder : public ::urbi::UObject {
+class XLineFinder : public XObject {
 public:
     /*
      * Inputs
      */
     ::urbi::InputPort video;
-    ::urbi::UVar theta; // intentionally UVar
-    ::urbi::UVar phi; // intentionally UVar
+    XVar<xcs::EulerianVector> rotation;
     ::urbi::UVar expectedDistanceUVar; // intentionally UVar
     ::urbi::UVar expectedDeviationUVar; // intentionally UVar
 
@@ -61,7 +63,7 @@ public:
     ::urbi::UVar hasLine;
     ::urbi::UVar curvatureUVar;
 
-    ULineFinder(const std::string &);
+    XLineFinder(const std::string &);
     void init();
 
     /*!
@@ -81,7 +83,7 @@ private:
     static const size_t STUCK_TOLERANCE;
 
 
-    xcs::urbi::ULineDrawer *lineDrawer_;
+    xcs::nodes::XLineDrawer *lineDrawer_;
 
     bool hasFrame_;
     ::urbi::UImage lastFrame_;
@@ -94,7 +96,7 @@ private:
 
     // processing results
     LineType lineType_;
-    xcs::urbi::line_finder::LineUtils lineUtils_;
+    xcs::nodes::line_finder::LineUtils lineUtils_;
 
     inline bool isLineVisual(LineType lineType) {
         return lineType == LINE_VISUAL;
@@ -106,11 +108,11 @@ private:
 
     void processFrame();
 
-    void useOnlyGoodLines(cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType> lines, cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType> & goodLines, cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType> & curvatureLines);
+    void useOnlyGoodLines(cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType> lines, cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType> & goodLines, cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType> & curvatureLines);
     
-    double calculateCurvature(xcs::urbi::line_finder::LineUtils::RawLineType meanLine, cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& curvatureLines, cv::Mat image);
+    double calculateCurvature(xcs::nodes::line_finder::LineUtils::RawLineType meanLine, cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType>& curvatureLines, cv::Mat image);
 
-    void drawDebugLines(const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& lines, const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& filteredLines);
+    void drawDebugLines(const cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType>& lines, const cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType>& filteredLines);
 
 };
 

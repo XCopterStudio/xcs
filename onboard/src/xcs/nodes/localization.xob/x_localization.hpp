@@ -1,5 +1,5 @@
-#ifndef XEKF_H
-#define XEKF_H
+#ifndef X_LOCALIZATION_H
+#define X_LOCALIZATION_H
 
 #include <chrono>
 #include <memory>

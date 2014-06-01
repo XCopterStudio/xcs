@@ -11,7 +11,7 @@
 #include <cmath>
 
 namespace xcs {
-namespace urbi {
+namespace nodes {
 namespace line_finder {
 
 struct LineUtils {
