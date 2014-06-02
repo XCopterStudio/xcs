@@ -1,4 +1,5 @@
 #include "eulerian_vector.hpp"
+#include <xcs/nodes/xobject/x_impl.hpp>
 
 using namespace xcs;
 

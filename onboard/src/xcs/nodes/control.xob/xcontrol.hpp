@@ -10,6 +10,7 @@
 
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
+#include <xcs/nodes/xobject/x_var.hpp>
 
 namespace xcs{
 namespace nodes{

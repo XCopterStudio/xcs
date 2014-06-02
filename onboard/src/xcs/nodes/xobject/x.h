@@ -1,9 +1,10 @@
 #ifndef XCS_X_H
 #define XCS_X_H
 
-#include <urbi/uobject.hh>
+#include <urbi/uvalue.hh>
 #include <libport/containers.hh>
-#include "xcs_object.hpp"
+
+GD_CATEGORY(Test.All);
 
 # define XBindVar(x) x.Init(*this, #x)
 
@@ -25,15 +26,5 @@
 
 # define X_REGISTER_STRUCT(cName, ...)          \
     URBI_REGISTER_STRUCT(cName, __VA_ARGS__)
-
-#define X_GENERATE_STRUCT_PROPERTY_S(cName, cProperty) int _ ## cName ## _ ## cProperty ## _ = xcs::nodes::XcsObject::registerStructProperty(#cName, #cProperty)
-
-#define X_GENERATE_STRUCT_PROPERTY(r, cName, cProperty) X_GENERATE_STRUCT_PROPERTY_S(cName, cProperty);
-
-/**
- * \param cName Name must be valid as C++ variable name.
- */
-# define X_GENERATE_STRUCT(cName, ...)    \
-    BOOST_PP_SEQ_FOR_EACH(X_GENERATE_STRUCT_PROPERTY, cName, LIBPORT_LIST(__VA_ARGS__, ))
 
 #endif
