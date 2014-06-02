@@ -156,18 +156,31 @@ var ScriptGeneratorView = Backbone.View.extend({
     
     initializeDfgToolbox4Drop : function() {
         //Counter
-        counter = 0;
+        var counter = [];
         var self = this;
+        
         //Make element droppable
         $("#flow-graph-screen").droppable({
             drop: function (ev, ui) {
-                counter++;
-                
                 var toolId = ui.draggable.attr('id');
-                var modelId = toolId + counter;
-                var pos = $(ui.helper).offset();
-                var containerPos = $("#flow-graph-screen").offset();
                 
+                if(!counter[toolId]) {
+                    counter[toolId] = 1;
+                }
+                else {
+                    ++counter[toolId];
+                }
+                
+                var modelId;
+                if(counter[toolId] == 1) {
+                    modelId = toolId;   
+                }
+                else {
+                    modelId = toolId + counter[toolId];
+                }
+                
+                var pos = $(ui.helper).offset();
+                var containerPos = $("#flow-graph-screen").offset();         
                 
                 //TODO: create appropriate model
                 var modelPrototype = self.dfgToolboxNodes[toolId];
@@ -180,6 +193,7 @@ var ScriptGeneratorView = Backbone.View.extend({
                 //get prototype name
                 //var prototypeName = modelPrototype.get("name");
                 //console.log(".prototypeName: " + JSON.stringify(prototypeName));
+                //console.log(".modelId: " + JSON.stringify(modelId));
                 
                 // get all xvars        
 //                console.log(".xvars:");
