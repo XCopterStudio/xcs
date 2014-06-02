@@ -1,4 +1,4 @@
-#include "XCI_Parrot.hpp"
+#include "xci_parrot.hpp"
 
 #include <array>
 #include <iostream>
@@ -18,24 +18,26 @@ using namespace xcs::xci;
 using namespace xcs::xci::parrot;
 // ----------------- Constant ----------------------- //
 
-const float XCI_Parrot::EPSILON = (float) 1.0e-10;
+const float XciParrot::EPSILON = (float) 1.0e-10;
 
-const std::string XCI_Parrot::NAME = "Parrot AR Drone 2.0 XCI";
+const std::string XciParrot::NAME = "Parrot AR Drone 2.0 Xci";
 
 // ----------------- Private function --------------- //
 
-void XCI_Parrot::initNetwork() {
+void XciParrot::initNetwork() {
 	// connect to video port
     atCommandSender_.connect();
     videoReceiver_.connect();
     navdataReceiver_.connect();
+    configurationReceiver_.connect();
 
     threadSendingATCmd_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceCMD_)));
 	threadReadVideoReceiver_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceVideo_)));
 	threadReceiveNavData_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceNavdata_)));
+    threadConfiguration_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceConfiguration_)));
 }
 
-void XCI_Parrot::processVideoData(){
+void XciParrot::processVideoData(){
     while (!endAll_){
         VideoFramePtr frame = nullptr;
         if (videoReceiver_.tryGetVideoFrame(frame)){
@@ -58,7 +60,7 @@ void XCI_Parrot::processVideoData(){
     }
 }
 
-bool XCI_Parrot::setConfirmedConfigure(AtCommand *command){
+bool XciParrot::setConfirmedConfigure(AtCommand *command){
 
     unsigned int count = 0;
     do{
@@ -87,7 +89,7 @@ bool XCI_Parrot::setConfirmedConfigure(AtCommand *command){
     return true;
 }
 
-bool XCI_Parrot::setDefaultConfiguration(){
+bool XciParrot::setDefaultConfiguration(){
     setConfirmedConfigure(new AtCommandCONFIG("custom:application_id","0a1b2c3d"));
     setConfirmedConfigure(new AtCommandCONFIG("custom:profile_id", "0a1b2c3d"));
     setConfirmedConfigure(new AtCommandCONFIG("custom:session_id", "0a1b2c3d"));
@@ -115,81 +117,36 @@ bool XCI_Parrot::setDefaultConfiguration(){
     return true;
 }
 
-bool XCI_Parrot::setNavdataReceive(bool full_mode){
-
-    unsigned int count = 0;
-
-    do{
-        if (full_mode){
-            atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "FALSE")); // exit bootstrap mode and drone will send the demo navdata
-        }
-        else{
-            atCommandQueue_.push(new AtCommandCONFIG("general:navdata_demo", "TRUE")); // exit bootstrap mode and drone will send the demo navdata
-        }
-
-        this_thread::sleep_for(std::chrono::milliseconds(10));
-
-        if(++count >= 20){
-            XCS_LOG_WARN("Cannot receive general:navdata_demo ack.");;
-            return false;
-        }
-
-    } while (!state_.getState(FLAG_ARDRONE_COMMAND_MASK));
-
-    count = 0;
-    do{
-        atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
-        this_thread::sleep_for(std::chrono::milliseconds(10));
-
-        if (++count >= 20){
-            XCS_LOG_WARN("Cannot receive clear general:navdata_demo ack.");
-            return false;
-        }
-    } while (state_.getState(FLAG_ARDRONE_COMMAND_MASK));
-
-    return true;
-}
-
 // ----------------- Public function ---------------- //
 
-void XCI_Parrot::init(){
+XciParrot::XciParrot(DataReceiver &dataReceiver, std::string ipAddress)
+    : Xci(dataReceiver),
+    atCommandSender_(atCommandQueue_, io_serviceCMD_, ipAddress),
+    videoReceiver_(io_serviceVideo_, ipAddress),
+    navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceNavdata_, ipAddress),
+    configurationReceiver_(atCommandQueue_,configuration_,io_serviceConfiguration_,ipAddress)
+{
+    configuration_["XCI_PARAM_FP_PERSISTENCE"] = "50";
+};
+
+void XciParrot::init(){
     endAll_ = false;
 
-    XCS_LOG_INFO("Before network");
     initNetwork();
-    XCS_LOG_INFO("After network");
-
-    setDefaultConfiguration();
-    //setNavdataReceive(true);
 
     // init videoDecoder
     videoDecoder_.init(AV_CODEC_ID_H264);
-    threadReadVideoData_ = std::move(std::thread(&XCI_Parrot::processVideoData, this));
+    threadReadVideoData_ = std::move(std::thread(&XciParrot::processVideoData, this));
+
+    setDefaultConfiguration();
+    configurationReceiver_.update();
 }
 
-void XCI_Parrot::reset() {
-
-}
-
-void XCI_Parrot::start() {
-    while (!state_.getState(FLAG_ARDRONE_FLY_MASK)) {
-        atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
-        std::this_thread::sleep_for(std::chrono::milliseconds(25));
-    }
-}
-
-void XCI_Parrot::stop() {
-    while (state_.getState(FLAG_ARDRONE_FLY_MASK)) {
-        atCommandQueue_.push(new AtCommandRef(STATE_LAND));
-        std::this_thread::sleep_for(std::chrono::milliseconds(25));
-    }
-}
-
-std::string XCI_Parrot::name() {
+std::string XciParrot::name() {
     return NAME;
 }
 
-SensorList XCI_Parrot::sensorList() {
+SensorList XciParrot::sensorList() {
     SensorList sensorList;
 
     sensorList.push_back(Sensor("rotation", "ROTATION"));
@@ -212,11 +169,7 @@ SensorList XCI_Parrot::sensorList() {
     return sensorList;
 }
 
-void* XCI_Parrot::sensorData(const Sensor &sensor) {
-    return NULL;
-}
-
-std::string XCI_Parrot::configuration(const std::string &key) {
+std::string XciParrot::configuration(const std::string &key) {
     if (configuration_.count(key) > 0){
         return configuration_[key];
     }
@@ -225,55 +178,34 @@ std::string XCI_Parrot::configuration(const std::string &key) {
     }
 }
 
-InformationMap XCI_Parrot::configuration() {
+InformationMap XciParrot::configuration() {
     return configuration_;
 }
 
-SpecialCMDList XCI_Parrot::specialCMD() {
+SpecialCMDList XciParrot::specialCMD() {
     SpecialCMDList CMDList;
     CMDList.push_back("TakeOff");
     CMDList.push_back("Land");
     CMDList.push_back("EmergencyStop");
     CMDList.push_back("Normal");
-    CMDList.push_back("Reset");
     return CMDList;
 }
 
-void XCI_Parrot::configuration(const std::string &key, const std::string &value) {
+void XciParrot::configuration(const std::string &key, const std::string &value) {
     atCommandQueue_.push(new AtCommandCONFIG(key, value));
 }
 
-void XCI_Parrot::configuration(const InformationMap &configuration) {
+void XciParrot::configuration(const InformationMap &configuration) {
     for (auto element : configuration) {
         atCommandQueue_.push(new AtCommandCONFIG(element.first, element.second));
     }
 }
 
-void XCI_Parrot::command(const std::string &command) {
+void XciParrot::command(const std::string &command) {
     if (command == "TakeOff") {
         atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
-        /*if (!state_.getState(FLAG_ARDRONE_FLY_MASK)){
-            atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
-        }*/
-        /*for (i = 0; i < TRY_COUNT; ++i) {
-            atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
-            if (state_.getState(FLAG_ARDRONE_FLY_MASK)){
-                break;
-            }
-        }*/
     } else if (command == "Land") {
         atCommandQueue_.push(new AtCommandRef(STATE_LAND));
-       /* if (state_.getState(FLAG_ARDRONE_FLY_MASK)){
-            atCommandQueue_.push(new AtCommandRef(STATE_LAND));
-        }*/
-        /*for (i = 0; i < TRY_COUNT; ++i) {
-            atCommandQueue_.push(new AtCommandRef(STATE_LAND));
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
-            if (!state_.getState(FLAG_ARDRONE_FLY_MASK)) {
-                break;
-            }
-        }*/
     } else if (command == "EmegrencyStop") {
         if (!state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)) {
             atCommandQueue_.push(new AtCommandRef(STATE_EMERGENCY));
@@ -282,15 +214,12 @@ void XCI_Parrot::command(const std::string &command) {
         if (state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)) {
             atCommandQueue_.push(new AtCommandRef(STATE_NORMAL));
         }
-    } else if (command == "Reset") {
-
     } else {
-
+        XCS_LOG_WARN("Unsupported command " + command);
     }
 }
 
-void XCI_Parrot::flyControl(float roll, float pitch, float yaw, float gaz) {
-    //printf("Roll %f Pitch %f YAW %f GAZ %f \n", roll,pitch,yaw,gaz);
+void XciParrot::flyControl(float roll, float pitch, float yaw, float gaz) {
     if (std::abs(pitch) < EPSILON && std::abs(roll) < EPSILON) {
         atCommandQueue_.push(new AtCommandPCMD(DroneMove(roll, pitch, yaw, gaz)));
     } else {
@@ -299,7 +228,7 @@ void XCI_Parrot::flyControl(float roll, float pitch, float yaw, float gaz) {
 
 }
 
-XCI_Parrot::~XCI_Parrot() {
+XciParrot::~XciParrot() {
     endAll_ = true;
 
     // wait for atCMDThread end and then clear memory
@@ -315,7 +244,7 @@ XCI_Parrot::~XCI_Parrot() {
 
 extern "C" {
 
-XCI* CreateXci(DataReceiver &dataReceiver) {
-    return new XCI_Parrot(dataReceiver);
+Xci* CreateXci(DataReceiver &dataReceiver) {
+    return new XciParrot(dataReceiver);
 }
 }

@@ -1,18 +1,19 @@
-#include "u_line_finder.hpp"
+#include "x_line_finder.hpp"
 #include <thread>
 #include <chrono>
 #include <cmath>
 #include <xcs/xcs_fce.hpp>
 
-using namespace xcs::urbi;
-using namespace xcs::urbi::line_finder;
+using namespace xcs::nodes;
+using namespace xcs::nodes::line_finder;
 using namespace std;
 
-const size_t ULineFinder::REFRESH_PERIOD = 66; // ms
-const size_t ULineFinder::STUCK_TOLERANCE = 2; // timer periods
+const size_t XLineFinder::REFRESH_PERIOD = 66; // ms
+const size_t XLineFinder::STUCK_TOLERANCE = 2; // timer periods
 
-ULineFinder::ULineFinder(const string& name) :
-  ::urbi::UObject(name),
+XLineFinder::XLineFinder(const string& name) :
+  XObject(name),
+  rotation("ROTATION"),
   lineDrawer_(nullptr),
   hasFrame_(false),
   lastReceivedFrameNo_(1), // must be greater than lastProcessedFrame_ at the beginning
@@ -21,46 +22,45 @@ ULineFinder::ULineFinder(const string& name) :
   distance_(0),
   deviation_(0),
   lineType_(LINE_NONE) {
-    UBindFunction(ULineFinder, init);
+    UBindFunction(XLineFinder, init);
 
-    UBindVar(ULineFinder, video);
-    UNotifyChange(video, &ULineFinder::onChangeVideo);
+    UBindVar(XLineFinder, video);
+    UNotifyChange(video, &XLineFinder::onChangeVideo);
 
-    UBindVar(ULineFinder, theta);
-    UBindVar(ULineFinder, phi);
-    UBindVar(ULineFinder, cameraParam);
-    UBindVarRename(ULineFinder, expectedDistanceUVar, "expectedDistance");
-    UBindVarRename(ULineFinder, expectedDeviationUVar, "expectedDeviation");
-
-
-    UBindVar(ULineFinder, blurRange);
-    UBindVar(ULineFinder, autoHsvValueRangeEnabled);
-    UBindVar(ULineFinder, autoHsvValueRangeRatio);
-    UBindVar(ULineFinder, autoHsvValueRangeFreq);
-    UBindVar(ULineFinder, hsvValueRange);
-    UBindVar(ULineFinder, cannyT1);
-    UBindVar(ULineFinder, cannyT2);
-    UBindVar(ULineFinder, cannyApertureSize);
-    UBindVar(ULineFinder, cannyL2Gradient);
-    UBindVar(ULineFinder, houghRho);
-    UBindVar(ULineFinder, houghTheta);
-    UBindVar(ULineFinder, houghT);
-    UBindVar(ULineFinder, houghMinLength);
-    UBindVar(ULineFinder, houghMaxGap);
-    UBindVar(ULineFinder, hystDeviationThr);
-    UBindVar(ULineFinder, hystDistanceThr);
-    UBindVar(ULineFinder, curvatureTolerance);
+    XBindVar(rotation);
+    UBindVar(XLineFinder, cameraParam);
+    UBindVarRename(XLineFinder, expectedDistanceUVar, "expectedDistance");
+    UBindVarRename(XLineFinder, expectedDeviationUVar, "expectedDeviation");
 
 
-    UBindVarRename(ULineFinder, curvatureUVar, "curvature");
-    UBindVarRename(ULineFinder, distanceUVar, "distance");
-    UBindVarRename(ULineFinder, deviationUVar, "deviation");
-    UBindVar(ULineFinder, hasLine);
+    UBindVar(XLineFinder, blurRange);
+    UBindVar(XLineFinder, autoHsvValueRangeEnabled);
+    UBindVar(XLineFinder, autoHsvValueRangeRatio);
+    UBindVar(XLineFinder, autoHsvValueRangeFreq);
+    UBindVar(XLineFinder, hsvValueRange);
+    UBindVar(XLineFinder, cannyT1);
+    UBindVar(XLineFinder, cannyT2);
+    UBindVar(XLineFinder, cannyApertureSize);
+    UBindVar(XLineFinder, cannyL2Gradient);
+    UBindVar(XLineFinder, houghRho);
+    UBindVar(XLineFinder, houghTheta);
+    UBindVar(XLineFinder, houghT);
+    UBindVar(XLineFinder, houghMinLength);
+    UBindVar(XLineFinder, houghMaxGap);
+    UBindVar(XLineFinder, hystDeviationThr);
+    UBindVar(XLineFinder, hystDistanceThr);
+    UBindVar(XLineFinder, curvatureTolerance);
 
-    UBindFunction(ULineFinder, setLineDrawer);
+
+    UBindVarRename(XLineFinder, curvatureUVar, "curvature");
+    UBindVarRename(XLineFinder, distanceUVar, "distance");
+    UBindVarRename(XLineFinder, deviationUVar, "deviation");
+    UBindVar(XLineFinder, hasLine);
+
+    UBindFunction(XLineFinder, setLineDrawer);
 }
 
-void ULineFinder::init() {
+void XLineFinder::init() {
     /*
      * Set default parameters
      */
@@ -95,7 +95,7 @@ void ULineFinder::init() {
     USetUpdate(REFRESH_PERIOD);
 }
 
-int ULineFinder::update() {
+int XLineFinder::update() {
     //TODO fallback to lost line when video is stucked
     if (!hasFrame_ || lastProcessedFrameNo_ >= lastReceivedFrameNo_) {
         if (++stuckCounter_ > STUCK_TOLERANCE) {
@@ -114,22 +114,23 @@ int ULineFinder::update() {
     return 0; // Urbi undocumented, return value probably doesn't matter
 }
 
-void ULineFinder::setLineDrawer(UObject *drawer) {
-    //lineDrawer_ = dynamic_cast<ULineDrawer *>(drawer);
-    lineDrawer_ = (ULineDrawer *) (drawer); //TODO missing typeinfo when linking
+void XLineFinder::setLineDrawer(UObject *drawer) {
+    //lineDrawer_ = dynamic_cast<XLineDrawer *>(drawer);
+    lineDrawer_ = (XLineDrawer *) (drawer); //TODO missing typeinfo when linking
 }
 
-void ULineFinder::onChangeVideo(::urbi::UVar& uvar) {
+void XLineFinder::onChangeVideo(::urbi::UVar& uvar) {
     lastFrame_ = uvar;
     hasFrame_ = true;
     lastReceivedFrameNo_ += 1;
     stuckCounter_ = 0;
     // adapt to different size
     lineUtils_.setDimensions(lastFrame_.width, lastFrame_.height);
-    lineUtils_.updateReferencePoint(theta, phi, cameraParam);
+    auto rotationVector = static_cast<EulerianVector>(rotation.Data()); // TODO use directoy operator on XVar
+    lineUtils_.updateReferencePoint(rotationVector.theta, rotationVector.phi, cameraParam);
 }
 
-void ULineFinder::adjustValueRange(cv::Mat hsvImage) {
+void XLineFinder::adjustValueRange(cv::Mat hsvImage) {
     if (!static_cast<bool> (autoHsvValueRangeEnabled)) {
         return;
     }
@@ -148,7 +149,7 @@ void ULineFinder::adjustValueRange(cv::Mat hsvImage) {
     hsvValueRange = static_cast<int> (minVal + diff * static_cast<double> (autoHsvValueRangeRatio));
 }
 
-void ULineFinder::processFrame() {
+void XLineFinder::processFrame() {
     /*
      * Image Processing
      */
@@ -227,7 +228,7 @@ void ULineFinder::processFrame() {
     hasLine = isLineVisual(lineType_); // must be last as it notifies other UObjects
 }
 
-void ULineFinder::useOnlyGoodLines(cv::vector<LineUtils::RawLineType> lines, cv::vector<LineUtils::RawLineType> &goodLines, cv::vector<LineUtils::RawLineType> &curvatureLines) {
+void XLineFinder::useOnlyGoodLines(cv::vector<LineUtils::RawLineType> lines, cv::vector<LineUtils::RawLineType> &goodLines, cv::vector<LineUtils::RawLineType> &curvatureLines) {
     auto expectedDistance = static_cast<double> (expectedDistanceUVar);
     auto expectedDeviation = static_cast<double> (expectedDeviationUVar);
 
@@ -262,7 +263,7 @@ void ULineFinder::useOnlyGoodLines(cv::vector<LineUtils::RawLineType> lines, cv:
     }
 }
 
-double ULineFinder::calculateCurvature(xcs::urbi::line_finder::LineUtils::RawLineType meanLine, cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& curvatureLines, cv::Mat image) {
+double XLineFinder::calculateCurvature(xcs::nodes::line_finder::LineUtils::RawLineType meanLine, cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType>& curvatureLines, cv::Mat image) {
     cv::Point meanLineCenter(LineUtils::lineCenter(meanLine));
 
     /*
@@ -312,7 +313,7 @@ double ULineFinder::calculateCurvature(xcs::urbi::line_finder::LineUtils::RawLin
     return curvature;
 }
 
-void ULineFinder::drawDebugLines(const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& lines, const cv::vector<xcs::urbi::line_finder::LineUtils::RawLineType>& filteredLines) {
+void XLineFinder::drawDebugLines(const cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType>& lines, const cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType>& filteredLines) {
 
     // expected line
     auto expectedDistance = static_cast<double> (expectedDistanceUVar);
@@ -357,4 +358,4 @@ void ULineFinder::drawDebugLines(const cv::vector<xcs::urbi::line_finder::LineUt
 
 }
 
-UStart(ULineFinder);
+UStart(XLineFinder);

@@ -4,10 +4,7 @@
 
 // module names to be loaded
 var moduleList = [
-    "ujson",
-    "ulinefinder",
-    "ulinedrawer",
-    "ulinekeeper"
+    "ujson"
 ];
 
 // nodes to be loaded
@@ -17,7 +14,9 @@ var nodeList = [
     "xxci",
     "xdatalogger",
     "xdataplayer",
-    "xptam"
+    "xlinefinder",
+    "xlinedrawer",
+    "xlinekeeper"
 ];
 
 moduleList += nodeList;

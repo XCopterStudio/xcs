@@ -3,6 +3,7 @@
 
 #include "tum/Predictor.h"
 #include "tum/scale_estimation.hpp"
+#include "ekf.hpp"
 
 #include <xcs/types/timestamp.hpp>
 
@@ -32,15 +33,23 @@ enum PtamStatusType {
     PTAM_IDLE = 0, PTAM_INITIALIZING = 1, PTAM_LOST = 2, PTAM_GOOD = 3, PTAM_BEST = 4, PTAM_TOOKKF = 5, PTAM_FALSEPOSITIVE = 6
 };
 
-
-class Ptam  {
+class Ptam {
 public:
-    Ptam();
+    Ptam(Ekf &ekf);
     virtual ~Ptam();
 
     void init();
 
+    /*!
+     * \param timestamp Timestamp in EKF's time.
+     */
     void handleFrame(::urbi::UImage &bwImage, Timestamp timestamp);
+
+    /*!
+     * \param timestamp EKF time.
+     */
+    void measurementImu(const DroneStateMeasurement &measurement, const double &timestamp);
+
 
 private:
     typedef std::unique_ptr<Tracker> TrackerPtr;
@@ -52,9 +61,10 @@ private:
     typedef std::chrono::high_resolution_clock Clock;
     typedef std::chrono::time_point<Clock> TimePoint;
 
+    /*! Default frame size */
     static const int FRAME_WIDTH;
     static const int FRAME_HEIGHT;
-    
+
     TooN::Vector<5> cameraParameters_;
 
     TrackerPtr ptamTracker_;
@@ -65,13 +75,13 @@ private:
     localization::ScaleEstimation scaleEstimation_;
 
     Predictor predConvert_; // used ONLY to convert from rpy to se3 and back, i.e. never kept in some state.
-    Predictor imuOnlyPred_;// TODO navdata should be fed to this predictor
+    Predictor imuOnlyPred_; // TODO navdata should be fed to this predictor (M: IMO unnecessary)
     Predictor predIMUOnlyForScale_; // used for scale calculation. needs to be updated with every new navinfo..., // TODO navdata should be fed to this predictor
     int goodCount_; // number of succ. tracked frames in a row.
+    int goodObservations_; // another metric of tracking quality (TODO explain better)
 
     int frameNo_; // frame sequence number TODO use atomic for threaded video update
     CVD::Image<CVD::byte> frame_;
-    Timestamp frameTimestamp_;
 
     bool resetPtamRequested_;
     bool mapLocked_; // XVar candidate
@@ -92,10 +102,13 @@ private:
     GLWindow2Ptr glWindow_;
     MouseKeyHandlerPtr glWindowKeyHandler_;
 
-
-
-    TooN::Vector<3> evalNavQue(unsigned int from, unsigned int to, bool* zCorrupted, bool* allCorrupted, float* out_start_pressure, float* out_end_pressure);
+    Ekf &ekf_;
     
+    localization::ImuMeasurements imuMeasurements_;
+
+
+    TooN::Vector<3> evalNavQue(xcs::Timestamp from, xcs::Timestamp to, bool* zCorrupted, bool* allCorrupted);
+
     void resetPtam();
 
 };

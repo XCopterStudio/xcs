@@ -17,7 +17,7 @@ namespace xcs {
 namespace xci {
 namespace vrep{
 
-    class XciVrep : public virtual XCI {
+    class XciVrep : public virtual Xci {
         static const float POS_MULTI;
 
         int clientID_;
@@ -62,12 +62,6 @@ namespace vrep{
         void flyControl(float roll, float pitch, float yaw, float gaz) override;
 
         void init() override;
-
-        void reset() override;
-
-        void start() override;
-
-        void stop() override;
     };
 
 }}}

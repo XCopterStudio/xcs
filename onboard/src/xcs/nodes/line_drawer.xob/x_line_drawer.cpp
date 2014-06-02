@@ -1,41 +1,42 @@
-#include "u_line_drawer.hpp"
+#include "x_line_drawer.hpp"
 #include <cmath>
 #include <mutex>
 
-using namespace xcs::urbi;
+using namespace xcs;
+using namespace xcs::nodes;
 using namespace std;
 
-ULineDrawer::ULineDrawer(const string& name) :
-  ::urbi::UObject(name),
+XLineDrawer::XLineDrawer(const string& name) :
+  XObject(name),
+  rotation("ROTATION"),
   hasFrame_(false) {
-    UBindFunction(ULineDrawer, init);
-    UBindFunctionRename(ULineDrawer, drawFullLineU, "drawFullLine"); //TODO better casting of cv::Scalar
+    UBindFunction(XLineDrawer, init);
+    UBindFunctionRename(XLineDrawer, drawFullLineU, "drawFullLine"); //TODO better casting of cv::Scalar
 
     /*
      * Inputs
      */
-    UBindVar(ULineDrawer, video);
-    UNotifyChange(video, &ULineDrawer::onChangeVideo);
+    UBindVar(XLineDrawer, video);
+    UNotifyChange(video, &XLineDrawer::onChangeVideo);
 
-    UBindVar(ULineDrawer, theta);
-    UBindVar(ULineDrawer, phi);
+    XBindVar(rotation);
 
     /*
      * Parameters
      */
-    UBindVar(ULineDrawer, cameraParam);
-    UBindVar(ULineDrawer, fps);
-    UNotifyChange(fps, &ULineDrawer::onChangeFps);
+    UBindVar(XLineDrawer, cameraParam);
+    UBindVar(XLineDrawer, fps);
+    UNotifyChange(fps, &XLineDrawer::onChangeFps);
 
 }
 
-void ULineDrawer::init() {
+void XLineDrawer::init() {
     cv::namedWindow("Lines", cv::WINDOW_AUTOSIZE);
 
     onChangeFps(10); // default FPS
 }
 
-int ULineDrawer::update() {
+int XLineDrawer::update() {
     const static size_t waitDelay = 10;
     if (!hasFrame_) {
         return 0;
@@ -69,14 +70,15 @@ int ULineDrawer::update() {
     return 0; // Urbi undocumented, return value probably doesn't matter
 }
 
-void ULineDrawer::onChangeVideo(::urbi::UVar& uvar) {
+void XLineDrawer::onChangeVideo(::urbi::UVar& uvar) {
     lastFrame_ = uvar;
     hasFrame_ = true;
     lineUtils_.setDimensions(lastFrame_.width, lastFrame_.height);
-    lineUtils_.updateReferencePoint(theta, phi, cameraParam);
+    auto rotationVector = static_cast<EulerianVector>(rotation.Data()); // TODO use directoy operator on XVar
+    lineUtils_.updateReferencePoint(rotationVector.theta, rotationVector.phi, cameraParam);
 }
 
-void ULineDrawer::onChangeFps(int value) {
+void XLineDrawer::onChangeFps(int value) {
     if (value <= 0) {
         USetUpdate(-1); // disabled timer
     } else {
@@ -84,7 +86,7 @@ void ULineDrawer::onChangeFps(int value) {
     }
 }
 
-void ULineDrawer::drawLine(cv::Point begin, cv::Point end, cv::Scalar color, size_t width) {
+void XLineDrawer::drawLine(cv::Point begin, cv::Point end, cv::Scalar color, size_t width) {
     lock_guard<mutex> lock(drawTasksMtx_);
     DrawTask task;
     task.point1 = begin;
@@ -95,7 +97,7 @@ void ULineDrawer::drawLine(cv::Point begin, cv::Point end, cv::Scalar color, siz
     drawTasks_.push_back(task);
 }
 
-void ULineDrawer::drawCircle(cv::Point center, cv::Scalar color, size_t radius) {
+void XLineDrawer::drawCircle(cv::Point center, cv::Scalar color, size_t radius) {
     lock_guard<mutex> lock(drawTasksMtx_);
     DrawTask task;
     task.point1 = center;
@@ -108,7 +110,7 @@ void ULineDrawer::drawCircle(cv::Point center, cv::Scalar color, size_t radius) 
 /*!
  * Very ugly geometry.
  */
-void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar color, size_t width, bool withCircle) {
+void XLineDrawer::drawFullLine(double distance, double deviation, cv::Scalar color, size_t width, bool withCircle) {
     if (abs(cos(deviation)) < 1e-6) { // TODO general solution for skewed lines would be better
         cv::Point leftPoint(0, lineUtils_.referencePoint.y + distance * lineUtils_.distanceUnit);
         cv::Point rightPoint(lineUtils_.width, lineUtils_.referencePoint.y + distance * lineUtils_.distanceUnit);
@@ -139,7 +141,7 @@ void ULineDrawer::drawFullLine(double distance, double deviation, cv::Scalar col
 
 }
 
-void ULineDrawer::drawFullLineU(double distance, double deviation, size_t color, size_t width, bool withCircle) {
+void XLineDrawer::drawFullLineU(double distance, double deviation, size_t color, size_t width, bool withCircle) {
     cv::Scalar cvColor;
     switch (color) {
         case 1:
@@ -158,9 +160,9 @@ void ULineDrawer::drawFullLineU(double distance, double deviation, size_t color,
     drawFullLine(distance, deviation, cvColor, width, withCircle);
 }
 
-void ULineDrawer::drawLine(xcs::urbi::line_finder::LineUtils::RawLineType line, cv::Scalar color, size_t width) {
+void XLineDrawer::drawLine(xcs::nodes::line_finder::LineUtils::RawLineType line, cv::Scalar color, size_t width) {
     drawLine(cv::Point(line[0], line[1]), cv::Point(line[2], line[3]), color, width);
 }
 
 
-UStart(ULineDrawer);
+UStart(XLineDrawer);

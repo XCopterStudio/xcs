@@ -1,15 +1,17 @@
 #ifndef XCI_PARROT_H
 #define XCI_PARROT_H
 
-#include "navdata_receiver.hpp"
+
 #include <xcs/xci/xci.hpp>
-#include "AT_Command.hpp"
 #include <xcs/tsqueue.hpp>
-#include "ardrone_state.hpp"
 #include <xcs/xci/connection_error_exception.hpp>
+
+#include "at_command.hpp"
+#include "navdata_receiver.hpp"
+#include "ardrone_state.hpp"
 #include "video_decode.hpp"
 #include "video_receive.hpp"
-#include "atcommand_sender.hpp"
+#include "at_command_sender.hpp"
 #include "configuration_receiver.hpp"
 
 #include <thread>
@@ -33,7 +35,7 @@ enum ParrotFrameType {
 
 typedef xcs::Tsqueue< AtCommand* > AtCommandQueue;
 
-class XCI_Parrot : public virtual XCI {
+class XciParrot : public virtual Xci {
     // Constant
     static const float EPSILON;
 
@@ -53,6 +55,7 @@ class XCI_Parrot : public virtual XCI {
     std::thread threadReceiveNavData_;
 	std::thread threadReadVideoReceiver_;
     std::thread threadReadVideoData_;
+    std::thread threadConfiguration_;
 
     // end all thread
     volatile std::atomic<bool> endAll_;
@@ -62,11 +65,12 @@ class XCI_Parrot : public virtual XCI {
     boost::asio::io_service io_serviceCMD_;
     boost::asio::io_service io_serviceNavdata_;
 	boost::asio::io_service io_serviceVideo_;
+    boost::asio::io_service io_serviceConfiguration_;
 
     AtCommandSender atCommandSender_;
     VideoReceiver videoReceiver_;
     NavdataReceiver navdataReceiver_;
-    //ConfigurationReceiver configurationReceiver_;
+    ConfigurationReceiver configurationReceiver_;
 
     void initNetwork();
     void processVideoData();
@@ -74,33 +78,18 @@ class XCI_Parrot : public virtual XCI {
   
     bool setConfirmedConfigure(AtCommand *command);
     bool setDefaultConfiguration();
-    bool setNavdataReceive(bool full_mode = false);
 
 public:
 
-    XCI_Parrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1")
-        : XCI(dataReceiver),
-        atCommandSender_(atCommandQueue_, io_serviceCMD_ ,ipAddress),
-        videoReceiver_(io_serviceVideo_, ipAddress),
-        navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceNavdata_, ipAddress)
-        //configurationReceiver_(atCommandQueue_,io_serviceCMD_,ipAddress)
-      {
-        configuration_["XCI_PARAM_FP_PERSISTENCE"] = "50";
-    };
-    //! Initialize XCI for use
+    XciParrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1");
+    ~XciParrot();
+
+    //! Initialize Xci for use
     void init();
-    //! Resets settings to default values and re-calibrates the sensors (if supported).
-    void reset();
-    //! Turns on the engines.
-    void start();
-    //! Turns off the engines.
-    void stop();
-    //! Return name of x-copter XCI
+    //! Return name of x-copter Xci
     std::string name();
     //!Return list of available sensor on x-copter
     SensorList sensorList();
-    //! Take specification of sensor and return void pointer to data from desired sensor
-    void* sensorData(const Sensor &sensor);
     //! Return x-copter�s configuration
     std::string configuration(const std::string &key);
     //! Return x-copter�s configuration
@@ -112,14 +101,10 @@ public:
     void configuration(const std::string &key, const std::string &value);
     //! Take new x-copter�s configuration and send this configuration to the x-copter
     void configuration(const InformationMap &configuration);
-    //! Take instance of the DataReceiver
-    void dataReceiver(DataReceiver* dataReceiver);
     //! Take command from list of x-copter�s special commands and send it to the x-copter
     void command(const std::string &command);
     //! Take four fly controls and send it to the x-copter
     void flyControl(float roll, float pitch, float yaw, float gaz);
-
-    ~XCI_Parrot();
 };
 }
 }

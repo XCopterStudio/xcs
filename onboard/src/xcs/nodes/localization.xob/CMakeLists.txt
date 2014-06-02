@@ -17,14 +17,12 @@ x_target_link_libraries(${PROJECT_NAME} xobject)
 find_package(UrbiAll)
 use_urbi(${PROJECT_NAME})
 
-find_package(Armadillo)
-use_armadillo(${PROJECT_NAME})
 
 find_package(OpenGL)
 find_package(GLUT)
 
 find_library(PTAM_LIB ptam PATHS ${PTAM_ROOT}/lib)
-find_library(GVARS_LIB gvars3 PATHS ${PTAM_ROOT}/lib)
+find_library(GVARS_LIB GVars3 PATHS ${PTAM_ROOT}/lib)
 find_library(CVD_LIB cvd PATHS ${PTAM_ROOT}/lib)
 set(PTAM_LIBRARIES ${PTAM_LIB} ${GVARS_LIB} ${CVD_LIB})
 
@@ -34,5 +32,9 @@ if(X_WIN)
 elseif(X_LIN)
     target_link_libraries(${PROJECT_NAME} ${PTAM_LIBRARIES} ${OPENGL_LIBRARY} ${GLUT_LIBRARY})
 endif()
+
+# Must be after PTAM library.
+find_package(Armadillo)
+use_armadillo(${PROJECT_NAME})
 
 use_logging(${PROJECT_NAME})

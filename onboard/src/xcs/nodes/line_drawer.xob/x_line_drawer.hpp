@@ -4,23 +4,25 @@
 #include <vector>
 #include <cstdint>
 #include <mutex>
-#include <urbi/uobject.hh>
+#include <xcs/nodes/xobject/x_object.hpp>
+#include <xcs/nodes/xobject/x_var.hpp>
+#include <xcs/types/eulerian_vector.hpp>
+
 #include <opencv2/opencv.hpp>
-#include <xcs/urbi/line_finder.uob/line_utils.hpp>
-#include <xcs/urbi/line_drawer.uob/ulinedrawer_export.h>
+#include <xcs/nodes/line_finder.xob/line_utils.hpp>
+#include <xcs/nodes/line_drawer.xob/xlinedrawer_export.h>
 
 
 namespace xcs {
-namespace urbi {
+namespace nodes {
 
-class ULINEDRAWER_EXPORT ULineDrawer : public ::urbi::UObject {
+class XLINEDRAWER_EXPORT XLineDrawer : public XObject {
 public:
     /*!
      * Inputs
      */
     ::urbi::InputPort video;
-    ::urbi::UVar theta; // intentionally UVar
-    ::urbi::UVar phi; // intentionally UVar
+    XVar<xcs::EulerianVector> rotation;
 
     /*
      * Params
@@ -29,7 +31,7 @@ public:
     ::urbi::UVar fps;
 
 
-    ULineDrawer(const std::string &);
+    XLineDrawer(const std::string &);
     void init();
 
     /*!
@@ -50,7 +52,7 @@ public:
      */
     void drawFullLineU(double distance, double deviation, size_t color = 0, size_t width = 3, bool withCircle = false);
 
-    void drawLine(xcs::urbi::line_finder::LineUtils::RawLineType line, cv::Scalar color, size_t width = 2);
+    void drawLine(xcs::nodes::line_finder::LineUtils::RawLineType line, cv::Scalar color, size_t width = 2);
 
     void drawCircle(cv::Point center, cv::Scalar color, size_t radius = 3);
 
@@ -70,7 +72,7 @@ private:
         size_t dimension1; // width for line, radius for circle
     };
 
-    xcs::urbi::line_finder::LineUtils lineUtils_;
+    xcs::nodes::line_finder::LineUtils lineUtils_;
     ::urbi::UImage lastFrame_;
     bool hasFrame_;
 

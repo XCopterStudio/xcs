@@ -1,4 +1,6 @@
-#include "atcommand_sender.hpp"
+#include "at_command_sender.hpp"
+
+#include <xcs/logging.hpp>
 
 #include <string>
 #include <iostream>
@@ -21,15 +23,16 @@ void AtCommandSender::handleConnectedAtCommand(const boost::system::error_code& 
     }
 
     if (!socket_.is_open()){
-        cerr << "Connect atCommand socket timed out." << endl;
+        XCS_LOG_WARN("Connect atCommand socket timed out.");
         connect();
     }
     else if (ec){
-        cerr << "Connect atCommand socket error: " << ec.message() << endl;
+        XCS_LOG_WARN("Connect atCommand socket error: " + ec.message());
         socket_.close();
         connect();
     }
     else{
+        XCS_LOG_INFO("atCommand sender connected");
         sendAtCommand();
     }
 }
@@ -38,7 +41,6 @@ void AtCommandSender::sendAtCommand(){
     AtCommand* atCommand = nullptr;
     if (atCommandQueue_.tryPop(atCommand)){
         lastAtcommand_ = atCommand->toString(sequenceNumber_++);
-        //cerr << lastAtcommand_ << endl;
         delete atCommand;
 
         deadline_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
@@ -56,10 +58,10 @@ void AtCommandSender::handleWritedAtCommand(const boost::system::error_code& ec)
     }
 
     if (!socket_.is_open()){
-        cerr << "Connect atCommand socket timed out." << endl;
+        XCS_LOG_WARN("Connect atCommand socket timed out.");
         connect();
     }else if (ec){
-        cerr << "Send atCommand data error: " << ec.message() << endl;
+        XCS_LOG_WARN("Send atCommand data error: " + ec.message());
         socket_.close();
         connect();
     }
@@ -109,7 +111,6 @@ atCommandQueue_(atCommandQueue)
 
 AtCommandSender::~AtCommandSender(){
     end_ = true;
-
     socket_.close();
 }
 
@@ -118,7 +119,7 @@ void AtCommandSender::connect(){
         return;
     }
 
-    cerr << "Try connect atCommand sender." << endl;
+    XCS_LOG_INFO("Try connect atCommand sender.");
     socket_.open(udp::v4());
 
     deadline_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));

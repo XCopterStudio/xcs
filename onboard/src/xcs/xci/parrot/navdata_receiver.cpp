@@ -1,6 +1,7 @@
 #include "navdata_receiver.hpp"
 
 #include "navdata_parser.hpp"
+#include<xcs/logging.hpp>
 
 #include <boost/bind.hpp>
 
@@ -19,15 +20,15 @@ void NavdataReceiver::handleConnectedNavdata(const boost::system::error_code& ec
     }
 
     if (!socketNavdata_.is_open()) {
-        cerr << "Connect Navdata socket timed out." << endl;
+        XCS_LOG_WARN("Connect Navdata socket timed out.");
         connect();
     }
     else if (ec){
-        cerr << "Connect Navdata socket error: " << ec.message() << endl;
+        XCS_LOG_WARN("Connect Navdata socket error: " + ec.message());
         socketNavdata_.close();
         connect();
     }else{
-        cerr << "Navdata socket connected." << endl;
+        XCS_LOG_INFO("Navdata socket connected.");
         int32_t flag = 1; // 1 - unicast, 2 - multicast
         deadlineNavdata_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
         socketNavdata_.async_send(boost::asio::buffer((uint8_t*) (&flag), sizeof (int32_t)), boost::bind(&NavdataReceiver::receiveNavdata, this, _1));
@@ -41,11 +42,11 @@ void NavdataReceiver::receiveNavdata(const boost::system::error_code& ec) {
 
 
     if (!socketNavdata_.is_open()) {
-        cerr << "Navdata receive error connection closed." << endl;
+        XCS_LOG_WARN("Navdata receive error connection closed.");
         connect();
     }
     else if (ec){
-        cerr << "Navdata receive error: " << ec.message() << endl;
+        XCS_LOG_WARN("Navdata receive error: " + ec.message());
         socketNavdata_.close();
         connect();
     }else{
@@ -60,10 +61,10 @@ void NavdataReceiver::handleReceivedNavdata(const boost::system::error_code& ec,
     }
 
     if (!socketNavdata_.is_open()){
-        cerr << "Navdata receive closed socket" << endl;
+        XCS_LOG_WARN("Navdata receive closed socket");
         connect();
     }else if (ec) {
-        cerr << "Navdata receive error: " << ec.message() << endl;
+        XCS_LOG_WARN("Navdata receive error: " + ec.message());
         socketNavdata_.close();
         connect();
     }else{
@@ -115,7 +116,7 @@ void NavdataReceiver::processState(uint32_t parrotState) {
         atCommandQueue_.push(new AtCommandCOMWDG());
     }
 
-    if (parrotState_.getState(FLAG_ARDRONE_COM_LOST_MASK)) { // TODO: check what exactly mean reinitialize the communication with the drone
+    if (parrotState_.getState(FLAG_ARDRONE_COM_LOST_MASK)) {
         sequenceNumberNavdata_ = DEFAULT_SEQUENCE_NUMBER - 1;
         //initNavdataReceive();
     }
@@ -171,7 +172,7 @@ void NavdataReceiver::connect() {
         return;
     }
 
-    cerr << "Try connect navdata receiver." << endl;
+    XCS_LOG_INFO("Try connect navdata receiver.");
     socketNavdata_.open(udp::v4());
 
     deadlineNavdata_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));

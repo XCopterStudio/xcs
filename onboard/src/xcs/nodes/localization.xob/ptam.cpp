@@ -22,7 +22,7 @@ using namespace xcs::nodes::localization;
 const int Ptam::FRAME_WIDTH = 360;
 const int Ptam::FRAME_HEIGHT = 640;
 
-Ptam::Ptam() {
+Ptam::Ptam(Ekf &ekf) : ekf_(ekf) {
     // TODO load camera parameters from configuration (these are for AR Drone Parrot 2.0)
     cameraParameters_[0] = 0.771557;
     cameraParameters_[1] = 1.368560;
@@ -35,28 +35,14 @@ Ptam::~Ptam() {
 }
 
 void Ptam::init() {
-    // predictors
 
-    // (G)UI type
-
-    // KF parameters
-    
-
-
-
-    // TODO wrap this inside a reset method (and allow user to reset whole PTAM)
-    ptamCamera_ = ATANCameraPtr(new ATANCamera(cameraParameters_));
-    ptamMap_ = MapPtr(new Map());
-    ptamMapMaker_ = MapMakerPtr(new MapMaker(*ptamMap_, *ptamCamera_));
-    ptamTracker_ = TrackerPtr(new Tracker(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), *ptamCamera_, *ptamMap_, *ptamMapMaker_)); // TODO video resolution (metadata??
+    resetPtam();
 
     glWindowKeyHandler_ = MouseKeyHandlerPtr(new MouseKeyHandler());
     glWindow_ = GLWindow2Ptr(new GLWindow2(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), "PTAM Drone Camera Feed", glWindowKeyHandler_.get()));
 
-    goodCount_ = 0;
     frameNo_ = 0;
     lockNextFrame_ = false;
-    resetPtamRequested_ = false;
     mapLocked_ = false;
     forceKF_ = false;
     // framesIncludedForScaleXYZ_ = -1; NOTE: not initialized
@@ -64,13 +50,11 @@ void Ptam::init() {
 }
 
 void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
+    cerr << "handle frame " << endl;
     frameNo_ += 1;
 
-    /*
-     * TODO reset PTAM
-     */
     if (resetPtamRequested_) {
-        //resetPTAMRequested_ = false;
+        resetPtam();
     }
 
     /*
@@ -81,11 +65,8 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     }
 
     memcpy(frame_.data(), bwImage.data, bwImage.width * bwImage.height);
-    frameTimestamp_ = timestamp;
 
-
-    TooN::Vector<10> filterPosePrePTAM; // TODO get state from EKF in correct time
-    //= filter->getPoseAtAsVec(mimFrameTime_workingCopy - filter->delayVideo, true);
+    TooN::Vector<10> filterPosePrePTAM = ekf_.computeState(timestamp);
 
     // ------------------------ do PTAM -------------------------
     glWindow_->SetupViewport();
@@ -168,7 +149,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     }
 
 
-    if (/* filter->getNumGoodPTAMObservations() < 10 &&*/ ptamMap_->IsGood()) { //TODO emulate filter statistics
+    if (goodObservations_ < 10 && ptamMap_->IsGood()) {
         isGood = true;
         isVeryGood = false;
     } else if (ptamTracker_->lastStepResult == ptamTracker_->I_FIRST ||
@@ -235,20 +216,21 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
     // TODO: make shure filter is handled properly with permanent roll-forwards.
     if (goodCount_ >= 3) {
-        // TODO publish PTAMResult to XVar  instead of vvvv
-        // filter->addPTAMObservation(PTAMResult, mimFrameTime_workingCopy - filter->delayVideo);
+        CameraMeasurement ptamResultForEkf(PTAMResult);
+        ekf_.measurementCam(ptamResultForEkf, timestamp);
+        goodObservations_ += 1;
     } else {
-        // TODO publish fake PTAMResult to XVar  instead of vvvv
-        // filter->addFakePTAMObservation(mimFrameTime_workingCopy - filter->delayVideo);
+        ekf_.clearUpToTime(timestamp);
     }
 
-    // filterPosePostPTAM = filter->getCurrentPoseSpeedAsVec(); // TODO obtain results from EKF with updated position
+    // obtain results from EKF with updated position
+    filterPosePostPTAM = ekf_.computeState(timestamp);
 
     TooN::Vector<6> filterPosePostPTAMBackTransformed = scaleEstimation_.backTransformPTAMObservation(filterPosePostPTAM.slice<0, 6>());
 
 
     // if interval is started: add one step.
-    double includedTime = frameTimestamp_ - ptamPositionForScaleTakenTimestamp_;
+    double includedTime = timestamp - ptamPositionForScaleTakenTimestamp_;
     if (framesIncludedForScaleXYZ_ >= 0) framesIncludedForScaleXYZ_++;
 
     // if interval is overdue: reset & dont add
@@ -258,15 +240,14 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
     if (goodCount_ >= 3) {
         // filter stuff
-        lastScaleEKFtimestamp_ = frameTimestamp_;
+        lastScaleEKFtimestamp_ = timestamp;
 
         if (includedTime >= 2.0 && framesIncludedForScaleXYZ_ > 1) // ADD! (if too many, was resetted before...)
         {
             TooN::Vector<3> diffPTAM = filterPosePostPTAMBackTransformed.slice<0, 3>() - ptamPositionForScale_;
             bool zCorrupted, allCorrupted;
-            float pressureStart = 0, pressureEnd = 0;
-            // TODO think about time reference point
-            TooN::Vector<3> diffIMU = evalNavQue(ptamPositionForScaleTakenTimestamp_ /*- filter->delayVideo + filter->delayXYZ*/, frameTimestamp_ /* - filter->delayVideo + filter->delayXYZ*/, &zCorrupted, &allCorrupted, &pressureStart, &pressureEnd);
+
+            TooN::Vector<3> diffIMU = evalNavQue(ptamPositionForScaleTakenTimestamp_, timestamp, &zCorrupted, &allCorrupted);
 
             /*
              * >>> Here was place for logging scale pairs (TODO write to an XVar)
@@ -283,7 +264,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
                 diffIMU.slice<0, 2>() *= xyFactor;
                 diffIMU[2] *= zFactor;
 
-                // TODO here is hidden helluva calculations for scale estimate that takes place in filter though!!
+                // hidden helluva calculations for scale estimate
                 scaleEstimation_.updateScaleXYZ(diffPTAM, diffIMU, PTAMResult.slice<0, 3>());
                 ptamMapMaker_->currentScaleFactor = scaleEstimation_.getCurrentScales()[0];
             }
@@ -294,16 +275,16 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
         {
             framesIncludedForScaleXYZ_ = 0;
             ptamPositionForScale_ = filterPosePostPTAMBackTransformed.slice<0, 3>();
-            //predIMUOnlyForScale->resetPos();	// also resetting z corrupted flag etc. (NOT REquired as reset is done in eval)
-            ptamPositionForScaleTakenTimestamp_ = frameTimestamp_;
+            //predIMUOnlyForScale_.resetPos();	// also resetting z corrupted flag etc. (NOT REquired as reset is done in eval)
+            ptamPositionForScaleTakenTimestamp_ = timestamp;
         }
     }
 
 
     if (lockNextFrame_ && isGood) {
-        // filter->scalingFixpoint = PTAMResult.slice<0, 3>(); // TODO what will EKF do with this?
+        scaleEstimation_.scalingFixpoint = PTAMResult.slice<0, 3>();
         lockNextFrame_ = false;
-        //filter->useScalingFixpoint = true;
+        //filter->useScalingFixpoint = true; // this was commented out in original TUM
 
         // node->publishCommand(std::string("u l ") + charBuf); TODO is this necessary
         XCS_LOG_INFO("locking scale fixpoint to " << PTAMResultTransformed[0] << " " << PTAMResultTransformed[1] << " " << PTAMResultTransformed[2]);
@@ -509,104 +490,77 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     glWindow_->HandlePendingEvents();
 }
 
-// TODO port this method
+void Ptam::measurementImu(const DroneStateMeasurement &measurement, const double &timestamp) {
+    ImuMeasurementChronologic copyMeasurement(measurement, timestamp);
+    imuMeasurements_.push_back(copyMeasurement);
+}
 
-TooN::Vector<3> Ptam::evalNavQue(unsigned int from, unsigned int to, bool* zCorrupted, bool* allCorrupted, float* out_start_pressure, float* out_end_pressure) {
-    //	predIMUOnlyForScale->resetPos();
+TooN::Vector<3> Ptam::evalNavQue(Timestamp from, Timestamp to, bool* zCorrupted, bool* allCorrupted) {
+    predIMUOnlyForScale_.resetPos();
+
+    Timestamp firstAdded = 0, lastAdded = 0;
+    // TODO locking and emptying queue
+    double firstZ = 0;
+
+    for (ImuMeasurements::iterator it = imuMeasurements_.begin(); it != imuMeasurements_.end(); ++it) {
+        auto frontStamp = it->second;
+        if (frontStamp < from) // packages before: delete
+        {
+            //navInfoQueue.pop_front();
+        } else if (frontStamp >= from && frontStamp <= to) {
+            if (firstAdded == 0) {
+                firstAdded = frontStamp;
+                firstZ = it->first.altitude;
+                predIMUOnlyForScale_.z = firstZ; // avoid height check initially!
+            }
+            lastAdded = frontStamp;
+            // add
+            predIMUOnlyForScale_.predictOneStep(*it);
+            // pop
+            //navInfoQueue.pop_front();
+        } else
+            break;
+
+    }
+    //printf("QueEval: before: %i; skipped: %i, used: %i, left: %i\n", totSize, skipped, used, navInfoQueue.size());
+    predIMUOnlyForScale_.z -= firstZ; // make height to height-diff
+
+    *zCorrupted = predIMUOnlyForScale_.zCorrupted;
+    *allCorrupted = std::abs(firstAdded - from) + std::abs(lastAdded - to) > 0.08; // 80 ms //TODO check this abs'es are correct
+
+    //    if (*allCorrupted)
+    //        printf("scalePackage corrupted (imu data gap for %ims)\n", abs(firstAdded - (int) from) + abs(lastAdded - (int) to));
+    //    else if (*zCorrupted)
+    //        printf("scalePackage z corrupted (jump in meters: %.3f)!\n", predIMUOnlyForScale_.zCorruptedJump);
     //
-    //	int firstAdded = 0, lastAdded = 0;
-    //	pthread_mutex_lock(&navInfoQueueCS);
-    //	int skipped=0;
-    //	int used = 0;
-    //	int firstZ = 0;
-    //
-    //	float sum_first=0, num_first=0, sum_last=0, num_last=0;
-    //	int pressureAverageRange = 100;
-    //
-    //
-    //	for(std::deque<ardrone_autonomy::Navdata>::iterator cur = navInfoQueue.begin();
-    //			cur != navInfoQueue.end();
-    //			)
-    //	{
-    //		int curStampMs = getMS(cur->header.stamp);
-    //
-    //		if(curStampMs < (int)from-pressureAverageRange)
-    //			cur = navInfoQueue.erase(cur);
-    //		else
-    //		{
-    //			if(curStampMs >= (int)from-pressureAverageRange && curStampMs <= (int)from+pressureAverageRange)
-    //			{
-    //				sum_first += cur->pressure;
-    //				num_first++;
-    //			}
-    //
-    //			if(curStampMs >= (int)to-pressureAverageRange && curStampMs <= (int)to+pressureAverageRange)
-    //			{
-    //				sum_last += cur->pressure;
-    //                  		num_last++;
-    //			}
-    //			cur++;
-    //		}
-    //	}
-    //
-    //	for(std::deque<ardrone_autonomy::Navdata>::iterator cur = navInfoQueue.begin();
-    //			cur != navInfoQueue.end();
-    //			cur++
-    //			)
-    //	{
-    //		int frontStamp = getMS(cur->header.stamp);
-    //		if(frontStamp < from)		// packages before: delete
-    //		{
-    //			//navInfoQueue.pop_front();
-    //			skipped++;
-    //		}
-    //		else if(frontStamp >= from && frontStamp <= to)
-    //		{
-    //			if(firstAdded == 0) 
-    //			{
-    //				firstAdded = frontStamp;
-    //				firstZ = cur->altd;
-    //				predIMUOnlyForScale->z = firstZ*0.001;	// avoid height check initially!
-    //			}
-    //			lastAdded = frontStamp;
-    //			// add
-    //			predIMUOnlyForScale->predictOneStep(&(*cur));
-    //			// pop
-    //			//navInfoQueue.pop_front();
-    //			used++;
-    //		}
-    //		else
-    //			break;
-    //
-    //	}
-    //	//printf("QueEval: before: %i; skipped: %i, used: %i, left: %i\n", totSize, skipped, used, navInfoQueue.size());
-    //	predIMUOnlyForScale->z -= firstZ*0.001;	// make height to height-diff
-    //
-    //	*zCorrupted = predIMUOnlyForScale->zCorrupted;
-    //	*allCorrupted = abs(firstAdded - (int)from) + abs(lastAdded - (int)to) > 80;
-    //	pthread_mutex_unlock(&navInfoQueueCS);
-    //
-    //	if(*allCorrupted)
-    //		printf("scalePackage corrupted (imu data gap for %ims)\n",abs(firstAdded - (int)from) + abs(lastAdded - (int)to));
-    //	else if(*zCorrupted)
-    //		printf("scalePackage z corrupted (jump in meters: %.3f)!\n",predIMUOnlyForScale->zCorruptedJump);
-    //
-    //	printf("first: %f (%f); last: %f (%f)=> diff: %f (z alt diff: %f)\n",
-    //			sum_first/num_first,
-    //			num_first,
-    //			sum_last/num_last,
-    //			num_last,
-    //			sum_last/num_last - sum_first/num_first,
-    //			predIMUOnlyForScale->z
-    //	);
-    //
-    //
-    //	*out_end_pressure = sum_last/num_last;
-    //	*out_start_pressure = sum_first/num_first;
+    //    printf("first: %f (%f); last: %f (%f)=> diff: %f (z alt diff: %f)\n",
+    //            sum_first / num_first,
+    //            num_first,
+    //            sum_last / num_last,
+    //            num_last,
+    //            sum_last / num_last - sum_first / num_first,
+    //            predIMUOnlyForScale_.z
+    //            );
 
     return TooN::makeVector(predIMUOnlyForScale_.x, predIMUOnlyForScale_.y, predIMUOnlyForScale_.z);
 }
 
-void resetPtam() {
-    
+void Ptam::resetPtam() {
+    // (re) create all PTAM instances
+    ptamCamera_ = ATANCameraPtr(new ATANCamera(cameraParameters_));
+    ptamMap_ = MapPtr(new Map());
+    ptamMapMaker_ = MapMakerPtr(new MapMaker(*ptamMap_, *ptamCamera_));
+    ptamTracker_ = TrackerPtr(new Tracker(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), *ptamCamera_, *ptamMap_, *ptamMapMaker_));
+
+    // TODO configuration
+    ptamMapMaker_->minKFDist = 0;
+    ptamMapMaker_->minKFWiggleDist = 0;
+    ptamTracker_->minKFTimeDist = 0;
+
+    predConvert_.setPosRPY(0, 0, 0, 0, 0, 0);
+    predIMUOnlyForScale_.setPosRPY(0, 0, 0, 0, 0, 0);
+
+    goodCount_ = 0;
+    goodObservations_ = 0;
+    resetPtamRequested_ = false;
 }

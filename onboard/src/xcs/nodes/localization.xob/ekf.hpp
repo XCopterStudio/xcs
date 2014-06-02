@@ -10,45 +10,13 @@
 #include <xcs/types/cartesian_vector.hpp>
 #include <xcs/types/eulerian_vector.hpp>
 
-#include <armadillo>
+
+#include "ekf_structs.hpp"
 
 namespace xcs {
 namespace nodes {
 namespace localization {
 
-struct DroneState {
-    xcs::CartesianVector position;
-    xcs::CartesianVector velocity;
-    xcs::EulerianVector angles;
-    double angularRotationPsi;
-
-    unsigned int updateMeasurementID;
-
-    DroneState() : angularRotationPsi(0), updateMeasurementID(0) {
-    };
-    arma::mat getMat() const;
-    void Mat(const arma::mat &mat);
-};
-
-struct DroneStateMeasurement {
-    xcs::CartesianVector velocity;
-    xcs::EulerianVector angles;
-    double altitude;
-    double angularRotationPsi;
-
-    unsigned int measurementID;
-
-    DroneStateMeasurement() : altitude(0), angularRotationPsi(0), measurementID(0) {
-    };
-    arma::mat getMat() const;
-};
-
-struct CameraMeasurement {
-    xcs::CartesianVector position;
-    xcs::EulerianVector angles;
-
-    arma::mat getMat() const;
-};
 
 typedef std::pair<DroneState, arma::mat> DroneStateDistribution;
 typedef std::pair<DroneStateMeasurement, double> ImuMeasurementChronologic;
@@ -91,10 +59,30 @@ class Ekf {
     DroneStateDistribution updateCam(const DroneStateDistribution &state, const CameraMeasurement &camMeasurement);
 public:
     Ekf();
+
+    /*!
+     * \param timestamp EKF time.
+     */
     void clearUpToTime(const double timestamp);
+
+    /*!
+     * \param timestamp EKF time.
+     */
     void flyControl(const xcs::FlyControl &flyControl, const double &timestamp);
+
+    /*!
+     * \param timestamp EKF time.
+     */
     void measurementImu(const DroneStateMeasurement &measurement, const double &timestamp);
+
+    /*!
+     * \param timestamp EKF time.
+     */
     void measurementCam(const CameraMeasurement &measurement, const double &timestamp);
+
+    /*!
+     * \param time EKF time.
+     */
     DroneState computeState(const double &time); // compute prediction state up to this time 
 };
 

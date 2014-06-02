@@ -1,6 +1,8 @@
 #include "video_receive.hpp"
 #include <cassert>
 
+#include <xcs/logging.hpp>
+
 #include <boost/bind.hpp>
 #include <iostream>
 
@@ -16,15 +18,16 @@ const unsigned int VideoReceiver::BUFFER_SIZE = 200000;
 
 void VideoReceiver::handleConnectedVideo(const boost::system::error_code& ec){
     if (!socketVideo_.is_open()){
-        cerr << "Connect video socket timed out." << endl;
+        XCS_LOG_WARN("Connect video socket timed out.");
         connect();
     }
     else if (ec){
-        cerr << "Receive video error: " << ec.message() << endl;
+        XCS_LOG_WARN("Receive video error: " + ec.message());
         socketVideo_.close();
         connect();
     }
     else{
+        XCS_LOG_INFO("Video receive connected");
         receiveVideo();
     }
 }
@@ -54,10 +57,10 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
     }
 
     if (!socketVideo_.is_open()){
-        cerr << "Navdata video closed socket" << endl;
+        XCS_LOG_WARN("Navdata video closed socket");
         connect();
     }else if (ec){
-        cerr << "Receive video data error: " << ec.message() << endl;
+        XCS_LOG_WARN("Receive video data error: " + ec.message());
         socketVideo_.close();
         connect();
     }
@@ -185,7 +188,7 @@ void VideoReceiver::connect(){
         lastFrame_ = nullptr;
     }
 
-    cerr << "Try connect video receiver." << endl;
+    XCS_LOG_INFO("Try connect video receiver.");
 
     receivedHeader_ = false;
     receiveSize_ = sizeof(parrot_t);

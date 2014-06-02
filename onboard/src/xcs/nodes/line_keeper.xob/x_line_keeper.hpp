@@ -3,22 +3,25 @@
 
 #include <cstdint>
 #include <chrono>
-#include <urbi/uobject.hh>
-#include <xcs/urbi/line_drawer.uob/u_line_drawer.hpp>
+#include <xcs/types/cartesian_vector.hpp>
+#include <xcs/types/eulerian_vector.hpp>
+#include <xcs/nodes/xobject/x_object.hpp>
+#include <xcs/nodes/xobject/x_input_port.hpp>
+#include <xcs/nodes/xobject/x_var.hpp>
+#include <xcs/nodes/line_drawer.xob/x_line_drawer.hpp>
 
 
 namespace xcs {
-namespace urbi {
+namespace nodes {
 
-class ULineKeeper : public ::urbi::UObject {
+class XLineKeeper : public XObject {
 public:
     /*!
      * Inputs
      */
-    ::urbi::InputPort vx;
-    ::urbi::InputPort vy;
-    ::urbi::UVar altitude; // intentionally UVar
-    ::urbi::UVar psi;
+    XInputPort<xcs::CartesianVector> velocity;
+    XVar<double> altitude; // intentionally XVar
+    XVar<xcs::EulerianVector> rotation; // intentionally XVar
 
     /*!
      * Image processing params
@@ -31,7 +34,7 @@ public:
     ::urbi::UVar distanceUVar;
     ::urbi::UVar deviationUVar;
 
-    ULineKeeper(const std::string &);
+    XLineKeeper(const std::string &);
     
     void init();
 
@@ -60,7 +63,7 @@ private:
 
     const static size_t REFRESH_PERIOD;
 
-    xcs::urbi::ULineDrawer *lineDrawer_;
+    xcs::nodes::XLineDrawer *lineDrawer_;
 
     VectorType positionShift_;
     TimePoint lastTimeVx_;
@@ -72,8 +75,7 @@ private:
     
     bool isKeeping_;
 
-    void onChangeVx(double vx);
-    void onChangeVy(double vy);
+    void onChangeVelocity(const xcs::CartesianVector v);
 
 };
 

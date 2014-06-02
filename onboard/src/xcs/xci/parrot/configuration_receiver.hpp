@@ -7,7 +7,8 @@
 #include <iostream>
 
 #include <xcs/tsqueue.hpp>
-#include "AT_Command.hpp"
+#include <xcs/xci/xci.hpp>
+#include "at_command.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/asio/deadline_timer.hpp>
@@ -28,26 +29,22 @@ namespace parrot{
         boost::asio::ip::tcp::endpoint parrot_;
 
         AtCommandQueue& atCommandQueue_;
+        InformationMap& configuration_;
 
-        std::stringstream configuration_;
+        char buffer_[BUFFER_SIZE];
 
-        char buffer[BUFFER_SIZE];
-
-        volatile std::atomic<bool> connected_;
-        volatile std::atomic<bool> received_;
-        volatile std::atomic<bool> receivedTimeOut_;
+        volatile std::atomic<bool> update_;
         volatile std::atomic<bool> end_;
-
-        void connect();
 
         void handleConnectedConfiguration(const boost::system::error_code& ec);
         void receiveConfiguration();
         void handleReceivedConfiguration(const boost::system::error_code& ec, std::size_t bytes_transferred);
         void checkDeadlineConfiguration();
     public:
-        ConfigurationReceiver(AtCommandQueue& atCommandQueue, boost::asio::io_service& io_service, std::string ipAdress = "192.168.1.1", unsigned int port = 5554);
+        ConfigurationReceiver(AtCommandQueue& atCommandQueue, InformationMap& configuration, boost::asio::io_service& io_service, std::string ipAdress = "192.168.1.1", unsigned int port = 5554);
         ~ConfigurationReceiver();
-        std::string getConfiguration();
+        void connect();
+        void update();
     };
 
 }}}

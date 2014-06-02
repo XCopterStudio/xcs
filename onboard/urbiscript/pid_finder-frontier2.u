@@ -20,14 +20,14 @@ var xciVersion = "xci_dodo";
  */
 var xci = XXci.new(xciVersion);
 
-var f = ULineFinder.new();
+var f = XLineFinder.new();
 f.cameraParam = 0.73;
 
-var d = ULineDrawer.new();
+var d = XLineDrawer.new();
 d.cameraParam = f.cameraParam;
 f.setLineDrawer(d);
 
-var k = ULineKeeper.new();
+var k = XLineKeeper.new();
 k.setLineDrawer(d);
 
 var s = LineSmoother.new(f);
@@ -46,17 +46,14 @@ var logger = XDatalogger.new("logs/" + logname + ".txt");
  * Connect nodes
  */
 xci.&video >> f.&video;
-xci.&theta >> f.&theta;
-xci.&phi >> f.&phi;
+xci.&rotation >> f.&rotation;
 
 xci.&video >> d.&video;
-xci.&theta >> d.&theta;
-xci.&phi >> d.&phi;
+xci.&rotation >> d.&rotation;
 
-xci.&velocityX >> k.&vx;
-xci.&velocityY >> k.&vy;
+xci.&velocity >> k.&velocity;
 xci.&altitude >> k.&altitude;
-xci.&psi >> k.&psi;
+xci.&rotation >> k.&rotation;
 
     logger.registerData("rotation","ROTATION","xcs::EulerianVector",xci.&rotation);
     logger.registerData("velocity","VELOCITY","xcs::CartesianVector",xci.&velocity);
@@ -96,8 +93,8 @@ if(xciVersion == "xci_dodo") {
     xci.setConfiguration("video:filename", "tmp/video.mp4");
     //xci.setConfiguration("video:filename", "logs/2014-03-27_12:08:48.152538.avi");
     
-    xci.doCommand("Load");
-    xci.doCommand("Play");
+    xci.command = "Load";
+    xci.command = "Play";
 } else if(xciVersion == "xci_parrot") {
     sleep(1s);
     xci.setConfiguration("video:video_channel", "1");

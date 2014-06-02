@@ -19,7 +19,7 @@ namespace xci {
 namespace dodo {
 
 /*!
- * Simple XCI implementation for debugging and testing.
+ * Simple Xci implementation for debugging and testing.
  * 
  * Available configuration:
  *     video:filename -- path to video file
@@ -34,7 +34,7 @@ namespace dodo {
  *     Stop    pause playing and rewinds video file
  * 
  */
-class XciDodo : public virtual XCI {
+class XciDodo : public virtual Xci {
 public:
     XciDodo(DataReceiver& dataReceiver);
     ~XciDodo();
@@ -65,17 +65,8 @@ public:
     //! A pure virtual member taking four fly controls and send it to the x-copter
     virtual void flyControl(float roll, float pitch, float yaw, float gaz);
 
-    //! A pure virtual member initializing XCI for use
+    //! A pure virtual member initializing Xci for use
     virtual void init();
-
-    //! Resets settings to default values and re-calibrates the sensors (if supported).
-    virtual void reset();
-
-    //! Turns on the engines.
-    virtual void start();
-
-    //! Turns off the engines.
-    virtual void stop();
 private:
 
     enum VideoStatus {

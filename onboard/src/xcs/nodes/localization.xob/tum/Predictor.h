@@ -30,9 +30,17 @@
 #include <string>
 
 #include <xcs/types/timestamp.hpp>
+
+/*!
+ * Forward declaration because we need to avoid including libport/pthread.h here.
+ */
 namespace xcs {
-struct CartesianVector;
-struct EulerianVector;
+namespace nodes {
+namespace localization {
+struct DroneStateMeasurement;
+typedef std::pair<DroneStateMeasurement, double> ImuMeasurementChronologic;
+}
+}
 }
 
 
@@ -57,7 +65,7 @@ struct EulerianVector;
 
 // scale is meters.
 
-class Predictor {
+class Predictor { // TODO wrap class in xcs::nodes::localization
 private:
     void calcGtDRodTransFromSE3();
     void calcDtGRodTransFromSE3();
@@ -100,7 +108,7 @@ public:
     double y;
     double z;
     bool zCorrupted;
-    double lastAddedDronetime;
+    xcs::Timestamp lastAddedDronetime;
     double zCorruptedJump;
 
 
@@ -113,10 +121,10 @@ public:
 
     // -------------------------- prediction -----------------------------------------------------------------------
 
-    void predictOneStep(const xcs::Timestamp timestamp, const double altitude, const xcs::CartesianVector velocity, const xcs::EulerianVector rotation);
+    void predictOneStep(const xcs::nodes::localization::ImuMeasurementChronologic &imuMeasurement);
     void resetPos();
 
-    Predictor(std::string basePath = "");
+    Predictor();
     ~Predictor(void);
 };
 #endif /* __PREDICTOR_H */
