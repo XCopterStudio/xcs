@@ -1,5 +1,4 @@
 class Adapter {
-
     var _socket;
     var output;
 
@@ -21,6 +20,122 @@ class Adapter {
         assert(_socket != nil);
         _socket.write(data);
     };
+}|;
+
+class FlashSender {
+    function init(adapter, UJson) {
+        var this.adapter = adapter;
+        var this.ujson = UJson;
+    }|;
+
+    function send(message) {
+        var data = [ => ];
+        data["type"] = "flash";
+        data["data"] = message;
+        this.adapter.send(this.ujson.encode(data) + "\n");
+    }|;
+}|;
+
+class SemanticSender {
+    function init(adapter, inputs, UJson, refreshFrequency) {
+        var that = this;
+        var this._inputs = [ => ];
+        var this.adapter = adapter;
+        var this.period = 1 / refreshFrequency;
+
+        for(var input: inputs) {
+            setSlot(input.first, nil); // slot for outer "writers"
+            _inputs[input.first] = nil; // last stored value
+            var slot = getSlot(input.first);
+            slot.notifyChange(function() {
+                that._inputs[input.first] = that.getSlotValue(input.first);
+            });
+        };
+    }|;
+    
+    function start() {
+        every(this.period) {
+                var dataToSend = [ => ];
+                for(var input: _inputs) {
+                    if(!this._inputs[input.first].isNil) {
+                        dataToSend[input.first] = this.getSlotValue(input.first);
+                    }
+                };
+                if(dataToSend.size > 0) {
+                    var serialized = UJson.encode([
+                        "type" => "data",
+                        "data" => dataToSend
+                    ]);
+
+                    this.adapter.send(serialized + "\n");                    
+                }
+        };
+    }|;
+}|;
+
+class SemanticReceiver {
+    var onboardMode;
+    var receivers = Dictionary.new();
+
+    function init(adapter, UJson) { // parseJson as arg, lookup is wierd in this case (TODO package/import? or Global)
+        at(adapter.output->changed?) {
+
+            /* This handles the case when more JSON objects are present in the buffer */
+            var messageArray = "[" + adapter.output.replace("}\n{", "},{") + "]";
+            var rawMessages = UJson.decode(messageArray);
+            for(var rawData: rawMessages) {
+                var type = rawData["type"];
+                var data = rawData["data"];
+                if (receivers.has(type)) {
+                    receivers[type].receive(data);
+                } else {
+                    echo("Unhandled message from Server of type: " + rawData["type"]);
+                }
+            };
+        };
+    };
+
+    function addReceiver(receiver) {
+        receivers[receiver.typeName] = receiver;
+    };
+}|;
+
+var Global.SemanticReceiver = this.SemanticReceiver|;
+
+class Receiver {
+    var typeName;
+    var outputs;
+
+    function init(type, outputs) {
+        this.typeName = type;
+        this.outputs = outputs;
+        for(var output: outputs) setSlot(output.first, nil);
+    };
+
+    var receive = function (data) {
+        for(var output: outputs) {
+            var name = output.first;
+            if(name in data) {
+                this.updateSlot(name, data[name]);
+            };
+        };
+    };
+}|;
+
+var Global.Receiver = this.Receiver|;
+
+class OnboardReceiver {
+    var request = "";
+
+    function init(adapter, uJson) {
+       var onboardReceiver = Global.Receiver.new("onboard", [
+            "request" => "request",
+        ]);
+        var semanticReceiver = Global.SemanticReceiver.new(adapter, UJson);
+        semanticReceiver.addReceiver(onboardReceiver);
+
+        onboardReceiver.&request >> this.&request;
+    }
 }|;
 
 class OnboardSender {
@@ -74,107 +189,4 @@ class OnboardSender {
         //send data
         this.adapter.send(this.ujson.encode(data) + "\n");
     };
-}|;
-
-class FlashSender {
-
-    function init(adapter, UJson) {
-        var this.adapter = adapter;
-        var this.ujson = UJson;
-    }|;
-
-    function send(message) {
-        var data = [ => ];
-        data["type"] = "flash";
-        data["data"] = message;
-        this.adapter.send(this.ujson.encode(data) + "\n");
-    }|;
-}|;
-
-class SemanticSender {
-
-    function init(adapter, inputs, UJson, refreshFrequency) {
-        var that = this;
-        var this._inputs = [ => ];
-        var this.adapter = adapter;
-        var this.period = 1 / refreshFrequency;
-
-        for(var input: inputs) {
-            setSlot(input.first, nil); // slot for outer "writers"
-            _inputs[input.first] = nil; // last stored value
-            var slot = getSlot(input.first);
-            slot.notifyChange(function() {
-                that._inputs[input.first] = that.getSlotValue(input.first);
-            });
-        };
-    }|;
-    
-    function start() {
-        every(this.period) {
-                var dataToSend = [ => ];
-                for(var input: _inputs) {
-                    if(!this._inputs[input.first].isNil) {
-                        dataToSend[input.first] = this.getSlotValue(input.first);
-                    }
-                };
-                if(dataToSend.size > 0) {
-                    var serialized = UJson.encode([
-                        "type" => "data",
-                        "data" => dataToSend
-                    ]);
-
-                    this.adapter.send(serialized + "\n");                    
-                }
-        };
-    }|;
-}|;
-
-class SemanticReceiver {
-
-    var onboardMode;
-    var receivers = Dictionary.new();
-
-    function init(adapter, UJson) { // parseJson as arg, lookup is wierd in this case (TODO package/import? or Global)
-        at(adapter.output->changed?) {
-
-            /* This handles the case when more JSON objects are present in the buffer */
-            var messageArray = "[" + adapter.output.replace("}\n{", "},{") + "]";
-            var rawMessages = UJson.decode(messageArray);
-            for(var rawData: rawMessages) {
-                var type = rawData["type"];
-                var data = rawData["data"];
-                if (receivers.has(type)) {
-                    receivers[type].receive(data);
-                } else {
-                    echo("Unhandled message from Server of type: " + rawData["type"]);
-                }
-            };
-        };
-    };
-
-    function addReceiver(receiver) {
-        receivers[receiver.typeName] = receiver;
-    };
-}|;
-
-class Receiver {
-
-    var typeName;
-    var outputs;
-
-    function init(type, outputs) {
-        this.typeName = type;
-        this.outputs = outputs;
-        for(var output: outputs) setSlot(output.first, nil);
-    };
-
-    var receive = function (data) {
-        for(var output: outputs) {
-            var name = output.first;
-            if(name in data) {
-                this.updateSlot(name, data[name]);
-            };
-        };
-    };
-
 }|;

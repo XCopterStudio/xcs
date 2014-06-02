@@ -9,8 +9,9 @@ class Onboard {
     var dataFlowGraph_ = "";                // data flow graph
     var dfgCommStarted_ = false;            // data flow graph communication started
     var onboardSender_;
+    var onboardReceiver_;
     var xobjectsSettings_;
-    var xobjectInfo_ = [ => ];
+    var xobjectInfo_ = [ => ];    
 
     function init() {
         echo("init...");
@@ -27,6 +28,12 @@ class Onboard {
         // initialize sending information about data flow graph
         initDfgCommunication_();
         startDfgCommunication();
+
+        // initialize onboard receiver 4 communication with server
+        this.onboardReceiver_ = OnboardReceiver.new(adapter, UJson);
+        at(this.onboardReceiver_.&request.changed?) {
+            doRequest_(this.onboardReceiver_.request);
+        };
 
         // find all possible xobjects
         loadXObjectsPath_();
@@ -138,6 +145,21 @@ class Onboard {
         //};
         //echo(".......................................................");
 
+    };
+
+    function doRequest_(request) {
+        //debug
+        echo("receive request: " + request);
+
+        switch(request) {
+            case "DFG_INIT":
+                // start dfg communication and send info about loaded xobjects and default dfg
+                startDfgCommunication();
+                this.loadedXObjects_.elementChanged!;
+                this.&dataFlowGraph_.changed!;
+            default:
+                echo("...unknown request");
+        };
     };
 
     // initialize sending information about data flow graph
