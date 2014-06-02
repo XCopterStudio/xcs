@@ -1,4 +1,4 @@
-set(PROJECT_NAME onboard)
+set(PROJECT_NAME xonboard)
 project(${PROJECT_NAME})
 
 file(GLOB SOURCES *.cpp)

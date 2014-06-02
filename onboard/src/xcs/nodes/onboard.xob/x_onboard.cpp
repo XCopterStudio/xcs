@@ -1,4 +1,4 @@
-#include "onboard.hpp"
+#include "x_onboard.hpp"
 #include <xcs/nodes/xobject/x.h>
 #include <boost/log/trivial.hpp>
 
@@ -9,7 +9,7 @@ namespace xcs {
 namespace nodes {
 
 
-Onboard::Onboard(const std::string &name) :
+XOnboard::XOnboard(const std::string &name) :
   xcs::nodes::XObject(name),
   changeMode("MODE"),
   mode("MODE"),
@@ -22,16 +22,16 @@ Onboard::Onboard(const std::string &name) :
 
     XBindVar(mode);
 
-    XBindFunction(Onboard, init);
-    XBindVarF(changeMode, &Onboard::onChangeMode);
+    XBindFunction(XOnboard, init);
+    XBindVarF(changeMode, &XOnboard::onChangeMode);
 }
 
-void Onboard::init() {
+void XOnboard::init() {
     // default mode so far, TODO: change to free-flight and run urbiscripts from web GUI
     mode = "scriptin";
 }
 
-void Onboard::onChangeMode(const string &newMode) {
+void XOnboard::onChangeMode(const string &newMode) {
     string oldMode = mode_;
     cerr << "mode_ = " << mode_ << endl;
     this->send("Onboard.stop_" + oldMode + "();");
@@ -44,4 +44,4 @@ void Onboard::onChangeMode(const string &newMode) {
 }
 }
 
-XStart(Onboard);
+XStart(XOnboard);

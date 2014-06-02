@@ -10,7 +10,7 @@
 namespace xcs {
 namespace nodes {
 
-class Onboard : public xcs::nodes::XObject {
+class XOnboard : public xcs::nodes::XObject {
 public:
 
     enum Mode {
@@ -28,7 +28,7 @@ public:
     XInputPort<std::string> changeMode;
     XVar<std::string> mode;
 
-    Onboard(const std::string &name);
+    XOnboard(const std::string &name);
 
     void init();
 
