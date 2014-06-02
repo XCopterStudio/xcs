@@ -143,4 +143,19 @@ var DataFlowGraph = Backbone.Model.extend({
             }
         }
     },
+    
+    requestData: function () {
+        this.sendRequest("DFG_INIT");
+    },
+    
+    sendRequest: function (request) {
+        var data = {
+            type: "onboard",
+            data: { 
+                request: request 
+            }
+        };
+        console.debug("SENDING INFO 2 ONBOARD: " + JSON.stringify(data));
+        gSocket.emit('resend', JSON.stringify(data));
+    },
 });

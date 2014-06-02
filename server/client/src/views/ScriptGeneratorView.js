@@ -107,6 +107,8 @@ var ScriptGeneratorView = Backbone.View.extend({
             snapLinks: { radius: 45 }
         });
         
+        this.model.requestData();
+        
         // 4 debug only
 //        var m1 = new DataFlowGraphDefaultModel();
 //        m1.setId('m1');
