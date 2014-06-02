@@ -1,6 +1,6 @@
-onboard
+xonboard
 {
-    name "Onboard"
+    name "XOnboard"
     init ""
 }
 xxci
