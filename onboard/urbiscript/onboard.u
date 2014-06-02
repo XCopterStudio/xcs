@@ -202,11 +202,11 @@ class Onboard {
 
                             // prepare data about input ports
                             var portList = [];
-                            for(var xv: xvars) {
+                            for(var xip: xinputPorts) {
                                 var pPort = [ => ];
-                                pPort["name"] = xv;
-                                pPort["synType"] = System.eval(name + ".getSynType(\"" + xv + "\")");
-                                pPort["semType"] = System.eval(name + ".getSemType(\"" + xv + "\")");
+                                pPort["name"] = xip;
+                                pPort["synType"] = System.eval(name + ".getSynType(\"" + xip + "\")");
+                                pPort["semType"] = System.eval(name + ".getSemType(\"" + xip + "\")");
                                 portList  << pPort;
                             };
 
