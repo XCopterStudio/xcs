@@ -173,59 +173,74 @@ var ScriptGeneratorView = Backbone.View.extend({
                     ++counter[toolId];
                 }
                 
-                var modelId;
-                if(counter[toolId] == 1) {
-                    modelId = toolId;   
-                }
-                else {
-                    modelId = toolId + counter[toolId];
-                }
-                
                 var pos = $(ui.helper).offset();
                 var containerPos = $("#flow-graph-screen").offset();         
                 
                 //TODO: create appropriate model
+                
+                // get model
                 var modelPrototype = self.dfgToolboxNodes[toolId];
+                
+                // get xvars and xinput ports
                 var xvars = modelPrototype.get("xvar");
-                var xinputPorts = modelPrototype.get("xinputPorts");
-                if((!xvars || xvars.length == 0) && (!xinputPorts || xinputPorts.length ==0)) {
-                    console.log("not defined");
+                var xinputPorts = modelPrototype.get("xinputPort");
+                
+                //get name
+                var prototypeName;
+                
+                var modelId;
+                if(counter[toolId] == 1) {
+                    prototypeName = modelPrototype.get("name");
+                    modelId = toolId;   
+                }
+                else {
+                    prototypeName = modelPrototype.get("name") + " " + counter[toolId];
+                    modelId = toolId + counter[toolId];
                 }
                 
-                //get prototype name
-                //var prototypeName = modelPrototype.get("name");
-                //console.log(".prototypeName: " + JSON.stringify(prototypeName));
-                //console.log(".modelId: " + JSON.stringify(modelId));
-                
-                // get all xvars        
-//                console.log(".xvars:");
-//                modelPrototype.get("xvar").forEach(function(xvar) {
-//                    var xvarName = xvar.get("name");
-//                    var xvarSynType = xvar.get("synType");
-//                    var xvarSemType = xvar.get("semType");
-//                    console.log("..xvarName: " + JSON.stringify(xvarName));
-//                    console.log("..xvarSynType: " + JSON.stringify(xvarSynType));
-//                    console.log("..xvarSemType: " + JSON.stringify(xvarSemType));
-//                });
-//                
-//                // get all xinputports
-//                console.log(".xinputPorts:");
-//                modelPrototype.get("xinputPort").forEach(function(xvar) {
-//                    var xinputPortName = xvar.get("name");
-//                    var xinputPortSynType = xvar.get("synType");
-//                    var xinputPortSemType = xvar.get("semType");
-//                    console.log("..xinputPortName: " + JSON.stringify(xinputPortName));
-//                    console.log("..xinputPortSynType: " + JSON.stringify(xinputPortSynType));
-//                    console.log("..xinputPortSemType: " + JSON.stringify(xinputPortSemType));
-//                });
-//                
-//                console.log(".end");
+//                console.log(".name: " + JSON.stringify(prototypeName));
+//                console.log(".id: " + JSON.stringify(modelId));
                 
                 var m = new DataFlowGraphDefaultModel({
                     position: { x: pos.left - containerPos.left, y: pos.top - containerPos.top },
                 });
                 m.setId(modelId);
-                m.setLabel(modelId);
+                m.setLabel(prototypeName);
+                
+                // get all xvars        
+//                console.log(".xvars:");
+                if(xvars) {
+                    xvars.forEach(function(xvar) {
+                        var xvarName = xvar.get("name");
+                        var xvarSynType = xvar.get("synType");
+                        var xvarSemType = xvar.get("semType");
+                        //DEBUG: logs
+//                        console.log("..xvarName: " + JSON.stringify(xvarName));
+//                        console.log("...xvarSynType: " + JSON.stringify(xvarSynType));
+//                        console.log("...xvarSemType: " + JSON.stringify(xvarSemType));
+                        
+                        m.addInputPort(xvarName);
+                    });
+                }
+                
+                // get all xinputports
+//                console.log(".xinputPorts:");
+                if(xinputPorts) {
+                    xinputPorts.forEach(function(xvar) {
+                        var xinputPortName = xvar.get("name");
+                        var xinputPortSynType = xvar.get("synType");
+                        var xinputPortSemType = xvar.get("semType");
+                        //DEBUG: logs
+//                        console.log("..xinputPortName: " + JSON.stringify(xinputPortName));
+//                        console.log("...xinputPortSynType: " + JSON.stringify(xinputPortSynType));
+//                        console.log("...xinputPortSemType: " + JSON.stringify(xinputPortSemType));
+                        
+                        m.addOutpuPort(xinputPortName);
+                    });
+                }
+                
+//                console.log(".end");
+                
                 m.setAutoSize();
                 
                 scriptGeneratorGraph.addCell(m);

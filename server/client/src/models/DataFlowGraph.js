@@ -61,7 +61,7 @@ var DataFlowGraph = Backbone.Model.extend({
         // TODO: parse data and fill properties on this
 
         //DEBUG
-        console.log("setData: " + JSON.stringify(data));
+        //console.log("setData: " + JSON.stringify(data));
         
         // set default dataFlowGraph
         if(data.dataFlowGraph) {
@@ -155,7 +155,7 @@ var DataFlowGraph = Backbone.Model.extend({
                 request: request 
             }
         };
-        console.debug("SENDING INFO 2 ONBOARD: " + JSON.stringify(data));
+        
         gSocket.emit('resend', JSON.stringify(data));
     },
 });
