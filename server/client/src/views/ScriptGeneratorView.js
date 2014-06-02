@@ -25,6 +25,8 @@ var ScriptGeneratorView = Backbone.View.extend({
         this.listenTo(this.model, "change:dataFlowGraph", this.onDataFlowGraphChange);
         this.listenTo(this.model.get("xprototype"), "add", this.onPrototypeAdd);
         this.listenTo(this.model.get("xclone"), "add", this.onCloneAdd);
+        this.listenTo(this.model.get("xprototype"), "remove", this.onPrototypeRemove);
+        this.listenTo(this.model.get("xclone"), "remove", this.onCloneRemove);
         
         
         // NOTE: 4 debug only
@@ -72,16 +74,16 @@ var ScriptGeneratorView = Backbone.View.extend({
         var flowGraphConsole = $('#flow-graph-console');
         flowGraphConsole.append('<textarea id="flow-graph-txt" rows="15" cols="150"></textarea>');
         
-        scriptGeneratoGraph = new joint.dia.Graph;
-        this.listenTo(scriptGeneratoGraph, 'change:target', this.setLink);
+        scriptGeneratorGraph = new joint.dia.Graph;
+        this.listenTo(scriptGeneratorGraph, 'change:target', this.setLink);
 
-        scriptGeneratoGraph.on('change', function(model) {
+        scriptGeneratorGraph.on('change', function(model) {
             $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
         });
-        scriptGeneratoGraph.on('add', function(cell) {
+        scriptGeneratorGraph.on('add', function(cell) {
             $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
         });
-        scriptGeneratoGraph.on('remove', function(cell) {
+        scriptGeneratorGraph.on('remove', function(cell) {
             $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
         });
 
@@ -94,7 +96,7 @@ var ScriptGeneratorView = Backbone.View.extend({
         var paper = new joint.dia.Paper({
             el: $('#flow-graph-screen'),
             width: 650, height: 200, gridSize: 1,
-            model: scriptGeneratoGraph,
+            model: scriptGeneratorGraph,
             validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
                 var valid = magnetT.getAttribute('type') != 'out';
                 return valid;
@@ -110,7 +112,7 @@ var ScriptGeneratorView = Backbone.View.extend({
 //        m1.setId('m1');
 //        m1.setLabel('Model 1');
 //        m1.setAutoSize();
-//        scriptGeneratoGraph.addCell(m1);
+//        scriptGeneratorGraph.addCell(m1);
 //        
 //        var m2 = new DataFlowGraphDefaultModel({
 //            inPorts: ['in1','in2', 'in3', 'in4', 'in5', 'in6'],
@@ -121,12 +123,12 @@ var ScriptGeneratorView = Backbone.View.extend({
 //        m2.setAutoSize();
 //        m2.addInputPort('in7');
 //        m2.addOutpuPort('out2');
-//        scriptGeneratoGraph.addCell(m2);
+//        scriptGeneratorGraph.addCell(m2);
 //        scriptGeneratorModels.addModel("m1", m1);
 //        scriptGeneratorModels.addModel("m2", m2);
         
 //        var newContent = JSON.parse('{"cells":[{"type":"devs.Model","size":{"width":90,"height":90},"inPorts":["in1","in2"],"outPorts":["out"],"position":{"x":50,"y":50},"angle":0,"id":"14515f13-24ab-4c10-b67a-0e9b55a526a7","z":0,"attrs":{"rect":{"fill":"#2ECC71"},".label":{"ref-x":0.5},".inPorts circle":{"fill":"#16A085","type":"in"},".outPorts circle":{"fill":"#E74C3C","type":"out"},".inPorts>.port0>text":{"text":"in1"},".inPorts>.port0>circle":{"port":{"id":"in1","type":"in"}},".inPorts>.port0":{"ref":"rect","ref-y":0.25},".inPorts>.port1>text":{"text":"in2"},".inPorts>.port1>circle":{"port":{"id":"in2","type":"in"}},".inPorts>.port1":{"ref":"rect","ref-y":0.75},".outPorts>.port0>text":{"text":"out"},".outPorts>.port0>circle":{"port":{"id":"out","type":"out"}},".outPorts>.port0":{"ref":"rect","ref-y":0.5,"ref-dx":0}}},{"type":"devs.Model","size":{"width":90,"height":90},"inPorts":["in1","in2"],"outPorts":["out"],"position":{"x":350,"y":50},"angle":0,"id":"cacddf4b-9244-4624-b1af-30355f4df78b","z":0,"embeds":"","attrs":{"rect":{"fill":"#2ECC71"},".label":{"text":"Model 2","ref-x":0.5},".inPorts circle":{"fill":"#16A085","type":"in"},".outPorts circle":{"fill":"#E74C3C","type":"out"},".inPorts>.port0>text":{"text":"in1"},".inPorts>.port0>circle":{"port":{"id":"in1","type":"in"}},".inPorts>.port0":{"ref":"rect","ref-y":0.25},".inPorts>.port1>text":{"text":"in2"},".inPorts>.port1>circle":{"port":{"id":"in2","type":"in"}},".inPorts>.port1":{"ref":"rect","ref-y":0.75},".outPorts>.port0>text":{"text":"out"},".outPorts>.port0>circle":{"port":{"id":"out","type":"out"}},".outPorts>.port0":{"ref":"rect","ref-y":0.5,"ref-dx":0}}},{"type":"link","id":"855fec63-9210-44a9-92d3-b9d1d4814406","embeds":"","source":{"id":"14515f13-24ab-4c10-b67a-0e9b55a526a7","selector":"g:nth-child(1) g:nth-child(4) g:nth-child(1) circle:nth-child(1)     ","port":"out"},"target":{"id":"cacddf4b-9244-4624-b1af-30355f4df78b","selector":"g:nth-child(1) g:nth-child(3) g:nth-child(1) circle:nth-child(1)     ","port":"in1"},"z":2,"vertices":[{"x":226,"y":43}],"attrs":{".connection":{"stroke":"green"},".marker-target":{"fill":"green","d":"M 10 0 L 0 5 L 10 10 z"}}},{"type":"link","id":"2fafc239-87ca-4b09-9c09-08a62b606976","embeds":"","source":{"id":"14515f13-24ab-4c10-b67a-0e9b55a526a7","selector":"g:nth-child(1) g:nth-child(4) g:nth-child(1) circle:nth-child(1)     ","port":"out"},"target":{"x":261,"y":131},"z":3,"attrs":{".connection":{"stroke":"red"},".marker-target":{"fill":"red","d":"M 10 0 L 0 5 L 10 10 z"}}},{"type":"link","id":"ed391108-0a1e-4723-a4bc-9d2341d684c6","embeds":"","source":{"id":"cacddf4b-9244-4624-b1af-30355f4df78b","selector":"g:nth-child(1) g:nth-child(4) g:nth-child(1) circle:nth-child(1)     ","port":"out"},"target":{"id":"cacddf4b-9244-4624-b1af-30355f4df78b","selector":"g:nth-child(1) g:nth-child(3) g:nth-child(2) circle:nth-child(1)     ","port":"in2"},"z":4,"attrs":{".connection":{"stroke":"green"},".marker-target":{"fill":"green","d":"M 10 0 L 0 5 L 10 10 z"}}}]}');
-//        scriptGeneratoGraph.fromJSON(newContent);    
+//        scriptGeneratorGraph.fromJSON(newContent);    
     },
     
     addNode2FgToolbox : function(id, title) {
@@ -210,7 +212,7 @@ var ScriptGeneratorView = Backbone.View.extend({
                 m.setLabel(modelId);
                 m.setAutoSize();
                 
-                scriptGeneratoGraph.addCell(m);
+                scriptGeneratorGraph.addCell(m);
                 scriptGeneratorModels.addModel(modelId, m);
             }
         });
@@ -299,6 +301,20 @@ var ScriptGeneratorView = Backbone.View.extend({
             var xinputPortSynType = xvar.get("synType");
             var xinputPortSemType = xvar.get("semType");
         });
+    },
+    
+    onPrototypeRemove : function(modelPrototype) {
+        //DEBUG
+        console.log("onPrototypeRemove " + JSON.stringify(modelPrototype.toJSON()));
+        
+        //TODO: remove prototype from GUI
+    },
+    
+    onCloneRemove : function(modelClone) {
+        //DEBUG
+        console.log("onCloneRemove " + JSON.stringify(modelClone.toJSON()));
+        
+        //TODO: remove clone from GUI
     },
     
     onPrototypeChange : function(modelPrototype) {

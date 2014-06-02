@@ -69,12 +69,15 @@ var DataFlowGraph = Backbone.Model.extend({
             this.set("dataFlowGraph", data.dataFlowGraph);
         }
         
+        // set prototypes
         if(data.prototype) {
-            for(var i = 0; i < data.prototype.length; ++i) {
-                var p = data.prototype[i];
+            //console.log("..." + data.prototype.length);
+            for(var j = 0; j < data.prototype.length; ++j) {
+                var p = data.prototype[j];
+                //console.log("..." + JSON.stringify(p));
                 
-                if(p.name) {
-                    
+                if(p.name) {  
+                    // get old prototype or create new
                     var prot;
                     var oldProt = this.get("xprototype").findWhere({"name": p.name});
                     if(oldProt) {
@@ -89,22 +92,54 @@ var DataFlowGraph = Backbone.Model.extend({
                         this.get("xprototype").add(prot);
                     }
                     
-                    //TODO: read vars and inputports
-                    //read vars and inputports
-//                    if(p.var && p.inputPort) {
-//                        prot.get("xvar").add(new DataFlowGraphNodeIO({
-//                            name : "fly",
-//                            synType : "xcs::nodes::xci::FlyParam",
-//                            semType : "FLY_PARAM"
-//                        }));
-//                        
-//                        prot.get("xinputPort").add(new DataFlowGraphNodeIO({
-//                            name : "command",
-//                            synType : "std::string",
-//                            semType : "COMMAND"
-//                        }));
-//                    }
+                    //read vars
+                    if(p.var) {
+                        for(var i = 0; i < p.var.length; ++i) {
+                            var oldXVar = prot.get("xvar").findWhere({"name": p.var[i].name});
+                            if(!oldXVar) {
+                                prot.get("xvar").add(new DataFlowGraphNodeIO({
+                                    name : p.var[i].name,
+                                    synType : p.var[i].synType,
+                                    semType : p.var[i].semType
+                                }));
+                            }
+                        }
+                    }
+                    
+                    // read inputports
+                    if(p.inputPort) {
+                        for(var i = 0; i < p.inputPort.length; ++i) {
+                            var oldXIPort = prot.get("xinputPort").findWhere({"name": p.inputPort[i].name});
+                            if(!oldXIPort) {
+                                prot.get("xinputPort").add(new DataFlowGraphNodeIO({
+                                    name : p.inputPort[i].name,
+                                    synType : p.inputPort[i].synType,
+                                    semType : p.inputPort[i].semType
+                                }));
+                            }
+                        }
+                    }
                 }
+            }
+            
+            //TODO: what about removing last prototype?
+            // check deleted protypes
+            var p2Del = [];
+            //console.log("..." + this.get("xprototype").length);
+            for(var j = 0; j < this.get("xprototype").length; ++j) {
+                var p = this.get("xprototype").at(j);
+                //console.log("... " + p.get("name"));
+                var prot = $.grep(data.prototype, function(item){ return item.name == p.get("name"); });
+                
+                // prototype was deleted
+                if(prot.length == 0) {
+                    p2Del.push(p);
+                }
+            }
+            
+            // remove deleted prototypes
+            for(var j = 0; j < p2Del.length; ++j) {
+                this.get("xprototype").remove(p);
             }
         }
     },
