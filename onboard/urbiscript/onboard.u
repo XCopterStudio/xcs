@@ -159,6 +159,12 @@ class Onboard {
 
                 // prepare data for yet not loaded xobjects
                 for(var kvpXO: this.xobjects4load_) {
+                    // dont send info about private objects
+                    if(this.privateObjects_.has(kvpXO.first())) {
+                        echo("... " + kvpXO.first() + " is private object - doesnt send info.");
+                        continue;
+                    };
+
                     var pData = [ => ];
 
                     try {
