@@ -1,11 +1,14 @@
+System.loadModule("xxci");
+System.loadModule("xdatalogger");
+
 var xciVersion = "xci_parrot";
 var logger = XDatalogger.new("pokus.txt");
 var xci = XXci.new(xciVersion);
 
-logger.registerData("rotation","ROTATION","xcs::EulerianVectorChronologic",xci.&rotation);
+logger.registerData("rotation","ROTATION","xcs::EulerianVector",xci.&rotation);
 logger.registerData("battery","BATTERY","double",xci.&battery);
 logger.registerData("internalTime","TIME_LOC","double",xci.&internalTime);
-logger.registerVideo("640","360","video","CAMERA_FRONT","xcs::BitmapType",xci.&video);
+logger.registerVideo("1280","720","video","CAMERA_FRONT","xcs::BitmapType",xci.&video);
 
 xci.xciInit();
 
@@ -16,3 +19,6 @@ if(xciVersion == "xci_dodo") {
     xci.doCommand("Load");
     xci.doCommand("Play");
 };
+
+//Global.player.start();
+logger.start();

@@ -14,7 +14,7 @@ using namespace std;
 const unsigned int VideoReceiver::TIMEOUT = 1000; // ms
 
 const unsigned int VideoReceiver::BUFFER_COUNT = 30;
-const unsigned int VideoReceiver::BUFFER_SIZE = 200000;
+const unsigned int VideoReceiver::BUFFER_SIZE = 50000;
 
 void VideoReceiver::handleConnectedVideo(const boost::system::error_code& ec){
     if (!socketVideo_.is_open()){
@@ -72,8 +72,6 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
             if (!receivedHeader_){
                 receivedHeader_ = true;
 
-                //assert(lastFrame_ != nullptr);
-                //lastFrame_ = new VideoFrame;
                 lastFrame_ = (VideoFrame*) &buffer[index*BUFFER_SIZE];
                 // fill lastFrame data
                 lastFrame_->width = parrotPave_.encoded_stream_width;

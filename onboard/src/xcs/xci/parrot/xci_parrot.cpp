@@ -10,6 +10,8 @@
 #include "video_encapsulation.h"
 #include "video_decode.hpp"
 
+#include "configure_options.hpp"
+
 using namespace std;
 using namespace boost::asio;
 using namespace boost::asio::ip;
@@ -42,17 +44,14 @@ void XciParrot::processVideoData(){
         VideoFramePtr frame = nullptr;
         if (videoReceiver_.tryGetVideoFrame(frame)){
             AVPacket avPacket;
-            //cerr << "Video frame [" << frame->width << "," << frame->height << "]" << endl;
             avPacket.data = &frame->data[frame->payload_offset];
             avPacket.size = frame->payload_size - frame->payload_offset;
             if (videoDecoder_.decodeVideo(&avPacket)){
                 AVFrame* avFrame = videoDecoder_.decodedFrame();
-                //cerr << "Video avframe [" << avFrame->width << "," << avFrame->height << "]" << endl;
                 BitmapType bitmap(avFrame->width, avFrame->height, avFrame->data[0]);
                 dataReceiver_.notify("video",bitmap);
                 dataReceiver_.notify("internalTimeVideo", frame->timestamp);
             }
-            //delete frame;
         }
         else{
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -94,7 +93,9 @@ bool XciParrot::setDefaultConfiguration(){
     setConfirmedConfigure(new AtCommandCONFIG("custom:profile_id", "0a1b2c3d"));
     setConfirmedConfigure(new AtCommandCONFIG("custom:session_id", "0a1b2c3d"));
 
-    setConfirmedConfigure(new AtCommandCONFIG("video:video_codec", "129"));
+    std::stringstream value;
+    value << H264_720P_CODEC;
+    setConfirmedConfigure(new AtCommandCONFIG("video:video_codec", value.str()));
     setConfirmedConfigure(new AtCommandCONFIG("video:bitrate_control_mode", "1"));
     setConfirmedConfigure(new AtCommandCONFIG("video:max_bitrate", "4000"));
     setConfirmedConfigure(new AtCommandCONFIG("video:video_channel", "0"));
