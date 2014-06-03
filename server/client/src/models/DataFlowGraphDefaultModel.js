@@ -1,4 +1,7 @@
 var DataFlowGraphDefaultModel = joint.shapes.devs.Model.extend({
+    inPortsType: {},
+    outPortsType: {},
+    
     defaults: joint.util.deepSupplement({
         id: "m",
         position: { x: 50, y: 50 },
@@ -34,15 +37,21 @@ var DataFlowGraphDefaultModel = joint.shapes.devs.Model.extend({
         this.get('size').height = count * 30;
     },
     
-    addInputPort : function(portId) {
-        var inp = this.get('inPorts').slice();
-        inp.push(portId);
-        this.set('inPorts', inp);
+    setModel : function(model) {
+        this.model = model;
     },
     
-    addOutpuPort : function(portId) {
+    addInputPort : function(portId, semT, synT) {
+        var inPorts = this.get('inPorts').slice();
+        inPorts.push(portId);
+        this.inPortsType[portId] = {semType: semT, synType: synT};
+        this.set('inPorts', inPorts);
+    },
+    
+    addOutpuPort : function(portId, semT, synT) {
         var outp = this.get('outPorts').slice();
         outp.push(portId);
+        this.outPortsType[portId] = {semType: semT, synType: synT};
         this.set('outPorts', outp);
     },
 });
