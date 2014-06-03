@@ -66,7 +66,7 @@ bool XciParrot::setConfirmedConfigure(AtCommand *command){
     do{
         atCommandQueue_.push(new AtCommandCONFIG_IDS("0a1b2c3d", "0a1b2c3d", "0a1b2c3d"));
         atCommandQueue_.push(command->clone());
-        this_thread::sleep_for(std::chrono::milliseconds(10));
+        this_thread::sleep_for(std::chrono::milliseconds(20));
         if (++count > 20){
             XCS_LOG_WARN("Cannot receive ack.");
             delete command;
@@ -78,7 +78,7 @@ bool XciParrot::setConfirmedConfigure(AtCommand *command){
     count = 0;
     do{
         atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
-        this_thread::sleep_for(std::chrono::milliseconds(10));
+        this_thread::sleep_for(std::chrono::milliseconds(20));
 
         if (++count >= 20){
             XCS_LOG_WARN("Cannot receive clear ack.");
@@ -192,12 +192,14 @@ SpecialCMDList XciParrot::specialCMD() {
 }
 
 void XciParrot::configuration(const std::string &key, const std::string &value) {
-    atCommandQueue_.push(new AtCommandCONFIG(key, value));
+    configuration_[key] = value;
+    setConfirmedConfigure(new AtCommandCONFIG(key, value));
 }
 
 void XciParrot::configuration(const InformationMap &configuration) {
     for (auto element : configuration) {
-        atCommandQueue_.push(new AtCommandCONFIG(element.first, element.second));
+        configuration_[element.first] = element.second;
+        setConfirmedConfigure(new AtCommandCONFIG(element.first, element.second));
     }
 }
 
