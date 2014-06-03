@@ -76,6 +76,7 @@ var ScriptGeneratorView = Backbone.View.extend({
         
         scriptGeneratorGraph = new joint.dia.Graph;
         this.listenTo(scriptGeneratorGraph, 'change:target', this.setLink);
+        this.listenTo(scriptGeneratorGraph, 'change:source', this.setLink);
 
         scriptGeneratorGraph.on('change', function(model) {
             $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
@@ -88,49 +89,35 @@ var ScriptGeneratorView = Backbone.View.extend({
         });
 
         this.initializeDfgToolbox4Drop();
-        
-        //debug: init toolbox
-//        this.addNode2FgToolbox("XXci parrot", "XXci - parrot");
-//        this.addNode2FgToolbox("XXci dodo", "XXci - dodo");
-        
+           
         var paper = new joint.dia.Paper({
             el: $('#flow-graph-screen'),
-            width: 650, height: 200, gridSize: 1,
+            width: 650, 
+            height: 400, 
+            gridSize: 10,   // size of grid in px (how many px reprezents one cell)
             model: scriptGeneratorGraph,
             validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
-                var valid = magnetT.getAttribute('type') != 'out';
-                return valid;
+                if(magnetS && magnetT && magnetS.getAttribute("type") == "out" && magnetT.getAttribute("type") == "in") {
+                    var idS = magnetS.getAttribute("port");
+                    var idT = magnetT.getAttribute("port");
+
+                    var sameSemT = cellViewS.model.outPortsType[idS].semType == cellViewT.model.inPortsType[idT].semType;
+                    var sameSynT = cellViewS.model.outPortsType[idS].synType == cellViewT.model.inPortsType[idT].synType;
+                    
+                    var valid = sameSemT && sameSynT;
+                    
+                    return valid;
+                }
+                
+                return false;
             },
             validateMagnet: function(cellView, magnet) {
                 return magnet.getAttribute('type') != "in";
             },
-            snapLinks: { radius: 45 }
+            snapLinks: { radius: 45 },
         });
         
         this.model.requestData();
-        
-        // 4 debug only
-//        var m1 = new DataFlowGraphDefaultModel();
-//        m1.setId('m1');
-//        m1.setLabel('Model 1');
-//        m1.setAutoSize();
-//        scriptGeneratorGraph.addCell(m1);
-//        
-//        var m2 = new DataFlowGraphDefaultModel({
-//            inPorts: ['in1','in2', 'in3', 'in4', 'in5', 'in6'],
-//        });
-//        m2.translate(300, 0);
-//        m2.setId("m2");
-//        m2.setLabel('Model 2');      
-//        m2.setAutoSize();
-//        m2.addInputPort('in7');
-//        m2.addOutpuPort('out2');
-//        scriptGeneratorGraph.addCell(m2);
-//        scriptGeneratorModels.addModel("m1", m1);
-//        scriptGeneratorModels.addModel("m2", m2);
-        
-//        var newContent = JSON.parse('{"cells":[{"type":"devs.Model","size":{"width":90,"height":90},"inPorts":["in1","in2"],"outPorts":["out"],"position":{"x":50,"y":50},"angle":0,"id":"14515f13-24ab-4c10-b67a-0e9b55a526a7","z":0,"attrs":{"rect":{"fill":"#2ECC71"},".label":{"ref-x":0.5},".inPorts circle":{"fill":"#16A085","type":"in"},".outPorts circle":{"fill":"#E74C3C","type":"out"},".inPorts>.port0>text":{"text":"in1"},".inPorts>.port0>circle":{"port":{"id":"in1","type":"in"}},".inPorts>.port0":{"ref":"rect","ref-y":0.25},".inPorts>.port1>text":{"text":"in2"},".inPorts>.port1>circle":{"port":{"id":"in2","type":"in"}},".inPorts>.port1":{"ref":"rect","ref-y":0.75},".outPorts>.port0>text":{"text":"out"},".outPorts>.port0>circle":{"port":{"id":"out","type":"out"}},".outPorts>.port0":{"ref":"rect","ref-y":0.5,"ref-dx":0}}},{"type":"devs.Model","size":{"width":90,"height":90},"inPorts":["in1","in2"],"outPorts":["out"],"position":{"x":350,"y":50},"angle":0,"id":"cacddf4b-9244-4624-b1af-30355f4df78b","z":0,"embeds":"","attrs":{"rect":{"fill":"#2ECC71"},".label":{"text":"Model 2","ref-x":0.5},".inPorts circle":{"fill":"#16A085","type":"in"},".outPorts circle":{"fill":"#E74C3C","type":"out"},".inPorts>.port0>text":{"text":"in1"},".inPorts>.port0>circle":{"port":{"id":"in1","type":"in"}},".inPorts>.port0":{"ref":"rect","ref-y":0.25},".inPorts>.port1>text":{"text":"in2"},".inPorts>.port1>circle":{"port":{"id":"in2","type":"in"}},".inPorts>.port1":{"ref":"rect","ref-y":0.75},".outPorts>.port0>text":{"text":"out"},".outPorts>.port0>circle":{"port":{"id":"out","type":"out"}},".outPorts>.port0":{"ref":"rect","ref-y":0.5,"ref-dx":0}}},{"type":"link","id":"855fec63-9210-44a9-92d3-b9d1d4814406","embeds":"","source":{"id":"14515f13-24ab-4c10-b67a-0e9b55a526a7","selector":"g:nth-child(1) g:nth-child(4) g:nth-child(1) circle:nth-child(1)     ","port":"out"},"target":{"id":"cacddf4b-9244-4624-b1af-30355f4df78b","selector":"g:nth-child(1) g:nth-child(3) g:nth-child(1) circle:nth-child(1)     ","port":"in1"},"z":2,"vertices":[{"x":226,"y":43}],"attrs":{".connection":{"stroke":"green"},".marker-target":{"fill":"green","d":"M 10 0 L 0 5 L 10 10 z"}}},{"type":"link","id":"2fafc239-87ca-4b09-9c09-08a62b606976","embeds":"","source":{"id":"14515f13-24ab-4c10-b67a-0e9b55a526a7","selector":"g:nth-child(1) g:nth-child(4) g:nth-child(1) circle:nth-child(1)     ","port":"out"},"target":{"x":261,"y":131},"z":3,"attrs":{".connection":{"stroke":"red"},".marker-target":{"fill":"red","d":"M 10 0 L 0 5 L 10 10 z"}}},{"type":"link","id":"ed391108-0a1e-4723-a4bc-9d2341d684c6","embeds":"","source":{"id":"cacddf4b-9244-4624-b1af-30355f4df78b","selector":"g:nth-child(1) g:nth-child(4) g:nth-child(1) circle:nth-child(1)     ","port":"out"},"target":{"id":"cacddf4b-9244-4624-b1af-30355f4df78b","selector":"g:nth-child(1) g:nth-child(3) g:nth-child(2) circle:nth-child(1)     ","port":"in2"},"z":4,"attrs":{".connection":{"stroke":"green"},".marker-target":{"fill":"green","d":"M 10 0 L 0 5 L 10 10 z"}}}]}');
-//        scriptGeneratorGraph.fromJSON(newContent);    
     },
     
     addNode2FgToolbox : function(id, title) {
@@ -176,8 +163,6 @@ var ScriptGeneratorView = Backbone.View.extend({
                 var pos = $(ui.helper).offset();
                 var containerPos = $("#flow-graph-screen").offset();         
                 
-                //TODO: create appropriate model
-                
                 // get model
                 var modelPrototype = self.dfgToolboxNodes[toolId];
                 
@@ -198,48 +183,31 @@ var ScriptGeneratorView = Backbone.View.extend({
                     modelId = toolId + counter[toolId];
                 }
                 
-//                console.log(".name: " + JSON.stringify(prototypeName));
-//                console.log(".id: " + JSON.stringify(modelId));
-                
                 var m = new DataFlowGraphDefaultModel({
                     position: { x: pos.left - containerPos.left, y: pos.top - containerPos.top },
                 });
                 m.setId(modelId);
                 m.setLabel(prototypeName);
                 
-                // get all xvars        
-//                console.log(".xvars:");
+                // get all xvars
                 if(xvars) {
                     xvars.forEach(function(xvar) {
                         var xvarName = xvar.get("name");
                         var xvarSynType = xvar.get("synType");
-                        var xvarSemType = xvar.get("semType");
-                        //DEBUG: logs
-//                        console.log("..xvarName: " + JSON.stringify(xvarName));
-//                        console.log("...xvarSynType: " + JSON.stringify(xvarSynType));
-//                        console.log("...xvarSemType: " + JSON.stringify(xvarSemType));
-                        
-                        m.addInputPort(xvarName);
+                        var xvarSemType = xvar.get("semType");   
+                        m.addInputPort(xvarName, xvarSemType, xvarSynType);
                     });
                 }
                 
                 // get all xinputports
-//                console.log(".xinputPorts:");
                 if(xinputPorts) {
                     xinputPorts.forEach(function(xvar) {
                         var xinputPortName = xvar.get("name");
                         var xinputPortSynType = xvar.get("synType");
                         var xinputPortSemType = xvar.get("semType");
-                        //DEBUG: logs
-//                        console.log("..xinputPortName: " + JSON.stringify(xinputPortName));
-//                        console.log("...xinputPortSynType: " + JSON.stringify(xinputPortSynType));
-//                        console.log("...xinputPortSemType: " + JSON.stringify(xinputPortSemType));
-                        
-                        m.addOutpuPort(xinputPortName);
+                        m.addOutpuPort(xinputPortName, xinputPortSemType, xinputPortSynType);
                     });
                 }
-                
-//                console.log(".end");
                 
                 m.setAutoSize();
                 
@@ -249,8 +217,9 @@ var ScriptGeneratorView = Backbone.View.extend({
         });
     },
     
-    setLink : function(link) {      
-        if(link.attributes.target.x){
+    setLink : function(link) {    
+        //determine if link is pin to some port on both sides
+        if(link.attributes.target.x || link.attributes.source.x){
             this.setBadLink(link);
         }
         else {
@@ -287,7 +256,7 @@ var ScriptGeneratorView = Backbone.View.extend({
     
     onPrototypeAdd : function(modelPrototype) {
         //DEBUG
-        console.log("onPrototypeAdd " + JSON.stringify(modelPrototype.toJSON()));
+        //console.log("onPrototypeAdd " + JSON.stringify(modelPrototype.toJSON()));
         
         // get prototype name
         var prototypeName = modelPrototype.get("name");
@@ -350,7 +319,7 @@ var ScriptGeneratorView = Backbone.View.extend({
     
     onPrototypeChange : function(modelPrototype) {
         //DEBUG
-        console.log("onPrototypeChange " + JSON.stringify(modelPrototype.toJSON()));
+        //console.log("onPrototypeChange " + JSON.stringify(modelPrototype.toJSON()));
         
         // get prototype name
         var prototypeName = modelPrototype.get("name");
