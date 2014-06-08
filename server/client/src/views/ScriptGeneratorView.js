@@ -14,6 +14,16 @@ var ScriptGeneratorView = Backbone.View.extend({
 
     id : 'script-generator',
     
+    el : '#dfg',
+    
+    events : {
+        "click #dfgLoad" : "dfgLoad",
+        "click #dfgCreate" : "dfgCreate",
+        "click #dfgStart" : "dfgStart",
+        "click #dfgStop" : "dfgStop",
+        "click #dfgReset" : "dfgReset",
+    },
+    
     dfgToolboxNodes : {},
     
     initialize : function() {
@@ -92,8 +102,8 @@ var ScriptGeneratorView = Backbone.View.extend({
            
         var paper = new joint.dia.Paper({
             el: $('#flow-graph-screen'),
-            width: 650, 
-            height: 400, 
+            width: 1024, 
+            height: 500, 
             gridSize: 10,   // size of grid in px (how many px reprezents one cell)
             model: scriptGeneratorGraph,
             validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
@@ -125,8 +135,28 @@ var ScriptGeneratorView = Backbone.View.extend({
             title = id;
         }
         
+//        var flowGraphToolbox = $('#flow-graph-toolbox');
+//        flowGraphToolbox.append('<div id="' + id + '" class="drag_init">' + title + '</div>');
+        
         var flowGraphToolbox = $('#flow-graph-toolbox');
-        flowGraphToolbox.append('<div id="' + id + '" class="drag_init">' + title + '</div>');
+        flowGraphToolbox.append('\
+            <div class="panel panel-default">         \
+                <div class="panel-heading">                                     \
+                    <!--<h4 class="panel-title">  -->                                 \
+                        <a data-toggle="collapse" href="#collapse_' + id + '" class="drag_init" id="' + id + '">  \
+                            ' + title + '                                      \
+                        </a>                                                    \
+                        <span class="badge  pull-right" data-toggle="tooltip" title="počet instancí">0</span> \
+                    <!--</h4>  -->                                                     \
+                </div>                                                         \
+                <div id="collapse_' + id + '" class="panel-collapse collapse">  \
+                   <!--<div class="panel-body drag_init" id="' + id + '">\
+                        bla bla bla\
+                    </div>-->     \
+                </div>                                                          \
+            </div>                                                              \
+        ');
+        
         this.initializeDfgToolbox4Drag();
     },
     
@@ -135,7 +165,7 @@ var ScriptGeneratorView = Backbone.View.extend({
         var dragInit = $(".drag_init");
         dragInit.draggable({
             helper: 'clone',
-            containment: '#flow-graph',
+            containment: '#DFG',
             //stop: function (ev, ui) { }
         });
         
@@ -418,6 +448,30 @@ var ScriptGeneratorView = Backbone.View.extend({
 //        };
     },
     
+    dfgLoad : function() {
+        console.log('dfgLoad');
+        //TODO: load dfg info
+    },
+    
+    dfgCreate : function() {
+        console.log('dfgCreate');
+        //TODO: send request to create dfg
+    },
+    
+    dfgStart : function() {
+        console.log('dfgStart');
+        //TODO: send request to start created dfg
+    },
+    
+    dfgStop : function() {
+        console.log('dfgStop');
+        //TODO: send request to stop started dfg
+    },
+    
+    dfgReset : function() {
+        console.log('dfgReset');
+        //TODO: send request to reset dfg and clear GUI
+    }, 
     
     /********************
     ** BLOCKLY SECTION **

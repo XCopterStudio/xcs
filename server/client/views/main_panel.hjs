@@ -64,13 +64,58 @@
     <div id="script-generator-console"></div>
 </div>
 
-<div class="container-fluid" id="flow-graph">
+<div class="container-fluid" id="dfg">
     <div class="row">
-        <div class="col-xs-2">
-            <div id="flow-graph-toolbox"></div>
+        <div class="col-xs-12">
+            <nav class="navbar navbar-default" role="navigation">
+                <div class="container-fluid">
+                
+                <div class="row">
+                    <div class="col-xs-3">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#nbDfg">
+                                <!--TODO: change text-->
+                                <span class="sr-only">Toggle navigation</span>
+                                <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+                            </button>
+                            <p class="navbar-text navbar-right">DFG nodes</p>
+                        </div>
+                    </div>
+                
+                    <div class="col-xs-9">
+                        <div class="collapse navbar-collapse" id="nbDfg">
+                            <div class="nav navbar-nav">
+                                <button id="dfgLoad" type="button" class="btn btn-info navbar-btn">Load nodes</button>
+                                <button id="dfgCreate" type="button" class="btn btn-warning navbar-btn">Create DFG</button>
+                                <button id="dfgStart" type="button" class="btn btn-danger navbar-btn">Start DFG</button>
+                                <button id="dfgStop" type="button" class="btn btn-danger navbar-btn">Stop DFG</button>
+                            </div>
+                            
+                            <div class="nav navbar-nav navbar-right">
+                                <button id="dfgReset" type="button" class="btn btn-default navbar-btn">Reset DFG</button>
+                            </div>
+                        </div><!-- /.navbar-collapse -->
+                    </div>
+                  </div><!-- /.container-fluid -->
+                </div>
+            </nav>
         </div>
-        <div class="col-xs-10">            
-            <div id="flow-graph-screen"></div>
+    </div>
+    
+    <div class="row">
+        <div class="col-xs-3">
+            <!-- TODO: change style -->
+            <div class="panel panel-default DFG">   <!--style="background-color: transparent"-->
+                <div class="panel-group panel-body" id="flow-graph-toolbox"></div>
+            </div>
+        </div>
+        <div class="col-xs-9">  
+            <!--<div id="flow-graph-screen" class="DFG"></div>-->
+            <div class="panel panel-default DFG" style="background-color: transparent">
+                <div class="panel-body">
+                    <div id="flow-graph-screen"></div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="row">
