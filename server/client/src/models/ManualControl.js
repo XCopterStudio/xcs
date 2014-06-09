@@ -82,5 +82,13 @@ var ManualControl = Backbone.Model.extend({
     setGaz : function(value, model) {
         model.gaz = value;
         model.sendFlyingCommand();
+    },
+
+    setFly : function(roll, pitch, yaw, gaz, model){
+        model.roll = roll;
+        model.pitch = pitch;
+        model.yaw = yaw;
+        model.gaz = gaz;
+        model.sendFlyingCommand();
     }
 });
