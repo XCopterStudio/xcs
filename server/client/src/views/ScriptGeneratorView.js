@@ -97,13 +97,15 @@ var ScriptGeneratorView = Backbone.View.extend({
         this.model.requestLoad();
     },
     
+    trimId : function(id) {
+        return id.replace(/ /g,'');
+    },
+    
     addNode2DfgToolbox : function(id, title) {
         if(!title) {
             title = id;
         }
         
-        id = id.replace(/ /g,'');
-   
         var toolbox = $('#flow-graph-toolbox');
         toolbox.append('\
             <div class="panel panel-default" id="xprototype_' + id + '">         \
@@ -127,8 +129,6 @@ var ScriptGeneratorView = Backbone.View.extend({
     },
     
     removeNodeFromDfgToolbox : function(id) {
-        id = id.replace(/ /g,'');
-        
         var node = $('#xprototype_' + id);
         node.remove();
     },
@@ -263,15 +263,16 @@ var ScriptGeneratorView = Backbone.View.extend({
         
         // get prototype name
         var prototypeName = modelPrototype.get("name");
+        var prototypeId = this.trimId(prototypeName);
         
-        if(this.dfgToolboxNodes[prototypeName]) {
+        if(this.dfgToolboxNodes[prototypeId]) {
             console.error("ERROR(onPrototypeAdd): " + prototypeName + " was already loaded!");
             return;
         }
         
         // add 2 toolbox - show to user
-        this.addNode2DfgToolbox(prototypeName);
-        this.dfgToolboxNodes[prototypeName] = modelPrototype;
+        this.addNode2DfgToolbox(prototypeId, prototypeName);
+        this.dfgToolboxNodes[prototypeId] = modelPrototype;
         
         //DEBUG
         //console.log("added: " + prototypeName + " = " + this.dfgToolboxNodes[prototypeName].get("name"));
@@ -292,6 +293,7 @@ var ScriptGeneratorView = Backbone.View.extend({
         
         // get prototype name
         var cloneName = modelClone.get("name");
+        var cloneId = this.trimId(cloneName);
         
         // get all xvars
         modelClone.get("xvar").forEach(function(xvar) {
@@ -314,24 +316,25 @@ var ScriptGeneratorView = Backbone.View.extend({
         
         // get prototype name
         var prototypeName = modelPrototype.get("name");
+        var prototypeId = this.trimId(prototypeName);
         
         //DEBUG
         //console.log("onPrototypeRemove " + prototypeName);
         
         //validation
-        if(!this.dfgToolboxNodes[prototypeName]) {
+        if(!this.dfgToolboxNodes[prototypeId]) {
             console.error("ERROR(onPrototypeRemove): " + prototypeName + " was not yet loaded!");
             return;
         }
         
         // stop listening to old model
-        this.stopListening(this.dfgToolboxNodes[prototypeName]);
+        this.stopListening(this.dfgToolboxNodes[prototypeId]);
         
         //delete from GUI
-        this.removeNodeFromDfgToolbox(prototypeName);
+        this.removeNodeFromDfgToolbox(prototypeId);
         
         // delete old model
-        delete this.dfgToolboxNodes[prototypeName];
+        delete this.dfgToolboxNodes[prototypeId];
     },
     
     onCloneRemove : function(modelClone) {
@@ -347,21 +350,22 @@ var ScriptGeneratorView = Backbone.View.extend({
         
         // get prototype name
         var prototypeName = modelPrototype.get("name");
+        var prototypeId = this.trimId(prototypeName);
         
         //DEBUG
         //console.log("onPrototypeChange: " + prototypeName);
         
         // add 2 toolbox - show to user
-        if(!this.dfgToolboxNodes[prototypeName]) {
+        if(!this.dfgToolboxNodes[prototypeId]) {
             console.error("ERROR(onPrototypeChange): " + prototypeName + " was not yet loaded!");
             return;
         }
         
         // stop listening to old model
-        this.stopListening(this.dfgToolboxNodes[prototypeName]);
+        this.stopListening(this.dfgToolboxNodes[prototypeId]);
         
         // remove old model and add new one
-        this.dfgToolboxNodes[prototypeName] = modelPrototype;
+        this.dfgToolboxNodes[prototypeId] = modelPrototype;
         
         //watch 4 changes
         this.listenTo(modelPrototype, "change", this.onPrototypeChange);
@@ -376,6 +380,7 @@ var ScriptGeneratorView = Backbone.View.extend({
         
         // get prototype name
         var cloneName = modelClone.get("name");
+        var cloneId = this.trimId(cloneName);
         
         // get all xvars
         modelClone.get("xvar").forEach(function(xvar) {
