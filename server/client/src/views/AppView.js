@@ -6,6 +6,7 @@ var AppView = Backbone.View.extend({
 
     initialize : function() {
         this.keyboard = new KeyboardControllerView();
+        this.mobile = new MobileControllerView();
     },
 
 });
