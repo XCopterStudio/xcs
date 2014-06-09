@@ -4,6 +4,7 @@
 #include <xcs/xcs_fce.hpp>
 #include <urbi/uconversion.hh>
 
+using namespace std;
 using namespace xcs::nodes;
 using namespace xcs::nodes::localization;
 
@@ -48,6 +49,7 @@ void XLocalization::onChangeTimeImu(double internalTime) {
 }
 
 void XLocalization::onChangeVideo(urbi::UImage image) {
+    lock_guard<mutex> lock(lastFrameMtx_);
     // store image until onChangeVideoTime
     lastFrame_ = image;
 }
@@ -62,7 +64,10 @@ void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
     bwImage.size = 0;
     bwImage.width = 0;
     bwImage.height = 0;
-    urbi::convert(lastFrame_, bwImage);
+    {
+        lock_guard<mutex> lock(lastFrameMtx_);
+        urbi::convert(lastFrame_, bwImage);
+    }
 
     ptam_->handleFrame(bwImage, ekfTime); // TODO should push results to EKF
 
@@ -118,7 +123,7 @@ XLocalization::XLocalization(const std::string &name) :
     XBindVar(position);
     XBindVar(velocity);
     XBindVar(rotation);
-    
+
     XBindFunction(XLocalization, init);
 }
 
