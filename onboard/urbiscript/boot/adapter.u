@@ -129,7 +129,7 @@ class OnboardReceiver {
 
     function init(adapter, uJson) {
        var onboardReceiver = Global.Receiver.new("onboard", [
-            "request" => "request",
+            "request" => "request"
         ]);
         var semanticReceiver = Global.SemanticReceiver.new(adapter, UJson);
         semanticReceiver.addReceiver(onboardReceiver);
