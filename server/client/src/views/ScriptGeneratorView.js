@@ -75,12 +75,12 @@ var ScriptGeneratorView = Backbone.View.extend({
             gridSize: 10,   // size of grid in px (how many px reprezents one cell)
             model: scriptGeneratorGraph,
             validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
-                if(magnetS && magnetT && magnetS.getAttribute("type") == "out" && magnetT.getAttribute("type") == "in") {
+                if(magnetS && magnetT && magnetS.getAttribute("type") == "in" && magnetT.getAttribute("type") == "out") {
                     var idS = magnetS.getAttribute("port");
                     var idT = magnetT.getAttribute("port");
 
-                    var sameSemT = cellViewS.model.outPortsType[idS].semType == cellViewT.model.inPortsType[idT].semType;
-                    var sameSynT = cellViewS.model.outPortsType[idS].synType == cellViewT.model.inPortsType[idT].synType;
+                    var sameSemT = cellViewS.model.inPortsType[idS].semType == cellViewT.model.outPortsType[idT].semType;
+                    var sameSynT = cellViewS.model.inPortsType[idS].synType == cellViewT.model.outPortsType[idT].synType;
                     
                     var valid = sameSemT && sameSynT;
                     
@@ -90,7 +90,7 @@ var ScriptGeneratorView = Backbone.View.extend({
                 return false;
             },
             validateMagnet: function(cellView, magnet) {
-                return magnet.getAttribute('type') != "in";
+                return magnet.getAttribute('type') != "out";
             },
             snapLinks: { radius: 45 },
         });
