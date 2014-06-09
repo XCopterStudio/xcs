@@ -158,7 +158,7 @@ SensorList XciParrot::sensorList() {
     sensorList.push_back(Sensor("acceleration", "ACCELERATION"));
     sensorList.push_back(Sensor("gyro", "GYRO_RAW"));
     sensorList.push_back(Sensor("magneto", "MAGNETO_RAW"));
-    sensorList.push_back(Sensor("internalTimeIMU", "TIME_LOC"));
+    sensorList.push_back(Sensor("internalTimeImu", "TIME_LOC"));
 
     sensorList.push_back(Sensor("altitude", "ALTITUDE"));
     sensorList.push_back(Sensor("battery", "BATTERY"));
