@@ -69,15 +69,20 @@ void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
     ptam_->handleFrame(bwImage, ekfTime); // TODO should push results to EKF
     
     // update current state of drone
-    DroneState state = ekf_.computeState(timeFromStart());
-    position = state.position;
-    velocity = state.velocity;
-    rotation = state.angles;
+//    DroneState state = ekf_.computeState(timeFromStart());
+//    position = state.position;
+//    velocity = state.velocity;
+//    rotation = state.angles;
 }
 
-void XLocalization::onChangeFlyControl(xcs::FlyControl flyControl) {
+void XLocalization::onChangeFlyControl(const xcs::FlyControl flyControl) {
     //printf("FlyControl time %f\n", timeFromStart());
     ekf_.flyControl(flyControl, timeFromStart() + FLY_CONTROL_SEND_TIME); // TODO: compute flyControl delay
+}
+
+void XLocalization::onChangePtamControl(const std::string &ptamControl) {
+    std::cerr << "PTAM control " << ptamControl << std::endl;
+    ptam_->pressSpacebar();
 }
 
 //================ public functions ==================
@@ -91,6 +96,7 @@ XLocalization::XLocalization(const std::string &name) :
   video("FRONT_CAMERA"),
   videoTime("TIME_LOC"),
   flyControl("FLY_CONTROL"),
+  ptamControl("COMMAND"),
   position("POSITION_ABS"),
   velocity("VELOCITY_ABS"),
   rotation("ROTATION") {
@@ -105,8 +111,11 @@ XLocalization::XLocalization(const std::string &name) :
 
     XBindVarF(video, &XLocalization::onChangeVideo);
     XBindVarF(videoTime, &XLocalization::onChangeVideoTime);
+//    XBindVar(videoTime);
+//    UNotifyThreadedChange(videoTime.Data(), &XLocalization::onChangeVideoTime, urbi::LOCK_FUNCTION);
 
     XBindVarF(flyControl, &XLocalization::onChangeFlyControl);
+    XBindVarF(ptamControl, &XLocalization::onChangePtamControl);
 
     XBindVar(position);
     XBindVar(velocity);

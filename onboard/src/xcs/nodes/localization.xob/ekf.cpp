@@ -108,15 +108,15 @@ DroneStateDistributionChronologic Ekf::predictAndUpdateFromImu(const DroneStateD
             break;
         }
 
-        printf("EKF: Drone measurement %i [%f,%f,%f,%f,%f,%f,%f]\n",
-            measurementIndex,
-            imuMeasurements_[measurementIndex].first.altitude,
-            imuMeasurements_[measurementIndex].first.velocity.x,
-            imuMeasurements_[measurementIndex].first.velocity.y,
-            imuMeasurements_[measurementIndex].first.velocity.z,
-            imuMeasurements_[measurementIndex].first.angles.phi,
-            imuMeasurements_[measurementIndex].first.angles.theta,
-            imuMeasurements_[measurementIndex].first.angularRotationPsi);
+        //M: printf("EKF: Drone measurement %i [%f,%f,%f,%f,%f,%f,%f]\n",
+//            measurementIndex,
+//            imuMeasurements_[measurementIndex].first.altitude,
+//            imuMeasurements_[measurementIndex].first.velocity.x,
+//            imuMeasurements_[measurementIndex].first.velocity.y,
+//            imuMeasurements_[measurementIndex].first.velocity.z,
+//            imuMeasurements_[measurementIndex].first.angles.phi,
+//            imuMeasurements_[measurementIndex].first.angles.theta,
+//            imuMeasurements_[measurementIndex].first.angularRotationPsi);
 
         newState.first = updateIMU(newState.first, imuMeasurements_[measurementIndex++].first);
         if (saveInterResults){
@@ -133,24 +133,24 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     const CartesianVector &velocityOld = state.first.velocity;
     const EulerianVector &anglesOld = state.first.angles;
 
-    printf("EKF: flyControl [%f,%f,%f,%f] \n", flyControl.roll, flyControl.pitch, flyControl.yaw, flyControl.gaz);
+    //M: printf("EKF: flyControl [%f,%f,%f,%f] \n", flyControl.roll, flyControl.pitch, flyControl.yaw, flyControl.gaz);
 
     // predict acceleration
     // acceleration in drone frame
     double force = parameters_[0] * (1.0 + parameters_[1] * flyControl.gaz);
     double forceX = force * sin(anglesOld.phi)*cos(anglesOld.theta);
     double forceY = -force * sin(anglesOld.theta);
-    //printf("EKF: Force [%f,%f] \n",forceX,forceY);
+    ////M: printf("EKF: Force [%f,%f] \n",forceX,forceY);
     // drag
     double dragX = parameters_[2] * velocityOld.x + parameters_[3] * velocityOld.x * velocityOld.x;
     double dragY = parameters_[2] * velocityOld.y + parameters_[3] * velocityOld.y * velocityOld.y;
-    //printf("EKF: Drag[%f,%f] \n", dragX,dragY);
+    ////M: printf("EKF: Drag[%f,%f] \n", dragX,dragY);
     // drone acceleration in global frame
     CartesianVector acceleration;
     acceleration.x = (cos(anglesOld.psi)*forceX + sin(anglesOld.psi)*forceY) - dragX;
     acceleration.y = (-sin(anglesOld.psi)*forceX + cos(anglesOld.psi)*forceY) - dragY;
     acceleration.z = parameters_[8] * flyControl.gaz - parameters_[9] * velocityOld.z;
-    //printf("EKF: Acceleration [%f,%f,%f] \n", acceleration.x, acceleration.y, acceleration.z);
+    ////M: printf("EKF: Acceleration [%f,%f,%f] \n", acceleration.x, acceleration.y, acceleration.z);
 
     // angular rotation speed
     EulerianVector angularRotation;
@@ -158,7 +158,7 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     angularRotation.theta = parameters_[4] * flyControl.pitch - parameters_[5] * anglesOld.theta;
     // angular acceleration
     angularRotation.psi = parameters_[6] * flyControl.yaw - parameters_[7] * state.first.angularRotationPsi;
-    //printf("EKF: Rotation [%f,%f,%f] \n", angularRotation.phi, angularRotation.theta, angularRotation.psi);
+    ////M: printf("EKF: Rotation [%f,%f,%f] \n", angularRotation.phi, angularRotation.theta, angularRotation.psi);
 
     // =========== predict new state ============
     // position
@@ -171,7 +171,7 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     velocity.x += acceleration.x*delta;
     velocity.y += acceleration.y*delta;
     velocity.z += acceleration.z*delta;
-    //printf("EKF: velocity[%f,%f,%f]\n", velocity.x, velocity.y, velocity.z);
+    ////M: printf("EKF: velocity[%f,%f,%f]\n", velocity.x, velocity.y, velocity.z);
     // angles
     EulerianVector &angles = newState.first.angles;
     angles.phi = xcs::normAngle(angles.phi + angularRotation.phi*delta);
@@ -258,13 +258,13 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
 
     // ======= end predict state deviation ===========
 
-    //printf("EKF: delta %f\n", delta);
-    printf("EKF: Computed drone predictedState [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
-        newState.first.position.x, newState.first.position.y, newState.first.position.z,
-        newState.first.velocity.x, newState.first.velocity.y, newState.first.velocity.z,
-        newState.first.angles.phi, newState.first.angles.theta, newState.first.angles.psi,
-        newState.first.angularRotationPsi);
-    ////printf("EKF: Deviation drone predictedState (%f,%f,%f,%f,%f,%f,%f,%f,%f,%f)\n",
+    ////M: printf("EKF: delta %f\n", delta);
+    //M: printf("EKF: Computed drone predictedState [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
+//        newState.first.position.x, newState.first.position.y, newState.first.position.z,
+//        newState.first.velocity.x, newState.first.velocity.y, newState.first.velocity.z,
+//        newState.first.angles.phi, newState.first.angles.theta, newState.first.angles.psi,
+//        newState.first.angularRotationPsi);
+    //////M: printf("EKF: Deviation drone predictedState (%f,%f,%f,%f,%f,%f,%f,%f,%f,%f)\n",
     //    newState.second(0, 0), newState.second(1, 1), newState.second(2, 2),
     //    newState.second(3, 3), newState.second(4, 4), newState.second(5, 5),
     //    newState.second(6, 6), newState.second(7, 7), newState.second(8, 8),
@@ -333,11 +333,11 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     newState.second = (mat(10, 10).eye() - gain*measurementJacobian) * state.second;
     
 
-    printf("EKF: Computed drone updatedState [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
-        newState.first.position.x, newState.first.position.y, newState.first.position.z,
-        newState.first.velocity.x, newState.first.velocity.y, newState.first.velocity.z,
-        newState.first.angles.phi, newState.first.angles.theta, newState.first.angles.psi,
-        newState.first.angularRotationPsi);
+    //M: printf("EKF: Computed drone updatedState [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
+//        newState.first.position.x, newState.first.position.y, newState.first.position.z,
+//        newState.first.velocity.x, newState.first.velocity.y, newState.first.velocity.z,
+//        newState.first.angles.phi, newState.first.angles.theta, newState.first.angles.psi,
+//        newState.first.angularRotationPsi);
 
     return newState;
 }
@@ -379,11 +379,11 @@ DroneStateDistribution Ekf::updateCam(const DroneStateDistribution &state, const
     // update deviation
     newState.second = (mat(10, 10).eye() - gain*measurementJacobian) * state.second;
 
-    printf("EKF: Computed drone updatedState [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
-        newState.first.position.x, newState.first.position.y, newState.first.position.z,
-        newState.first.velocity.x, newState.first.velocity.y, newState.first.velocity.z,
-        newState.first.angles.phi, newState.first.angles.theta, newState.first.angles.psi,
-        newState.first.angularRotationPsi);
+    //M: printf("EKF: Computed drone updatedState [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
+//        newState.first.position.x, newState.first.position.y, newState.first.position.z,
+//        newState.first.velocity.x, newState.first.velocity.y, newState.first.velocity.z,
+//        newState.first.angles.phi, newState.first.angles.theta, newState.first.angles.psi,
+//        newState.first.angularRotationPsi);
 
     return newState;
 }
@@ -428,7 +428,7 @@ void Ekf::flyControl(const FlyControl &flyControl, const double &timestamp){
 };
 
 void Ekf::measurementImu(const DroneStateMeasurement &measurement, const double &timestamp){
-    XCS_LOG_INFO("Inserted new imu measurement with timestamp: " << timestamp);
+    //XCS_LOG_INFO("Inserted new imu measurement with timestamp: " << timestamp);
     ImuMeasurementChronologic copyMeasurement(measurement, timestamp);
     copyMeasurement.first.measurementID = IDCounter_++;
     imuMeasurements_.push_back(copyMeasurement);
