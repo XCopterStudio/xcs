@@ -152,11 +152,15 @@ class Onboard {
         echo("receive request: " + request);
 
         switch(request) {
-            case "DFG_INIT":
+            case "DFG_LOAD":
                 // start dfg communication and send info about loaded xobjects and default dfg
                 startDfgCommunication();
                 this.loadedXObjects_.elementChanged!;
                 this.&dataFlowGraph_.changed!;
+            case "DFG_CREATE":
+            case "DFG_START":
+            case "DFG_STOP":
+            case "DFG_RESET":
             default:
                 echo("...unknown request");
         };

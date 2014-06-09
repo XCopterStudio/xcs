@@ -11,7 +11,7 @@ var scriptGeneratorModels =  {
 };
 
 var ScriptGeneratorView = Backbone.View.extend({
-
+    
     id : 'script-generator',
     
     el : '#dfg',
@@ -37,40 +37,7 @@ var ScriptGeneratorView = Backbone.View.extend({
         this.listenTo(this.model.get("xclone"), "add", this.onCloneAdd);
         this.listenTo(this.model.get("xprototype"), "remove", this.onPrototypeRemove);
         this.listenTo(this.model.get("xclone"), "remove", this.onCloneRemove);
-        
-        
-        // NOTE: 4 debug only
-//        var prot = new DataFlowGraphNode();
-//        prot.set("name", "XXci");
-//        prot.get("xvar").add(new DataFlowGraphNodeIO({
-//            name : "fly",
-//            synType : "xcs::nodes::xci::FlyParam",
-//            semType : "FLY_PARAM"
-//        }));
-//        prot.get("xinputPort").add(new DataFlowGraphNodeIO({
-//            name : "command",
-//            synType : "std::string",
-//            semType : "COMMAND"
-//        }));
-//        
-//        //var c = new DataFlowGraphNode({"name" : "dodo"});
-//        var c = prot.clone();
-//        c.set("name", "dodo");
-//        
-//        this.model.get("xprototype").add(prot);
-//        this.model.get("xclone").add(c);
-//        //this.model.set('dataFlowGraph', '<xml></xml>');
-//        
-//        prot.set("name", "XXCI");
-//        
-//        c.get("xvar").add(new DataFlowGraphNodeIO({
-//            name : "gaz",
-//            synType : "double",
-//            semType : "GAZ"
-//        }));
-        
-//        this.model.set('dataFlowGraph', '<xml><text>hello world</text></xml>');        
-        
+
         this.initializeDfg();
         
         //this.initializeBlockly();
@@ -127,20 +94,19 @@ var ScriptGeneratorView = Backbone.View.extend({
             snapLinks: { radius: 45 },
         });
         
-        this.model.requestData();
+        this.model.requestLoad();
     },
     
-    addNode2FgToolbox : function(id, title) {
+    addNode2DfgToolbox : function(id, title) {
         if(!title) {
             title = id;
         }
         
-//        var flowGraphToolbox = $('#flow-graph-toolbox');
-//        flowGraphToolbox.append('<div id="' + id + '" class="drag_init">' + title + '</div>');
-        
-        var flowGraphToolbox = $('#flow-graph-toolbox');
-        flowGraphToolbox.append('\
-            <div class="panel panel-default">         \
+        id = id.replace(/ /g,'');
+   
+        var toolbox = $('#flow-graph-toolbox');
+        toolbox.append('\
+            <div class="panel panel-default" id="xprototype_' + id + '">         \
                 <div class="panel-heading">                                     \
                     <!--<h4 class="panel-title">  -->                                 \
                         <a data-toggle="collapse" href="#collapse_' + id + '" class="drag_init" id="' + id + '">  \
@@ -158,6 +124,13 @@ var ScriptGeneratorView = Backbone.View.extend({
         ');
         
         this.initializeDfgToolbox4Drag();
+    },
+    
+    removeNodeFromDfgToolbox : function(id) {
+        id = id.replace(/ /g,'');
+        
+        var node = $('#xprototype_' + id);
+        node.remove();
     },
     
     initializeDfgToolbox4Drag : function() {
@@ -297,9 +270,11 @@ var ScriptGeneratorView = Backbone.View.extend({
         }
         
         // add 2 toolbox - show to user
-        this.addNode2FgToolbox(prototypeName);
+        this.addNode2DfgToolbox(prototypeName);
         this.dfgToolboxNodes[prototypeName] = modelPrototype;
-        console.log("added: " + prototypeName + " = " + this.dfgToolboxNodes[prototypeName].get("name"));
+        
+        //DEBUG
+        //console.log("added: " + prototypeName + " = " + this.dfgToolboxNodes[prototypeName].get("name"));
         
         //watch 4 changes
         this.listenTo(modelPrototype, "change", this.onPrototypeChange);
@@ -335,9 +310,28 @@ var ScriptGeneratorView = Backbone.View.extend({
     
     onPrototypeRemove : function(modelPrototype) {
         //DEBUG
-        console.log("onPrototypeRemove " + JSON.stringify(modelPrototype.toJSON()));
+        //console.log("onPrototypeRemove " + JSON.stringify(modelPrototype.toJSON()));
         
-        //TODO: remove prototype from GUI
+        // get prototype name
+        var prototypeName = modelPrototype.get("name");
+        
+        //DEBUG
+        //console.log("onPrototypeRemove " + prototypeName);
+        
+        //validation
+        if(!this.dfgToolboxNodes[prototypeName]) {
+            console.error("ERROR(onPrototypeRemove): " + prototypeName + " was not yet loaded!");
+            return;
+        }
+        
+        // stop listening to old model
+        this.stopListening(this.dfgToolboxNodes[prototypeName]);
+        
+        //delete from GUI
+        this.removeNodeFromDfgToolbox(prototypeName);
+        
+        // delete old model
+        delete this.dfgToolboxNodes[prototypeName];
     },
     
     onCloneRemove : function(modelClone) {
@@ -353,6 +347,9 @@ var ScriptGeneratorView = Backbone.View.extend({
         
         // get prototype name
         var prototypeName = modelPrototype.get("name");
+        
+        //DEBUG
+        //console.log("onPrototypeChange: " + prototypeName);
         
         // add 2 toolbox - show to user
         if(!this.dfgToolboxNodes[prototypeName]) {
@@ -449,28 +446,29 @@ var ScriptGeneratorView = Backbone.View.extend({
     },
     
     dfgLoad : function() {
-        console.log('dfgLoad');
-        //TODO: load dfg info
+        this.model.reset();
+        this.model.requestLoad();
     },
     
     dfgCreate : function() {
         console.log('dfgCreate');
-        //TODO: send request to create dfg
+        this.model.requestCreate();
     },
     
     dfgStart : function() {
         console.log('dfgStart');
-        //TODO: send request to start created dfg
+        this.model.requestStart();
     },
     
     dfgStop : function() {
         console.log('dfgStop');
-        //TODO: send request to stop started dfg
+        this.model.requestStop();
     },
     
     dfgReset : function() {
         console.log('dfgReset');
-        //TODO: send request to reset dfg and clear GUI
+        this.model.reset();
+        this.model.requestReset();
     }, 
     
     /********************

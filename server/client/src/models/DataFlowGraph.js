@@ -57,7 +57,7 @@ var DataFlowGraph = Backbone.Model.extend({
     initialize : function() { 
     },
 
-    setData: function (data) {
+    setData: function(data) {
         // TODO: parse data and fill properties on this
 
         //DEBUG
@@ -144,11 +144,39 @@ var DataFlowGraph = Backbone.Model.extend({
         }
     },
     
-    requestData: function () {
-        this.sendRequest("DFG_INIT");
+    reset: function() {
+        // remove clones
+        while(this.get("xclone").length > 0) {
+            this.get("xclone").pop();
+        }
+        
+        // remove prototypes
+        while(this.get("xprototype").length > 0) {
+            this.get("xprototype").pop();
+        }
     },
     
-    sendRequest: function (request) {
+    requestLoad: function() {
+        this.sendRequest("DFG_LOAD");
+    },
+    
+    requestCreate: function() {
+        this.sendRequest("DFG_CREATE");
+    },
+    
+    requestStart: function() {
+        this.sendRequest("DFG_START");
+    },
+    
+    requestStop: function() {
+        this.sendRequest("DFG_STOP");
+    },
+    
+    requestReset: function() {
+        this.sendRequest("DFG_RESET");
+    },
+    
+    sendRequest: function(request) {
         var data = {
             type: "onboard",
             data: { 
