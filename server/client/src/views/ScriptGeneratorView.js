@@ -1,3 +1,4 @@
+// todooo:udelat z toho vnitrni promennou
 var scriptGeneratorGraph = {};
 
 var scriptGeneratorModels =  {
@@ -190,6 +191,7 @@ var ScriptGeneratorView = Backbone.View.extend({
                     position: { x: pos.left - containerPos.left, y: pos.top - containerPos.top },
                 });
                 m.setId(modelId);
+                m.setOrigId(toolId);
                 m.setLabel(prototypeName);
                 
                 // get all xvars
@@ -457,7 +459,53 @@ var ScriptGeneratorView = Backbone.View.extend({
     
     dfgCreate : function() {
         console.log('dfgCreate');
-        this.model.requestCreate();
+        
+        // load dfg 2 json object
+        var jsonDfg = scriptGeneratorGraph.toJSON()
+        
+        if(jsonDfg.cells) {
+            // prepare object 4 dfg info
+            var dfg = {
+                prototype: [],
+                clone: [],
+                link: []
+            };
+                
+            for(var i = 0; i < jsonDfg.cells.length; ++i) {
+                var cell = jsonDfg.cells[i];
+                
+                // prototypes and clones
+                if(cell.inPorts && cell.outPorts && cell.id && cell.origId) {
+                    // load prototypes info
+                    var prototypeId = cell.origId;
+                    var cloneId = cell.id;
+                    var modelPrototype = this.dfgToolboxNodes[prototypeId];
+                    if(!modelPrototype) {
+                        console.error("ERROR(dfgCreate): " + prototypeId + " is not loaded!");
+                        return;
+                    }
+                    
+                    // prepate loaded prototypes info 4 sending
+                    dfg.prototype.push({
+                        id: cloneId,
+                        name: modelPrototype.get("name"),
+                    });
+                    
+                    //TODO: load and send information about clones
+                }
+                // links
+                else if(cell.source && cell.target && cell.source.id && cell.target.id && cell.type && cell.type == "link") {
+                    // prepare links info 4 sending
+                    dfg.link.push({
+                        source: cell.source.id + "." + cell.source.port,
+                        target: cell.target.id + "." + cell.target.port,
+                    });
+                }
+            }
+            
+            // send request
+            this.model.requestCreate(dfg);
+        }
     },
     
     dfgStart : function() {

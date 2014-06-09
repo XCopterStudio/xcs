@@ -160,8 +160,8 @@ var DataFlowGraph = Backbone.Model.extend({
         this.sendRequest("DFG_LOAD");
     },
     
-    requestCreate: function() {
-        this.sendRequest("DFG_CREATE");
+    requestCreate: function(dfg) {
+        this.sendRequest("DFG_CREATE", dfg);
     },
     
     requestStart: function() {
@@ -176,14 +176,19 @@ var DataFlowGraph = Backbone.Model.extend({
         this.sendRequest("DFG_RESET");
     },
     
-    sendRequest: function(request) {
-        var data = {
+    sendRequest: function(request, data) {
+        if(!data) {
+            data = "";
+        }
+        
+        var requestData = {
             type: "onboard",
             data: { 
-                request: request 
+                request: request,
+                data: data,
             }
         };
         
-        gSocket.emit('resend', JSON.stringify(data));
+        gSocket.emit('resend', JSON.stringify(requestData));
     },
 });
