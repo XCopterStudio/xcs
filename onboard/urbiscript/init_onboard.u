@@ -14,6 +14,7 @@ var nodeList = [
     "xxci",
     "xdatalogger",
     "xdataplayer",
+    "xlocalization",
     "xlinefinder",
     "xlinedrawer",
     "xlinekeeper"

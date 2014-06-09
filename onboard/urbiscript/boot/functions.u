@@ -1,4 +1,4 @@
-function serverConnect(ip, port, xci, xciVersion = "xci_parrot") {
+function serverConnect(ip, port, xci, fprSetter, xciVersion = "xci_parrot") {
 
     var adapter = Adapter.new();
     adapter.start(ip, port);
@@ -21,6 +21,7 @@ function serverConnect(ip, port, xci, xciVersion = "xci_parrot") {
         "gaz" => "GAZ",
         "command" => "COMMAND"
     ]);
+    fprSetter(flyParamReceiver); // NOTE: temporary patch for fly control logging
     // Onboard state receiver
     var onboardReceiver = Receiver.new("onboard", [
         "mode" => "MODE",
