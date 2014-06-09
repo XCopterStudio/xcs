@@ -5,6 +5,13 @@
 
 using namespace xcs::nodes::localization;
 
+ScaleEstimation::ScaleEstimation() :
+  offsets_xyz_initialized(false), scale_xyz_initialized(false),
+  xy_scale(1), z_scale(1), scale_from_xy(1), scale_from_z(1),
+  roll_offset(0), pitch_offset(0), yaw_offset(0), x_offset(0), y_offset(0), z_offset(0) {
+
+}
+
 TooN::Vector<6> ScaleEstimation::getCurrentOffsets() {
     TooN::Vector<6> res = TooN::makeVector(0, 0, 0, 0, 0, 0);
     if (offsets_xyz_initialized)
@@ -91,13 +98,13 @@ void ScaleEstimation::updateScaleXYZ(TooN::Vector<3> ptamDiff, TooN::Vector<3> i
             sumPP += scalePairs_[i].pp;
             sumPI += scalePairs_[i].pi;
 
-            sumIIxy += scalePairs_[i].imu[0]*scalePairs_[i].imu[0] + scalePairs_[i].imu[1]*scalePairs_[i].imu[1];
-            sumPPxy += scalePairs_[i].ptam[0]*scalePairs_[i].ptam[0] + scalePairs_[i].ptam[1]*scalePairs_[i].ptam[1];
-            sumPIxy += scalePairs_[i].ptam[0]*scalePairs_[i].imu[0] + scalePairs_[i].ptam[1]*scalePairs_[i].imu[1];
+            sumIIxy += scalePairs_[i].imu[0] * scalePairs_[i].imu[0] + scalePairs_[i].imu[1] * scalePairs_[i].imu[1];
+            sumPPxy += scalePairs_[i].ptam[0] * scalePairs_[i].ptam[0] + scalePairs_[i].ptam[1] * scalePairs_[i].ptam[1];
+            sumPIxy += scalePairs_[i].ptam[0] * scalePairs_[i].imu[0] + scalePairs_[i].ptam[1] * scalePairs_[i].imu[1];
 
-            sumIIz += scalePairs_[i].imu[2]*scalePairs_[i].imu[2];
-            sumPPz += scalePairs_[i].ptam[2]*scalePairs_[i].ptam[2];
-            sumPIz += scalePairs_[i].ptam[2]*scalePairs_[i].imu[2];
+            sumIIz += scalePairs_[i].imu[2] * scalePairs_[i].imu[2];
+            sumPPz += scalePairs_[i].ptam[2] * scalePairs_[i].ptam[2];
+            sumPIz += scalePairs_[i].ptam[2] * scalePairs_[i].imu[2];
 
             numIn++;
         } else {

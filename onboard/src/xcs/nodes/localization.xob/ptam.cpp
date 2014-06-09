@@ -107,7 +107,9 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     predConvert_.setPosRPY(PTAMPoseGuess[0], PTAMPoseGuess[1], PTAMPoseGuess[2], PTAMPoseGuess[3], PTAMPoseGuess[4], PTAMPoseGuess[5]);
     // 3. multiply with rotation matrix	
     TooN::SE3<> PTAMPoseGuessSE3 = predConvert_.droneToFrontNT * predConvert_.globaltoDrone;
-    DEBUG_PRINT("PTAM: pre PTAM pose guess " << endl << PTAMPoseGuessSE3);
+    DEBUG_PRINT("PTAM: pre PTAM pose guess (10) " << endl << filterPosePrePTAM);
+    DEBUG_PRINT("PTAM: pre PTAM pose guess " << endl << PTAMPoseGuess);
+    DEBUG_PRINT("PTAM: pre PTAM pose guess SE3" << endl << PTAMPoseGuessSE3);
 
 
     // set

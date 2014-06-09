@@ -10,6 +10,8 @@ namespace localization {
 
 class ScaleEstimation {
 public:
+    ScaleEstimation();
+    
     TooN::Vector<6> getCurrentOffsets();
     
     TooN::Vector<3> getCurrentScales();
