@@ -1,0 +1,99 @@
+load("init_onboard.u");
+
+/*
+ * Static parameters
+ */
+var xciVersion = "xci_dodo";
+//var xciVersion = "xci_parrot";
+
+/*
+ * Dataflow graph
+ */
+
+/*
+ * Initialize nodes
+ */
+var xci = XXci.new(xciVersion);
+
+var logname = Date.now().asString().replace(" ", "_");
+var logger = XDatalogger.new("logs/" + logname + ".txt");
+
+/*
+ * Connect nodes
+ */
+
+/* Register to logger */
+if(xci.hasSlot("rotation")) logger.registerData("rotation","ROTATION","xcs::EulerianVector",xci.&rotation);
+if(xci.hasSlot("velocity")) logger.registerData("velocity","VELOCITY","xcs::CartesianVector",xci.&velocity);
+if(xci.hasSlot("altitude")) logger.registerData("altitude","ALTITUDE","double",xci.&altitude);
+if(xci.hasSlot("altitudeAll")) logger.registerData("altitudeAll","ALTITUDE_ALL","xcs::CartesianVector",xci.&altitudeAll);
+if(xci.hasSlot("altitudeV")) logger.registerData("altitudeV","ALTITUDE_V","double",xci.&altitudeV);
+if(xci.hasSlot("acceleration")) logger.registerData("acceleration","ACCELERATION","xcs::CartesianVector",xci.&acceleration);
+if(xci.hasSlot("gyro")) logger.registerData("gyro","GYRO_RAW","xcs::CartesianVector",xci.&gyro);
+if(xci.hasSlot("magneto")) logger.registerData("magneto","MAGNETO_RAW","xcs::CartesianVector",xci.&magneto);
+if(xci.hasSlot("internalTime")) logger.registerData("internalTime","TIME_LOC","double",xci.&internalTime);
+if(xci.hasSlot("videoTime")) logger.registerData("videoTime","TIME_LOC","double",xci.&videoTime);
+
+if(xci.hasSlot("video")) logger.registerVideo(640, 360, "video","CAMERA","xcs::BitmapType",xci.&video);
+
+var Global.fpr;
+function fprSetter(locFpr) {
+    echo("SETTER");
+    Global.fpr = locFpr;
+}|;
+serverConnect("127.0.0.1", 1234, xci, fprSetter, xciVersion),; // beware the comma
+sleep(2s);
+var fpr = Global.fpr;
+
+
+logger.registerData("flyControl","FLY_CONTROL","xcs::FlyControl",xci.&flyControl);
+logger.registerData("roll","ROLL","double",fpr.&roll);
+logger.registerData("pitch","PITCH","double",fpr.&pitch);
+logger.registerData("yaw","YAW","double",fpr.&yaw);
+logger.registerData("gaz","GAZ","double",fpr.&gaz);
+
+logger.registerData("command","COMMAND","std::string",fpr.&command);
+
+function demo(xci, r, p, y, g, duration = 1s) {
+    var fc = FlyControl.new();    
+    fc.roll = r;
+    fc.pitch = p;
+    fc.yaw = y;
+    fc.gaz = g;
+    
+    var fc0 = FlyControl.new();    
+    fc0.roll = 0;
+    fc0.pitch = 0;
+    fc0.yaw = 0;
+    fc0.gaz = 0;
+    
+    xci.flyControl = fc;
+    sleep(duration);
+    xci.flyControl = fc0;
+    echo("Finished");
+}|;
+
+/*
+ * Start dataflow
+ */
+
+xci.xciInit();
+
+/*
+ * After start configuration
+ */
+if(xciVersion == "xci_dodo") {
+    //xci.setConfiguration("video:timestamps", "1");
+    xci.setConfiguration("video:filename", "tmp/video.mp4");
+    //xci.setConfiguration("video:filename", "logs/2014-03-27_12:08:48.152538.avi");
+    
+    xci.command = "Load";
+    xci.command = "Play";
+} else if(xciVersion == "xci_parrot") {
+    sleep(1s);
+    xci.setConfiguration("video:video_channel", "2"); // 1-bottom, 2-front
+};
+
+logger.start();
+sleep(4s);
+echo("STARTED");
