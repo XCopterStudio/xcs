@@ -34,10 +34,10 @@ void XLocalization::onChangeTimeImu(double internalTime) {
     double ekfTime = internalTime - imuTimeShift_ - IMU_DELAY;
     lastMeasurement_.velocity.z /= (ekfTime - lastMeasurementTime_);
     lastMeasurement_.angularRotationPsi /= (ekfTime - lastMeasurementTime_);
-     // TODO: compute measurement time delay
+    // TODO: compute measurement time delay
     ekf_.measurementImu(lastMeasurement_, ekfTime);
     ptam_->measurementImu(lastMeasurement_, ekfTime);
-    
+
     //printf("Measurement time %f actual time %f \n", actualTime, timeFromStart());
 
     // update actual position of drone
@@ -47,8 +47,6 @@ void XLocalization::onChangeTimeImu(double internalTime) {
     rotation = state.angles;
 }
 
-
-
 void XLocalization::onChangeVideo(urbi::UImage image) {
     // store image until onChangeVideoTime
     lastFrame_ = image;
@@ -56,7 +54,7 @@ void XLocalization::onChangeVideo(urbi::UImage image) {
 
 void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
     double ekfTime = internalTime - imuTimeShift_ - CAM_DELAY;
-    
+
     // convert image to grayscale for PTAM
     urbi::UImage bwImage;
     bwImage.imageFormat = urbi::IMAGE_GREY8;
@@ -67,12 +65,12 @@ void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
     urbi::convert(lastFrame_, bwImage);
 
     ptam_->handleFrame(bwImage, ekfTime); // TODO should push results to EKF
-    
+
     // update current state of drone
-//    DroneState state = ekf_.computeState(timeFromStart());
-//    position = state.position;
-//    velocity = state.velocity;
-//    rotation = state.angles;
+    //    DroneState state = ekf_.computeState(timeFromStart());
+    //    position = state.position;
+    //    velocity = state.velocity;
+    //    rotation = state.angles;
 }
 
 void XLocalization::onChangeFlyControl(const xcs::FlyControl flyControl) {
@@ -110,7 +108,7 @@ XLocalization::XLocalization(const std::string &name) :
     XBindVarF(timeImu, &XLocalization::onChangeTimeImu);
 
     XBindVarF(video, &XLocalization::onChangeVideo);
-//    XBindVarF(videoTime, &XLocalization::onChangeVideoTime);
+    //    XBindVarF(videoTime, &XLocalization::onChangeVideoTime);
     XBindVar(videoTime);
     UNotifyThreadedChange(videoTime.Data(), &XLocalization::onChangeVideoTime, urbi::LOCK_FUNCTION);
 
@@ -121,6 +119,10 @@ XLocalization::XLocalization(const std::string &name) :
     XBindVar(velocity);
     XBindVar(rotation);
     
+    XBindFunction(XLocalization, init);
+}
+
+void XLocalization::init() {
     ptam_ = PtamPtr(new Ptam(ekf_));
 }
 

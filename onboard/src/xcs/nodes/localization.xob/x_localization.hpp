@@ -79,6 +79,8 @@ public:
     XVar<xcs::EulerianVector> rotation;
 
     XLocalization(const std::string &name);
+    
+    void init();
 };
 
 }
