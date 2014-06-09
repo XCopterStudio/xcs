@@ -458,9 +458,7 @@ var ScriptGeneratorView = Backbone.View.extend({
     },
     
     dfgCreate : function() {
-        console.log('dfgCreate');
-        
-        // load dfg 2 json object
+       // load dfg 2 json object
         var jsonDfg = scriptGeneratorGraph.toJSON()
         
         if(jsonDfg.cells) {
@@ -497,8 +495,14 @@ var ScriptGeneratorView = Backbone.View.extend({
                 else if(cell.source && cell.target && cell.source.id && cell.target.id && cell.type && cell.type == "link") {
                     // prepare links info 4 sending
                     dfg.link.push({
-                        source: cell.source.id + "." + cell.source.port,
-                        target: cell.target.id + "." + cell.target.port,
+                        source: {
+                            id: cell.source.id,
+                            port: cell.source.port,
+                        },
+                        target: {
+                            id: cell.target.id,
+                            port: cell.target.port,
+                        },
                     });
                 }
             }

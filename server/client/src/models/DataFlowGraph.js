@@ -184,8 +184,10 @@ var DataFlowGraph = Backbone.Model.extend({
         var requestData = {
             type: "onboard",
             data: { 
-                request: request,
-                data: data,
+                request: {
+                    id: request,
+                    requestData: data,
+                }
             }
         };
         
