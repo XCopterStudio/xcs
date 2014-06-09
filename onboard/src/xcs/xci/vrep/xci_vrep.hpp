@@ -22,10 +22,15 @@ namespace vrep{
 
         int clientID_;
         std::string droneName_;
+        std::string frontCameraName_;
+        std::string bottomCameraName_;
         std::string targetName_;
         std::string address_;
+
         int portNumber_;        
         int droneHandler_;
+        int frontCameraHandler_;
+        int bottomCameraHandler_;
         int targetHandler_;
 
         InformationMap configuration_;
@@ -36,11 +41,19 @@ namespace vrep{
         std::atomic_bool endAll_;
 
         std::thread updateThread_;
+        std::thread videoThread_;
 
         void updateSensors();
+        void updateImages();
     public:
 
-        XciVrep(DataReceiver& dataReceiver, std::string droneName = "Quadricopter#", std::string targetName = "Quadricopter_target#", std::string address = "127.0.0.1", int portNumber = 19997);
+        XciVrep(DataReceiver& dataReceiver, 
+            std::string droneName = "Quadricopter",
+            std::string frontCameraName = "Quadricopter_frontCamera",
+            std::string bottomCameraName = "Quadricopter_floorCamera",
+            std::string targetName = "Quadricopter_target",
+            std::string address = "127.0.0.1", 
+            int portNumber = 19997);
         ~XciVrep();
 
         std::string name() override;

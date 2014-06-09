@@ -33,15 +33,16 @@ namespace parrot{
 
         char buffer_[BUFFER_SIZE];
 
-        volatile std::atomic<bool> update_;
         volatile std::atomic<bool> end_;
+
+        void parseBuffer();
 
         void handleConnectedConfiguration(const boost::system::error_code& ec);
         void receiveConfiguration();
         void handleReceivedConfiguration(const boost::system::error_code& ec, std::size_t bytes_transferred);
         void checkDeadlineConfiguration();
     public:
-        ConfigurationReceiver(AtCommandQueue& atCommandQueue, InformationMap& configuration, boost::asio::io_service& io_service, std::string ipAdress = "192.168.1.1", unsigned int port = 5554);
+        ConfigurationReceiver(AtCommandQueue& atCommandQueue, InformationMap& configuration, boost::asio::io_service& io_service, std::string ipAdress = "192.168.1.1", unsigned int port = 5559);
         ~ConfigurationReceiver();
         void connect();
         void update();

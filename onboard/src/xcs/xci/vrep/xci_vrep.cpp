@@ -5,11 +5,13 @@
 #include <xcs/types/eulerian_vector.hpp>
 #include <xcs/xci/data_receiver.hpp>
 
+#include <xcs/logging.hpp>
+
 using namespace xcs;
 using namespace xcs::xci;
 using namespace xcs::xci::vrep;
 
-const float XciVrep::POS_MULTI = 2;
+const float XciVrep::POS_MULTI = 10;
 
 void XciVrep::updateSensors(){
     while (!endAll_){
@@ -29,12 +31,12 @@ void XciVrep::updateSensors(){
                 dataReceiver_.notify("velocity", CartesianVector(vector[0], vector[1], vector[2]));
             }
 
-            if (simxGetObjectOrientation(clientID_, droneHandler_, droneHandler_, angle, simx_opmode_buffer) == simx_return_ok){
+            if (simxGetObjectOrientation(clientID_, droneHandler_, -1, angle, simx_opmode_buffer) == simx_return_ok){
                 dataReceiver_.notify("rotation", EulerianVector(angle[0], angle[1], angle[2]));
                 droneRotation_.phi = normAngle(degreesToRadians(angle[0]));
                 droneRotation_.theta = normAngle(degreesToRadians(angle[1]));
                 droneRotation_.psi = normAngle(degreesToRadians(angle[2]));
-                printf("XciVrep: drone rotation[%f,%f,%f] \n", droneRotation_.phi, droneRotation_.theta, droneRotation_.psi);
+                //printf("XciVrep: drone rotation[%f,%f,%f] \n", droneRotation_.phi, droneRotation_.theta, droneRotation_.psi);
             }
         }
 
@@ -42,11 +44,37 @@ void XciVrep::updateSensors(){
     }
 }
 
+
+void XciVrep::updateImages(){
+    while (!endAll_){
+        if (simxGetConnectionId(clientID_) != -1){ // we have connection with simulation server
+            simxUChar** image = nullptr;
+            int resolution[] = { 0, 0 };
+            if (simxGetVisionSensorImage(clientID_, frontCameraHandler_, resolution, image, 0, simx_opmode_buffer) == simx_error_noerror){
+                printf("Image resolution [%i,%i]", resolution[0], resolution[1]);
+            }
+
+            if (simxGetVisionSensorImage(clientID_, bottomCameraHandler_, resolution, image, 0, simx_opmode_buffer) == simx_error_noerror){
+                printf("Image resolution [%i,%i]", resolution[0], resolution[1]);
+            }
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(40));
+    }
+}
 // ================ public functions ================
 
-XciVrep::XciVrep(DataReceiver& dataReceiver, std::string droneName, std::string targetName, std::string address, int portNumber) :
+XciVrep::XciVrep(DataReceiver& dataReceiver,
+    std::string droneName,
+    std::string targetName,
+    std::string frontCameraName,
+    std::string bottomCameraName,
+    std::string address, 
+    int portNumber) :
 Xci(dataReceiver),
 droneName_(droneName),
+frontCameraName_(frontCameraName),
+bottomCameraName_(bottomCameraName),
 targetName_(targetName),
 address_(address),
 portNumber_(portNumber)
@@ -60,7 +88,6 @@ XciVrep::~XciVrep(){
     if (clientID_ != -1){
         simxFinish(clientID_);
     }
-
     endAll_ = true;
 }
 
@@ -74,6 +101,9 @@ SensorList XciVrep::sensorList(){
     sensorList.push_back(Sensor("position", "POSITION_ABS"));
     sensorList.push_back(Sensor("velocity", "VELOCITY_ABS"));
     sensorList.push_back(Sensor("rotation", "ROTATION"));
+
+    sensorList.push_back(Sensor("video_front", "VIDEO"));
+    sensorList.push_back(Sensor("video_bottom", "VIDEO"));
     
     return sensorList;
 }
@@ -102,7 +132,6 @@ void XciVrep::configuration(const InformationMap &configuration){}
 void XciVrep::command(const std::string &command){}
 
 void XciVrep::flyControl(float roll, float pitch, float yaw, float gaz){
-    printf("XciVrep: flyControl [%f,%f,%f]\n", roll, pitch, yaw);
     if (simxGetConnectionId(clientID_) != -1){ // we have connection with simulation server
         float angle[3];
         angle[0] = 0;
@@ -114,7 +143,7 @@ void XciVrep::flyControl(float roll, float pitch, float yaw, float gaz){
         float position[3];
         position[0] = dronePosition_.x + cos(droneRotation_.psi)*roll*POS_MULTI - sin(droneRotation_.psi)*pitch*POS_MULTI;
         position[1] = dronePosition_.y - sin(droneRotation_.psi)*roll*POS_MULTI - cos(droneRotation_.psi)*pitch*POS_MULTI;
-        position[2] = dronePosition_.z + gaz;
+        position[2] = dronePosition_.z + gaz*POS_MULTI;
         simxSetObjectPosition(clientID_, targetHandler_, -1, position, simx_opmode_oneshot);
         //printf("XciVrep: New position [%f,%f,%f] \n", position[0],position[1],position[2]);
     }
@@ -124,19 +153,27 @@ void XciVrep::init(){
     // connect to the remote simulator with reconnection
     clientID_ = simxStart(address_.c_str(), portNumber_, true, false, 2000, 5); 
     if (clientID_ != -1){
-        simxGetObjectHandle(clientID_, droneName_.c_str(), &droneHandler_, simx_opmode_oneshot_wait);
-        simxGetObjectHandle(clientID_, targetName_.c_str(), &targetHandler_, simx_opmode_oneshot_wait);
+        int error = 0;
+        error |= simxGetObjectHandle(clientID_, droneName_.c_str(), &droneHandler_, simx_opmode_oneshot_wait);
+        error |= simxGetObjectHandle(clientID_, frontCameraName_.c_str(), &frontCameraHandler_, simx_opmode_oneshot_wait);
+        error |= simxGetObjectHandle(clientID_, bottomCameraName_.c_str(), &bottomCameraHandler_, simx_opmode_oneshot_wait);
+        error |= simxGetObjectHandle(clientID_, targetName_.c_str(), &targetHandler_, simx_opmode_oneshot_wait);
 
-        if (droneHandler_ >= 0 && targetHandler_ >= 0){
+        if (error == 0){
             // Send request for periodic updates
             simxGetObjectPosition(clientID_, droneHandler_, -1, NULL,simx_opmode_streaming);
             simxGetObjectVelocity(clientID_, droneHandler_, NULL, NULL, simx_opmode_streaming);
             simxGetObjectOrientation(clientID_, droneHandler_, -1, NULL, simx_opmode_streaming);
 
+            // Send camera request for periodic updates
+            simxGetVisionSensorImage(clientID_, frontCameraHandler_, NULL, NULL, 0, simx_opmode_streaming_split + 4000);
+            simxGetVisionSensorImage(clientID_, bottomCameraHandler_, NULL, NULL, 0, simx_opmode_streaming_split + 4000);
+
             updateThread_ = std::thread(&XciVrep::updateSensors, this);
+            videoThread_ = std::thread(&XciVrep::updateImages, this);
         }
         else{
-            // TODO: error
+            XCS_LOG_ERROR("Cannot get objects handlers.");
         }
     }else{
         // TODO: error can not connect with simulation

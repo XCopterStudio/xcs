@@ -11,7 +11,24 @@ using namespace std;
 using namespace boost::asio;
 using namespace boost::asio::ip;
 
-const unsigned int ConfigurationReceiver::TIMEOUT = 100;// ms
+const unsigned int ConfigurationReceiver::TIMEOUT = 1000;// ms
+
+void ConfigurationReceiver::parseBuffer(){
+    std::istringstream data(buffer_);
+
+    while (!data.eof()){
+        std::string line;
+        std::getline(data, line);
+
+        int index = line.find(" ");
+        if (index > 0 && index < (line.size() - 3)){
+            std::string key = line.substr(0, index);
+            std::string value = line.substr(index+3, line.size());
+
+            configuration_[key] = value;
+        }
+    }
+}
 
 void ConfigurationReceiver::handleConnectedConfiguration(const boost::system::error_code& ec){
     if (end_) {
@@ -54,7 +71,8 @@ void ConfigurationReceiver::handleReceivedConfiguration(const boost::system::err
     }
     else{
         
-        cout << buffer_ << endl;
+        //cout << buffer_ << endl;
+        parseBuffer();
         receiveConfiguration();
     }
 };
@@ -91,7 +109,6 @@ atCommandQueue_(atCommandQueue),
 configuration_(configuration)
 {
     end_ = false;
-    update_ = false;
 };
 
 ConfigurationReceiver::~ConfigurationReceiver(){
