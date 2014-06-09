@@ -29,7 +29,7 @@ void OptionVisitor::visit(NavdataCks* cks){
 }
 
 void OptionVisitor::visit(NavdataTime* time){
-    dataReceiver_.notify("internalTimeIMU", (time->time >> 21) + ((time->time & 0x001FFFFF) / 1000000));
+    dataReceiver_.notify("internalTimeIMU", (time->time >> 21) + ((time->time & 0x001FFFFF) / 1000000.0));
 }
 
 void OptionVisitor::visit(NavdataRawMeasures* rawMeasures){
