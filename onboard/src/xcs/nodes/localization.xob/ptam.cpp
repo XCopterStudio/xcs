@@ -63,7 +63,6 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     if (resetPtamRequested_) {
         resetPtam();
     }
-    DEBUG_PRINT("PTAM: handle frame ");
 
     /*
      * Copy image data to CVD representation
@@ -73,21 +72,21 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     }
 
     memcpy(frame_.data(), bwImage.data, bwImage.width * bwImage.height);
-    DEBUG_PRINT("PTAM: handle frame ");
+    DEBUG_PRINT("PTAM: copied frame ");
 
     /////////////////////////////
-//    glWindow_->SetupViewport();
-//    glWindow_->SetupVideoOrtho();
-//    glWindow_->SetupVideoRasterPosAndZoom();
-//
-//    ptamTracker_->TrackFrame(frame_, true);
-//
-//    glWindow_->DrawCaption("Test XCS");
-//    glWindow_->DrawMenus();
-//    glWindow_->swap_buffers();
-//    glWindow_->HandlePendingEvents();
-//
-//    return;
+    //    glWindow_->SetupViewport();
+    //    glWindow_->SetupVideoOrtho();
+    //    glWindow_->SetupVideoRasterPosAndZoom();
+    //
+    //    ptamTracker_->TrackFrame(frame_, true);
+    //
+    //    glWindow_->DrawCaption("Test XCS");
+    //    glWindow_->DrawMenus();
+    //    glWindow_->swap_buffers();
+    //    glWindow_->HandlePendingEvents();
+    //
+    //    return;
     /////////////////////////////
 
     DEBUG_PRINT("PTAM: before ekf " << timestamp);
@@ -533,6 +532,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 }
 
 void Ptam::measurementImu(const DroneStateMeasurement &measurement, const double &timestamp) {
+    lock_guard<mutex> lock(imuMeasurementsMtx_);
     ImuMeasurementChronologic copyMeasurement(measurement, timestamp);
     imuMeasurements_.push_back(copyMeasurement);
 }
@@ -542,30 +542,33 @@ void Ptam::pressSpacebar() {
 }
 
 TooN::Vector<3> Ptam::evalNavQue(Timestamp from, Timestamp to, bool* zCorrupted, bool* allCorrupted) {
+    // TODO emptying queue
+    Timestamp firstAdded = 0, lastAdded = 0;
+    double firstZ = 0;
     predIMUOnlyForScale_.resetPos();
 
-    Timestamp firstAdded = 0, lastAdded = 0;
-    // TODO locking and emptying queue
-    double firstZ = 0;
+    { // lock the queue
+        lock_guard<mutex> lock(imuMeasurementsMtx_);
+        for (ImuMeasurements::iterator it = imuMeasurements_.begin(); it != imuMeasurements_.end(); ++it) {
+            auto frontStamp = it->second;
+            if (frontStamp < from) // packages before: delete
+            {
+                //navInfoQueue.pop_front();
+            } else if (frontStamp >= from && frontStamp <= to) {
+                if (firstAdded == 0) {
+                    firstAdded = frontStamp;
+                    firstZ = it->first.altitude;
+                    predIMUOnlyForScale_.z = firstZ; // avoid height check initially!
+                }
+                lastAdded = frontStamp;
+                // add
+                predIMUOnlyForScale_.predictOneStep(*it);
+                // pop
+                //navInfoQueue.pop_front();
+            } else
+                break;
 
-    for (ImuMeasurements::iterator it = imuMeasurements_.begin(); it != imuMeasurements_.end(); ++it) {
-        auto frontStamp = it->second;
-        if (frontStamp < from) // packages before: delete
-        {
-            //navInfoQueue.pop_front();
-        } else if (frontStamp >= from && frontStamp <= to) {
-            if (firstAdded == 0) {
-                firstAdded = frontStamp;
-                firstZ = it->first.altitude;
-                predIMUOnlyForScale_.z = firstZ; // avoid height check initially!
-            }
-            lastAdded = frontStamp;
-            // add
-            predIMUOnlyForScale_.predictOneStep(*it);
-            // pop
-            //navInfoQueue.pop_front();
-        } else
-            break;
+        }
 
     }
     //printf("QueEval: before: %i; skipped: %i, used: %i, left: %i\n", totSize, skipped, used, navInfoQueue.size());
@@ -593,15 +596,10 @@ TooN::Vector<3> Ptam::evalNavQue(Timestamp from, Timestamp to, bool* zCorrupted,
 
 void Ptam::resetPtam() {
     // (re) create all PTAM instances
-    DEBUG_PRINT("PTAM: R1");
     ptamCamera_ = ATANCameraPtr(new ATANCamera(cameraParameters_));
-    DEBUG_PRINT("PTAM: R2");
     ptamMap_ = MapPtr(new Map());
-    DEBUG_PRINT("PTAM: R3");
     ptamMapMaker_ = MapMakerPtr(new MapMaker(*ptamMap_, *ptamCamera_));
-    DEBUG_PRINT("PTAM: R4");
     ptamTracker_ = TrackerPtr(new Tracker(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), *ptamCamera_, *ptamMap_, *ptamMapMaker_));
-    DEBUG_PRINT("PTAM: R5");
 
     // TODO configuration
     ptamMapMaker_->minKFDist = 0;
@@ -614,7 +612,10 @@ void Ptam::resetPtam() {
     DEBUG_PRINT("PTAM: R7");
 
     goodCount_ = 0;
+    forceKF_ = false;
     goodObservations_ = 0;
+    lockNextFrame_ = false;
+
     resetPtamRequested_ = false;
     DEBUG_PRINT("PTAM: R8");
 }

@@ -110,9 +110,9 @@ XLocalization::XLocalization(const std::string &name) :
     XBindVarF(timeImu, &XLocalization::onChangeTimeImu);
 
     XBindVarF(video, &XLocalization::onChangeVideo);
-    XBindVarF(videoTime, &XLocalization::onChangeVideoTime);
-//    XBindVar(videoTime);
-//    UNotifyThreadedChange(videoTime.Data(), &XLocalization::onChangeVideoTime, urbi::LOCK_FUNCTION);
+//    XBindVarF(videoTime, &XLocalization::onChangeVideoTime);
+    XBindVar(videoTime);
+    UNotifyThreadedChange(videoTime.Data(), &XLocalization::onChangeVideoTime, urbi::LOCK_FUNCTION);
 
     XBindVarF(flyControl, &XLocalization::onChangeFlyControl);
     XBindVarF(ptamControl, &XLocalization::onChangePtamControl);

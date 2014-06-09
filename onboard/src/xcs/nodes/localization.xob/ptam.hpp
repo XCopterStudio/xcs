@@ -15,6 +15,7 @@
 
 #include <memory>
 #include <chrono>
+#include <mutex>
 
 class Tracker;
 class ATANCamera;
@@ -105,6 +106,7 @@ private:
     Ekf &ekf_;
 
     localization::ImuMeasurements imuMeasurements_;
+    std::mutex imuMeasurementsMtx_;
 
 
     TooN::Vector<3> evalNavQue(xcs::Timestamp from, xcs::Timestamp to, bool* zCorrupted, bool* allCorrupted);
