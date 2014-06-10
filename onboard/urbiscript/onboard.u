@@ -156,7 +156,12 @@ class Onboard {
             var requestData = request["requestData"];
         
             //debug
-            echo("receive request: " + id + " (data: " + requestData + ")");
+            if(requestData == ""){
+                echo("receive request: " + id);
+            }
+            else {
+                echo("receive request: " + id + " (data: " + requestData + ")");
+            };
 
             try {
                 switch(id) {
@@ -190,11 +195,21 @@ class Onboard {
     };
 
     function doDfgStop_() {
-        //TODO: stop dfg
+        //TODO: send list of stoped xobjects back?
+        for(var slot: this.dfgLobby_.localSlotNames()) {
+            if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("stop")) {
+                this.dfgLobby_.getLocalSlot(slot).value().stop();
+            };
+        };
     };
 
     function doDfgStart_() {
-        //TODO: start dfg
+        //TODO: send list of started xobjects back?
+        for(var slot: this.dfgLobby_.localSlotNames()) {
+            if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("start")) {
+                this.dfgLobby_.getLocalSlot(slot).value().start();
+            };
+        };
     };
 
     function doDfgCreate_(requestData) {
