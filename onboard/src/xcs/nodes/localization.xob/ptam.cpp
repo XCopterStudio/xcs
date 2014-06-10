@@ -94,6 +94,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     DEBUG_PRINT("PTAM: handle frame ");
 
     // ------------------------ do PTAM -------------------------
+    glWindow_->activate(); // set context for the current thread
     glWindow_->SetupViewport();
     glWindow_->SetupVideoOrtho();
     glWindow_->SetupVideoRasterPosAndZoom();
