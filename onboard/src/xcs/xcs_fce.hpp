@@ -47,8 +47,8 @@ namespace xcs{
 
     inline double normAngle(const double angle){
         double temp = angle;
-        while (temp > M_PI) temp -= M_PI;
-        while (temp < -M_PI) temp += M_PI;
+        while (temp > M_PI) temp -= 2*M_PI;
+        while (temp < -M_PI) temp += 2*M_PI;
 
         return temp;
     }

@@ -49,7 +49,7 @@ Ptam::Ptam(Ekf &ekf) : ekf_(ekf) {
     mapLocked_ = false;
     forceKF_ = false;
     // framesIncludedForScaleXYZ_ = -1; NOTE: not initialized
-
+    maxKF_ = 60;
 
 }
 
@@ -117,6 +117,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     //ptamTracker_->setLastFrameLost((goodCount_ < -10), (videoFrameID%2 != 0));
     ptamTracker_->setLastFrameLost((goodCount_ < -20), (frameNo_ % 3 == 0));
     DEBUG_PRINT("PTAM: PTAM xxx");
+    DEBUG_PRINT("goodCount_ " << goodCount_ << " ptamTracker " << ptamTracker_->lastStepResult);
 
     // track
     ptamTracker_->TrackFrame(frame_, true);
@@ -533,7 +534,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     DEBUG_PRINT("window buffer swapped");
 }
 
-void Ptam::measurementImu(const DroneStateMeasurement &measurement, const double &timestamp) {
+void Ptam::measurementImu(const DroneStateMeasurement measurement, const double timestamp) {
     lock_guard<mutex> lock(imuMeasurementsMtx_);
     ImuMeasurementChronologic copyMeasurement(measurement, timestamp);
     imuMeasurements_.push_back(copyMeasurement);

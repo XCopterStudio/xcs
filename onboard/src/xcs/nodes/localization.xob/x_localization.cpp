@@ -13,8 +13,8 @@ const double XLocalization::FLY_CONTROL_SEND_TIME = 0.075; // 75ms
 const double XLocalization::CAM_DELAY = 0.100; // 
 
 void XLocalization::onChangeVelocity(xcs::CartesianVector measuredVelocity) {
-    lastMeasurement_.velocity.x = measuredVelocity.y;
-    lastMeasurement_.velocity.y = measuredVelocity.x;
+    lastMeasurement_.velocity.x = measuredVelocity.x;
+    lastMeasurement_.velocity.y = measuredVelocity.y;
 }
 
 void XLocalization::onChangeRotation(xcs::EulerianVector measuredAnglesRotation) {
@@ -55,21 +55,21 @@ void XLocalization::onChangeVideo(urbi::UImage image) {
 }
 
 void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
-    double ekfTime = internalTime - imuTimeShift_ - CAM_DELAY;
+    //double ekfTime = internalTime - imuTimeShift_ - CAM_DELAY;
 
-    // convert image to grayscale for PTAM
-    urbi::UImage bwImage;
-    bwImage.imageFormat = urbi::IMAGE_GREY8;
-    bwImage.data = nullptr;
-    bwImage.size = 0;
-    bwImage.width = 0;
-    bwImage.height = 0;
-    {
-        lock_guard<mutex> lock(lastFrameMtx_);
-        urbi::convert(lastFrame_, bwImage);
-    }
+    //// convert image to grayscale for PTAM
+    //urbi::UImage bwImage;
+    //bwImage.imageFormat = urbi::IMAGE_GREY8;
+    //bwImage.data = nullptr;
+    //bwImage.size = 0;
+    //bwImage.width = 0;
+    //bwImage.height = 0;
+    //{
+    //    lock_guard<mutex> lock(lastFrameMtx_);
+    //    urbi::convert(lastFrame_, bwImage);
+    //}
 
-    ptam_->handleFrame(bwImage, ekfTime); // TODO should push results to EKF
+    //ptam_->handleFrame(bwImage, ekfTime); // TODO should push results to EKF
 
     // update current state of drone
     //    DroneState state = ekf_.computeState(timeFromStart());
@@ -113,9 +113,9 @@ XLocalization::XLocalization(const std::string &name) :
     XBindVarF(timeImu, &XLocalization::onChangeTimeImu);
 
     XBindVarF(video, &XLocalization::onChangeVideo);
-    //    XBindVarF(videoTime, &XLocalization::onChangeVideoTime);
-    XBindVar(videoTime);
-    UNotifyThreadedChange(videoTime.Data(), &XLocalization::onChangeVideoTime, urbi::LOCK_FUNCTION);
+    XBindVarF(videoTime, &XLocalization::onChangeVideoTime);
+    //XBindVar(videoTime);
+    //UNotifyThreadedChange(videoTime.Data(), &XLocalization::onChangeVideoTime, urbi::LOCK_FUNCTION);
 
     XBindVarF(flyControl, &XLocalization::onChangeFlyControl);
     XBindVarF(ptamControl, &XLocalization::onChangePtamControl);

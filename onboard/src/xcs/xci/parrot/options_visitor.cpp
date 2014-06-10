@@ -15,8 +15,8 @@ void OptionVisitor::visit(NavdataDemo* demo){
         miliDegreesToRadias(demo->psi));
     dataReceiver_.notify("rotation", rotation);
 
-    CartesianVector velocity(demo->vx / 1000.0,
-        demo->vy / 1000.0,
+    CartesianVector velocity(-demo->vy / 1000.0,
+        demo->vx / 1000.0,
         demo->vz / 1000.0);
     dataReceiver_.notify("velocity", velocity);
 
