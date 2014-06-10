@@ -174,7 +174,7 @@ class Onboard {
                     case "DFG_STOP":
                         doDfgStop_();
                     case "DFG_RESET":
-                        doDfgReset_();
+                        doDfgReset_(true);
                     default:
                         echo("...unknown request");
                 };
@@ -190,10 +190,24 @@ class Onboard {
         };
     };
 
-    function doDfgReset_() {
-        //TODO: reset dfg
+    // stop all xobjects and delete them and optionally resend info about loaded xobjects
+    function doDfgReset_(resend) {
+        // stop all xobjects
+        doDfgStop_();
+
+        //delete all xobjects - should call destructors
+        for(var slot: this.dfgLobby_.localSlotNames()) {
+            this.dfgLobby_.getLocalSlot(slot).value = nil;
+            this.dfgLobby_.removeLocalSlot(slot);
+        };
+
+        // send info about loaded xobjects
+        if(resend) {
+            doDfgLoad_();
+        };
     };
 
+    // stop all xobjects
     function doDfgStop_() {
         //TODO: send list of stoped xobjects back?
         for(var slot: this.dfgLobby_.localSlotNames()) {
@@ -203,6 +217,7 @@ class Onboard {
         };
     };
 
+    // start all xobjects
     function doDfgStart_() {
         //TODO: send list of started xobjects back?
         for(var slot: this.dfgLobby_.localSlotNames()) {
@@ -212,10 +227,11 @@ class Onboard {
         };
     };
 
+    // reset old dfg and create new one
     function doDfgCreate_(requestData) {
         try {
-            //TODO: what about started nodes?
-            clearDfg_();
+            // reset dfg
+            doDfgReset_(false);
                 
             // prototypes
             for(var p: requestData["prototype"]) {
@@ -245,7 +261,7 @@ class Onboard {
             };
         }
         catch(var ex) {
-            clearDfg_();
+            doDfgReset_(false);
             throw ex;
         };
     };
@@ -255,13 +271,6 @@ class Onboard {
         startDfgCommunication();
         this.loadedXObjects_.elementChanged!;
         this.&dataFlowGraph_.changed!;
-    };
-
-    function clearDfg_() {
-        for(var slot: this.dfgLobby_.localSlotNames()) {
-            this.dfgLobby_.getLocalSlot(slot).value = nil;
-            this.dfgLobby_.removeLocalSlot(slot);
-        };
     };
 
     // initialize sending information about data flow graph
