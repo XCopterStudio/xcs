@@ -12,9 +12,17 @@ XObject::XObject(const std::string& name) : UObject(name) {
     XBindFunction(XObject, getSemType);
     XBindFunction(XObject, getXVars);
     XBindFunction(XObject, getXInputPorts);
+    XBindFunction(XObject, start);
+    XBindFunction(XObject, stop);
 }
 
-XObject::~XObject(void) { 
+XObject::~XObject() { 
+}
+
+void XObject::start() {
+}
+
+void XObject::stop() {
 }
 
 bool XObject::RegisterXVar(const string& xVarName, const XType& type) {
