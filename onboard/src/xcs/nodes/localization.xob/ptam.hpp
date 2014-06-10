@@ -47,7 +47,7 @@ public:
     /*!
      * \param timestamp EKF time.
      */
-    void measurementImu(const DroneStateMeasurement &measurement, const double &timestamp);
+    void measurementImu(const DroneStateMeasurement measurement, const double timestamp);
 
     virtual void on_key_down(int key);
     

@@ -249,10 +249,15 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
 
     // ======= predict state deviation ===========
     mat noise(4, 4,fill::zeros); // TODO: compute better noise
-    noise(0, 0) = normalDistribution_(randomGenerator_) * 0.1;
-    noise(1, 1) = normalDistribution_(randomGenerator_) * 0.1;
-    noise(2, 2) = normalDistribution_(randomGenerator_) * 0.1;
-    noise(3, 3) = normalDistribution_(randomGenerator_) * 0.1;
+    /*noise(0, 0) = normalDistribution_(randomGenerator_) * 16 * delta * delta;
+    noise(1, 1) = normalDistribution_(randomGenerator_) * 16 * delta * delta;
+    noise(2, 2) = normalDistribution_(randomGenerator_) * 16 * delta * delta;
+    noise(3, 3) = normalDistribution_(randomGenerator_) * 16 * delta * delta;*/
+
+    noise(0, 0) = 16 * delta * delta;
+    noise(1, 1) = 16 * delta * delta;
+    noise(2, 2) = 16 * delta * delta;
+    noise(3, 3) = 16 * delta * delta;
 
     newState.second = jacobian * state.second * jacobian.t() + noiseTransf * noise * noiseTransf.t();
 
@@ -299,13 +304,21 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
 
     // additional noise // TODO: compute better values
     mat noise(7, 7, fill::zeros);
-    noise(0, 0) = normalDistribution_(randomGenerator_) * 0.0016; // altitude variance 
-    noise(1, 1) = normalDistribution_(randomGenerator_) * 0.0025; // velocity x
-    noise(2, 2) = normalDistribution_(randomGenerator_) * 0.0025; // velocity y
-    noise(3, 3) = normalDistribution_(randomGenerator_) * 0.0025; // velocity z
-    noise(4, 4) = normalDistribution_(randomGenerator_) * 0.008; // phi 
-    noise(5, 5) = normalDistribution_(randomGenerator_) * 0.008; // theta
-    noise(6, 6) = normalDistribution_(randomGenerator_) * 0.008; // angular velocity psi
+    //noise(0, 0) = normalDistribution_(randomGenerator_) * 0.0025; // altitude variance 
+    //noise(1, 1) = normalDistribution_(randomGenerator_) * 0.0016; // velocity x
+    //noise(2, 2) = normalDistribution_(randomGenerator_) * 0.0016; // velocity y
+    //noise(3, 3) = normalDistribution_(randomGenerator_) * 0.0016; // velocity z
+    //noise(4, 4) = normalDistribution_(randomGenerator_) * 0.0076; // phi 
+    //noise(5, 5) = normalDistribution_(randomGenerator_) * 0.0076; // theta
+    //noise(6, 6) = normalDistribution_(randomGenerator_) * 0.0076; // angular velocity psi
+
+    noise(0, 0) = 0.0004; // altitude variance 
+    noise(1, 1) = 0.0016; // velocity x
+    noise(2, 2) = 0.0016; // velocity y
+    noise(3, 3) = 0.0016; // velocity z
+    noise(4, 4) = 0.0076; // phi 
+    noise(5, 5) = 0.0076; // theta
+    noise(6, 6) = 0.0076; // angular velocity psi
 
     // compute kalman gain
     mat gain = state.second * measurementJacobian.t() * (measurementJacobian * state.second * measurementJacobian.t() + noise).i();
@@ -422,12 +435,12 @@ void Ekf::clearUpToTime(const double timestamp){
     clearUpToTime(imuMeasurements_, timestamp);
 }
 
-void Ekf::flyControl(const FlyControl &flyControl, const double &timestamp){
+void Ekf::flyControl(const FlyControl flyControl, const double timestamp){
     XCS_LOG_INFO("Inserted new flyControl with timestamp: " << timestamp);
     flyControls_.push_back(FlyControlChronologic(flyControl, timestamp));
 };
 
-void Ekf::measurementImu(const DroneStateMeasurement &measurement, const double &timestamp){
+void Ekf::measurementImu(const DroneStateMeasurement measurement, const double timestamp){
     //XCS_LOG_INFO("Inserted new imu measurement with timestamp: " << timestamp);
     ImuMeasurementChronologic copyMeasurement(measurement, timestamp);
     copyMeasurement.first.measurementID = IDCounter_++;
@@ -436,7 +449,7 @@ void Ekf::measurementImu(const DroneStateMeasurement &measurement, const double 
     droneStates_.push_back(predictAndUpdateFromImu(droneStates_[index], timestamp));
 };
 
-void Ekf::measurementCam(const CameraMeasurement &measurement, const double &timestamp){  // TODO:
+void Ekf::measurementCam(const CameraMeasurement measurement, const double timestamp){  // TODO:
     XCS_LOG_INFO("Inserted new camera measurement with timestamp: " << timestamp);
     int index = findNearest(droneStates_, timestamp);
     DroneStateDistributionChronologic newState = droneStates_[index];
@@ -456,7 +469,7 @@ void Ekf::measurementCam(const CameraMeasurement &measurement, const double &tim
     clearUpToTime(flyControls_, timestamp);
 }
 
-DroneState Ekf::computeState(const double &time){
+DroneState Ekf::computeState(const double time){
     int index = findNearest(droneStates_, time);
     DroneStateDistributionChronologic state = droneStates_[index];
     return predict(state, time).first.first;
