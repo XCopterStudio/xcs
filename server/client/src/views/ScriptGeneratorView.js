@@ -5,10 +5,33 @@ var scriptGeneratorModels =  {
     addModel: function(id, model) {
         this[id] = model;
         
+        var self = this;
+        
         $('g[model-id="' + id + '"]').dblclick(function(eventObject){
-            scriptGeneratorModels[this.getAttribute('model-id')].remove();
+            self.removeModel(this.getAttribute('model-id'));
+            //scriptGeneratorModels[this.getAttribute('model-id')].remove();
         }); 
-    }
+    },
+    
+    removeModel: function(id) {
+        if(this[id]) {
+            this[id].remove();
+            delete this[id];
+        }
+    },
+    
+    clear: function() {
+        var ps = [];
+        for(var p in this) {
+            if (this.hasOwnProperty(p)) {
+                ps.push(p);
+            }
+        }
+        
+        for(var i = 0; i < ps.length; ++i) {
+            this.removeModel(ps[i]);
+        }
+    },
 };
 
 var ScriptGeneratorView = Backbone.View.extend({
@@ -175,8 +198,7 @@ var ScriptGeneratorView = Backbone.View.extend({
                 var xinputPorts = modelPrototype.get("xinputPort");
                 
                 //get name
-                var prototypeName;
-                
+                var prototypeName;            
                 var modelId;
                 if(counter[toolId] == 1) {
                     prototypeName = modelPrototype.get("name");
@@ -525,6 +547,7 @@ var ScriptGeneratorView = Backbone.View.extend({
     dfgReset : function() {
         console.log('dfgReset');
         this.model.reset();
+        scriptGeneratorGraph.clear();
         this.model.requestReset();
     }, 
     
