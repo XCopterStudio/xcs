@@ -33,8 +33,14 @@ void XLocalization::onChangeTimeImu(double internalTime) {
     }
 
     double ekfTime = internalTime - imuTimeShift_ - IMU_DELAY;
-    lastMeasurement_.velocity.z /= (ekfTime - lastMeasurementTime_);
-    lastMeasurement_.angularRotationPsi /= (ekfTime - lastMeasurementTime_);
+    lastMeasurement_.velocity.z /= std::abs(ekfTime - lastMeasurementTime_);
+    lastMeasurement_.angularRotationPsi /= std::abs(ekfTime - lastMeasurementTime_);
+
+    if (std::abs(lastMeasurement_.angularRotationPsi) > M_PI_4){ // discard bigger change than M_PI_4
+        lastMeasurement_.angularRotationPsi = 0;
+    }
+
+    lastMeasurementTime_ = ekfTime;
     // TODO: compute measurement time delay
     ekf_.measurementImu(lastMeasurement_, ekfTime);
     ptam_->measurementImu(lastMeasurement_, ekfTime);
@@ -46,6 +52,9 @@ void XLocalization::onChangeTimeImu(double internalTime) {
     position = state.position;
     velocity = state.velocity;
     rotation = state.angles;
+
+    printf("%f AngularRot %f \n", internalTime, state.angularRotationPsi);
+    printf("%f MeasAngularRot %f \n", internalTime, lastMeasurement_.angularRotationPsi);
 }
 
 void XLocalization::onChangeVideo(urbi::UImage image) {

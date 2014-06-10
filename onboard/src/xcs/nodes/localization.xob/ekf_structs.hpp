@@ -31,7 +31,7 @@ struct DroneState {
       position(mat.at(0, 0), mat.at(1, 0), mat.at(2, 0)),
       velocity(mat.at(3, 0), mat.at(4, 0), mat.at(5, 0)),
       angles(mat.at(6, 0), mat.at(7, 0), mat.at(8, 0)),
-      angularRotationPsi(mat.at(6, 0)),
+      angularRotationPsi(mat.at(9, 0)),
       updateMeasurementID(0) {
     }
 
