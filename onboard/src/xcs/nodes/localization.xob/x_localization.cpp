@@ -18,7 +18,7 @@ void XLocalization::onChangeVelocity(xcs::CartesianVector measuredVelocity) {
 }
 
 void XLocalization::onChangeRotation(xcs::EulerianVector measuredAnglesRotation) {
-    lastMeasurement_.angularRotationPsi = xcs::normAngle(measuredAnglesRotation.psi - lastMeasurement_.angles.psi);
+    lastMeasurement_.angularRotationPsi = measuredAnglesRotation.psi - lastMeasurement_.angles.psi;
     lastMeasurement_.angles = measuredAnglesRotation;
 }
 
@@ -52,9 +52,7 @@ void XLocalization::onChangeTimeImu(double internalTime) {
     position = state.position;
     velocity = state.velocity;
     rotation = state.angles;
-
-    printf("%f AngularRot %f \n", internalTime, state.angularRotationPsi);
-    printf("%f MeasAngularRot %f \n", internalTime, lastMeasurement_.angularRotationPsi);
+    velocityPsi = state.angularRotationPsi;
 }
 
 void XLocalization::onChangeVideo(urbi::UImage image) {
@@ -111,7 +109,8 @@ XLocalization::XLocalization(const std::string &name) :
   ptamControl("COMMAND"),
   position("POSITION_ABS"),
   velocity("VELOCITY_ABS"),
-  rotation("ROTATION") {
+  rotation("ROTATION"),
+  velocityPsi("ROTATION_VELOCITY_ABS"){
     startTime_ = clock_.now();
     lastMeasurementTime_ = 0;
     imuTimeShift_ = std::numeric_limits<double>::max();
@@ -132,6 +131,7 @@ XLocalization::XLocalization(const std::string &name) :
     XBindVar(position);
     XBindVar(velocity);
     XBindVar(rotation);
+    XBindVar(velocityPsi);
 
     XBindFunction(XLocalization, init);
 }

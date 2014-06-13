@@ -79,6 +79,7 @@ public:
     XVar<xcs::CartesianVector> position;
     XVar<xcs::CartesianVector> velocity;
     XVar<xcs::EulerianVector> rotation;
+    XVar<double> velocityPsi;
 
     XLocalization(const std::string &name);
     

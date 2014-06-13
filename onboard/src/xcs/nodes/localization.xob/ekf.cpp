@@ -254,10 +254,10 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     noise(2, 2) = normalDistribution_(randomGenerator_) * 16 * delta * delta;
     noise(3, 3) = normalDistribution_(randomGenerator_) * 16 * delta * delta;*/
 
-    noise(0, 0) = 200 * delta;
-    noise(1, 1) = 200 * delta;
-    noise(2, 2) = 200 * delta;
-    noise(3, 3) = 200 * delta;
+    noise(0, 0) = 16 * delta;
+    noise(1, 1) = 16 * delta;
+    noise(2, 2) = 16 * delta;
+    noise(3, 3) = 16 * delta;
 
     newState.second = jacobian * state.second * jacobian.t() + noiseTransf * noise * noiseTransf.t();
 
@@ -305,11 +305,11 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     // additional noise // TODO: compute better values
     mat noise(7, 7, fill::zeros);
     noise(0, 0) = 0.0004; // altitude variance 
-    noise(1, 1) = 0.0001; // velocity x
-    noise(2, 2) = 0.0001; // velocity y
-    noise(3, 3) = 0.0004; // velocity z
-    noise(4, 4) = 0.0012; // phi 
-    noise(5, 5) = 0.0012; // theta
+    noise(1, 1) = 0.000025; // velocity x
+    noise(2, 2) = 0.000025; // velocity y
+    noise(3, 3) = 0.01; // velocity z
+    noise(4, 4) = 0.0003; // phi 
+    noise(5, 5) = 0.0003; // theta
     noise(6, 6) = 0.01; // angular velocity psi
 
     // compute kalman gain
@@ -426,16 +426,16 @@ randomGenerator_(5){
     //parameters_[8] = 1.4;
     //parameters_[9] = 1.0;
 
-    parameters_[0] = 0.58;
+    parameters_[0] = 10.32;
     parameters_[1] = 0; // TODO: compute
-    parameters_[2] = 17.8;
+    parameters_[2] = 0.58;
     parameters_[3] = 0; // TODO: compute
-    parameters_[4] = 0.175;
-    parameters_[5] = 0.611;
-    parameters_[6] = 0.175;
-    parameters_[7] = 0.436;
+    parameters_[4] = 6.108;
+    parameters_[5] = 0.175;
+    parameters_[6] = 4.363;
+    parameters_[7] = 0.175;
     parameters_[8] = 1.4;
-    parameters_[9] = 1.0;
+    parameters_[9] = 1.4;
 
 }
 
