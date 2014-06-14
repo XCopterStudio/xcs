@@ -211,8 +211,8 @@ class Onboard {
     function doDfgStop_() {
         //TODO: send list of stoped xobjects back?
         for(var slot: this.dfgLobby_.localSlotNames()) {
-            if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("stop")) {
-                this.dfgLobby_.getLocalSlot(slot).value().stop();
+            if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("stopXO")) {
+                this.dfgLobby_.getLocalSlot(slot).value().stopXO();
             };
         };
     };
@@ -221,8 +221,8 @@ class Onboard {
     function doDfgStart_() {
         //TODO: send list of started xobjects back?
         for(var slot: this.dfgLobby_.localSlotNames()) {
-            if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("start")) {
-                this.dfgLobby_.getLocalSlot(slot).value().start();
+            if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("startXO")) {
+                this.dfgLobby_.getLocalSlot(slot).value().startXO();
             };
         };
     };
