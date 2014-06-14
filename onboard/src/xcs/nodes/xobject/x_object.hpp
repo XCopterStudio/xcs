@@ -21,20 +21,21 @@ public:
     virtual ~XObject();
     void startXO();
     void stopXO();
-    virtual void stateChanged(int state);
     const std::string getType(const std::string& xVarName) const;
     const std::string getSynType(const std::string& xVarName) const;
     const std::string getSemType(const std::string& xVarName) const;
     StringList getXVars() const;
     StringList getXInputPorts() const;
 protected:
-    bool RegisterXVar(const std::string& xVarName, const XType& type);
-    bool RegisterXInputPort(const std::string& xVarName, const XType& type);
+    bool registerXVar(const std::string& xVarName, const XType& type);
+    bool registerXInputPort(const std::string& xVarName, const XType& type);
+    // this method will never be called with STATE_CREATED parameter
+    virtual void stateChanged(XObject::State state);
     const XObject::State getState() const;
 private:
     typedef std::map<const std::string, XType> XTypesType;
     StringList getXChilds(const XType::DataFlowType dataFlowType) const;
-    bool RegisterXChild(const std::string& xVarName, const XType& type, const XType::DataFlowType dataFlowType);
+    bool registerXChild(const std::string& xVarName, const XType& type, const XType::DataFlowType dataFlowType);
     void setState(XObject::State state);
     XTypesType xVarsType_;
     XObject::State state_;
