@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <memory>
+#include <mutex>
 
 #include "ekf.hpp"
 #include "ptam.hpp"
@@ -40,6 +41,7 @@ class XLocalization : public XObject {
     TimePoint startTime_;
     double imuTimeShift_;
     ::urbi::UImage lastFrame_;
+    std::mutex lastFrameMtx_;
 
     void onChangeVelocity(xcs::CartesianVector measuredVelocity);
     void onChangeRotation(xcs::EulerianVector measuredAnglesRotation);
@@ -77,8 +79,11 @@ public:
     XVar<xcs::CartesianVector> position;
     XVar<xcs::CartesianVector> velocity;
     XVar<xcs::EulerianVector> rotation;
+    XVar<double> velocityPsi;
 
     XLocalization(const std::string &name);
+    
+    void init();
 };
 
 }
