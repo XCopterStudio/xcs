@@ -528,7 +528,8 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     //        pthread_mutex_unlock(&(node->logPTAM_CS));
     //    }
 
-    glWindow_->DrawCaption("Test XCS");
+    
+    glWindow_->DrawCaption(ptamTracker_->GetMessageForUser());
     glWindow_->DrawMenus();
     glWindow_->swap_buffers();
     glWindow_->HandlePendingEvents();

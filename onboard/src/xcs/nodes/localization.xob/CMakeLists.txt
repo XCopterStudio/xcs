@@ -17,6 +17,9 @@ x_target_link_libraries(${PROJECT_NAME} xobject)
 find_package(UrbiAll)
 use_urbi(${PROJECT_NAME})
 
+find_package(Boost 1.55 REQUIRED COMPONENTS thread)
+include_directories(${Boost_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
 find_package(OpenGL)
 find_package(GLUT)
