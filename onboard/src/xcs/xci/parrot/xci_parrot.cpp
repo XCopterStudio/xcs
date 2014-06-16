@@ -94,14 +94,15 @@ bool XciParrot::setDefaultConfiguration(){
     setConfirmedConfigure(new AtCommandCONFIG("custom:session_id", "0a1b2c3d"));
 
     std::stringstream value;
-    value << H264_720P_CODEC;
+    //value << H264_720P_CODEC;
+    value << H264_360P_CODEC;
     setConfirmedConfigure(new AtCommandCONFIG("video:video_codec", value.str()));
     setConfirmedConfigure(new AtCommandCONFIG("video:bitrate_control_mode", "1"));
     setConfirmedConfigure(new AtCommandCONFIG("video:max_bitrate", "4000"));
     setConfirmedConfigure(new AtCommandCONFIG("video:video_channel", "0"));
 
     //receive only reduced navdata set
-    setConfirmedConfigure(new AtCommandCONFIG("general:navdata_demo", "TRUE"));
+    setConfirmedConfigure(new AtCommandCONFIG("general:navdata_demo", "FALSE"));
     // set which data will be send
     unsigned int ndOptions = ((1 << NAVDATA_DEMO_TAG) |
         (1 << NAVDATA_ALTITUDE_TAG) |

@@ -14,7 +14,7 @@ using namespace std;
 const unsigned int VideoReceiver::TIMEOUT = 1000; // ms
 
 const unsigned int VideoReceiver::BUFFER_COUNT = 30;
-const unsigned int VideoReceiver::BUFFER_SIZE = 50000;
+const unsigned int VideoReceiver::BUFFER_SIZE = 200000;
 
 void VideoReceiver::handleConnectedVideo(const boost::system::error_code& ec){
     if (!socketVideo_.is_open()){

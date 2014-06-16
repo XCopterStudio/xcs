@@ -17,7 +17,8 @@ VideoWriter::~VideoWriter() {
 void VideoWriter::init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, LoggerContext &context, ::urbi::UVar &uvar) {
     basicInit(dataName, context, uvar);
     videoFileWriter_ = unique_ptr<VideoFileWriter>(new VideoFileWriter(videoFile, width, height));
-    UNotifyThreadedChange(uvar, &VideoWriter::write, ::urbi::LOCK_FUNCTION);
+    //UNotifyThreadedChange(uvar, &VideoWriter::write, ::urbi::LOCK_FUNCTION);
+    UNotifyChange(uvar, &VideoWriter::write);
 }
 
 void VideoWriter::write(urbi::UImage image) {
