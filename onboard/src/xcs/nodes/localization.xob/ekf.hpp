@@ -5,7 +5,7 @@
 #include <utility>
 #include <random>
 #include <chrono>
-#include <boost/thread/shared_mutex.hpp>
+#include <boost/thread.hpp>
 
 #include <xcs/types/fly_control.hpp>
 #include <xcs/types/cartesian_vector.hpp>
