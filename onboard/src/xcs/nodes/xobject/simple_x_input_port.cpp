@@ -14,7 +14,7 @@ SimpleXInputPort::~SimpleXInputPort() {
 }
 
 void SimpleXInputPort::Init(XObject& parent, const string& varname) {
-    parent.RegisterXInputPort(varname, Type());
+    parent.registerXInputPort(varname, Type());
     
     if(input_ != NULL) {
         delete input_;

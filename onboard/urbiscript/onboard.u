@@ -151,68 +151,126 @@ class Onboard {
     };
 
     function doRequest_(request) {
-        var id = request["id"];
-        var requestData = request["requestData"];
+        if(request.has("id") && request.has("requestData")) {
+            var id = request["id"];
+            var requestData = request["requestData"];
         
-        //debug
-        echo("receive request: " + id + " (data: " + requestData + ")");
+            //debug
+            if(requestData == ""){
+                echo("receive request: " + id);
+            }
+            else {
+                echo("receive request: " + id + " (data: " + requestData + ")");
+            };
 
-        switch(id) {
-            case "DFG_LOAD":
-                // start dfg communication and send info about loaded xobjects and default dfg
-                startDfgCommunication();
-                this.loadedXObjects_.elementChanged!;
-                this.&dataFlowGraph_.changed!;
-            case "DFG_CREATE":
-                try {
-                    //TODO: what about started nodes?
-                    clearDfg_();
-                
-                    // prototypes
-                    for(var p: requestData["prototype"]) {
-                        var id = p["id"];
-                        var name = p["name"];
-
-                        var createPart = "";
-                        if(this.xobjectInfo_.has(name)) {
-                            createPart = this.xobjectInfo_[name].name + ".new(" + this.xobjectInfo_[name].initParam + ")";
-                        }
-                        else {
-                            createPart = id + ".()";
-                        };
-
-                        this.dfgLobby_.setSlot(id, System.eval(createPart + ";"));
-                        //echo(this.dfgLobby_.getLocalSlot(id).asString());
-                    };
-
-                    // links
-                    for(var l: requestData["link"]) {
-                        var sourceId = l["source"]["id"];
-                        var sourcePort = l["source"]["port"];
-                        var targetId = l["target"]["id"];
-                        var targetPort = l["target"]["port"];
-
-                        this.dfgLobby_.getLocalSlot(sourceId).value().getLocalSlot(sourcePort) >> 
-                            this.dfgLobby_.getLocalSlot(targetId).value().getLocalSlot(targetPort);
-                    };
-                }
-                catch(var ex) {
-                   echo("ERROR(DFG_CREATE): " + ex.asString());
-                   clearDfg_();
+            try {
+                switch(id) {
+                    case "DFG_LOAD":
+                        doDfgLoad_();
+                    case "DFG_CREATE":
+                        doDfgCreate_(requestData);
+                    case "DFG_START":
+                        doDfgStart_();
+                    case "DFG_STOP":
+                        doDfgStop_();
+                    case "DFG_RESET":
+                        doDfgReset_(true);
+                    default:
+                        echo("...unknown request");
                 };
-            case "DFG_START":
-            case "DFG_STOP":
-            case "DFG_RESET":
-            default:
-                echo("...unknown request");
+            }
+            catch(var ex) {
+                //TODO: what to do with errors? send to client?
+                echo("ERROR(" + id + "): " + ex.asString());
+            };
+        }
+        else {
+            //TODO: what to do with errors? send to client?
+            echo("ERROR(doRequest): bad request format: " + request.asString());
         };
     };
 
-    function clearDfg_() {
+    // stop all xobjects and delete them and optionally resend info about loaded xobjects
+    function doDfgReset_(resend) {
+        // stop all xobjects
+        doDfgStop_();
+
+        //delete all xobjects - should call destructors
         for(var slot: this.dfgLobby_.localSlotNames()) {
             this.dfgLobby_.getLocalSlot(slot).value = nil;
             this.dfgLobby_.removeLocalSlot(slot);
         };
+
+        // send info about loaded xobjects
+        if(resend) {
+            doDfgLoad_();
+        };
+    };
+
+    // stop all xobjects
+    function doDfgStop_() {
+        //TODO: send list of stoped xobjects back?
+        for(var slot: this.dfgLobby_.localSlotNames()) {
+            if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("stopXO")) {
+                this.dfgLobby_.getLocalSlot(slot).value().stopXO();
+            };
+        };
+    };
+
+    // start all xobjects
+    function doDfgStart_() {
+        //TODO: send list of started xobjects back?
+        for(var slot: this.dfgLobby_.localSlotNames()) {
+            if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("startXO")) {
+                this.dfgLobby_.getLocalSlot(slot).value().startXO();
+            };
+        };
+    };
+
+    // reset old dfg and create new one
+    function doDfgCreate_(requestData) {
+        try {
+            // reset dfg
+            doDfgReset_(false);
+                
+            // prototypes
+            for(var p: requestData["prototype"]) {
+                var id = p["id"];
+                var name = p["name"];
+
+                var createPart = "";
+                if(this.xobjectInfo_.has(name)) {
+                    createPart = this.xobjectInfo_[name].name + ".new(" + this.xobjectInfo_[name].initParam + ")";
+                }
+                else {
+                    createPart = id + ".()";
+                };
+
+                this.dfgLobby_.setSlot(id, System.eval(createPart + ";"));
+            };
+
+            // links
+            for(var l: requestData["link"]) {
+                var sourceId = l["source"]["id"];
+                var sourcePort = l["source"]["port"];
+                var targetId = l["target"]["id"];
+                var targetPort = l["target"]["port"];
+
+                this.dfgLobby_.getLocalSlot(sourceId).value().getLocalSlot(sourcePort) >> 
+                    this.dfgLobby_.getLocalSlot(targetId).value().getLocalSlot(targetPort);
+            };
+        }
+        catch(var ex) {
+            doDfgReset_(false);
+            throw ex;
+        };
+    };
+
+    // start dfg communication and send info about loaded xobjects and default dfg
+    function doDfgLoad_() {
+        startDfgCommunication();
+        this.loadedXObjects_.elementChanged!;
+        this.&dataFlowGraph_.changed!;
     };
 
     // initialize sending information about data flow graph

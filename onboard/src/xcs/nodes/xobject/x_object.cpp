@@ -12,20 +12,32 @@ XObject::XObject(const std::string& name) : UObject(name) {
     XBindFunction(XObject, getSemType);
     XBindFunction(XObject, getXVars);
     XBindFunction(XObject, getXInputPorts);
+    XBindFunction(XObject, startXO);
+    XBindFunction(XObject, stopXO);
+
+    setState(XObject::STATE_CREATED);
 }
 
-XObject::~XObject(void) { 
+XObject::~XObject() {
 }
 
-bool XObject::RegisterXVar(const string& xVarName, const XType& type) {
-    return RegisterXChild(xVarName, type, XType::DATAFLOWTYPE_XVAR);
+void XObject::startXO() {
+    setState(XObject::STATE_STARTED);
 }
 
-bool XObject::RegisterXInputPort(const string& xVarName, const XType& type) {
-    return RegisterXChild(xVarName, type, XType::DATAFLOWTYPE_XINPUTPORT);
+void XObject::stopXO() {
+    setState(XObject::STATE_STOPED);
 }
 
-bool XObject::RegisterXChild(const string& xVarName, const XType& type, const XType::DataFlowType dataFlowType) {
+bool XObject::registerXVar(const string& xVarName, const XType& type) {
+    return registerXChild(xVarName, type, XType::DATAFLOWTYPE_XVAR);
+}
+
+bool XObject::registerXInputPort(const string& xVarName, const XType& type) {
+    return registerXChild(xVarName, type, XType::DATAFLOWTYPE_XINPUTPORT);
+}
+
+bool XObject::registerXChild(const string& xVarName, const XType& type, const XType::DataFlowType dataFlowType) {
     // reg new xvar
     if (xVarsType_.count(xVarName) == 0) {
         xVarsType_.emplace(xVarName, type);
@@ -77,4 +89,16 @@ XObject::StringList XObject::getXChilds(const XType::DataFlowType dataFlowType) 
     }
 
     return result;
+}
+
+void XObject::stateChanged(XObject::State state) {
+}
+
+void XObject::setState(XObject::State state) {
+    state_ = state;
+    stateChanged(state_);
+}
+
+const XObject::State XObject::getState() const {
+    return state_;
 }

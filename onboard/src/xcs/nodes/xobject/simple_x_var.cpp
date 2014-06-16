@@ -13,7 +13,7 @@ SimpleXVar::~SimpleXVar() {
 }
 
 void SimpleXVar::Init(XObject& parent, const string& varname) {
-    parent.RegisterXVar(varname, Type());
+    parent.registerXVar(varname, Type());
 
     if (data_ != NULL) {
         delete data_;
