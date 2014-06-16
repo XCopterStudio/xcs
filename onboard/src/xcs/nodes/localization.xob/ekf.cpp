@@ -5,10 +5,11 @@
 
 #include <cmath>
 
+using namespace arma;
+using namespace boost;
 using namespace std;
 using namespace xcs;
 using namespace xcs::nodes::localization;
-using namespace arma;
 
 template <typename Deque>
 void Ekf::clearUpToTime(Deque &deque, const double &time){
@@ -440,6 +441,7 @@ randomGenerator_(5){
 }
 
 void Ekf::clearUpToTime(const double timestamp){
+    unique_lock<shared_mutex> lock(bigSharedMtx_);
     clearUpToTime(droneStates_, timestamp);
     clearUpToTime(flyControls_, timestamp);
     clearUpToTime(imuMeasurements_, timestamp);
@@ -447,20 +449,23 @@ void Ekf::clearUpToTime(const double timestamp){
 
 void Ekf::flyControl(const FlyControl flyControl, const double timestamp){
     XCS_LOG_INFO("Inserted new flyControl with timestamp: " << timestamp);
+    unique_lock<shared_mutex> lock(bigSharedMtx_);
     flyControls_.push_back(FlyControlChronologic(flyControl, timestamp));
 };
 
-void Ekf::measurementImu(const DroneStateMeasurement measurement, const double timestamp){
+void Ekf::measurementImu(const DroneStateMeasurement &measurement, const double timestamp){
     //XCS_LOG_INFO("Inserted new imu measurement with timestamp: " << timestamp);
     ImuMeasurementChronologic copyMeasurement(measurement, timestamp);
     copyMeasurement.first.measurementID = IDCounter_++;
+    unique_lock<shared_mutex> lock(bigSharedMtx_);
     imuMeasurements_.push_back(copyMeasurement);
     int index = findNearest(droneStates_, timestamp); // TODO: check -1 when findNearest cannot find any state which we can update
     droneStates_.push_back(predictAndUpdateFromImu(droneStates_[index], timestamp));
 };
 
-void Ekf::measurementCam(const CameraMeasurement measurement, const double timestamp){  // TODO:
+void Ekf::measurementCam(const CameraMeasurement &measurement, const double timestamp){
     XCS_LOG_INFO("Inserted new camera measurement with timestamp: " << timestamp);
+    unique_lock<shared_mutex> lock(bigSharedMtx_); // Note: Maybe upgradable lock could be used, but this is not a conditinal writer.
     int index = findNearest(droneStates_, timestamp);
     DroneStateDistributionChronologic newState = droneStates_[index];
     //delete all old droneStates
@@ -480,6 +485,7 @@ void Ekf::measurementCam(const CameraMeasurement measurement, const double times
 }
 
 DroneState Ekf::computeState(const double time){
+    shared_lock<shared_mutex> lock(bigSharedMtx_);
     int index = findNearest(droneStates_, time);
     DroneStateDistributionChronologic state = droneStates_[index];
     return predict(state, time).first.first;

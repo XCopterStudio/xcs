@@ -36,7 +36,7 @@ void XLocalization::onChangeTimeImu(double internalTime) {
     lastMeasurement_.velocity.z /= std::abs(ekfTime - lastMeasurementTime_);
     lastMeasurement_.angularRotationPsi /= std::abs(ekfTime - lastMeasurementTime_);
 
-    if (std::abs(lastMeasurement_.angularRotationPsi) > M_PI_4){ // discard bigger change than M_PI_4
+    if (std::abs(lastMeasurement_.angularRotationPsi) > M_PI_4) { // discard bigger change than M_PI_4
         lastMeasurement_.angularRotationPsi = 0;
     }
 
@@ -62,27 +62,27 @@ void XLocalization::onChangeVideo(urbi::UImage image) {
 }
 
 void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
-    //double ekfTime = internalTime - imuTimeShift_ - CAM_DELAY;
+    double ekfTime = internalTime - imuTimeShift_ - CAM_DELAY;
 
-    //// convert image to grayscale for PTAM
-    //urbi::UImage bwImage;
-    //bwImage.imageFormat = urbi::IMAGE_GREY8;
-    //bwImage.data = nullptr;
-    //bwImage.size = 0;
-    //bwImage.width = 0;
-    //bwImage.height = 0;
-    //{
-    //    lock_guard<mutex> lock(lastFrameMtx_);
-    //    urbi::convert(lastFrame_, bwImage);
-    //}
+    // convert image to grayscale for PTAM
+    urbi::UImage bwImage;
+    bwImage.imageFormat = urbi::IMAGE_GREY8;
+    bwImage.data = nullptr;
+    bwImage.size = 0;
+    bwImage.width = 0;
+    bwImage.height = 0;
+    {
+        lock_guard<mutex> lock(lastFrameMtx_);
+        urbi::convert(lastFrame_, bwImage);
+    }
 
-    //ptam_->handleFrame(bwImage, ekfTime); // TODO should push results to EKF
+    ptam_->handleFrame(bwImage, ekfTime); // this will do update EKF
 
     // update current state of drone
-    //    DroneState state = ekf_.computeState(timeFromStart());
-    //    position = state.position;
-    //    velocity = state.velocity;
-    //    rotation = state.angles;
+    DroneState state = ekf_.computeState(timeFromStart());
+    position = state.position;
+    velocity = state.velocity;
+    rotation = state.angles;
 }
 
 void XLocalization::onChangeFlyControl(const xcs::FlyControl flyControl) {
@@ -110,7 +110,7 @@ XLocalization::XLocalization(const std::string &name) :
   position("POSITION_ABS"),
   velocity("VELOCITY_ABS"),
   rotation("ROTATION"),
-  velocityPsi("ROTATION_VELOCITY_ABS"){
+  velocityPsi("ROTATION_VELOCITY_ABS") {
     startTime_ = clock_.now();
     lastMeasurementTime_ = 0;
     imuTimeShift_ = std::numeric_limits<double>::max();
@@ -121,9 +121,8 @@ XLocalization::XLocalization(const std::string &name) :
     XBindVarF(timeImu, &XLocalization::onChangeTimeImu);
 
     XBindVarF(video, &XLocalization::onChangeVideo);
-    XBindVarF(videoTime, &XLocalization::onChangeVideoTime);
-    //XBindVar(videoTime);
-    //UNotifyThreadedChange(videoTime.Data(), &XLocalization::onChangeVideoTime, urbi::LOCK_FUNCTION);
+    XBindVar(videoTime);
+    UNotifyThreadedChange(videoTime.Data(), &XLocalization::onChangeVideoTime, urbi::LOCK_FUNCTION);
 
     XBindVarF(flyControl, &XLocalization::onChangeFlyControl);
     XBindVarF(ptamControl, &XLocalization::onChangePtamControl);
