@@ -5,6 +5,7 @@
 #include <utility>
 #include <random>
 #include <chrono>
+#include <boost/thread.hpp>
 
 #include <xcs/types/fly_control.hpp>
 #include <xcs/types/cartesian_vector.hpp>
@@ -34,6 +35,9 @@ typedef std::mt19937 Generator;
 typedef std::normal_distribution<double> NormalDistribution;
 
 class Ekf {
+    /*! Used to control access to all of droneStates_, imuMeasurements_ and flyControls_. */
+    boost::shared_mutex bigSharedMtx_;
+
     DroneStates droneStates_;
     ImuMeasurements imuMeasurements_;
     FlyControls flyControls_;
@@ -68,22 +72,22 @@ public:
     /*!
      * \param timestamp EKF time.
      */
-    void flyControl(const xcs::FlyControl &flyControl, const double &timestamp);
+    void flyControl(const xcs::FlyControl flyControl, const double timestamp);
 
     /*!
      * \param timestamp EKF time.
      */
-    void measurementImu(const DroneStateMeasurement &measurement, const double &timestamp);
+    void measurementImu(const DroneStateMeasurement &measurement, const double timestamp);
 
     /*!
      * \param timestamp EKF time.
      */
-    void measurementCam(const CameraMeasurement &measurement, const double &timestamp);
+    void measurementCam(const CameraMeasurement &measurement, const double timestamp);
 
     /*!
      * \param time EKF time.
      */
-    DroneState computeState(const double &time); // compute prediction state up to this time 
+    DroneState computeState(const double time); // compute prediction state up to this time 
 };
 
 }

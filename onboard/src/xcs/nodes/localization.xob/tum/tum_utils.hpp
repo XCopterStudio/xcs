@@ -4,6 +4,7 @@
 #include <TooN/TooN.h>
 #include <TooN/so3.h>
 #include <chrono>
+#include <cmath>
 
 namespace xcs {
 namespace nodes {
@@ -22,12 +23,8 @@ namespace localization {
 // pitch: rhs-system *-1;
 // yaw: rhs system *-1;
 
-inline static TooN::SO3<> rpy2rod(double roll, double pitch, double yaw) {
+inline static TooN::SO3<> rpy2rod(const double roll, const double pitch, const double yaw) {
     TooN::Matrix<3, 3> mat;
-
-    pitch /= 180 / 3.14159265;
-    roll /= 180 / 3.14159265;
-    yaw /= -180 / 3.14159265;
 
     double sa = sin(yaw); // a is yaw = psi
     double ca = cos(yaw);
@@ -61,17 +58,12 @@ inline static void rod2rpy(TooN::SO3<> trans, double* roll, double* pitch, doubl
     *yaw = atan2(mat(0, 1) / cos(*roll), mat(0, 0) / cos(*roll));
     *pitch = atan2(mat(1, 2) / cos(*roll), mat(2, 2) / cos(*roll));
 
-    *pitch *= 180 / 3.14159265;
-    *roll *= 180 / 3.14159265;
-    *yaw *= -180 / 3.14159265;
-
-
-    while (*pitch > 180) *pitch -= 360;
-    while (*pitch < -180) *pitch += 360;
-    while (*roll > 180) *roll -= 360;
-    while (*roll < -180) *roll += 360;
-    while (*yaw > 180) *yaw -= 360;
-    while (*yaw < -180) *yaw += 360;
+    while (*pitch > M_PI) *pitch -= 2 * M_PI;
+    while (*pitch < -M_PI) *pitch += 2 * M_PI;
+    while (*roll > M_PI) *roll -= 2 * M_PI;
+    while (*roll < -M_PI) *roll += 2 * M_PI;
+    while (*yaw > M_PI) *yaw -= 2 * M_PI;
+    while (*yaw < -M_PI) *yaw += 2 * M_PI;
 }
 
 template<typename RepT, typename DurationT>

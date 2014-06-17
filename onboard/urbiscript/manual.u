@@ -31,7 +31,7 @@ if(xci.hasSlot("altitudeV")) logger.registerData("altitudeV","ALTITUDE_V","doubl
 if(xci.hasSlot("acceleration")) logger.registerData("acceleration","ACCELERATION","xcs::CartesianVector",xci.&acceleration);
 if(xci.hasSlot("gyro")) logger.registerData("gyro","GYRO_RAW","xcs::CartesianVector",xci.&gyro);
 if(xci.hasSlot("magneto")) logger.registerData("magneto","MAGNETO_RAW","xcs::CartesianVector",xci.&magneto);
-if(xci.hasSlot("internalTimeIMU")) logger.registerData("internalTimeIMU","TIME_LOC","double",xci.&internalTimeIMU);
+if(xci.hasSlot("internalTimeImu")) logger.registerData("internalTimeImu","TIME_LOC","double",xci.&internalTimeImu);
 if(xci.hasSlot("internalTimeVideo")) logger.registerData("internalTimeVideo","TIME_LOC","double",xci.&internalTimeVideo);
 
 if(xci.hasSlot("video")) logger.registerVideo(640, 360, "video","CAMERA","xcs::BitmapType",xci.&video);
@@ -54,12 +54,18 @@ logger.registerData("gaz","GAZ","double",fpr.&gaz);
 
 //logger.registerData("command","COMMAND","std::string",fpr.&command);
 
-function demo(xci, r, p, y, g, duration) {
+function demo(xci, r, p, y, g, duration, n) {
     var fc = FlyControl.new();    
     fc.roll = r;
     fc.pitch = p;
     fc.yaw = y;
     fc.gaz = g;
+    
+    var fc1 = FlyControl.new();    
+    fc1.roll = -r;
+    fc1.pitch = -p;
+    fc1.yaw = -y;
+    fc1.gaz = -g;
     
     var fc0 = FlyControl.new();    
     fc0.roll = 0;
@@ -67,9 +73,77 @@ function demo(xci, r, p, y, g, duration) {
     fc0.yaw = 0;
     fc0.gaz = 0;
     
-    xci.flyControl = (Global.fc = fc);
-    sleep(duration);
+    var fcUp = FlyControl.new();    
+    fcUp.roll = 0;
+    fcUp.pitch = 0;
+    fcUp.yaw = 0;
+    fcUp.gaz = 0.3;
+    xci.flyControl = (Global.fc = fcUp);
+    sleep(1s);
     xci.flyControl = (Global.fc = fc0);
+    sleep(1s);
+    
+    for (var i = 0; i < n; i += 1) {
+        echo("Cycle no. " + i);
+        xci.flyControl = (Global.fc = fc);
+        sleep(duration);
+        xci.flyControl = (Global.fc = fc0);
+        sleep(duration);
+        xci.flyControl = (Global.fc = fc1);
+        sleep(duration);
+        xci.flyControl = (Global.fc = fc0);
+        sleep(duration);
+        echo("Cycle no. " + i + " finished");
+    };
+
+    
+    echo("Finished");
+}|;
+
+function ptam(xci, left, leftDuration, forward, forwardDuration) {
+    var fc0 = FlyControl.new();    
+    fc0.roll = 0;
+    fc0.pitch = 0;
+    fc0.yaw = 0;
+    fc0.gaz = 0;
+    
+    // a bit up
+    var fcUp = FlyControl.new();    
+    fcUp.roll = 0;
+    fcUp.pitch = 0;
+    fcUp.yaw = 0;
+    fcUp.gaz = 0.3;
+    xci.flyControl = (Global.fc = fcUp);
+    sleep(1s);
+    xci.flyControl = (Global.fc = fc0);
+    sleep(1s);
+    
+    echo("Risen");
+    
+    // a bit right
+    var fcLeft = FlyControl.new();    
+    fcLeft.roll = left;
+    fcLeft.pitch = 0;
+    fcLeft.yaw = 0;
+    fcLeft.gaz = 0;
+    xci.flyControl = (Global.fc = fcLeft);
+    sleep(leftDuration);
+    xci.flyControl = (Global.fc = fc0);
+    sleep(1s);
+    
+    echo("Righted");
+    
+    // a bit forward 
+    var fcForw = FlyControl.new();    
+    fcForw.roll = 0;
+    fcForw.pitch = forward;
+    fcForw.yaw = 0;
+    fcForw.gaz = 0;
+    xci.flyControl = (Global.fc = fcForw);
+    sleep(forwardDuration);
+    xci.flyControl = (Global.fc = fc0);
+    sleep(1s);
+    
     echo("Finished");
 }|;
 
@@ -95,5 +169,4 @@ if(xciVersion == "xci_dodo") {
 };
 
 logger.start();
-sleep(4s);
 echo("STARTED");

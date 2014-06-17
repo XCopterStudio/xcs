@@ -31,7 +31,7 @@ struct DroneState {
       position(mat.at(0, 0), mat.at(1, 0), mat.at(2, 0)),
       velocity(mat.at(3, 0), mat.at(4, 0), mat.at(5, 0)),
       angles(mat.at(6, 0), mat.at(7, 0), mat.at(8, 0)),
-      angularRotationPsi(mat.at(6, 0)),
+      angularRotationPsi(mat.at(9, 0)),
       updateMeasurementID(0) {
     }
 
@@ -51,7 +51,7 @@ struct DroneState {
     }
 
     inline operator TooN::Vector<10> () const {
-        return TooN::makeVector(position.x, position.y, position.z, velocity.x, velocity.y, velocity.z, angles.phi, angles.theta, angles.psi, angularRotationPsi);
+        return TooN::makeVector(position.x, position.y, position.z, angles.phi, angles.theta, angles.psi, velocity.x, velocity.y, velocity.z, angularRotationPsi);
     }
 
 };

@@ -15,13 +15,14 @@
 
 #include <memory>
 #include <chrono>
+#include <mutex>
 
 class Tracker;
 class ATANCamera;
 class Map;
 class MapMaker;
 class GLWindow2;
-class MouseKeyHandler;
+#include <ptam/MouseKeyHandler.h> // class MouseKeyHandler;
 
 
 namespace xcs {
@@ -33,12 +34,10 @@ enum PtamStatusType {
     PTAM_IDLE = 0, PTAM_INITIALIZING = 1, PTAM_LOST = 2, PTAM_GOOD = 3, PTAM_BEST = 4, PTAM_TOOKKF = 5, PTAM_FALSEPOSITIVE = 6
 };
 
-class Ptam {
+class Ptam : public MouseKeyHandler {
 public:
     Ptam(Ekf &ekf);
     virtual ~Ptam();
-
-    void init();
 
     /*!
      * \param timestamp Timestamp in EKF's time.
@@ -48,9 +47,11 @@ public:
     /*!
      * \param timestamp EKF time.
      */
-    void measurementImu(const DroneStateMeasurement &measurement, const double &timestamp);
+    void measurementImu(const DroneStateMeasurement measurement, const double timestamp);
 
-
+    virtual void on_key_down(int key);
+    
+    void pressSpacebar();
 private:
     typedef std::unique_ptr<Tracker> TrackerPtr;
     typedef std::unique_ptr<ATANCamera> ATANCameraPtr;
@@ -103,8 +104,9 @@ private:
     MouseKeyHandlerPtr glWindowKeyHandler_;
 
     Ekf &ekf_;
-    
+
     localization::ImuMeasurements imuMeasurements_;
+    std::mutex imuMeasurementsMtx_;
 
 
     TooN::Vector<3> evalNavQue(xcs::Timestamp from, xcs::Timestamp to, bool* zCorrupted, bool* allCorrupted);

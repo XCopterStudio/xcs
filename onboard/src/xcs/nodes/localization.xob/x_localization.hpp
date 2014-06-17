@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <memory>
+#include <mutex>
 
 #include "ekf.hpp"
 #include "ptam.hpp"
@@ -40,6 +41,7 @@ class XLocalization : public XObject {
     TimePoint startTime_;
     double imuTimeShift_;
     ::urbi::UImage lastFrame_;
+    std::mutex lastFrameMtx_;
 
     void onChangeVelocity(xcs::CartesianVector measuredVelocity);
     void onChangeRotation(xcs::EulerianVector measuredAnglesRotation);
@@ -51,7 +53,9 @@ class XLocalization : public XObject {
     void onChangeVideo(::urbi::UImage image);
     void onChangeVideoTime(xcs::Timestamp internalTime); // TODE deprecated use onChanheTimeCam or vice versa
 
-    void onChangeFlyControl(xcs::FlyControl flyControl);
+    void onChangeFlyControl(const xcs::FlyControl flyControl);
+    
+    void onChangePtamControl(const std::string &ptamControl);
 
     inline double timeFromStart() {
         return std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -68,13 +72,18 @@ public:
     XInputPort<double> videoTime;
     // drone fly control
     XInputPort<xcs::FlyControl> flyControl;
+    // PTAM control
+    XInputPort<std::string> ptamControl;
 
     // computed ekf output
     XVar<xcs::CartesianVector> position;
     XVar<xcs::CartesianVector> velocity;
     XVar<xcs::EulerianVector> rotation;
+    XVar<double> velocityPsi;
 
     XLocalization(const std::string &name);
+    
+    void init();
 };
 
 }

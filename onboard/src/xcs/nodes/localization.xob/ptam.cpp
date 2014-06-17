@@ -19,8 +19,16 @@ using namespace xcs;
 using namespace xcs::nodes;
 using namespace xcs::nodes::localization;
 
-const int Ptam::FRAME_WIDTH = 360;
-const int Ptam::FRAME_HEIGHT = 640;
+const int Ptam::FRAME_WIDTH = 640;
+const int Ptam::FRAME_HEIGHT = 360;
+
+#define DEBUG_PRINT(a) /*cerr << a << endl*/
+
+void Ptam::on_key_down(int key) {
+    if (key == 32) { // space
+        ptamTracker_->pressSpacebar();
+    }
+}
 
 Ptam::Ptam(Ekf &ekf) : ekf_(ekf) {
     // TODO load camera parameters from configuration (these are for AR Drone Parrot 2.0)
@@ -29,29 +37,32 @@ Ptam::Ptam(Ekf &ekf) : ekf_(ekf) {
     cameraParameters_[2] = 0.552779;
     cameraParameters_[3] = 0.444056;
     cameraParameters_[4] = 1.156010;
-}
 
-Ptam::~Ptam() {
-}
-
-void Ptam::init() {
-
+    // initialization    
     resetPtam();
 
     glWindowKeyHandler_ = MouseKeyHandlerPtr(new MouseKeyHandler());
-    glWindow_ = GLWindow2Ptr(new GLWindow2(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), "PTAM Drone Camera Feed", glWindowKeyHandler_.get()));
+    glWindow_ = GLWindow2Ptr(new GLWindow2(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), "PTAM Drone Camera Feed", this));
 
     frameNo_ = 0;
     lockNextFrame_ = false;
     mapLocked_ = false;
     forceKF_ = false;
     // framesIncludedForScaleXYZ_ = -1; NOTE: not initialized
+    maxKF_ = 60;
 
 }
 
+Ptam::~Ptam() {
+}
+
 void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
-    cerr << "handle frame " << endl;
+    DEBUG_PRINT("PTAM: handle frame " << frameNo_);
     frameNo_ += 1;
+    
+    if(frameNo_ % 2 == 0) { // slow machine, only half a frame rate
+        return;
+    }
 
     if (resetPtamRequested_) {
         resetPtam();
@@ -65,13 +76,18 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     }
 
     memcpy(frame_.data(), bwImage.data, bwImage.width * bwImage.height);
+    DEBUG_PRINT("PTAM: copied frame ");
 
+    DEBUG_PRINT("PTAM: before ekf " << timestamp);
     TooN::Vector<10> filterPosePrePTAM = ekf_.computeState(timestamp);
+    DEBUG_PRINT("PTAM: handle frame ");
 
     // ------------------------ do PTAM -------------------------
+    glWindow_->activate(); // set context for the current thread
     glWindow_->SetupViewport();
     glWindow_->SetupVideoOrtho();
     glWindow_->SetupVideoRasterPosAndZoom();
+    DEBUG_PRINT("PTAM: handle frame 1");
 
 
 
@@ -81,19 +97,28 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     predConvert_.setPosRPY(PTAMPoseGuess[0], PTAMPoseGuess[1], PTAMPoseGuess[2], PTAMPoseGuess[3], PTAMPoseGuess[4], PTAMPoseGuess[5]);
     // 3. multiply with rotation matrix	
     TooN::SE3<> PTAMPoseGuessSE3 = predConvert_.droneToFrontNT * predConvert_.globaltoDrone;
+    DEBUG_PRINT("PTAM: pre PTAM pose guess (10) " << endl << filterPosePrePTAM);
+    DEBUG_PRINT("PTAM: pre PTAM pose guess " << endl << PTAMPoseGuess);
+    DEBUG_PRINT("PTAM: pre PTAM pose guess SE3" << endl << PTAMPoseGuessSE3);
 
 
     // set
     ptamTracker_->setPredictedCamFromW(PTAMPoseGuessSE3);
     //ptamTracker_->setLastFrameLost((goodCount_ < -10), (videoFrameID%2 != 0));
     ptamTracker_->setLastFrameLost((goodCount_ < -20), (frameNo_ % 3 == 0));
+    DEBUG_PRINT("PTAM: PTAM xxx");
+    DEBUG_PRINT("goodCount_ " << goodCount_ << " ptamTracker " << ptamTracker_->lastStepResult);
 
     // track
     ptamTracker_->TrackFrame(frame_, true);
     TooN::SE3<> PTAMResultSE3 = ptamTracker_->GetCurrentPose();
+    DEBUG_PRINT("PTAM: Got PTAM pose" << endl << PTAMResultSE3);
     //lastPTAMMessage = msg = ptamTracker_->GetMessageForUser(); TODO necessary?
-
-    TooN::Vector<6> PTAMResultSE3TwistOrg = PTAMResultSE3.ln(); // TODO logarithm of the matrix, probably unnecessary
+    
+    double dbgRoll, dbgPitch, dbgYaw;
+    rod2rpy(PTAMResultSE3.get_rotation(), &dbgRoll, &dbgPitch, &dbgYaw);
+    const auto dbgTrans = PTAMResultSE3.get_translation();
+    XCS_LOG_INFO("PTAM (raw): " << dbgTrans[0] << " " << dbgTrans[1] << " " << dbgTrans[2] << " " << dbgRoll << " " << dbgPitch << " " << dbgYaw);
 
     // TODO store into XVar
     //node->publishTf(ptamTracker_->GetCurrentPose(), mimFrameTimeRos_workingCopy, frameNo_, "cam_front");
@@ -104,12 +129,14 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     predConvert_.setPosSE3_globalToDrone(predConvert_.frontToDroneNT * PTAMResultSE3);
     TooN::Vector<6> PTAMResult = TooN::makeVector(predConvert_.x, predConvert_.y, predConvert_.z, predConvert_.roll, predConvert_.pitch, predConvert_.yaw);
     // Michal: PTAMResult is now pose of the drone in basic coordinates
+    XCS_LOG_INFO("PTAM (basic): " << PTAMResult);
 
     // 3. transform with filter
     TooN::Vector<6> PTAMResultTransformed = scaleEstimation_.transformPTAMObservation(PTAMResult);
+    XCS_LOG_INFO("PTAM (scaled): " << PTAMResultTransformed);
     // Michal: apply "current"/last scale to result
 
-
+    DEBUG_PRINT("PTAM: PTAM result transformed");
 
 
     // init failed?
@@ -131,6 +158,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
         imuOnlyPred_.resetPos();
     }
     if (ptamTracker_->lastStepResult == ptamTracker_->I_FIRST) {
+        XCS_LOG_INFO("PTAM initialization started (took first KF)");
         // node->publishCommand("u l PTAM initialization started (took first KF)"); // TODO what is this for
     }
 
@@ -166,6 +194,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
         // if yaw difference too big: something certainly is wrong.
         // maximum difference is 5 + 2*(number of seconds since PTAM observation).
+        // TODO (Michal): convert to radians
         double maxYawDiff = 10.0 + 2 * duration2sec(Clock::now() - lastGoodYawClock_);
         if (maxYawDiff > 20) maxYawDiff = 1000;
         if (false && diffs[5] > maxYawDiff) {
@@ -203,6 +232,8 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
     }
 
+    DEBUG_PRINT("PTAM: assessed quality");
+
     TooN::Vector<10> filterPosePostPTAM;
     // --------------------------- scale estimation & update filter (REDONE) -----------------------------
     // interval length is always between 1s and 2s, to enshure approx. same variances.
@@ -217,10 +248,12 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     // TODO: make shure filter is handled properly with permanent roll-forwards.
     if (goodCount_ >= 3) {
         CameraMeasurement ptamResultForEkf(PTAMResult);
-        ekf_.measurementCam(ptamResultForEkf, timestamp);
+        // Blocked while debugging PTAM: ekf_.measurementCam(ptamResultForEkf, timestamp);
         goodObservations_ += 1;
+        DEBUG_PRINT("PTAM: measurementCam " << timestamp);
     } else {
         ekf_.clearUpToTime(timestamp);
+        DEBUG_PRINT("PTAM: clearUpToTime " << timestamp);
     }
 
     // obtain results from EKF with updated position
@@ -237,6 +270,8 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     if (includedTime > 3.0) {
         framesIncludedForScaleXYZ_ = -1;
     }
+
+    DEBUG_PRINT("PTAM: smoothed backtransformed ");
 
     if (goodCount_ >= 3) {
         // filter stuff
@@ -278,6 +313,8 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
             //predIMUOnlyForScale_.resetPos();	// also resetting z corrupted flag etc. (NOT REquired as reset is done in eval)
             ptamPositionForScaleTakenTimestamp_ = timestamp;
         }
+
+        DEBUG_PRINT("PTAM: scale recalculate");
     }
 
 
@@ -316,7 +353,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     else
         ptamStatus_ = PTAM_LOST;
 
-
+    DEBUG_PRINT("PTAM: set PTAM status");
     /*
      * No map and no logging so far.
      */
@@ -486,40 +523,52 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     //        pthread_mutex_unlock(&(node->logPTAM_CS));
     //    }
 
+    
+    glWindow_->DrawCaption(ptamTracker_->GetMessageForUser());
+    glWindow_->DrawMenus();
     glWindow_->swap_buffers();
     glWindow_->HandlePendingEvents();
+    DEBUG_PRINT("window buffer swapped");
 }
 
-void Ptam::measurementImu(const DroneStateMeasurement &measurement, const double &timestamp) {
+void Ptam::measurementImu(const DroneStateMeasurement measurement, const double timestamp) {
+    lock_guard<mutex> lock(imuMeasurementsMtx_);
     ImuMeasurementChronologic copyMeasurement(measurement, timestamp);
     imuMeasurements_.push_back(copyMeasurement);
 }
 
+void Ptam::pressSpacebar() {
+    ptamTracker_->pressSpacebar();
+}
+
 TooN::Vector<3> Ptam::evalNavQue(Timestamp from, Timestamp to, bool* zCorrupted, bool* allCorrupted) {
+    // TODO emptying queue
+    Timestamp firstAdded = 0, lastAdded = 0;
+    double firstZ = 0;
     predIMUOnlyForScale_.resetPos();
 
-    Timestamp firstAdded = 0, lastAdded = 0;
-    // TODO locking and emptying queue
-    double firstZ = 0;
+    { // lock the queue
+        lock_guard<mutex> lock(imuMeasurementsMtx_);
+        for (ImuMeasurements::iterator it = imuMeasurements_.begin(); it != imuMeasurements_.end(); ++it) {
+            auto frontStamp = it->second;
+            if (frontStamp < from) // packages before: delete
+            {
+                //navInfoQueue.pop_front();
+            } else if (frontStamp >= from && frontStamp <= to) {
+                if (firstAdded == 0) {
+                    firstAdded = frontStamp;
+                    firstZ = it->first.altitude;
+                    predIMUOnlyForScale_.z = firstZ; // avoid height check initially!
+                }
+                lastAdded = frontStamp;
+                // add
+                predIMUOnlyForScale_.predictOneStep(*it);
+                // pop
+                //navInfoQueue.pop_front();
+            } else
+                break;
 
-    for (ImuMeasurements::iterator it = imuMeasurements_.begin(); it != imuMeasurements_.end(); ++it) {
-        auto frontStamp = it->second;
-        if (frontStamp < from) // packages before: delete
-        {
-            //navInfoQueue.pop_front();
-        } else if (frontStamp >= from && frontStamp <= to) {
-            if (firstAdded == 0) {
-                firstAdded = frontStamp;
-                firstZ = it->first.altitude;
-                predIMUOnlyForScale_.z = firstZ; // avoid height check initially!
-            }
-            lastAdded = frontStamp;
-            // add
-            predIMUOnlyForScale_.predictOneStep(*it);
-            // pop
-            //navInfoQueue.pop_front();
-        } else
-            break;
+        }
 
     }
     //printf("QueEval: before: %i; skipped: %i, used: %i, left: %i\n", totSize, skipped, used, navInfoQueue.size());
@@ -556,11 +605,17 @@ void Ptam::resetPtam() {
     ptamMapMaker_->minKFDist = 0;
     ptamMapMaker_->minKFWiggleDist = 0;
     ptamTracker_->minKFTimeDist = 0;
+    DEBUG_PRINT("PTAM: R6");
 
     predConvert_.setPosRPY(0, 0, 0, 0, 0, 0);
     predIMUOnlyForScale_.setPosRPY(0, 0, 0, 0, 0, 0);
+    DEBUG_PRINT("PTAM: R7");
 
     goodCount_ = 0;
+    forceKF_ = false;
     goodObservations_ = 0;
+    lockNextFrame_ = false;
+
     resetPtamRequested_ = false;
+    DEBUG_PRINT("PTAM: R8");
 }
