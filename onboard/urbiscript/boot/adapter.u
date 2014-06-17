@@ -78,19 +78,44 @@ class SemanticReceiver {
     var receivers = Dictionary.new();
     var messageBuffer;
 
-    function init(adapter, xjson) { // parseJson as arg, lookup is wierd in this case (TODO package/import? or Global)
+    function init(adapter, json) { // parseJson as arg, lookup is wierd in this case (TODO package/import? or Global)
         messageBuffer = "";
         
         at(adapter.output->changed?) {
 
-            /* This handles the case when more JSON objects are present in the buffer */
-            var messageArray = (messageBuffer + adapter.output).replace("}\n{", "},{");
-            
             // tryDecode and messageBuffer handles the case when too big message is comming and is cut to more parts
-            if(xjson.tryDecode(messageArray)) {
-                messageBuffer = xjson.outRest;
-                var rawMessages = xjson.outJson;
+            if(json.hasSlot("tryDecode")) {     // working with xjson
+                /* This handles the case when more JSON objects are present in the buffer */
+                var messageArray = (messageBuffer + adapter.output).replace("}\n{", "},{");
 
+                if(json.tryDecode(messageArray)) {
+                    messageBuffer = json.outRest;
+                    var rawMessages = json.outJson;
+
+                    for(var rawData: rawMessages) {
+                        var type = rawData["type"];
+                        var data = rawData["data"];
+                        if (receivers.has(type)) {
+                            receivers[type].receive(data);
+                        } else {
+                            echo("Unhandled message from Server of type: " + rawData["type"]);
+                        }
+                    };
+                }
+                else {
+                    messageBuffer = messageArray;
+                };
+
+                if(messageBuffer != "") {
+                    //echo("Save massage from server to buffer: " + messageBuffer);
+                    echo("Save massage from server to buffer.");
+                };
+            }
+            else {  // working with ujson
+                /* This handles the case when more JSON objects are present in the buffer */
+                var messageArray = "[" + adapter.output.replace("}\n{", "},{") + "]";
+
+                var rawMessages = json.decode(messageArray);
                 for(var rawData: rawMessages) {
                     var type = rawData["type"];
                     var data = rawData["data"];
@@ -98,17 +123,9 @@ class SemanticReceiver {
                         receivers[type].receive(data);
                     } else {
                         echo("Unhandled message from Server of type: " + rawData["type"]);
-                    }
-                };
+                    };
+                }
             }
-            else {
-                messageBuffer = messageArray;
-            };
-
-            if(messageBuffer != "") {
-                //echo("Save massage from server to buffer: " + messageBuffer);
-                echo("Save massage from server to buffer.");
-            };
         };
     };
 
