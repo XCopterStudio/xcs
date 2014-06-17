@@ -14,7 +14,7 @@ namespace nodes {
 class XSettings : public xcs::nodes::XObject {
 public:
     XSettings(const std::string &name);
-    void init(const std::string& filepath);
+    void init(const std::string& filepath, bool create);
     std::string get(const std::string& key);
     std::string getOrDefault(const std::string& key, const std::string& defaultValue);
     boost::unordered_map<std::string, std::string> getMap(const std::string& key) const;

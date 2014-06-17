@@ -11,10 +11,10 @@ namespace xcs {
 
 class XCS_EXPORT Settings {
 public:
-    Settings(const std::string& filename = "");
+    Settings(const std::string& filename = "", bool create = false);
     ~Settings();
-    void reset();
-    void reset(const std::string& filename);
+    void reset(bool create = false);
+    void reset(const std::string& filename, bool create = false);
     template<class Type = std::string>
     Type get(const std::string& key, const Type& defaultValue) const;
     template<class Type = std::string>
