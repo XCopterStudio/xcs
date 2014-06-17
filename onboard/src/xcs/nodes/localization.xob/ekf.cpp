@@ -164,14 +164,10 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     // =========== predict new state ============
     // position
     CartesianVector &position = newState.first.position;
-    position.x += velocityOld.x*delta;
-    position.y += velocityOld.y*delta;
-    position.z += velocityOld.z*delta;
+    position += velocityOld * delta;
     // velocity
     CartesianVector &velocity = newState.first.velocity;
-    velocity.x += acceleration.x*delta;
-    velocity.y += acceleration.y*delta;
-    velocity.z += acceleration.z*delta;
+    velocity += acceleration * delta;
     ////M: printf("EKF: velocity[%f,%f,%f]\n", velocity.x, velocity.y, velocity.z);
     // angles
     EulerianVector &angles = newState.first.angles;
