@@ -46,6 +46,7 @@ var ScriptGeneratorView = Backbone.View.extend({
         "click #dfgStart" : "dfgStart",
         "click #dfgStop" : "dfgStop",
         "click #dfgReset" : "dfgReset",
+        "click #dfgSaveDfg" : "dfgSaveDfg"
     },
     
     dfgToolboxNodes : {},
@@ -480,7 +481,7 @@ var ScriptGeneratorView = Backbone.View.extend({
     },
     
     dfgCreate : function() {
-       // load dfg 2 json object
+        // load dfg 2 json object
         var jsonDfg = scriptGeneratorGraph.toJSON()
         
         if(jsonDfg.cells) {
@@ -550,6 +551,37 @@ var ScriptGeneratorView = Backbone.View.extend({
         scriptGeneratorGraph.clear();
         this.model.requestReset();
     }, 
+    
+    dfgSaveDfg : function() {
+        console.log('dfgSaveDfg');
+        
+        var inputFilename = $('#dfgSaveDfg-filename');
+        
+        // read filenam
+        var filename = inputFilename.val().trim();
+
+        // validate filename
+        var errorMsg = '';
+        if(filename == '') {
+            errorMsg += 'You must set the filename first! ';    
+        }
+        
+        //TODO: properly show error message
+        //show error message
+        if(errorMsg != '') {
+            console.log(errorMsg);
+            return;
+        }        
+
+        // clean input 4 filename
+        inputFilename.val('');
+        
+        // load dfg 2 json object
+        var jsonDfg = scriptGeneratorGraph.toJSON();
+        
+        //send request
+        this.model.requestSaveDfg(jsonDfg, filename, true);
+    },
     
     /********************
     ** BLOCKLY SECTION **

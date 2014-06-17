@@ -176,6 +176,19 @@ var DataFlowGraph = Backbone.Model.extend({
         this.sendRequest("DFG_RESET");
     },
     
+    requestSaveDfg: function(dfg, filename, rewrite) {
+        // default value 4 rewrite is false
+        rewrite = typeof rewrite !== 'undefined' ? rewrite : false;
+        
+        var data = {
+            DFG : dfg, //JSON.stringify(dfg),
+            filename : filename,
+            rewrite : rewrite
+        };
+        
+        this.sendRequest("DFG_SAVE", data);
+    },
+    
     sendRequest: function(request, data) {
         if(!data) {
             data = "";
