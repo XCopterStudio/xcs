@@ -14,6 +14,17 @@ struct CartesianVector {
     CartesianVector(double x = 0, double y = 0, double z = 0) : x(x), y(y), z(z) {
     }
 
+    inline CartesianVector operator*(const double scale) const {
+        return CartesianVector(scale*x, scale*y, scale * z);
+    }
+
+    inline CartesianVector &operator+=(const CartesianVector &rhs) {
+        x += rhs.x;
+        y += rhs.y;
+        z += rhs.z;
+        return *this;
+    }
+
     template<typename T>
             void serialize(T &stream) {
         stream << x << "\t" << y << "\t" << z;
