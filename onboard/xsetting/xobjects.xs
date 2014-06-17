@@ -1,6 +1,6 @@
-xonboard
+xjson
 {
-    name "XOnboard"
+    name "XJson"
     init ""
 }
 xxci
@@ -12,13 +12,24 @@ xxci
         "xci parrot" "\"xci_parrot\""
     }
 }
+xdatalogger
+{
+    name XDatalogger
+    init "\"logs/test.txt\""   ;TODO: change file name - or file name like xinputport
+    ;init "\"logs/\" + Date.now().asString().replace(\" \", \"_\") + \".txt\""
+}
+xdataplayer
+{
+    name XDataplayer
+    init "\"logs/test.txt\""   ;TODO: change file name - or file name like xinputport
+}
+xonboard
+{
+    name "XOnboard"
+    init ""
+}
 xsettings
 {
     name "XSettings"
-    init "\"./xobjects.xs\""
-}
-ujson
-{
-    name "UJson"
-    init ""
+    init "\"./xobjects.xs\""    ;TODO: change file name
 }
