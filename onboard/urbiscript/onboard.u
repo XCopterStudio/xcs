@@ -24,16 +24,17 @@ class Onboard {
         loadCore_();
 
         // initialize onboard sender 4 communication with server
-        var adapter = Adapter.new();
+        var this.adapter = Adapter.new();
         adapter.start("127.0.0.1", 1234);
-        this.onboardSender_ = OnboardSender.new(adapter, UJson);
+        var json = XJson.new();
+        this.onboardSender_ = OnboardSender.new(adapter, json);
 
         // initialize sending information about data flow graph
         initDfgCommunication_();
         startDfgCommunication();
 
         // initialize onboard receiver 4 communication with server
-        this.onboardReceiver_ = OnboardReceiver.new(adapter, UJson);
+        this.onboardReceiver_ = OnboardReceiver.new(adapter, json);
         at(this.onboardReceiver_.&request.changed?) {
             doRequest_(this.onboardReceiver_.request);
         };
@@ -175,6 +176,8 @@ class Onboard {
                         doDfgStop_();
                     case "DFG_RESET":
                         doDfgReset_(true);
+                    case "DFG_SAVE":
+                        doDfgSave_(requestData);
                     default:
                         echo("...unknown request");
                 };
@@ -226,7 +229,17 @@ class Onboard {
             };
         };
     };
+    
+    function doDfgSave_(requestData) {
+        var filename = requestData["filename"];
+        var rewrite = requestData["rewrite"];
+        var dfg = requestData["DFG"];
 
+        var filePath = getUserDfgPath_() / Path.new(filename);
+        var setting = XSettings.new(filePath.asString(), rewrite);
+        setting.setAndSave("DFG", dfg.asString());
+    };
+    
     // reset old dfg and create new one
     function doDfgCreate_(requestData) {
         try {
@@ -633,7 +646,7 @@ class Onboard {
             //"datalogger",
             //"xobject",
             //"xci_dodo",
-            "ujson",
+            "xjson",
             //"onboard",
             //"xxci",
 
@@ -674,6 +687,16 @@ class Onboard {
         return [
             Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/xsetting/xobjects.xs")
         ];
+    };
+
+    function getUserDfgPath_() {
+        //TODO: return valide path 4 user dfg
+        return getUserDataPath_() / Path.new("DFG/");
+    };
+
+    function getUserDataPath_() {
+        //TODO: return valide user data path
+        return Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/xsetting/userdata");
     };
 }|;
 
