@@ -47,6 +47,7 @@ add_subdirectory(xcs/nodes/onboard.xob)
 add_subdirectory(xcs/nodes/xci.xob)
 add_subdirectory(xcs/nodes/xobject)
 add_subdirectory(xcs/nodes/settings.xob)
+add_subdirectory(xcs/nodes/json.xob)
 
 # Subprojects (urbiscript)
 #add_subdirectory(../urbiscript ./urbiscript)
