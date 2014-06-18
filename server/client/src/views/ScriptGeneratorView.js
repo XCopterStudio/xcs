@@ -46,7 +46,8 @@ var ScriptGeneratorView = Backbone.View.extend({
         "click #dfgStart" : "dfgStart",
         "click #dfgStop" : "dfgStop",
         "click #dfgReset" : "dfgReset",
-        "click #dfgSaveDfg" : "dfgSaveDfg"
+        "click #dfgSaveDfg" : "dfgSaveDfg",
+        "click .dfgLoadDfg" : "dfgLoadDfg",
     },
     
     dfgToolboxNodes : {},
@@ -63,6 +64,9 @@ var ScriptGeneratorView = Backbone.View.extend({
         this.listenTo(this.model.get("xprototype"), "remove", this.onPrototypeRemove);
         this.listenTo(this.model.get("xclone"), "remove", this.onCloneRemove);
 
+        this.listenTo(this.model, "change:savedDfg", this.onSavedDfgChange);
+        this.listenTo(this.model, "change:dfgDef", this.onDfgDefChange);
+        
         this.initializeDfg();
         
         //this.initializeBlockly();
@@ -269,6 +273,31 @@ var ScriptGeneratorView = Backbone.View.extend({
             //'.marker-source': { fill: 'red', d: 'M 10 0 L 0 5 L 10 10 z' },
             '.marker-target': { fill: 'green', d: 'M 10 0 L 0 5 L 10 10 z' }
         });
+    },
+    
+    onSavedDfgChange : function(model) {
+        var dfgs = model.get("savedDfg");
+        
+        var loadItems = $('#DFG-saved-items');
+        loadItems.html('');
+        
+        for(var i = 0; i < dfgs.length; ++i) {
+            loadItems.append('<li><a class="dfgLoadDfg" id="dfgLoadDfg_' + this.trimId(dfgs[i]) + '">' + dfgs[i] + '</a></li>');
+        }
+    },
+    
+    onDfgDefChange : function(model) {
+        // TODO: change graph
+        var graph = model.get("dfgDef");
+        
+        //DEBUG
+        //console.log("onDfgDefChange: " + JSON.stringify(graph));
+        
+        this.loadGraph(graph.DFG);
+    },
+    
+    loadGraph: function(dfg) {
+        // TODO: load default DFG
     },
     
     onDataFlowGraphChange : function(model) {
@@ -536,25 +565,20 @@ var ScriptGeneratorView = Backbone.View.extend({
     },
     
     dfgStart : function() {
-        console.log('dfgStart');
         this.model.requestStart();
     },
     
     dfgStop : function() {
-        console.log('dfgStop');
         this.model.requestStop();
     },
     
     dfgReset : function() {
-        console.log('dfgReset');
         this.model.reset();
         scriptGeneratorGraph.clear();
         this.model.requestReset();
     }, 
     
     dfgSaveDfg : function() {
-        console.log('dfgSaveDfg');
-        
         var inputFilename = $('#dfgSaveDfg-filename');
         
         // read filenam
@@ -581,6 +605,13 @@ var ScriptGeneratorView = Backbone.View.extend({
         
         //send request
         this.model.requestSaveDfg(jsonDfg, filename, true);
+    },
+    
+    dfgLoadDfg : function(model) {
+        var dfg = $(model.target);
+        var dfgFilename = dfg.html();
+        console.log("tutu: " + dfgFilename);
+        this.model.requestLoadDfg(dfgFilename);
     },
     
     /********************

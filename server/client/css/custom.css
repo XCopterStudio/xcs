@@ -68,42 +68,30 @@ body { background-image: url("../image/first_aid_kit.png"); }
 
 .menu-item { background-color: whitesmoke; }
 
+/*** DFG ***/
 
 .DFG {
     overflow: auto;
     height: 540px;
 }
 
+/*** DROPDOWN SUBMENU ***/
 
 .dropdown-menu .sub-menu-left {
     right: 100%;
     position: absolute;
     top: 0;
     visibility: hidden;
-    margin-top: -1px;
+    margin-top: -2px;
+}
+
+.dropdown-menu li {
+    position: relative;
 }
 
 .dropdown-menu li:hover .sub-menu-left {
     visibility: visible;
     display: block;
-}
-
-.navbar .sub-menu-left:before {
-    border-bottom: 7px solid transparent;
-    border-right: none;
-    border-left: 7px solid rgba(0, 0, 0, 0.2);
-    border-top: 7px solid transparent;
-    right: -7px;
-    top: 10px;
-}
-.navbar .sub-menu-left:after {
-    border-top: 6px solid transparent;
-    border-right: none;
-    border-left: 6px solid #fff;
-    border-bottom: 6px solid transparent;
-    right: 10px;
-    top: 11px;
-    right: -6px;
 }
 
 .left-caret {

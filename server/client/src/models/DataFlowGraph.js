@@ -49,6 +49,8 @@ var DataFlowGraphNode = Backbone.Model.extend({
 
 var DataFlowGraph = Backbone.Model.extend({    
     defaults : {
+        "dfgDef" : "",
+        "savedDfg" : "",
         "dataFlowGraph" : "",
         "xprototype" : new Backbone.Collection([], { model : DataFlowGraphNode }),
         "xclone" : new Backbone.Collection([], { model : DataFlowGraphNode })
@@ -62,6 +64,16 @@ var DataFlowGraph = Backbone.Model.extend({
 
         //DEBUG
         //console.log("setData: " + JSON.stringify(data));
+        
+        // set dfg definition
+        if(data.dfgDef) {
+            this.set("dfgDef", data.dfgDef);
+        }
+        
+        // set availabel dfg for load 
+        if(data.savedDfg) {
+            this.set("savedDfg", data.savedDfg);
+        }
         
         // set default dataFlowGraph
         if(data.dataFlowGraph) {
@@ -157,7 +169,9 @@ var DataFlowGraph = Backbone.Model.extend({
     },
     
     requestLoad: function() {
+        //TODO: rename DFG_LOAD
         this.sendRequest("DFG_LOAD");
+        this.sendRequest("SAVED_DFG");
     },
     
     requestCreate: function(dfg) {
@@ -187,6 +201,11 @@ var DataFlowGraph = Backbone.Model.extend({
         };
         
         this.sendRequest("DFG_SAVE", data);
+    },
+    
+    requestLoadDfg: function(dfgFilename) {
+        //TODO: rename to DFG_LOAD
+        this.sendRequest("LOAD_DFG", dfgFilename);
     },
     
     sendRequest: function(request, data) {
