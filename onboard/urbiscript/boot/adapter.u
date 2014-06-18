@@ -202,8 +202,16 @@ class OnboardSender {
         sendData(["prototype", "clone"], [prototypeData, cloneData]);
     };
 
+    function sendDfg4Load(dfgs) {
+        sendData("savedDfg", dfgs);
+    };
+
+    function sendLoadDfg(dfg) {
+        sendData("dfgDef", dfg);
+    };
+
     function sendData(type, typesData) {
-        //prepate data type 
+        //prepare data type 
         var data = [ => ];
         data["type"] = "onboard";
 

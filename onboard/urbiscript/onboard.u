@@ -178,6 +178,10 @@ class Onboard {
                         doDfgReset_(true);
                     case "DFG_SAVE":
                         doDfgSave_(requestData);
+                    case "SAVED_DFG":
+                        doSavedDfg_();
+                    case "LOAD_DFG":
+                        doLoadDfg_(requestData);
                     default:
                         echo("...unknown request");
                 };
@@ -230,16 +234,6 @@ class Onboard {
         };
     };
     
-    function doDfgSave_(requestData) {
-        var filename = requestData["filename"];
-        var rewrite = requestData["rewrite"];
-        var dfg = requestData["DFG"];
-
-        var filePath = getUserDfgPath_() / Path.new(filename);
-        var setting = XSettings.new(filePath.asString(), rewrite);
-        setting.setAndSave("DFG", dfg.asString());
-    };
-    
     // reset old dfg and create new one
     function doDfgCreate_(requestData) {
         try {
@@ -284,6 +278,35 @@ class Onboard {
         startDfgCommunication();
         this.loadedXObjects_.elementChanged!;
         this.&dataFlowGraph_.changed!;
+    };
+
+    function doDfgSave_(requestData) {
+        var filename = requestData["filename"];
+        var rewrite = requestData["rewrite"];
+        var dfg = requestData["DFG"];
+
+        var filePath = getUserDfgPath_() / Path.new(filename);
+        var setting = XSettings.new(filePath.asString(), rewrite);
+        setting.setAndSave("DFG", dfg.asString());
+
+        //resend info about saved dfg
+        doSavedDfg_();
+    };
+
+    function doSavedDfg_() {
+        var filePath = getUserDfgPath_();
+        var dfgs = XSettings.getSettingsFiles(filePath.asString(), "DFG");
+        this.onboardSender_.sendDfg4Load(dfgs);
+        echo(dfgs.asString());
+    };
+
+    function doLoadDfg_(filename) {
+        var filePath = getUserDfgPath_() / Path.new(filename);
+        var setting = XSettings.new(filePath.asString(), false);
+        var dfg = [ => ]; 
+        dfg["filename"] = filename;
+        dfg["DFG"] = setting.get("DFG");
+        this.onboardSender_.sendLoadDfg(dfg);
     };
 
     // initialize sending information about data flow graph
@@ -647,6 +670,7 @@ class Onboard {
             //"xobject",
             //"xci_dodo",
             "xjson",
+            "ujson",
             //"onboard",
             //"xxci",
 
