@@ -25,7 +25,7 @@ class SettingsCollection {
         // read new settings
         for(var path: settingPaths) {
             //echo("read settings file: " + path.asString());
-            xobjectsSettings_ << XSettings.new(path.asString());
+            xobjectsSettings_ << XSettings.new(path.asString(), false);
         };
     };
 

@@ -86,6 +86,12 @@ $(function() {
     sampleRun();
     
     ***/
+    
+    // Setup drop down menu (4 input)
+    $('.dropdown-toggle').dropdown();
+    $('.dropdown-menu input, .dropdown-menu label, .dropdown-menu .dropdown-header').click(function(e) {
+        e.stopPropagation();
+    });
 });
 
 function initSidepanels() {

@@ -1,26 +1,39 @@
+#include <iostream>
+#include <boost/filesystem.hpp>
 #include <boost/property_tree/info_parser.hpp>
 #include "settings.hpp"
 
 using namespace std;
 using namespace xcs;
 
-Settings::Settings(const string& filename) :
+Settings::Settings(const string& filename, bool create) :
     filename_(filename) {
-    reset();
+    reset(create);
 }
 
 Settings::~Settings() {
 }
 
-void Settings::reset() {
+void Settings::reset(bool create) {
     if (isInit()) {
+        if (create) {
+            boost::filesystem::path p(filename_);
+            if (!boost::filesystem::exists(p)) {
+                boost::filesystem::create_directories(p.parent_path());
+                ofstream f(p.string(), ios::app);
+                if (f.is_open()) {
+                    f.close();
+                }
+            }
+        }
+
         boost::property_tree::info_parser::read_info(filename_, settings_);
     }
 }
 
-void Settings::reset(const string& filename) {
+void Settings::reset(const string& filename, bool create) {
     filename_ = filename;
-    reset();
+    reset(create);
 }
 
 bool Settings::save() {

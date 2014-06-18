@@ -11,19 +11,21 @@ namespace xcs {
 
 class XCS_EXPORT Settings {
 public:
-    Settings(const std::string& filename = "");
+    Settings(const std::string& filename = "", bool create = false);
     ~Settings();
-    void reset();
-    void reset(const std::string& filename);
+    void reset(bool create = false);
+    void reset(const std::string& filename, bool create = false);
     template<class Type = std::string>
     Type get(const std::string& key, const Type& defaultValue) const;
     template<class Type = std::string>
-    Type get(const std::string& key) const;    
+    Type get(const std::string& key) const;
+    
     template<class Type = std::string>
     std::map<std::string, Type> getMap(const std::string& key) const;
     template<class Type>
     void set(const std::string& key, const Type& value);
     boost::property_tree::ptree& getTree();
+    
     bool isInit() const;
     bool save();
     bool contains(const std::string& key) const;
@@ -45,7 +47,7 @@ Type Settings::get(const std::string& key) const {
 template<class Type>
 std::map<std::string, Type> Settings::getMap(const std::string& key) const {
     std::map<std::string, Type> m;
-    
+
     // read all settings and fill the map
     if (contains(key)) {
         for (const auto& kvp : settings_.get_child(key)) {

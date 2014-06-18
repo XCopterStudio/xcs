@@ -16,8 +16,8 @@ XSettings::XSettings(const std::string &name) :
     XBindFunction(XSettings, contains);
 }
 
-void XSettings::init(const string& filepath) {
-    settings_.reset(filepath);
+void XSettings::init(const string& filepath, bool create) {
+    settings_.reset(filepath, create);
 }
 
 string XSettings::get(const string& key) {

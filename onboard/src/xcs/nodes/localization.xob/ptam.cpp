@@ -22,7 +22,7 @@ using namespace xcs::nodes::localization;
 const int Ptam::FRAME_WIDTH = 640;
 const int Ptam::FRAME_HEIGHT = 360;
 
-#define DEBUG_PRINT(a) cerr << a << endl
+#define DEBUG_PRINT(a) /*cerr << a << endl*/
 
 void Ptam::on_key_down(int key) {
     if (key == 32) { // space
@@ -59,6 +59,10 @@ Ptam::~Ptam() {
 void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     DEBUG_PRINT("PTAM: handle frame " << frameNo_);
     frameNo_ += 1;
+    
+    if(frameNo_ % 2 == 0) { // slow machine, only half a frame rate
+        return;
+    }
 
     if (resetPtamRequested_) {
         resetPtam();
@@ -73,21 +77,6 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
     memcpy(frame_.data(), bwImage.data, bwImage.width * bwImage.height);
     DEBUG_PRINT("PTAM: copied frame ");
-
-    /////////////////////////////
-    //    glWindow_->SetupViewport();
-    //    glWindow_->SetupVideoOrtho();
-    //    glWindow_->SetupVideoRasterPosAndZoom();
-    //
-    //    ptamTracker_->TrackFrame(frame_, true);
-    //
-    //    glWindow_->DrawCaption("Test XCS");
-    //    glWindow_->DrawMenus();
-    //    glWindow_->swap_buffers();
-    //    glWindow_->HandlePendingEvents();
-    //
-    //    return;
-    /////////////////////////////
 
     DEBUG_PRINT("PTAM: before ekf " << timestamp);
     TooN::Vector<10> filterPosePrePTAM = ekf_.computeState(timestamp);
@@ -125,8 +114,11 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     TooN::SE3<> PTAMResultSE3 = ptamTracker_->GetCurrentPose();
     DEBUG_PRINT("PTAM: Got PTAM pose" << endl << PTAMResultSE3);
     //lastPTAMMessage = msg = ptamTracker_->GetMessageForUser(); TODO necessary?
-
-    TooN::Vector<6> PTAMResultSE3TwistOrg = PTAMResultSE3.ln(); // TODO logarithm of the matrix, probably unnecessary
+    
+    double dbgRoll, dbgPitch, dbgYaw;
+    rod2rpy(PTAMResultSE3.get_rotation(), &dbgRoll, &dbgPitch, &dbgYaw);
+    const auto dbgTrans = PTAMResultSE3.get_translation();
+    XCS_LOG_INFO("PTAM (raw): " << dbgTrans[0] << " " << dbgTrans[1] << " " << dbgTrans[2] << " " << dbgRoll << " " << dbgPitch << " " << dbgYaw);
 
     // TODO store into XVar
     //node->publishTf(ptamTracker_->GetCurrentPose(), mimFrameTimeRos_workingCopy, frameNo_, "cam_front");
@@ -137,9 +129,11 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     predConvert_.setPosSE3_globalToDrone(predConvert_.frontToDroneNT * PTAMResultSE3);
     TooN::Vector<6> PTAMResult = TooN::makeVector(predConvert_.x, predConvert_.y, predConvert_.z, predConvert_.roll, predConvert_.pitch, predConvert_.yaw);
     // Michal: PTAMResult is now pose of the drone in basic coordinates
+    XCS_LOG_INFO("PTAM (basic): " << PTAMResult);
 
     // 3. transform with filter
     TooN::Vector<6> PTAMResultTransformed = scaleEstimation_.transformPTAMObservation(PTAMResult);
+    XCS_LOG_INFO("PTAM (scaled): " << PTAMResultTransformed);
     // Michal: apply "current"/last scale to result
 
     DEBUG_PRINT("PTAM: PTAM result transformed");
@@ -200,6 +194,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
         // if yaw difference too big: something certainly is wrong.
         // maximum difference is 5 + 2*(number of seconds since PTAM observation).
+        // TODO (Michal): convert to radians
         double maxYawDiff = 10.0 + 2 * duration2sec(Clock::now() - lastGoodYawClock_);
         if (maxYawDiff > 20) maxYawDiff = 1000;
         if (false && diffs[5] > maxYawDiff) {
@@ -253,7 +248,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     // TODO: make shure filter is handled properly with permanent roll-forwards.
     if (goodCount_ >= 3) {
         CameraMeasurement ptamResultForEkf(PTAMResult);
-        ekf_.measurementCam(ptamResultForEkf, timestamp);
+        // Blocked while debugging PTAM: ekf_.measurementCam(ptamResultForEkf, timestamp);
         goodObservations_ += 1;
         DEBUG_PRINT("PTAM: measurementCam " << timestamp);
     } else {
