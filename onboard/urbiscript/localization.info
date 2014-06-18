@@ -1,0 +1,42 @@
+ModelParameters 
+{
+  c0  10.32
+  c1  0
+  c2  0.58
+  c3  0
+  c4  6.108
+  c5  0.175
+  c6  4.363
+  c7  0.175
+  c8  1.4
+  c9  1.4
+}
+
+ModelVariance
+{
+  roll  3
+  pitch 3
+  yaw   9
+  gaz   1
+}
+
+ImuVariance
+{
+  z           0.0004
+  velocityX   0.000025
+  velocityY   0.000025
+  velocityZ   0.01
+  phi         0.0003
+  theta       0.0003
+  velocityPsi 0.001
+}
+
+PtamVariance
+{
+  x     0.01
+  y     0.01
+  z     0.01
+  phi   0.122
+  theta 0.122
+  psi   0.122
+}

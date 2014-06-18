@@ -84,6 +84,7 @@ public:
     XLocalization(const std::string &name);
     
     void init();
+    void loadParameters(const std::string &file);
 };
 
 }

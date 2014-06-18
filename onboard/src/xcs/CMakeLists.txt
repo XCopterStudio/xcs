@@ -13,3 +13,5 @@ endif(X_LIN)
 find_package(Boost 1.55 REQUIRED COMPONENTS system filesystem)
 include_directories(${Boost_INCLUDE_DIRS}) 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+
+use_logging(${PROJECT_NAME})

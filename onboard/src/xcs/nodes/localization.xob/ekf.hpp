@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <utility>
+#include <vector>
 #include <random>
 #include <chrono>
 #include <boost/thread.hpp>
@@ -18,7 +19,8 @@ namespace xcs {
 namespace nodes {
 namespace localization {
 
-
+typedef std::vector<double> Parameters;
+typedef std::vector<double> Variances;
 typedef std::pair<DroneState, arma::mat> DroneStateDistribution;
 typedef std::pair<DroneStateMeasurement, double> ImuMeasurementChronologic;
 typedef std::pair<DroneStateDistribution, double> DroneStateDistributionChronologic;
@@ -42,11 +44,11 @@ class Ekf {
     ImuMeasurements imuMeasurements_;
     FlyControls flyControls_;
 
-    double parameters_[10];
+    double modelPar_[10];
+    double modelVariance_[4];
+    double imuVariance_[7];
+    double ptamVariance_[6];
     unsigned int IDCounter_;
-
-    Generator randomGenerator_;
-    NormalDistribution normalDistribution_;
 
     template <typename Deque>
     void clearUpToTime(Deque &deque, const double &time);
@@ -63,7 +65,12 @@ class Ekf {
     DroneStateDistribution updateCam(const DroneStateDistribution &state, const CameraMeasurement &camMeasurement);
 public:
     Ekf();
+    Ekf(Parameters parameters, Variances model, Variances imu, Variances ptam);
 
+    void modelParameters(Parameters parameters);
+    void modelVariances(Variances model);
+    void imuVariances(Variances imu);
+    void ptamVariances(Variances ptam);
     /*!
      * \param timestamp EKF time.
      */
