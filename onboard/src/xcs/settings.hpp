@@ -1,8 +1,8 @@
 #ifndef SETTINGS_HPP
 #define SETTINGS_HPP
 
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/info_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
 #include <string>
 #include <map>
 #include <list>

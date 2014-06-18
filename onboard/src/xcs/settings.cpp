@@ -1,7 +1,9 @@
+#include "settings.hpp"
+#include <xcs/logging.hpp>
+
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/info_parser.hpp>
-#include "settings.hpp"
 
 using namespace std;
 using namespace xcs;
@@ -27,7 +29,12 @@ void Settings::reset(bool create) {
             }
         }
 
-        boost::property_tree::info_parser::read_info(filename_, settings_);
+        try{
+            boost::property_tree::info_parser::read_info(filename_, settings_);
+        }
+        catch (boost::property_tree::info_parser_error error){
+            XCS_LOG_ERROR("Cannot load information from info file: " << filename_ << "\n With error " << error.message() << " on line: "<< error.line());
+        }
     }
 }
 
