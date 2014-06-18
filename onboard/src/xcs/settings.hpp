@@ -5,6 +5,7 @@
 #include <boost/property_tree/info_parser.hpp>
 #include <string>
 #include <map>
+#include <list>
 #include <xcs/xcs_export.h>
 
 namespace xcs {
@@ -29,6 +30,8 @@ public:
     bool isInit() const;
     bool save();
     bool contains(const std::string& key) const;
+
+    static std::list<std::string> getSettingsFiles(std::string foldername, const std::string& key = "");
 private:
     boost::property_tree::ptree settings_;
     std::string filename_;

@@ -14,6 +14,7 @@ XSettings::XSettings(const std::string &name) :
     XBindFunction(XSettings, setAndSave);
     XBindFunction(XSettings, save);
     XBindFunction(XSettings, contains);
+    XBindFunction(XSettings, getSettingsFiles);
 }
 
 void XSettings::init(const string& filepath, bool create) {
@@ -41,7 +42,6 @@ boost::unordered_map<string, string> XSettings::getMap(const string& key) const 
     return um;
 }
 
-
 void XSettings::set(const std::string& key, const std::string& value) {
     settings_.set(key, value);
 }
@@ -57,6 +57,10 @@ bool XSettings::save() {
 
 bool XSettings::contains(const string& key) {
     return settings_.contains(key);
+}
+
+list<string> XSettings::getSettingsFiles(string foldername, const string& key) {
+    return Settings::getSettingsFiles(foldername, key);
 }
 
 XStart(XSettings);
