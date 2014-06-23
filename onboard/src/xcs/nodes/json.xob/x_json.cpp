@@ -86,7 +86,8 @@ bool XJson::tryDecode(const std::string &json) {
         }
         else {
             text = jsonText.substr(0, foundPosition + 1);
-            rest = trimRestJson(jsonText.substr(foundPosition + 1, jsonText.length()));
+            rest = jsonText.substr(foundPosition + 1, jsonText.length());
+            trimRestJson(rest);
             if (rest != "") {
                 rests.push_back(rest);
                 jsonText = text;
@@ -121,10 +122,9 @@ bool XJson::tryDecode(const std::string &json) {
     return true;
 }
 
-string& XJson::trimRestJson(string &restJson) const {
+void XJson::trimRestJson(string &restJson) const {
     restJson.erase(restJson.begin(), std::find_if(restJson.begin(), restJson.end(), bind1st(mem_fun(&XJson::isNotSpaceOrComma), this)));
     restJson.erase(std::find_if(restJson.rbegin(), restJson.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), restJson.end());
-    return restJson;
 }
 
 bool XJson::isNotSpaceOrComma(char c) const {
