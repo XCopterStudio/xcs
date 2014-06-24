@@ -2,6 +2,7 @@
 #define	TUMUTILS_HPP
 
 #include <TooN/TooN.h>
+#include <TooN/se3.h>
 #include <TooN/so3.h>
 #include <chrono>
 #include <cmath>
@@ -9,6 +10,45 @@
 namespace xcs {
 namespace nodes {
 namespace localization {
+
+typedef TooN::SE3<double> SE3Element;
+
+inline SE3Element vectToSe3(const TooN::Vector<6> &pose) {
+    SE3Element result(TooN::Identity, pose.slice<0, 3>());
+
+    const double sPhi = sin(pose[3]);
+    const double cPhi = sin(pose[3]);
+    const double sThe = sin(pose[4]);
+    const double cThe = sin(pose[4]);
+    const double sPsi = sin(pose[5]);
+    const double cPsi = sin(pose[5]);
+
+    TooN::Matrix<3, 3> mat;
+    mat(0, 0) = cPsi * cPhi + sPsi * sThe * sPhi;
+    mat(0, 1) = sPsi * sThe;
+    mat(0, 2) = cPsi * sPhi - cPhi * sPsi * sThe;
+
+    mat(1, 0) = -sPsi * cPhi + cPsi * sThe * sPhi;
+    mat(1, 1) = cPsi * cThe;
+    mat(1, 2) = -sPsi * sPhi - cPsi * sThe * cPhi;
+
+    mat(2, 0) = -cThe * sPhi;
+    mat(2, 1) = sThe;
+    mat(2, 2) = cThe * cPhi;
+
+    result.get_rotation() = mat;
+    
+    return result;
+}
+
+inline TooN::Vector<3> so3ToAngles(const TooN::SO3<> &pose) {
+    TooN::Vector<3> result;
+    //TODO angles
+    return result;
+}
+
+
+// TODO original TUM functions are below (refactored code doesn't use them probably, remove?)
 
 /****************************************************
  *********** Pose-Representation Conversion **********

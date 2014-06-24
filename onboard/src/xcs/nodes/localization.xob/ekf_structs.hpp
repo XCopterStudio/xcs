@@ -1,6 +1,7 @@
 #ifndef EKF_STRUCTS_HPP
 #define	EKF_STRUCTS_HPP
 
+#include "tum/tum_utils.hpp"
 #include <armadillo>
 #include <TooN/TooN.h>
 
@@ -95,9 +96,12 @@ struct CameraMeasurement {
         return measurement;
     }
 
-    inline CameraMeasurement(const TooN::Vector<6> &vector) :
-      position(vector[0], vector[1], vector[2]),
-      angles(vector[3], vector[4], vector[5]) {
+    inline CameraMeasurement(const TooN::SE3<> &pose) :
+      position(pose.get_translation()[0], pose.get_translation()[1], pose.get_translation()[2]) {
+        const auto poseAngles = so3ToAngles(pose.get_rotation());
+        angles.phi = poseAngles[0];
+        angles.theta = poseAngles[1];
+        angles.psi = poseAngles[2];
     }
 };
 }

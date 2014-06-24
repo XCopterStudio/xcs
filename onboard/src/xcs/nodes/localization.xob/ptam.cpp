@@ -12,6 +12,7 @@
 #include <ptam/MouseKeyHandler.h>
 
 #include <xcs/logging.hpp>
+#include <xcs/xcs_fce.hpp>
 
 
 using namespace std;
@@ -56,11 +57,18 @@ Ptam::Ptam(Ekf &ekf) : ekf_(ekf) {
 Ptam::~Ptam() {
 }
 
+inline void dbgPrintSE3(const string &tag, const TooN::SE3<> &pose) {
+    double dbgRoll, dbgPitch, dbgYaw;
+    rod2rpy(pose.get_rotation(), &dbgRoll, &dbgPitch, &dbgYaw);
+    const auto dbgTrans = pose.get_translation();
+    XCS_LOG_INFO("PTAM (" << tag << "): " << dbgTrans[0] << " " << dbgTrans[1] << " " << dbgTrans[2] << " " << dbgRoll << " " << dbgPitch << " " << dbgYaw);
+}
+
 void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     DEBUG_PRINT("PTAM: handle frame " << frameNo_);
     frameNo_ += 1;
-    
-    if(frameNo_ % 2 == 0) { // slow machine, only half a frame rate
+
+    if (frameNo_ % 2 == 0) { // slow machine, only half a frame rate
         return;
     }
 
@@ -76,67 +84,35 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     }
 
     memcpy(frame_.data(), bwImage.data, bwImage.width * bwImage.height);
-    DEBUG_PRINT("PTAM: copied frame ");
 
-    DEBUG_PRINT("PTAM: before ekf " << timestamp);
-    TooN::Vector<10> filterPosePrePTAM = ekf_.computeState(timestamp);
-    DEBUG_PRINT("PTAM: handle frame ");
+    TooN::Vector<10> filterPosePrePTAM = ekf_.computeState(timestamp); // TODO (michal): use appropriate structure for state
 
     // ------------------------ do PTAM -------------------------
+    // TODO (michal) wrap in IF depending onn configuration
     glWindow_->activate(); // set context for the current thread
     glWindow_->SetupViewport();
     glWindow_->SetupVideoOrtho();
     glWindow_->SetupVideoRasterPosAndZoom();
-    DEBUG_PRINT("PTAM: handle frame 1");
 
-
-
-    // 1. transform with filter
-    TooN::Vector<6> PTAMPoseGuess = scaleEstimation_.backTransformPTAMObservation(filterPosePrePTAM.slice<0, 6>());
-    // 2. convert to se3
-    predConvert_.setPosRPY(PTAMPoseGuess[0], PTAMPoseGuess[1], PTAMPoseGuess[2], PTAMPoseGuess[3], PTAMPoseGuess[4], PTAMPoseGuess[5]);
-    // 3. multiply with rotation matrix	
-    TooN::SE3<> PTAMPoseGuessSE3 = predConvert_.droneToFrontNT * predConvert_.globaltoDrone;
-    DEBUG_PRINT("PTAM: pre PTAM pose guess (10) " << endl << filterPosePrePTAM);
-    DEBUG_PRINT("PTAM: pre PTAM pose guess " << endl << PTAMPoseGuess);
-    DEBUG_PRINT("PTAM: pre PTAM pose guess SE3" << endl << PTAMPoseGuessSE3);
-
+    const SE3Element droneToWPred(vectToSe3(filterPosePrePTAM.slice<0, 6>()));
+    const SE3Element worldUToCam(scaleEstimation_.droneToFront * droneToWPred.inverse() * scaleEstimation_.offsetMatrix());
+    const SE3Element ptamToCamPPred(worldUToCam.get_rotation(), worldUToCam.get_translation() / scaleEstimation_.scale());
 
     // set
-    ptamTracker_->setPredictedCamFromW(PTAMPoseGuessSE3);
+    dbgPrintSE3("predicted", ptamToCamPPred);
+    ptamTracker_->setPredictedCamFromW(ptamToCamPPred); // TODO patch TUM API
     //ptamTracker_->setLastFrameLost((goodCount_ < -10), (videoFrameID%2 != 0));
     ptamTracker_->setLastFrameLost((goodCount_ < -20), (frameNo_ % 3 == 0));
-    DEBUG_PRINT("PTAM: PTAM xxx");
-    DEBUG_PRINT("goodCount_ " << goodCount_ << " ptamTracker " << ptamTracker_->lastStepResult);
 
     // track
     ptamTracker_->TrackFrame(frame_, true);
-    TooN::SE3<> PTAMResultSE3 = ptamTracker_->GetCurrentPose();
-    DEBUG_PRINT("PTAM: Got PTAM pose" << endl << PTAMResultSE3);
-    //lastPTAMMessage = msg = ptamTracker_->GetMessageForUser(); TODO necessary?
-    
-    double dbgRoll, dbgPitch, dbgYaw;
-    rod2rpy(PTAMResultSE3.get_rotation(), &dbgRoll, &dbgPitch, &dbgYaw);
-    const auto dbgTrans = PTAMResultSE3.get_translation();
-    XCS_LOG_INFO("PTAM (raw): " << dbgTrans[0] << " " << dbgTrans[1] << " " << dbgTrans[2] << " " << dbgRoll << " " << dbgPitch << " " << dbgYaw);
+    const SE3Element ptamToCamPResult = ptamTracker_->GetCurrentPose();
+    const SE3Element camPToPtamResult(ptamToCamPResult.inverse());
+    const SE3Element camToWorldU(camPToPtamResult.get_rotation(), camPToPtamResult.get_translation() * scaleEstimation_.scale());
 
-    // TODO store into XVar
-    //node->publishTf(ptamTracker_->GetCurrentPose(), mimFrameTimeRos_workingCopy, frameNo_, "cam_front");
+    const SE3Element droneToWResult(scaleEstimation_.offsetMatrix() * camToWorldU * scaleEstimation_.droneToFront);
 
 
-    // 1. multiply from left by frontToDroneNT.
-    // 2. convert to xyz,rpy
-    predConvert_.setPosSE3_globalToDrone(predConvert_.frontToDroneNT * PTAMResultSE3);
-    TooN::Vector<6> PTAMResult = TooN::makeVector(predConvert_.x, predConvert_.y, predConvert_.z, predConvert_.roll, predConvert_.pitch, predConvert_.yaw);
-    // Michal: PTAMResult is now pose of the drone in basic coordinates
-    XCS_LOG_INFO("PTAM (basic): " << PTAMResult);
-
-    // 3. transform with filter
-    TooN::Vector<6> PTAMResultTransformed = scaleEstimation_.transformPTAMObservation(PTAMResult);
-    XCS_LOG_INFO("PTAM (scaled): " << PTAMResultTransformed);
-    // Michal: apply "current"/last scale to result
-
-    DEBUG_PRINT("PTAM: PTAM result transformed");
 
 
     // init failed?
@@ -146,16 +122,14 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     }
     if (ptamTracker_->lastStepResult == ptamTracker_->I_SECOND) {
         //PTAMInitializedClock = getMS(); TODO this is used in MapView to redraw something(?) only after 200 ms
-        const auto scaleVector = TooN::makeVector(ptamMapMaker_->initialScaleFactor * 1.2, ptamMapMaker_->initialScaleFactor * 1.2, ptamMapMaker_->initialScaleFactor * 1.2);
-        scaleEstimation_.setCurrentScales(scaleVector);
-        ptamMapMaker_->currentScaleFactor = scaleEstimation_.getCurrentScales()[0]; // M: why not directly?
+        scaleEstimation_.scale(ptamMapMaker_->initialScaleFactor); // TODO (Michal): use initial scale factor = 1
+        ptamMapMaker_->currentScaleFactor = ptamMapMaker_->initialScaleFactor;
 
         XCS_LOG_INFO("PTAM initialized!");
-        XCS_LOG_INFO("initial scale: " << ptamMapMaker_->initialScaleFactor * 1.2);
+        XCS_LOG_INFO("initial scale: " << scaleEstimation_.scale());
         //node->publishCommand("u l PTAM initialized (took second KF)"); // TODO what is this for
         framesIncludedForScaleXYZ_ = -1;
         lockNextFrame_ = true;
-        imuOnlyPred_.resetPos();
     }
     if (ptamTracker_->lastStepResult == ptamTracker_->I_FIRST) {
         XCS_LOG_INFO("PTAM initialization started (took first KF)");
@@ -171,7 +145,10 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     bool isGood = true;
     bool isVeryGood = true;
     // calculate absolute differences.
-    TooN::Vector<6> diffs = PTAMResultTransformed - filterPosePrePTAM.slice<0, 6>();
+    TooN::Vector<6> diffs;
+    diffs.slice<0, 3>() = droneToWResult.get_translation() - droneToWPred.get_translation();
+    diffs.slice<3, 3>() = so3ToAngles(droneToWResult.get_rotation()) - so3ToAngles(droneToWPred.get_rotation());
+
     for (int i = 0; 1 < 1; i++) {
         diffs[i] = abs(diffs[i]);
     }
@@ -192,37 +169,46 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
         bool dodgy = ptamTracker_->lastStepResult == ptamTracker_->T_DODGY ||
                 ptamTracker_->lastStepResult == ptamTracker_->T_RECOVERED_DODGY;
 
-        // if yaw difference too big: something certainly is wrong.
-        // maximum difference is 5 + 2*(number of seconds since PTAM observation).
-        // TODO (Michal): convert to radians
-        double maxYawDiff = 10.0 + 2 * duration2sec(Clock::now() - lastGoodYawClock_);
-        if (maxYawDiff > 20) maxYawDiff = 1000;
+        /*
+         * Engel: If yaw difference too big: something certainly is wrong.
+         * Engel: maximum difference is 10° + 2° * (number of seconds since PTAM observation).
+         */
+        double maxYawDiff = degreesToRadians(10) + degreesToRadians(2) * duration2sec(Clock::now() - lastGoodYawClock_);
+        if (maxYawDiff > degreesToRadians(20)) {
+            maxYawDiff = degreesToRadians(1000);
+        }
         if (false && diffs[5] > maxYawDiff) {
             isGood = false;
         }
 
-        if (diffs[5] < 10) {
+        if (diffs[5] < degreesToRadians(10)) {
             lastGoodYawClock_ = Clock::now();
         }
-        if (diffs[5] > 4.0) {
+        if (diffs[5] > degreesToRadians(4)) {
             isVeryGood = false;
         }
 
-        // if rp difference too big: something certainly is wrong.
-        if (diffs[3] > 20 || diffs[4] > 20) {
+        /*
+         * Engel: if rp difference too big: something certainly is wrong.
+         */
+        if (diffs[3] > degreesToRadians(20) || diffs[4] > degreesToRadians(20)) {
             isGood = false;
         }
 
-        if (diffs[3] > 3 || diffs[4] > 3 || dodgy) {
+        if (diffs[3] > degreesToRadians(3) || diffs[4] > degreesToRadians(3) || dodgy) {
             isVeryGood = false;
         }
     }
 
     if (isGood) {
-        if (goodCount_ < 0) goodCount_ = 0;
+        if (goodCount_ < 0) {
+            goodCount_ = 0;
+        }
         goodCount_++;
     } else {
-        if (goodCount_ > 0) goodCount_ = 0;
+        if (goodCount_ > 0) {
+            goodCount_ = 0;
+        }
         goodCount_--;
 
         if (ptamTracker_->lastStepResult == ptamTracker_->T_RECOVERED_DODGY)
@@ -232,9 +218,6 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
     }
 
-    DEBUG_PRINT("PTAM: assessed quality");
-
-    TooN::Vector<10> filterPosePostPTAM;
     // --------------------------- scale estimation & update filter (REDONE) -----------------------------
     // interval length is always between 1s and 2s, to enshure approx. same variances.
     // if interval contained height inconsistency, z-distances are simply both set to zero, which does not generate a bias.
@@ -247,8 +230,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
     // TODO: make shure filter is handled properly with permanent roll-forwards.
     if (goodCount_ >= 3) {
-        CameraMeasurement ptamResultForEkf(PTAMResult);
-        // Blocked while debugging PTAM: ekf_.measurementCam(ptamResultForEkf, timestamp);
+        ekf_.measurementCam(droneToWResult, timestamp);
         goodObservations_ += 1;
         DEBUG_PRINT("PTAM: measurementCam " << timestamp);
     } else {
@@ -257,14 +239,16 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     }
 
     // obtain results from EKF with updated position
-    filterPosePostPTAM = ekf_.computeState(timestamp);
+    // TODO post EKF is not necessary IMO TooN::Vector<10> filterPosePostPTAM = ekf_.computeState(timestamp);
 
-    TooN::Vector<6> filterPosePostPTAMBackTransformed = scaleEstimation_.backTransformPTAMObservation(filterPosePostPTAM.slice<0, 6>());
-
-
+    const TooN::Vector<3> ptamPositionForScale(droneToWResult.get_translation() / scaleEstimation_.scale());
+    const TooN::Vector<3> scalingFixpoint((scaleEstimation_.offsetMatrix().inverse() * droneToWResult).get_translation() / scaleEstimation_.scale());
+    
     // if interval is started: add one step.
-    double includedTime = timestamp - ptamPositionForScaleTakenTimestamp_;
-    if (framesIncludedForScaleXYZ_ >= 0) framesIncludedForScaleXYZ_++;
+    const double includedTime = timestamp - ptamPositionForScaleTakenTimestamp_;
+    if (framesIncludedForScaleXYZ_ >= 0) {
+        framesIncludedForScaleXYZ_++;
+    }
 
     // if interval is overdue: reset & dont add
     if (includedTime > 3.0) {
@@ -279,7 +263,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
         if (includedTime >= 2.0 && framesIncludedForScaleXYZ_ > 1) // ADD! (if too many, was resetted before...)
         {
-            TooN::Vector<3> diffPTAM = filterPosePostPTAMBackTransformed.slice<0, 3>() - ptamPositionForScale_;
+            TooN::Vector<3> diffPTAM = ptamPositionForScale - lastPtamPositionForScale_;
             bool zCorrupted, allCorrupted;
 
             TooN::Vector<3> diffIMU = evalNavQue(ptamPositionForScaleTakenTimestamp_, timestamp, &zCorrupted, &allCorrupted);
@@ -300,8 +284,8 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
                 diffIMU[2] *= zFactor;
 
                 // hidden helluva calculations for scale estimate
-                scaleEstimation_.updateScaleXYZ(diffPTAM, diffIMU, PTAMResult.slice<0, 3>());
-                ptamMapMaker_->currentScaleFactor = scaleEstimation_.getCurrentScales()[0];
+                scaleEstimation_.updateScaleXYZ(diffPTAM, diffIMU, scalingFixpoint);
+                ptamMapMaker_->currentScaleFactor = scaleEstimation_.scale();
             }
             framesIncludedForScaleXYZ_ = -1; // causing reset afterwards
         }
@@ -309,7 +293,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
         if (framesIncludedForScaleXYZ_ == -1) // RESET!
         {
             framesIncludedForScaleXYZ_ = 0;
-            ptamPositionForScale_ = filterPosePostPTAMBackTransformed.slice<0, 3>();
+            lastPtamPositionForScale_ = ptamPositionForScale;
             //predIMUOnlyForScale_.resetPos();	// also resetting z corrupted flag etc. (NOT REquired as reset is done in eval)
             ptamPositionForScaleTakenTimestamp_ = timestamp;
         }
@@ -319,12 +303,12 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
 
     if (lockNextFrame_ && isGood) {
-        scaleEstimation_.scalingFixpoint = PTAMResult.slice<0, 3>();
+        scaleEstimation_.scalingFixpoint = scalingFixpoint;
         lockNextFrame_ = false;
         //filter->useScalingFixpoint = true; // this was commented out in original TUM
 
         // node->publishCommand(std::string("u l ") + charBuf); TODO is this necessary
-        XCS_LOG_INFO("locking scale fixpoint to " << PTAMResultTransformed[0] << " " << PTAMResultTransformed[1] << " " << PTAMResultTransformed[2]);
+        XCS_LOG_INFO("locking scale fixpoint to " << scalingFixpoint[0] << " " << scalingFixpoint[1] << " " << scalingFixpoint[2]);
     }
 
 
@@ -523,7 +507,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     //        pthread_mutex_unlock(&(node->logPTAM_CS));
     //    }
 
-    
+
     glWindow_->DrawCaption(ptamTracker_->GetMessageForUser());
     glWindow_->DrawMenus();
     glWindow_->swap_buffers();

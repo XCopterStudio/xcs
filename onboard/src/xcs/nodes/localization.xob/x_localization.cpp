@@ -67,27 +67,26 @@ void XLocalization::onChangeVideo(urbi::UImage image) {
 }
 
 void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
-    //double ekfTime = internalTime - imuTimeShift_ - CAM_DELAY;
+   double ekfTime = internalTime - imuTimeShift_ - CAM_DELAY;
 
-    //// convert image to grayscale for PTAM
-    //urbi::UImage bwImage;
-    //bwImage.imageFormat = urbi::IMAGE_GREY8;
-    //bwImage.data = nullptr;
-    //bwImage.size = 0;
-    //bwImage.width = 0;
-    //bwImage.height = 0;
-    //{
-    //    lock_guard<mutex> lock(lastFrameMtx_);
-    //    urbi::convert(lastFrame_, bwImage);
-    //}
+    // convert image to grayscale for PTAM
+    urbi::UImage bwImage;
+    bwImage.imageFormat = urbi::IMAGE_GREY8;
+    bwImage.data = nullptr;
+    bwImage.size = 0;
+    bwImage.width = 0;
+    bwImage.height = 0;
+    {
+        lock_guard<mutex> lock(lastFrameMtx_);
+        urbi::convert(lastFrame_, bwImage);
+    }
+    ptam_->handleFrame(bwImage, ekfTime); // this will do update EKF
 
-    //ptam_->handleFrame(bwImage, ekfTime); // this will do update EKF
-
-    //// update current state of drone
-    //DroneState state = ekf_.computeState(timeFromStart());
-    //position = state.position;
-    //velocity = state.velocity;
-    //rotation = state.angles;
+    // update current state of drone
+    DroneState state = ekf_.computeState(timeFromStart());
+    position = state.position;
+    velocity = state.velocity;
+    rotation = state.angles;
 }
 
 void XLocalization::onChangeFlyControl(const xcs::FlyControl flyControl) {
@@ -189,3 +188,4 @@ void XLocalization::loadParameters(const std::string &file){
 }
 
 XStart(XLocalization);
+

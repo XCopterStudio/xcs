@@ -76,7 +76,6 @@ private:
     localization::ScaleEstimation scaleEstimation_;
 
     Predictor predConvert_; // used ONLY to convert from rpy to se3 and back, i.e. never kept in some state.
-    Predictor imuOnlyPred_; // TODO navdata should be fed to this predictor (M: IMO unnecessary)
     Predictor predIMUOnlyForScale_; // used for scale calculation. needs to be updated with every new navinfo..., // TODO navdata should be fed to this predictor
     int goodCount_; // number of succ. tracked frames in a row.
     int goodObservations_; // another metric of tracking quality (TODO explain better)
@@ -93,7 +92,7 @@ private:
     bool lockNextFrame_;
     TimePoint lastGoodYawClock_;
 
-    TooN::Vector<3> ptamPositionForScale_;
+    TooN::Vector<3> lastPtamPositionForScale_;
     Timestamp ptamPositionForScaleTakenTimestamp_;
     Timestamp lastScaleEKFtimestamp_;
 
