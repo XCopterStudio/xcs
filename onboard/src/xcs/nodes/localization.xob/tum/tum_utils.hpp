@@ -17,11 +17,11 @@ inline SE3Element vectToSe3(const TooN::Vector<6> &pose) {
     SE3Element result(TooN::Identity, pose.slice<0, 3>());
 
     const double sPhi = sin(pose[3]);
-    const double cPhi = sin(pose[3]);
+    const double cPhi = cos(pose[3]);
     const double sThe = sin(pose[4]);
-    const double cThe = sin(pose[4]);
+    const double cThe = cos(pose[4]);
     const double sPsi = sin(pose[5]);
-    const double cPsi = sin(pose[5]);
+    const double cPsi = cos(pose[5]);
 
     TooN::Matrix<3, 3> mat;
     mat(0, 0) = cPsi * cPhi + sPsi * sThe * sPhi;
