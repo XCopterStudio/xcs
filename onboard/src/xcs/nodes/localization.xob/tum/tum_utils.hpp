@@ -37,13 +37,18 @@ inline SE3Element vectToSe3(const TooN::Vector<6> &pose) {
     mat(2, 2) = cThe * cPhi;
 
     result.get_rotation() = mat;
-    
+
     return result;
 }
 
 inline TooN::Vector<3> so3ToAngles(const TooN::SO3<> &pose) {
     TooN::Vector<3> result;
-    //TODO angles
+    auto mat = pose.get_matrix();
+
+    result[0] = atan2(-mat(2, 0), mat(2, 2)); // phi
+    result[1] = atan2(mat(2, 1), hypot(mat(2, 0), mat(2, 2))); // theta
+    result[2] = atan2(mat(0, 1), mat(1, 1)); // psi
+
     return result;
 }
 
