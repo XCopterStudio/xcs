@@ -22,7 +22,7 @@ $(function () {
     app.XcopterState = new XcopterState();
     app.Flash = new FlashMessagesView();
     app.Navdata = new AbstractNavdataView();
-    app.ScriptGeneratorView = new ScriptGeneratorView();
+    app.DataFlowGraph = new DataFlowGraphView();
 //    app.Navdata.onDataChange({ type: "data", data: { altitude: "2.3" }});
 //    app.Navdata.onDataChange({ type: "data", data: { phi: "4.3" }});
 //    app.Navdata.onDataChange({ type: "data", data: { psi: "1.3" }});

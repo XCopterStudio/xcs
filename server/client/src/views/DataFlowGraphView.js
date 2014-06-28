@@ -1,5 +1,5 @@
-var ScriptGeneratorView = Backbone.View.extend({
-    id : 'script-generator',
+var DataFlowGraphView = Backbone.View.extend({
+    id : 'data-flow-graph',
     
     el : '#dfg',
     
@@ -13,11 +13,11 @@ var ScriptGeneratorView = Backbone.View.extend({
         "click .dfgLoadDfg" : "dfgLoadDfg",
     },
     
-    scriptGeneratorGraph : {},
+    dfgGraph : {},
     
     dfgToolboxNodes : {},
     
-    scriptGeneratorModels : {
+    dfgModels : {
         addModel: function(id, model) {
             this[id] = model;
             
@@ -78,17 +78,17 @@ var ScriptGeneratorView = Backbone.View.extend({
         var flowGraphConsole = $('#flow-graph-console');
         flowGraphConsole.append('<textarea id="flow-graph-txt" rows="15" cols="150"></textarea>');
         
-        this.scriptGeneratorGraph = new joint.dia.Graph;
-        this.listenTo(this.scriptGeneratorGraph, 'change:target', this.setLink);
-        this.listenTo(this.scriptGeneratorGraph, 'change:source', this.setLink);
+        this.dfgGraph = new joint.dia.Graph;
+        this.listenTo(this.dfgGraph, 'change:target', this.setLink);
+        this.listenTo(this.dfgGraph, 'change:source', this.setLink);
 
-        this.scriptGeneratorGraph.on('change', function(model) {
+        this.dfgGraph.on('change', function(model) {
             $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
         });
-        this.scriptGeneratorGraph.on('add', function(cell) {
+        this.dfgGraph.on('add', function(cell) {
             $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
         });
-        this.scriptGeneratorGraph.on('remove', function(cell) {
+        this.dfgGraph.on('remove', function(cell) {
             $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
         });
 
@@ -99,7 +99,7 @@ var ScriptGeneratorView = Backbone.View.extend({
             width: 1024, 
             height: 500, 
             gridSize: 10,   // size of grid in px (how many px reprezents one cell)
-            model: this.scriptGeneratorGraph,
+            model: this.dfgGraph,
             validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
                 if(magnetS && magnetT && magnetS.getAttribute("type") == "in" && magnetT.getAttribute("type") == "out") {
                     var idS = magnetS.getAttribute("port");
@@ -241,8 +241,8 @@ var ScriptGeneratorView = Backbone.View.extend({
                 
                 m.setAutoSize();
                 
-                self.scriptGeneratorGraph.addCell(m);
-                self.scriptGeneratorModels.addModel(modelId, m);
+                self.dfgGraph.addCell(m);
+                self.dfgModels.addModel(modelId, m);
             }
         });
     },
@@ -509,7 +509,7 @@ var ScriptGeneratorView = Backbone.View.extend({
     
     dfgCreate : function() {
         // load dfg 2 json object
-        var jsonDfg = this.scriptGeneratorGraph.toJSON()
+        var jsonDfg = this.dfgGraph.toJSON()
         
         if(jsonDfg.cells) {
             // prepare object 4 dfg info
@@ -572,7 +572,7 @@ var ScriptGeneratorView = Backbone.View.extend({
     
     dfgReset : function() {
         this.model.reset();
-        this.scriptGeneratorGraph.clear();
+        this.dfgGraph.clear();
         this.model.requestReset();
     }, 
     
@@ -599,7 +599,7 @@ var ScriptGeneratorView = Backbone.View.extend({
         inputFilename.val('');
         
         // load dfg 2 json object
-        var jsonDfg = this.scriptGeneratorGraph.toJSON();
+        var jsonDfg = this.dfgGraph.toJSON();
         
         //send request
         this.model.requestSaveDfg(jsonDfg, filename, true);

@@ -44,6 +44,6 @@
 <script type="text/javascript" src="src/views/FlashMessagesView.js"></script>
 <script type="text/javascript" src="src/views/AbstractNavdataView.js"></script>
 <script type="text/javascript" src="src/views/AppView.js"></script>
-<script type="text/javascript" src="src/views/ScriptGeneratorView.js"></script>
+<script type="text/javascript" src="src/views/DataFlowGraphView.js"></script>
 <script type="text/javascript" src="src/views/WaitView.js"></script>
 <script type="text/javascript" src="src/app.js"></script>
