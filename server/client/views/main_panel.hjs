@@ -1,3 +1,39 @@
+<!-- Button trigger modal -->
+<!--<div class="test">
+    <button class="btn btn-primary btn-lg red">test</buttom>
+    <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+        Launch demo modal
+    </button>
+</div>
+
+<div class="row">
+        <div class="col-xs-12">
+<div class="red" style="width:200px;height:200px;background:red;"></div>
+</div></div>
+
+<div class="row">
+        <div class="col-xs-4">
+<div class="green" style="height:50px;background:green;"></div>
+</div></div>
+-->
+
+<!-- Modal -->
+<!--
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+    </div>
+  </div>
+</div>
+-->
+
+
 <!-- Main X-copter Panel -->
 <nav class="navbar navbar-default" role="navigation">
         <div class="container-fluid">

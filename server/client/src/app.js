@@ -18,6 +18,7 @@ $(function () {
     'use strict';
 
     app = new AppView();
+    app.Wait = new WaitView();
     app.XcopterState = new XcopterState();
     app.Flash = new FlashMessagesView();
     app.Navdata = new AbstractNavdataView();
