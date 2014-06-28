@@ -1,11 +1,7 @@
 var WaitView = Backbone.View.extend({
-    
     id : 'wait',
     
     el : 'body',
-    
-//    events : {
-//    },
     
     initialize : function() {
         $(window).resize(this.setFontSize);

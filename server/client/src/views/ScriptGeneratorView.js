@@ -1,6 +1,3 @@
-// todooo:udelat z toho vnitrni promennou
-var scriptGeneratorGraph = {};
-
 var scriptGeneratorModels =  {
     addModel: function(id, model) {
         this[id] = model;
@@ -35,7 +32,6 @@ var scriptGeneratorModels =  {
 };
 
 var ScriptGeneratorView = Backbone.View.extend({
-    
     id : 'script-generator',
     
     el : '#dfg',
@@ -49,6 +45,8 @@ var ScriptGeneratorView = Backbone.View.extend({
         "click #dfgSaveDfg" : "dfgSaveDfg",
         "click .dfgLoadDfg" : "dfgLoadDfg",
     },
+    
+    scriptGeneratorGraph : {},
     
     dfgToolboxNodes : {},
     
@@ -80,17 +78,17 @@ var ScriptGeneratorView = Backbone.View.extend({
         var flowGraphConsole = $('#flow-graph-console');
         flowGraphConsole.append('<textarea id="flow-graph-txt" rows="15" cols="150"></textarea>');
         
-        scriptGeneratorGraph = new joint.dia.Graph;
-        this.listenTo(scriptGeneratorGraph, 'change:target', this.setLink);
-        this.listenTo(scriptGeneratorGraph, 'change:source', this.setLink);
+        this.scriptGeneratorGraph = new joint.dia.Graph;
+        this.listenTo(this.scriptGeneratorGraph, 'change:target', this.setLink);
+        this.listenTo(this.scriptGeneratorGraph, 'change:source', this.setLink);
 
-        scriptGeneratorGraph.on('change', function(model) {
+        this.scriptGeneratorGraph.on('change', function(model) {
             $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
         });
-        scriptGeneratorGraph.on('add', function(cell) {
+        this.scriptGeneratorGraph.on('add', function(cell) {
             $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
         });
-        scriptGeneratorGraph.on('remove', function(cell) {
+        this.scriptGeneratorGraph.on('remove', function(cell) {
             $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
         });
 
@@ -101,7 +99,7 @@ var ScriptGeneratorView = Backbone.View.extend({
             width: 1024, 
             height: 500, 
             gridSize: 10,   // size of grid in px (how many px reprezents one cell)
-            model: scriptGeneratorGraph,
+            model: this.scriptGeneratorGraph,
             validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
                 if(magnetS && magnetT && magnetS.getAttribute("type") == "in" && magnetT.getAttribute("type") == "out") {
                     var idS = magnetS.getAttribute("port");
@@ -243,7 +241,7 @@ var ScriptGeneratorView = Backbone.View.extend({
                 
                 m.setAutoSize();
                 
-                scriptGeneratorGraph.addCell(m);
+                self.scriptGeneratorGraph.addCell(m);
                 scriptGeneratorModels.addModel(modelId, m);
             }
         });
@@ -511,7 +509,7 @@ var ScriptGeneratorView = Backbone.View.extend({
     
     dfgCreate : function() {
         // load dfg 2 json object
-        var jsonDfg = scriptGeneratorGraph.toJSON()
+        var jsonDfg = this.scriptGeneratorGraph.toJSON()
         
         if(jsonDfg.cells) {
             // prepare object 4 dfg info
@@ -574,7 +572,7 @@ var ScriptGeneratorView = Backbone.View.extend({
     
     dfgReset : function() {
         this.model.reset();
-        scriptGeneratorGraph.clear();
+        this.scriptGeneratorGraph.clear();
         this.model.requestReset();
     }, 
     
@@ -601,7 +599,7 @@ var ScriptGeneratorView = Backbone.View.extend({
         inputFilename.val('');
         
         // load dfg 2 json object
-        var jsonDfg = scriptGeneratorGraph.toJSON();
+        var jsonDfg = this.scriptGeneratorGraph.toJSON();
         
         //send request
         this.model.requestSaveDfg(jsonDfg, filename, true);
