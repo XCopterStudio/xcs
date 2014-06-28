@@ -540,20 +540,21 @@ void Ekf::measurementImu(const DroneStateMeasurement &measurement, const double 
 };
 
 void Ekf::measurementCam(const CameraMeasurement &measurement, const double timestamp){
-    XCS_LOG_INFO("Inserted new camera measurement with timestamp: " << timestamp);
-    unique_lock<shared_mutex> lock(bigSharedMtx_); // Note: Maybe upgradable lock could be used, but this is not a conditinal writer.
-    int index = findNearest(droneStates_, timestamp);
-    DroneStateDistributionChronologic newState = droneStates_[index];
-    //delete all old droneStates
-    droneStates_.clear();
-
-    // create new droneStates up to the time of last imuMeasurements
-    newState = predict(newState, timestamp);
-    newState.first = updateCam(newState.first, measurement);
-    // save cam update
-    droneStates_.push_back(newState);
-    // update up to the last imu measurements
-    newState = predictAndUpdateFromImu(newState, imuMeasurements_.back().second,true);
+      XCS_LOG_INFO("Inserted new camera measurement with timestamp: " << timestamp);
+      unique_lock<shared_mutex> lock(bigSharedMtx_); // Note: Maybe upgradable lock could be used, but this is not a conditinal writer.
+// TODO commented out while debugging PTAM (not to spoil EKF results)
+//    int index = findNearest(droneStates_, timestamp);
+//    DroneStateDistributionChronologic newState = droneStates_[index];
+//    //delete all old droneStates
+//    droneStates_.clear();
+//
+//    // create new droneStates up to the time of last imuMeasurements
+//    newState = predict(newState, timestamp);
+//    newState.first = updateCam(newState.first, measurement);
+//    // save cam update
+//    droneStates_.push_back(newState);
+//    // update up to the last imu measurements
+//    newState = predictAndUpdateFromImu(newState, imuMeasurements_.back().second,true);
 
     // clear old imuMeasurements and flyControls
     clearUpToTime(imuMeasurements_, timestamp);

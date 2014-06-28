@@ -23,7 +23,7 @@ public:
     XVar<std::string> outRest;    
 private:
     std::unique_ptr<rapidjson::Value> fromUValue(const ::urbi::UValue & uvalue, rapidjson::Document::AllocatorType &allocator);
-    std::string& trimRestJson(std::string &restJson) const;
+    void trimRestJson(std::string &restJson) const;
     bool isNotSpaceOrComma(char c) const;
 };
 

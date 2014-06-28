@@ -2,6 +2,7 @@
 #define	SCALEESTIMATION_HPP
 
 #include "scale_struct.hpp"
+#include "tum_utils.hpp"
 #include <TooN/TooN.h>
 
 namespace xcs {
@@ -11,7 +12,17 @@ namespace localization {
 class ScaleEstimation {
 public:
     ScaleEstimation();
+    SE3Element offsetMatrix() const;
+    double scale() const;
+    void scale(const double scale);
     
+    /*
+     * Transformations (rewrite to config for other drones)
+     */
+    static const SE3Element droneToFront;
+    /*
+     * Until revision all the public API bellow is deprecated.
+     */
     TooN::Vector<6> getCurrentOffsets();
     
     TooN::Vector<3> getCurrentScales();
@@ -30,6 +41,9 @@ public:
     TooN::Vector<3> scalingFixpoint; // in PTAM's system (!)
     bool useScalingFixpoint;
     bool allSyncLocked;
+    
+    
+    
 private:
     typedef std::vector<ScaleStruct> ScalePairsType;
 
@@ -52,6 +66,8 @@ private:
     double initialScaleSet; // M: ?
 
     int scalePairsIn, scalePairsOut;
+    
+    // coordinate transformations
 
 };
 
