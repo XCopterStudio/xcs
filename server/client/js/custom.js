@@ -125,3 +125,82 @@ function initSidepanels() {
         $('.sidepanel-right li > a > h3').hide();
     });
 }
+
+// create enum
+var ENUM = function() {
+    var self = {};
+    
+    // vars 4 enum mask
+    var maskValue = 1;
+    self.mask = {};
+    
+    // add enum values from arguments
+    for (var arg in arguments) {
+        self[arguments[arg]] = maskValue;
+        
+        self.mask[arguments[arg]] = maskValue;
+        maskValue *= 2;
+    }
+    
+    // add enum value for nothing
+    var noneKey = "None";
+    if(!self[noneKey]){
+        self[noneKey] = 0;
+        self.mask[noneKey] = 0;
+    }
+    else {
+        noneKey = "";
+    }
+    
+    // add enum value for everithing
+    var allKey = "All";
+    if(!self[allKey]) {
+        maskValue = 0;
+        for(var m in self.mask) {
+            if(self.mask[m]) {
+                maskValue |= self.mask[m];
+            }
+        }
+        
+        self[allKey] = maskValue;
+        self.mask[allKey] = maskValue;
+    }
+    else {
+        allKey = "";
+    }
+    
+    // find single name for value
+    self.getName = function(value) {
+        for(var p in self.mask) {
+            if(self.mask[p] == value) {
+                return p;
+            }
+        }
+    };
+    
+    // find array of all names for value
+    self.getNames = function(value) {
+        var names = [];
+        for(var p in self.mask) {
+            if(self.mask[p] && p != noneKey && p != allKey) {
+                var contain = ((self.mask[p] & value) == self.mask[p]);
+                if(contain) {
+                    names.push(p);
+                }
+            }
+        }
+        
+        return names;
+    };
+    
+    // freeze the enum
+    if (Object.freeze) {
+        try {
+            Object.freeze(self);   
+        }
+        catch(ex){
+        }
+    }
+    
+    return self;
+};
