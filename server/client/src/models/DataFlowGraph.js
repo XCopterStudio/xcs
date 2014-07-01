@@ -48,6 +48,24 @@ var DataFlowGraphNode = Backbone.Model.extend({
 });
 
 var DataFlowGraph = Backbone.Model.extend({    
+    requestId_ : 0,
+    
+    maxRequestId_ : 1000,
+    
+    responses : {
+        addResponse : function(requestId, response) {
+            this[requestId] = response;
+        },
+        
+        getAndRemoveResponse : function(requestId) {
+            if(this[requestId]) {
+                var response = this[requestId];
+                this[requestId].remove();
+                return response;
+            }
+        },
+    },
+    
     defaults : {
         "dfgDef" : "",
         "savedDfg" : "",
@@ -60,13 +78,35 @@ var DataFlowGraph = Backbone.Model.extend({
     },
 
     setData: function(data) {
-        // TODO: parse data and fill properties on this
-
         //DEBUG
         //console.log("setData: " + JSON.stringify(data));
+
+        if(data.response) {
+            
+            console.log("RESPONSE: " + JSON.stringify(data.response));
+            
+            if(data.response.id && data.response.respondType && data.response.respondData && data.response.requestId) {
+                var id = data.response.id 
+                var responseType = data.response.respondType;
+                var responseData = data.response.respondData;
+                var requestId = data.response.requestId;
+                
+                // run response action
+                var responseAction = this.responses.getAndRemoveResponse(requestId);
+                if(responseAction) {
+                    responseAction(id, responseType, responseData);
+                }
+            }
+            else {
+                //TODO: bad format data  - what to do?
+            }
+        }
         
         // set dfg definition
         if(data.dfgDef) {
+            console.log("old vs. new value: ");
+            console.log(this.get("dfgDef"));
+            console.log(data.dfgDef);
             this.set("dfgDef", data.dfgDef);
         }
         
@@ -168,29 +208,30 @@ var DataFlowGraph = Backbone.Model.extend({
         }
     },
     
-    requestLoad: function() {
+    requestLoad: function(response) {
         //TODO: rename DFG_LOAD
-        this.sendRequest("DFG_LOAD");
-        this.sendRequest("SAVED_DFG");
+        //TODO: what to do with request id of seved dfg
+        this.sendRequest("SAVED_DFG", "", response);
+        this.sendRequest("DFG_LOAD", "", response);
     },
     
-    requestCreate: function(dfg) {
-        this.sendRequest("DFG_CREATE", dfg);
+    requestCreate: function(dfg, response) {
+        this.sendRequest("DFG_CREATE", dfg, response);
     },
     
-    requestStart: function() {
-        this.sendRequest("DFG_START");
+    requestStart: function(response) {
+        this.sendRequest("DFG_START", "", response);
     },
     
-    requestStop: function() {
-        this.sendRequest("DFG_STOP");
+    requestStop: function(response) {
+        this.sendRequest("DFG_STOP", "", response);
     },
     
-    requestReset: function() {
-        this.sendRequest("DFG_RESET");
+    requestReset: function(response) {
+        this.sendRequest("DFG_RESET", "", response);
     },
     
-    requestSaveDfg: function(dfg, filename, rewrite) {
+    requestSaveDfg: function(dfg, filename, rewrite, response) {
         // default value 4 rewrite is false
         rewrite = typeof rewrite !== 'undefined' ? rewrite : false;
         
@@ -200,29 +241,55 @@ var DataFlowGraph = Backbone.Model.extend({
             rewrite : rewrite
         };
         
-        this.sendRequest("DFG_SAVE", data);
+        this.sendRequest("DFG_SAVE", data, response);
     },
     
-    requestLoadDfg: function(dfgFilename) {
+    requestLoadDfg: function(dfgFilename, response) {
         //TODO: rename to DFG_LOAD
-        this.sendRequest("LOAD_DFG", dfgFilename);
+        this.sendRequest("LOAD_DFG", dfgFilename, response);
     },
     
-    sendRequest: function(request, data) {
+    sendRequest: function(request, data, response) {
         if(!data) {
             data = "";
         }
         
+        // set reaquest id and prepare new one
+        var rId = this.requestId_;
+        if(++this.requestId_ > this.maxRequestId_) {
+            this.requestId_ = 0;
+        }
+        
+        // register response action 4 current request id
+        if(response) {
+            this.responses.addResponse(rId, response);
+        }
+        
+        //create request message
         var requestData = {
             type: "onboard",
             data: { 
                 request: {
                     id: request,
                     requestData: data,
+                    requestId: rId,
                 }
             }
         };
         
-        gSocket.emit('resend', JSON.stringify(requestData));
+        // try send request
+        try {
+            console.log("REQUEST: " + JSON.stringify(requestData));
+            
+            gSocket.emit('resend', JSON.stringify(requestData));
+        }
+        catch(ex) {
+            // TODO: log exception
+            
+            // remove response action
+            this.responses.getAndRemoveResponse(rId);
+        }
+        
+        return rId;
     },
 });
