@@ -173,9 +173,9 @@ class OnboardReceiver {
 }|;
 
 class OnboardSender {
-    function init(adapter, UJson) {
+    function init(adapter, json) {
         var this.adapter = adapter;
-        var this.ujson = UJson;
+        var this.json = json;
     };
 
     function sendMode(mode) {
@@ -183,7 +183,7 @@ class OnboardSender {
         //var data = [ => ];
         //data["type"] = "onboard";
         //data["data"] = [ "mode" => mode ];
-        //this.adapter.send(this.ujson.encode(data) + "\n");
+        //this.adapter.send(this.json.encode(data) + "\n");
     };
 
     function sendDataFlowGraph(dataFlowGraphData) {
@@ -210,6 +210,16 @@ class OnboardSender {
         sendData("dfgDef", dfg);
     };
 
+    function sendResponse(id, responseType, responseData, requestId) {
+        var response = [ => ];
+        response["id"] = id;
+        response["respondType"] = responseType;
+        response["respondData"] = responseData;
+        response["requestId"] = requestId;
+
+        sendData("response", response);
+    };
+
     function sendData(type, typesData) {
         //prepare data type 
         var data = [ => ];
@@ -229,6 +239,6 @@ class OnboardSender {
         };
 
         //send data
-        this.adapter.send(this.ujson.encode(data) + "\n");
+        this.adapter.send(this.json.encode(data) + "\n");
     };
 }|;

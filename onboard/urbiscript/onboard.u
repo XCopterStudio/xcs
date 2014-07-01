@@ -13,6 +13,7 @@ class Onboard {
     var xobjectsSettings_;
     var xobjectInfo_ = [ => ];
     var dfgLobby_;
+    var json_;
 
     function init() {
         echo("init...");
@@ -26,15 +27,15 @@ class Onboard {
         // initialize onboard sender 4 communication with server
         var this.adapter = Adapter.new();
         adapter.start("127.0.0.1", 1234);
-        var json = XJson.new();
-        this.onboardSender_ = OnboardSender.new(adapter, json);
+        this.json_ = XJson.new();
+        this.onboardSender_ = OnboardSender.new(adapter, this.json_);
 
         // initialize sending information about data flow graph
         initDfgCommunication_();
         startDfgCommunication();
 
         // initialize onboard receiver 4 communication with server
-        this.onboardReceiver_ = OnboardReceiver.new(adapter, json);
+        this.onboardReceiver_ = OnboardReceiver.new(adapter, this.json_);
         at(this.onboardReceiver_.&request.changed?) {
             doRequest_(this.onboardReceiver_.request);
         };
@@ -152,10 +153,13 @@ class Onboard {
     };
 
     function doRequest_(request) {
-        if(request.has("id") && request.has("requestData")) {
+        if(request.has("id") && request.has("requestData") && request.has("requestId")) {
             var id = request["id"];
             var requestData = request["requestData"];
-        
+            var requestId = request["requestId"];
+            var responseData = "";
+            var responseType = "Done";
+
             //debug
             if(requestData == ""){
                 echo("receive request: " + id);
@@ -167,28 +171,39 @@ class Onboard {
             try {
                 switch(id) {
                     case "DFG_LOAD":
-                        doDfgLoad_();
+                        responseData = doDfgLoad_();
                     case "DFG_CREATE":
-                        doDfgCreate_(requestData);
+                        responseData = doDfgCreate_(requestData);
                     case "DFG_START":
-                        doDfgStart_();
+                        responseData = doDfgStart_();
                     case "DFG_STOP":
-                        doDfgStop_();
+                        responseData = doDfgStop_();
                     case "DFG_RESET":
-                        doDfgReset_(true);
+                        responseData = doDfgReset_(true);
                     case "DFG_SAVE":
-                        doDfgSave_(requestData);
+                        responseData = doDfgSave_(requestData);
                     case "SAVED_DFG":
-                        doSavedDfg_();
+                        responseData = doSavedDfg_();
                     case "LOAD_DFG":
-                        doLoadDfg_(requestData);
+                        responseData = doLoadDfg_(requestData);
                     default:
                         echo("...unknown request");
+                        responseData = "Unknown request: " + id + ".";
+                        responseType = "Error";
                 };
             }
             catch(var ex) {
                 //TODO: what to do with errors? send to client?
                 echo("ERROR(" + id + "): " + ex.asString());
+                responseData = ex.asString();
+                responseType = "Error";
+            };
+
+            try {
+                this.onboardSender_.sendResponse(id, responseType, responseData, requestId);
+            }
+            catch(var ex) {
+                echo("ERROR while try send respond: " + ex.asString());
             };
         }
         else {
@@ -212,6 +227,9 @@ class Onboard {
         if(resend) {
             doDfgLoad_();
         };
+
+        // TODO: what to return
+        return "";
     };
 
     // stop all xobjects
@@ -222,6 +240,9 @@ class Onboard {
                 this.dfgLobby_.getLocalSlot(slot).value().stopXO();
             };
         };
+
+        // TODO: what to return
+        return "";
     };
 
     // start all xobjects
@@ -232,6 +253,9 @@ class Onboard {
                 this.dfgLobby_.getLocalSlot(slot).value().startXO();
             };
         };
+
+        // TODO: what to return
+        return "";
     };
     
     // reset old dfg and create new one
@@ -271,6 +295,9 @@ class Onboard {
             doDfgReset_(false);
             throw ex;
         };
+
+        // TODO: what to return
+        return "";
     };
 
     // start dfg communication and send info about loaded xobjects and default dfg
@@ -278,6 +305,9 @@ class Onboard {
         startDfgCommunication();
         this.loadedXObjects_.elementChanged!;
         this.&dataFlowGraph_.changed!;
+        
+        // TODO: what to return
+        return "";
     };
 
     function doDfgSave_(requestData) {
@@ -287,17 +317,22 @@ class Onboard {
 
         var filePath = getUserDfgPath_() / Path.new(filename);
         var setting = XSettings.new(filePath.asString(), rewrite);
-        setting.setAndSave("DFG", dfg.asString());
+        setting.setAndSave("DFG", dfg);
 
         //resend info about saved dfg
         doSavedDfg_();
+
+        // TODO: what to return
+        return "";
     };
 
     function doSavedDfg_() {
         var filePath = getUserDfgPath_();
         var dfgs = XSettings.getSettingsFiles(filePath.asString(), "DFG");
         this.onboardSender_.sendDfg4Load(dfgs);
-        echo(dfgs.asString());
+
+        // TODO: what to return
+        return "";
     };
 
     function doLoadDfg_(filename) {
@@ -307,6 +342,9 @@ class Onboard {
         dfg["filename"] = filename;
         dfg["DFG"] = setting.get("DFG");
         this.onboardSender_.sendLoadDfg(dfg);
+
+        // TODO: what to return
+        return "";
     };
 
     // initialize sending information about data flow graph
