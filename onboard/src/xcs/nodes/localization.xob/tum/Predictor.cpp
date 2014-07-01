@@ -27,82 +27,12 @@
 
 using namespace xcs::nodes::localization;
 
-const TooN::SE3<double> Predictor::droneToBottom = TooN::SE3<double>(TooN::SO3<double>(TooN::makeVector(3.14159265, 0, 0)), TooN::makeVector(0, 0, 0));
-const TooN::SE3<double> Predictor::bottomToDrone = Predictor::droneToBottom.inverse();
-
-const TooN::SE3<double> Predictor::droneToFront = TooN::SE3<double>(TooN::SO3<double>(TooN::makeVector(3.14159265 / 2, 0, 0)), TooN::makeVector(0, 0.025, -0.2));
-const TooN::SE3<double> Predictor::frontToDrone = Predictor::droneToFront.inverse();
-
-const TooN::SE3<double> Predictor::droneToFrontNT = TooN::SE3<double>(TooN::SO3<double>(TooN::makeVector(3.14159265 / 2, 0, 0)), TooN::makeVector(0, 0, 0));
-const TooN::SE3<double> Predictor::frontToDroneNT = Predictor::droneToFrontNT.inverse();
-
 Predictor::Predictor() {
-    setPosRPY(0, 0, 0, 0, 0, 0);
+    resetPos();
     lastAddedDronetime = 0;
 }
 
 Predictor::~Predictor(void) {
-}
-
-void Predictor::calcCombinedTransformations() {
-    globalToFront = droneToFront * globaltoDrone;
-    globalToBottom = droneToBottom * globaltoDrone;
-    frontToGlobal = globalToFront.inverse();
-    bottmoToGlobal = globalToBottom.inverse();
-}
-
-
-// input in rpy
-
-void Predictor::setPosRPY(double newX, double newY, double newZ, double newRoll, double newPitch, double newYaw) {
-    // set rpy
-    x = newX;
-    y = newY;
-    z = newZ;
-    roll = newRoll;
-    pitch = newPitch;
-    yaw = newYaw;
-
-    // set se3
-    droneToGlobal.get_translation()[0] = x;
-    droneToGlobal.get_translation()[1] = y;
-    droneToGlobal.get_translation()[2] = z;
-    droneToGlobal.get_rotation() = rpy2rod(roll, pitch, yaw);
-
-    globaltoDrone = droneToGlobal.inverse();
-
-    // set rest
-    calcCombinedTransformations();
-}
-
-// input in SE3
-
-void Predictor::setPosSE3_globalToDrone(TooN::SE3<double> newGlobaltoDrone) {
-    // set se3
-    globaltoDrone = newGlobaltoDrone;
-    droneToGlobal = globaltoDrone.inverse();
-
-    // set rpy
-    x = droneToGlobal.get_translation()[0];
-    y = droneToGlobal.get_translation()[1];
-    z = droneToGlobal.get_translation()[2];
-    rod2rpy(droneToGlobal.get_rotation(), &roll, &pitch, &yaw);
-
-    // set rest
-    calcCombinedTransformations();
-}
-
-void Predictor::setPosSE3_droneToGlobal(TooN::SE3<double> newDroneToGlobal) {
-    droneToGlobal = newDroneToGlobal;
-    globaltoDrone = droneToGlobal.inverse();
-
-    x = droneToGlobal.get_translation()[0];
-    y = droneToGlobal.get_translation()[1];
-    z = droneToGlobal.get_translation()[2];
-
-    rod2rpy(droneToGlobal.get_rotation(), &roll, &pitch, &yaw);
-
-    calcCombinedTransformations();
 }
 
 
@@ -142,5 +72,6 @@ void Predictor::predictOneStep(const ImuMeasurementChronologic &imuMeasurement) 
 void Predictor::resetPos() {
     zCorrupted = false;
     zCorruptedJump = 0;
-    setPosRPY(0, 0, 0, 0, 0, 0);
+    x = y = z = 0;
+    roll = pitch = yaw = 0;
 }
