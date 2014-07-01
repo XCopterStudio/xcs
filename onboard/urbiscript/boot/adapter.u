@@ -201,11 +201,7 @@ class OnboardSender {
     function sendPrototypeClone(prototypeData, cloneData) {
         sendData(["prototype", "clone"], [prototypeData, cloneData]);
     };
-
-    function sendLoadDfg(dfg) {
-        sendData("dfgDef", dfg);
-    };
-
+    
     function sendResponse(id, responseType, responseData, requestId) {
         var response = [ => ];
         response["id"] = id;

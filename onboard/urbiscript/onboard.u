@@ -357,10 +357,8 @@ class Onboard {
         var dfg = [ => ]; 
         dfg["filename"] = filename;
         dfg["DFG"] = setting.get("DFG");
-        this.onboardSender_.sendLoadDfg(dfg);
-
-        // TODO: what to return
-        return "";
+        
+        return dfg;
     };
 
     // initialize sending information about data flow graph
