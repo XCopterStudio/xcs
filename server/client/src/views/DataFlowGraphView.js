@@ -128,7 +128,7 @@ var DataFlowGraphView = Backbone.View.extend({
             snapLinks: { radius: 45 },
         });
         
-        this.model.requestLoad();
+        //this.model.requestLoad();
     },
     
     trimId : function(id) {
@@ -580,6 +580,9 @@ var DataFlowGraphView = Backbone.View.extend({
                 if(responseData.clone) {
                     self.model.setClone(responseData.clone);
                 }
+                if(responseData.savedDfg) {
+                    self.model.setSavedDfg(responseData.savedDfg);
+                }
             }
         });
     },
@@ -665,6 +668,9 @@ var DataFlowGraphView = Backbone.View.extend({
                     if(responseData.clone) {
                         self.model.setClone(responseData.clone);
                     }
+                    if(responseData.savedDfg) {
+                        self.model.setSavedDfg(responseData.savedDfg);
+                    }
                 }
             });
         }
@@ -696,7 +702,14 @@ var DataFlowGraphView = Backbone.View.extend({
         var jsonDfg = this.dfgGraph.toJSON();
         
         //send request
-        this.model.requestSaveDfg(JSON.stringify(jsonDfg), filename, true);
+        var self = this;
+        self.model.requestSaveDfg(JSON.stringify(jsonDfg), filename, true, function(id, responseType, responseData) {
+            if(responseType == ResponseType.Done) {
+                if(responseData.savedDfg) {
+                    self.model.setSavedDfg(responseData.savedDfg);
+                }
+            }
+        });
     },
     
     dfgLoadDfg : function(model) {

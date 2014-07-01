@@ -50,7 +50,7 @@ var DataFlowGraphNode = Backbone.Model.extend({
 var ResponseType = ENUM("Done", "Error");
 
 var DataFlowGraph = Backbone.Model.extend({    
-    requestId_ : 0,
+    requestId_ : 1,
     
     maxRequestId_ : 1000,
     
@@ -118,7 +118,7 @@ var DataFlowGraph = Backbone.Model.extend({
         
         // set availabel dfg for load 
         if(data.savedDfg) {
-            this.set("savedDfg", data.savedDfg);
+            this.setSavedDfg(data.savedDfg);
         }
         
         // set default dataFlowGraph
@@ -129,9 +129,12 @@ var DataFlowGraph = Backbone.Model.extend({
         
         // set prototypes
         if(data.prototype) {
-            console.log("...prototypes");
             this.setPrototype(data.prototype);
         }
+    },
+    
+    setSavedDfg: function(savedDfg) {
+        this.set("savedDfg", savedDfg);
     },
     
     setClone: function(clone) {
@@ -139,7 +142,6 @@ var DataFlowGraph = Backbone.Model.extend({
     },
     
     setPrototype: function(prototype) {
-        console.log("..." + prototype.length);
         for(var j = 0; j < prototype.length; ++j) {
             var p = prototype[j];
             //console.log("..." + JSON.stringify(p));
@@ -272,7 +274,7 @@ var DataFlowGraph = Backbone.Model.extend({
         // set reaquest id and prepare new one
         var rId = this.requestId_;
         if(++this.requestId_ > this.maxRequestId_) {
-            this.requestId_ = 0;
+            this.requestId_ = 1;
         }
         
         // register response action 4 current request id
