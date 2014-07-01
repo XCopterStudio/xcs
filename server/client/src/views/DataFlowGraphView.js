@@ -1,6 +1,6 @@
 var DfgState = ENUM(
     "DFG_STATE_NODES_LOADED", 
-    "DFG_STATE_CREATED", "DFG_STATE_STARTED", "DFG_STATE_STOPPED"//,    // DFG STATE
+    "DFG_STATE_CREATED", "DFG_STATE_STARTED", "DFG_STATE_STOPPED", "DFG_STATE_DESTROYED"//,    // DFG STATE
     //"DFG_STATE_USER_DFG_LOADED", "DFG_STATE_DEFAULT_DFG_LOADED", "DFG_STATE_NODE_DFG_LOADED"    // LOADED DFG TYPE
     );
 
@@ -59,6 +59,8 @@ var DataFlowGraphView = Backbone.View.extend({
     
     dfgCounter : [],
     
+    dfgState_ : DfgState.DFG_STATE_DESTROYED,
+    
     initialize : function() {
         this.model = new DataFlowGraph();
         
@@ -84,6 +86,8 @@ var DataFlowGraphView = Backbone.View.extend({
     ** DATA FLOW GRAPH SECTION **
     ****************************/
     initializeDfg : function() {
+        this.onStateChanged();
+        
         var flowGraphConsole = $('#flow-graph-console');
         flowGraphConsole.append('<textarea id="flow-graph-txt" rows="15" cols="150"></textarea>');
         
@@ -304,7 +308,7 @@ var DataFlowGraphView = Backbone.View.extend({
         loadItems.html('');
         
         for(var i = 0; i < dfgs.length; ++i) {
-            loadItems.append('<li><a class="dfgLoadDfg" id="dfgLoadDfg_' + this.trimId(dfgs[i]) + '">' + dfgs[i] + '</a></li>');
+            loadItems.append('<li><a class="btn dfgLoadDfg" id="dfgLoadDfg_' + this.trimId(dfgs[i]) + '" role="button">' + dfgs[i] + '</a></li>');
         }
     },
     
@@ -588,6 +592,8 @@ var DataFlowGraphView = Backbone.View.extend({
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
                 }
+                
+                self.setDfgState(DfgState.DFG_STATE_NODES_LOADED);
             }
         });
     },
@@ -643,16 +649,31 @@ var DataFlowGraphView = Backbone.View.extend({
             }
             
             // send request
-            this.model.requestCreate(dfg);
+            var self = this;
+            self.model.requestCreate(dfg, function(id, responseType, responseData) {
+                if(responseType == ResponseType.Done) {
+                    self.setDfgState(DfgState.DFG_STATE_CREATED);
+                }
+            });
         }
     },
     
     dfgStart : function() {
-        this.model.requestStart();
+        var self = this;
+        self.model.requestStart(function(id, responseType, responseData) {
+            if(responseType == ResponseType.Done) {
+                self.setDfgState(DfgState.DFG_STATE_STARTED);
+            }
+        });
     },
     
     dfgStop : function() {
-        this.model.requestStop();
+        var self = this;
+        self.model.requestStop(function(id, responseType, responseData) {
+            if(responseType == ResponseType.Done) {
+                self.setDfgState(DfgState.DFG_STATE_STOPPED);
+            }
+        });
     },
     
     dfgDestroy: function() {
@@ -669,6 +690,8 @@ var DataFlowGraphView = Backbone.View.extend({
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
                 }
+                
+                self.setDfgState(DfgState.DFG_STATE_DESTROYED);
             }
         });
     },
@@ -681,7 +704,7 @@ var DataFlowGraphView = Backbone.View.extend({
         this.dfgGraph.clear();
         
         if(all) {
-            this.dfgDestry();
+            this.dfgDestroy();
         }
     }, 
     
@@ -734,6 +757,160 @@ var DataFlowGraphView = Backbone.View.extend({
                 }
             }
         });
+    },
+    
+    setDfgState : function(state) {
+        console.log("set state: " + DfgState.getName(state));
+        console.log("... old states: " + DfgState.getNames(this.dfgState_));
+        
+        var stateSetted = false;
+        switch(state) {
+            case DfgState.DFG_STATE_NODES_LOADED:
+                this.dfgState_ |= state;
+                stateSetted = true;
+                break;
+            case DfgState.DFG_STATE_DESTROYED:
+                if(((this.dfgState_ & DfgState.DFG_STATE_STOPPED) == DfgState.DFG_STATE_STOPPED) ||
+                  ((this.dfgState_ & DfgState.DFG_STATE_CREATED) == DfgState.DFG_STATE_CREATED)) {
+                    // remove old state
+                    this.dfgState_ &= ~DfgState.DFG_STATE_STOPPED;
+                    this.dfgState_ &= ~DfgState.DFG_STATE_CREATED;
+                    
+                    // add new state
+                    this.dfgState_ |= state;
+                    stateSetted = true;
+                }
+                break;
+            case DfgState.DFG_STATE_CREATED:
+                if(((this.dfgState_ & DfgState.DFG_STATE_DESTROYED) == DfgState.DFG_STATE_DESTROYED)) {
+                    // remove old state
+                    this.dfgState_ &= ~DfgState.DFG_STATE_DESTROYED;
+                    
+                    // add new state
+                    this.dfgState_ |= state;
+                    stateSetted = true;
+                }
+                break;
+            case DfgState.DFG_STATE_STARTED:
+                if(((this.dfgState_ & DfgState.DFG_STATE_CREATED) == DfgState.DFG_STATE_CREATED)) {
+                    // remove old state
+                    this.dfgState_ &= ~DfgState.DFG_STATE_CREATED;
+                    
+                    // add new state
+                    this.dfgState_ |= state;
+                    stateSetted = true;
+                }
+                else if(((this.dfgState_ & DfgState.DFG_STATE_STOPPED) == DfgState.DFG_STATE_STOPPED)) {
+                    // remove old state
+                    this.dfgState_ &= ~DfgState.DFG_STATE_STOPPED;
+                    
+                    // add new state
+                    this.dfgState_ |= state;
+                    stateSetted = true;
+                }
+                break;
+            case DfgState.DFG_STATE_STOPPED:
+                if(((this.dfgState_ & DfgState.DFG_STATE_STARTED) == DfgState.DFG_STATE_STARTED)) {
+                    // remove old state
+                    this.dfgState_ &= ~DfgState.DFG_STATE_STARTED;
+                    
+                    // add new state
+                    this.dfgState_ |= state;
+                    stateSetted = true;
+                }
+                break;
+        }
+        
+        console.log("... new states: " + DfgState.getNames(this.dfgState_));
+        
+        if(stateSetted) {
+            this.onStateChanged();    
+        }
+    },
+    
+    onStateChanged : function() {
+        var buttons = {
+            load: { disabled: false, selector: "#dfgLoad", type: "attr"},
+            create: { disabled: false, selector: "#dfgCreate", type: "attr"},
+            start: { disabled: false, selector: "#dfgStart", type: "attr"},
+            stop: { disabled: false, selector: "#dfgStop", type: "attr"},
+            destroy: { disabled: false, selector: "#dfgDestroy", type: "attr"},
+            reset: { disabled: false, selector: "#dfgReset", type: "attr"},
+            otherAction: { disabled: false, selector: "#dfgOtherAction", type: "attr"},
+            saveDfg: { disabled: false, selector: "#dfgSaveDfg", type: "attr"},
+            loadDfg: { disabled: false, selector: ".dfgLoadDfg", type: "class"},
+        };
+        
+        if(((this.dfgState_ & DfgState.DFG_STATE_NODES_LOADED) != DfgState.DFG_STATE_NODES_LOADED)) {
+            $("#dfgLoad").html("Load nodes");
+            
+            buttons.create.disabled = true;
+            buttons.start.disabled = true;
+            buttons.stop.disabled = true;
+            buttons.destroy.disabled = true;
+            buttons.reset.disabled = true;
+            buttons.otherAction.disabled = true;
+            buttons.saveDfg.disabled = true; 
+            buttons.loadDfg.disabled = true; 
+        }
+        else {
+            $("#dfgLoad").html("Reload nodes");
+            
+            buttons.create.disabled = false;
+            buttons.start.disabled = false;
+            buttons.stop.disabled = false;
+            buttons.destroy.disabled = false;
+            buttons.reset.disabled = false;
+            buttons.otherAction.disabled = false; 
+            buttons.saveDfg.disabled = false; 
+            buttons.loadDfg.disabled = false;
+        
+            if(((this.dfgState_ & DfgState.DFG_STATE_DESTROYED) == DfgState.DFG_STATE_DESTROYED)) {
+                buttons.start.disabled = true;
+                buttons.stop.disabled = true;
+                buttons.destroy.disabled = true;
+            }
+            
+            else if(((this.dfgState_ & DfgState.DFG_STATE_CREATED) == DfgState.DFG_STATE_CREATED)) {
+                buttons.create.disabled = true;
+                buttons.stop.disabled = true;
+                buttons.loadDfg.disabled = true;
+            }
+            
+            else if(((this.dfgState_ & DfgState.DFG_STATE_STARTED) == DfgState.DFG_STATE_STARTED)) {
+                buttons.create.disabled = true;
+                buttons.start.disabled = true;
+                buttons.destroy.disabled = true;
+                buttons.reset.disabled = true;
+                buttons.loadDfg.disabled = true;
+            }
+            
+            else if(((this.dfgState_ & DfgState.DFG_STATE_STOPPED) == DfgState.DFG_STATE_STOPPED)) {
+                buttons.create.disabled = true;
+                buttons.stop.disabled = true;
+                buttons.loadDfg.disabled = true;
+            }
+        }
+        
+        // enable/disable buttons
+        for(var p in buttons){
+            if(buttons[p].disabled) {
+                if(buttons[p].type == "attr") {
+                    $(buttons[p].selector).attr("disabled", "disabled");
+                }
+                else { // "class"
+                    $(buttons[p].selector).addClass("disabled");
+                }
+            }
+            else {
+                if(buttons[p].type == "attr") {
+                    $(buttons[p].selector).removeAttr("disabled");
+                }
+                else {
+                    $(buttons[p].selector).removeClass("disabled");
+                }
+            }
+        }
     },
     
     /********************

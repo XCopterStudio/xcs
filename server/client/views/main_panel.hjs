@@ -131,7 +131,7 @@
                             <div class="nav navbar-nav navbar-right">
                                 <button id="dfgReset" type="button" class="btn btn-default navbar-btn">Reset DFG</button>
                                 
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <button id="dfgOtherAction" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                                     Other actions <span class="caret"></span>
                                 </button>
                                 

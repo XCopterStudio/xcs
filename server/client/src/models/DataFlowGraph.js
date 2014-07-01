@@ -83,11 +83,10 @@ var DataFlowGraph = Backbone.Model.extend({
         //DEBUG
         //console.log("setData: " + JSON.stringify(data));
 
-        if(data.response) {
-            
+        if(data.response) {         
             console.log("RESPONSE: " + JSON.stringify(data.response));
             
-            if(data.response.id && data.response.respondType && data.response.respondData && data.response.requestId) {
+            if(data.response.id && data.response.respondType && (data.response.respondData || data.response.respondData == "") && data.response.requestId) {
                 var id = data.response.id 
                 var responseTypeText = data.response.respondType;
                 var responseData = data.response.respondData;

@@ -192,7 +192,7 @@ var ENUM = function() {
         
         return names;
     };
-    
+       
     // freeze the enum
     if (Object.freeze) {
         try {
