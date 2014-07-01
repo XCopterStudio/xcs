@@ -32,7 +32,7 @@ class Onboard {
 
         // initialize sending information about data flow graph
         initDfgCommunication_();
-        startDfgCommunication();
+        //startDfgCommunication();
 
         // initialize onboard receiver 4 communication with server
         this.onboardReceiver_ = OnboardReceiver.new(adapter, this.json_);
@@ -225,7 +225,7 @@ class Onboard {
 
         // send info about loaded xobjects
         if(resend) {
-            doDfgLoad_();
+            return doDfgLoad_();
         };
 
         // TODO: what to return
@@ -302,12 +302,14 @@ class Onboard {
 
     // start dfg communication and send info about loaded xobjects and default dfg
     function doDfgLoad_() {
-        startDfgCommunication();
-        this.loadedXObjects_.elementChanged!;
-        this.&dataFlowGraph_.changed!;
-        
-        // TODO: what to return
-        return "";
+        var prototypeData = getNodesPrototypesInfo_();
+        var cloneData = getNodesCloneInfo_();
+
+        var data = [ => ];
+        data["prototype"] = prototypeData;
+        data["clone"] = cloneData;
+
+        return data;
     };
 
     function doDfgSave_(requestData) {
@@ -353,7 +355,7 @@ class Onboard {
         this.dataFlowGraph_ = "";
         at(this.&dataFlowGraph_.changed?) {
             if(this.dfgCommStarted_) {
-                this.onboardSender_.sendDataFlowGraph(this.dataFlowGraph_);
+                sendDefaultDfg_();
             };
         };
 
@@ -361,92 +363,112 @@ class Onboard {
         var this.loadedXObjectsEvent_ = this.loadedXObjects_.elementAdded.'||'(this.loadedXObjects_.elementChanged).'||'(this.xobjects4load_.elementAdded);
         at(this.loadedXObjectsEvent_?) {
             if(this.dfgCommStarted_) {
-                var prototypesData = [];
-                var clonesData = [];
-
-                // prepare data for yet not loaded xobjects
-                for(var kvpXO: this.xobjects4load_) {
-                    // dont send info about private objects
-                    if(this.privateObjects_.has(kvpXO.first())) {
-                        echo("... " + kvpXO.first() + " is private object - doesnt send info.");
-                        continue;
-                    };
-
-                    var pData = [ => ];
-
-                    try {
-                        pData["name"] = kvpXO.first();
-                    }
-                    catch(var ex){
-                        echo("!!!!!ERROR: " + ex.asString());
-                        pData.clear();
-                    };
-
-                    if(!pData.empty()) {
-                        prototypesData << pData;
-                    };
-                };
-
-                // prepare data for loaded xobjects
-                for(var p: this.loadedXObjects_) {
-                    var pData = [ => ];
-
-                    try {
-                        var key = p.first().asString();
-                        echo("...sending info about loaded xobject: " + key);
-
-                        // determine if we have enough information about current key
-                        if(this.xobjectInfo_.has(key)) {
-                            var name = this.xobjectInfo_[key].name;
-
-                            // get info about xvars and inout ports
-                            var xvars = System.eval(name + ".getXVars()");
-                            var xinputPorts = System.eval(name + ".getXInputPorts()");
-
-                            // prepare data about xvars
-                            var varList = [];
-                            for(var xv: xvars) {
-                                var pVar = [ => ];
-                                pVar["name"] = xv;
-                                pVar["synType"] = System.eval(name + ".getSynType(\"" + xv + "\")");
-                                pVar["semType"] = System.eval(name + ".getSemType(\"" + xv + "\")");
-                                varList << pVar;
-                            };
-
-                            // prepare data about input ports
-                            var portList = [];
-                            for(var xip: xinputPorts) {
-                                var pPort = [ => ];
-                                pPort["name"] = xip;
-                                pPort["synType"] = System.eval(name + ".getSynType(\"" + xip + "\")");
-                                pPort["semType"] = System.eval(name + ".getSemType(\"" + xip + "\")");
-                                portList  << pPort;
-                            };
-
-                            pData["name"] = key;
-                            pData["var"] = varList;
-                            pData["inputPort"] = portList;
-                        }
-                        else {
-                            echo("...there is no info for: " + key);
-                            //TODO: move object to loadedPrivateObjects and erase it from loadedXObject (we are in foreach loop...)
-                            //if(!this.loadedPrivateObjects_.has(key)) {
-                            //    this.loadedPrivateObjects_[p.first()] = p.second()
-                            //}
-                        };
-                    }
-                    catch(var ex) {
-                        echo("chyba: " + ex.asString());
-                    };
-
-                    prototypesData << pData;
-                };
-
-                // send data
-                echo("sending info");
-                this.onboardSender_.sendPrototypeClone(prototypesData, clonesData);
+                sendNodesInfo_();
             };
         };
+    };
+
+    function sendDefaultDfg_() {
+        this.onboardSender_.sendDataFlowGraph(this.dataFlowGraph_);
+    };
+
+    function sendNodesInfo_() {
+        var prototypesData = getNodesPrototypesInfo_();
+        var clonesData = getNodesCloneInfo_();
+
+        // send data
+        echo("sending info");
+        this.onboardSender_.sendPrototypeClone(prototypesData, clonesData);
+    };
+
+    function getNodesPrototypesInfo_() {
+        var prototypesData = [];
+
+        // prepare data for yet not loaded xobjects
+        for(var kvpXO: this.xobjects4load_) {
+            // dont send info about private objects
+            if(this.privateObjects_.has(kvpXO.first())) {
+                echo("... " + kvpXO.first() + " is private object - doesnt send info.");
+                continue;
+            };
+
+            var pData = [ => ];
+
+            try {
+                pData["name"] = kvpXO.first();
+            }
+            catch(var ex){
+                echo("!!!!!ERROR: " + ex.asString());
+                pData.clear();
+            };
+
+            if(!pData.empty()) {
+                prototypesData << pData;
+            };
+        };
+
+        // prepare data for loaded xobjects
+        for(var p: this.loadedXObjects_) {
+            var pData = [ => ];
+
+            try {
+                var key = p.first().asString();
+                echo("...sending info about loaded xobject: " + key);
+
+                // determine if we have enough information about current key
+                if(this.xobjectInfo_.has(key)) {
+                    var name = this.xobjectInfo_[key].name;
+
+                    // get info about xvars and inout ports
+                    var xvars = System.eval(name + ".getXVars()");
+                    var xinputPorts = System.eval(name + ".getXInputPorts()");
+
+                    // prepare data about xvars
+                    var varList = [];
+                    for(var xv: xvars) {
+                        var pVar = [ => ];
+                        pVar["name"] = xv;
+                        pVar["synType"] = System.eval(name + ".getSynType(\"" + xv + "\")");
+                        pVar["semType"] = System.eval(name + ".getSemType(\"" + xv + "\")");
+                        varList << pVar;
+                    };
+
+                    // prepare data about input ports
+                    var portList = [];
+                    for(var xip: xinputPorts) {
+                        var pPort = [ => ];
+                        pPort["name"] = xip;
+                        pPort["synType"] = System.eval(name + ".getSynType(\"" + xip + "\")");
+                        pPort["semType"] = System.eval(name + ".getSemType(\"" + xip + "\")");
+                        portList  << pPort;
+                    };
+
+                    pData["name"] = key;
+                    pData["var"] = varList;
+                    pData["inputPort"] = portList;
+                }
+                else {
+                    echo("...there is no info for: " + key);
+                    //TODO: move object to loadedPrivateObjects and erase it from loadedXObject (we are in foreach loop...)
+                    //if(!this.loadedPrivateObjects_.has(key)) {
+                    //    this.loadedPrivateObjects_[p.first()] = p.second()
+                    //}
+                };
+            }
+            catch(var ex) {
+                echo("chyba: " + ex.asString());
+            };
+
+            prototypesData << pData;
+        };
+
+        return prototypesData;
+    };
+
+    function getNodesCloneInfo_() {
+        var clonesData = [];
+
+        return clonesData;
     };
 
     function startDfgCommunication() {
