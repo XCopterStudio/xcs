@@ -177,7 +177,7 @@ class Onboard {
                     case "DFG_START":
                         responseData = doDfgStart_();
                     case "DFG_STOP":
-                        responseData = doDfgStop_();
+                        responseData = doDfgStop_(true);
                     case "DFG_RESET":
                         responseData = doDfgReset_(true);
                     case "DFG_SAVE":
@@ -195,7 +195,7 @@ class Onboard {
             catch(var ex) {
                 //TODO: what to do with errors? send to client?
                 echo("ERROR(" + id + "): " + ex.asString());
-                responseData = ex.asString();
+                responseData = ex.message;
                 responseType = "Error";
             };
 
@@ -215,7 +215,7 @@ class Onboard {
     // stop all xobjects and delete them and optionally resend info about loaded xobjects
     function doDfgReset_(resend) {
         // stop all xobjects
-        doDfgStop_();
+        doDfgStop_(false);
 
         //delete all xobjects - should call destructors
         for(var slot: this.dfgLobby_.localSlotNames()) {
@@ -228,17 +228,22 @@ class Onboard {
             return doDfgLoad_();
         };
 
-        // TODO: what to return
         return "";
     };
 
     // stop all xobjects
-    function doDfgStop_() {
-        //TODO: send list of stoped xobjects back?
+    function doDfgStop_(checkStopped) {
+        var stopped = false;
+
         for(var slot: this.dfgLobby_.localSlotNames()) {
             if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("stopXO")) {
                 this.dfgLobby_.getLocalSlot(slot).value().stopXO();
+                stopped = true;
             };
+        };
+
+        if(!stopped && checkStopped) {
+            throw Exception.new("Nothing to create!");
         };
 
         // TODO: what to return
@@ -247,23 +252,30 @@ class Onboard {
 
     // start all xobjects
     function doDfgStart_() {
-        //TODO: send list of started xobjects back?
+        var started = false;
+
         for(var slot: this.dfgLobby_.localSlotNames()) {
             if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("startXO")) {
                 this.dfgLobby_.getLocalSlot(slot).value().startXO();
+                started = true;
             };
         };
 
-        // TODO: what to return
+        if(!started) {
+            throw Exception.new("Nothing to start!");
+        };
+
         return "";
     };
     
     // reset old dfg and create new one
     function doDfgCreate_(requestData) {
+        var created = false;
+
         try {
             // reset dfg
             doDfgReset_(false);
-                
+            
             // prototypes
             for(var p: requestData["prototype"]) {
                 var id = p["id"];
@@ -278,6 +290,7 @@ class Onboard {
                 };
 
                 this.dfgLobby_.setSlot(id, System.eval(createPart + ";"));
+                created = true;
             };
 
             // links
@@ -296,7 +309,10 @@ class Onboard {
             throw ex;
         };
 
-        // TODO: what to return
+        if(!created) {
+            throw Exception.new("Nothing to create!");
+        }; 
+
         return "";
     };
 
