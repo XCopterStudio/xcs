@@ -104,9 +104,6 @@ var DataFlowGraph = Backbone.Model.extend({
         
         // set dfg definition
         if(data.dfgDef) {
-            console.log("old vs. new value: ");
-            console.log(this.get("dfgDef"));
-            console.log(data.dfgDef);
             this.set("dfgDef", data.dfgDef);
         }
         

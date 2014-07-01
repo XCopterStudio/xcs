@@ -1,3 +1,8 @@
+//var DfgState = ENUM(
+//    "DFG_STATE_NODES_LOADED", "DFG_STATE_CREATED", "DFG_STATE_STARTED", "DFG_STATE_STOPPED",    // DFG STATE
+//    "DFG_STATE_USER_DFG_LOADED", "DFG_STATE_DEFAULT_DFG_LOADED", "DFG_STATE_NODE_DFG_LOADED"    // LOADED DFG TYPE
+//    );
+
 var DataFlowGraphView = Backbone.View.extend({
     id : 'data-flow-graph',
     
@@ -39,8 +44,8 @@ var DataFlowGraphView = Backbone.View.extend({
         clear: function() {
             var ps = [];
             for(var p in this) {
-                if (this.hasOwnProperty(p)) {
-                    ps.push(p);
+                if (this.hasOwnProperty(p) && !_.isFunction(this[p])) {
+                    ps.push(this[p]);
                 }
             }
             
@@ -49,6 +54,8 @@ var DataFlowGraphView = Backbone.View.extend({
             }
         },
     },
+    
+    dfgCounter : [],
     
     initialize : function() {
         this.model = new DataFlowGraph();
@@ -174,80 +181,95 @@ var DataFlowGraphView = Backbone.View.extend({
     },
     
     initializeDfgToolbox4Drop : function() {
-        //Counter
-        var counter = [];
         var self = this;
         
         //Make element droppable
         $("#flow-graph-screen").droppable({
             drop: function (ev, ui) {
-                var toolId = ui.draggable.attr('id');
-                
-                if(!counter[toolId]) {
-                    counter[toolId] = 1;
-                }
-                else {
-                    ++counter[toolId];
-                }
-                
+                var toolId = ui.draggable.attr('id');                       
                 var pos = $(ui.helper).offset();
-                var containerPos = $("#flow-graph-screen").offset();         
-                
-                // get model
-                var modelPrototype = self.dfgToolboxNodes[toolId];
-                
-                // get xvars and xinput ports
-                var xvars = modelPrototype.get("xvar");
-                var xinputPorts = modelPrototype.get("xinputPort");
-                
-                //get name
-                var prototypeName;            
-                var modelId;
-                if(counter[toolId] == 1) {
-                    prototypeName = modelPrototype.get("name");
-                    modelId = toolId;   
-                }
-                else {
-                    prototypeName = modelPrototype.get("name") + " " + counter[toolId];
-                    modelId = toolId + counter[toolId];
-                }
-                
-                var m = new DataFlowGraphDefaultModel({
-                    position: { x: pos.left - containerPos.left, y: pos.top - containerPos.top },
-                });
-                m.setId(modelId);
-                m.setOrigId(toolId);
-                m.setLabel(prototypeName);
-                
-                // get all xvars
-                if(xvars) {
-                    xvars.forEach(function(xvar) {
-                        var xvarName = xvar.get("name");
-                        var xvarSynType = xvar.get("synType");
-                        var xvarSemType = xvar.get("semType");   
-                        m.addInputPort(xvarName, xvarSemType, xvarSynType);
-                    });
-                }
-                
-                // get all xinputports
-                if(xinputPorts) {
-                    xinputPorts.forEach(function(xvar) {
-                        var xinputPortName = xvar.get("name");
-                        var xinputPortSynType = xvar.get("synType");
-                        var xinputPortSemType = xvar.get("semType");
-                        m.addOutpuPort(xinputPortName, xinputPortSemType, xinputPortSynType);
-                    });
-                }
-                
-                m.setAutoSize();
-                
-                self.dfgGraph.addCell(m);
-                self.dfgModels.addModel(modelId, m);
+                var containerPos = $("#flow-graph-screen").offset();           
+                self.addNodeToGraph(toolId, pos.left - containerPos.left, pos.top - containerPos.top);
             }
         });
     },
     
-    setLink : function(link) {    
+    addNodeToGraph : function(nodeId, x, y) {
+        if(!this.dfgCounter[nodeId]) {
+            this.dfgCounter[nodeId] = 1;
+        }
+        else {
+            ++this.dfgCounter[nodeId];
+        }
+        
+        // get model
+        var modelPrototype = this.dfgToolboxNodes[nodeId];
+        
+        // get xvars and xinput ports
+        var xvars = modelPrototype.get("xvar");
+        var xinputPorts = modelPrototype.get("xinputPort");
+        
+        //get name
+        var prototypeName;            
+        var modelId;
+        if(this.dfgCounter[nodeId] == 1) {
+            prototypeName = modelPrototype.get("name");
+            modelId = nodeId;   
+        }
+        else {
+            prototypeName = modelPrototype.get("name") + " " + this.dfgCounter[nodeId];
+            modelId = nodeId + this.dfgCounter[nodeId];
+        }
+        
+        var m = new DataFlowGraphDefaultModel({
+            position: { x: x, y: y },
+        });
+        m.setId(modelId);
+        m.setOrigId(nodeId);
+        m.setLabel(prototypeName);
+        
+        // get all xvars
+        if(xvars) {
+            xvars.forEach(function(xvar) {
+                var xvarName = xvar.get("name");
+                var xvarSynType = xvar.get("synType");
+                var xvarSemType = xvar.get("semType");   
+                m.addInputPort(xvarName, xvarSemType, xvarSynType);
+            });
+        }
+        
+        // get all xinputports
+        if(xinputPorts) {
+            xinputPorts.forEach(function(xvar) {
+                var xinputPortName = xvar.get("name");
+                var xinputPortSynType = xvar.get("synType");
+                var xinputPortSemType = xvar.get("semType");
+                m.addOutpuPort(xinputPortName, xinputPortSemType, xinputPortSynType);
+            });
+        }
+        
+        m.setAutoSize();
+        
+        this.dfgGraph.addCell(m);
+        this.dfgModels.addModel(modelId, m);
+        
+        return modelId;
+    },
+    
+    addLinkToGraph : function(sourceId, sourcePort, sourceSelector, targetId, targetPort, targetSelector, vertices) {
+        // default value 4 vertices
+        vertices = typeof vertices !== 'undefined' ? vertices : [];
+        
+        var link = new joint.dia.Link({
+            source: { id: sourceId, port: sourcePort, selector: sourceSelector },
+            target: { id: targetId, port: targetPort, selector: targetSelector },
+            vertices: vertices,
+        });
+        this.dfgGraph.addCell(link);
+        this.setLink(link);
+    },
+    
+    setLink : function(link) {   
         //determine if link is pin to some port on both sides
         if(link.attributes.target.x || link.attributes.source.x){
             this.setBadLink(link);
@@ -285,28 +307,72 @@ var DataFlowGraphView = Backbone.View.extend({
     },
     
     onDfgDefChange : function(model) {
-        // TODO: change graph
+        // TODO: show some question? 
         var graph = model.get("dfgDef");
-        
-        //DEBUG
-        //console.log("onDfgDefChange: " + JSON.stringify(graph));
-        
         this.loadGraph(graph.DFG);
     },
-    
-    loadGraph: function(dfg) {
-        // TODO: load default DFG
+     
+    onDataFlowGraphChange : function(model) {
+        // TODO: show some question? 
+        var graph = model.get("dataFlowGraph");       
+        this.loadGraph(graph);
     },
     
-    onDataFlowGraphChange : function(model) {
-        var graph = model.get("dataFlowGraph");
+    loadGraph : function(dfg, append) {
+        // TODO: load default DFG
+        //console.log("load graph: " + dfg);
+        console.log("load graph");
         
-        //DEBUG
-        console.log("onDataFlowGraphChange: " + JSON.stringify(graph));
+        // default value 4 append is false
+        append = typeof append !== 'undefined' ? append : false;
         
-        //TODO: change default graph
-        //...
-        //this.loadScript(graph);
+        try {
+            //this.dfgGraph.fromJSON(JSON.parse(dfg));
+            //this.dfgGraph.resetCells(this.dfgGraph.getElements());
+            
+            if(!append) {
+                this.dfgReset(false);
+            }
+                                    
+            var dfgJson = JSON.parse(dfg);
+            if(dfgJson.cells) {
+                var nodes = {};
+                
+                // nodes
+                for(var i = 0; i < dfgJson.cells.length; ++i) {
+                    var cell = dfgJson.cells[i];
+                    
+                    // node
+                    if(cell.origId) {
+                        if(this.dfgToolboxNodes[cell.origId]) {
+                            nodes[cell.id] = this.addNodeToGraph(cell.origId, cell.position.x, cell.position.y);
+                        }
+                        else {
+                            //TODO: what to do?
+                        }
+                    }
+                }
+                
+                // links
+                for(var i = 0; i < dfgJson.cells.length; ++i) {
+                    var cell = dfgJson.cells[i];
+                    
+                    //cell
+                    if(cell.source) {
+                        var vertices = ((cell.vertices) ? cell.vertices : []);
+                        var sourceSelector = ((cell.source.selector) ? cell.source.selector : "");
+                        var targetSelector = ((cell.target.selector) ? cell.target.selector : "");
+                        this.addLinkToGraph(nodes[cell.source.id], cell.source.port, sourceSelector, 
+                                            nodes[cell.target.id], cell.target.port, targetSelector,
+                                            vertices);
+                    }
+                }
+            }
+        }
+        catch(ex) {
+            console.log("...ERROR: " + ex.message);
+            this.dfgReset(false);
+        }
     },
     
     onPrototypeAdd : function(modelPrototype) {
@@ -570,10 +636,17 @@ var DataFlowGraphView = Backbone.View.extend({
         this.model.requestStop();
     },
     
-    dfgReset : function() {
-        this.model.reset();
+    dfgReset : function(all) {
+        // default value 4 all is true
+        all = typeof all !== 'undefined' ? all : true;
+        
+        this.dfgModels.clear();
         this.dfgGraph.clear();
-        this.model.requestReset();
+        
+        if(all) {
+            this.model.reset();
+            this.model.requestReset();
+        }
     }, 
     
     dfgSaveDfg : function() {
@@ -602,13 +675,12 @@ var DataFlowGraphView = Backbone.View.extend({
         var jsonDfg = this.dfgGraph.toJSON();
         
         //send request
-        this.model.requestSaveDfg(jsonDfg, filename, true);
+        this.model.requestSaveDfg(JSON.stringify(jsonDfg), filename, true);
     },
     
     dfgLoadDfg : function(model) {
         var dfg = $(model.target);
         var dfgFilename = dfg.html();
-        console.log("tutu: " + dfgFilename);
         this.model.requestLoadDfg(dfgFilename);
     },
     
