@@ -16,7 +16,7 @@ public:
     double alphaSingleEstimate;
     double pp, ii, pi;
 
-    inline double computeEstimator(double spp, double sii, double spi, double stdDevPTAM = 0.2, double stdDevIMU = 0.1) {
+    inline double computeEstimator(double spp, double sii, double spi, double stdDevPTAM = 0.2, double stdDevIMU = 0.1) const {
         double sII = stdDevPTAM * stdDevPTAM * sii;
         double sPP = stdDevIMU * stdDevIMU * spp;
         double sPI = stdDevIMU * stdDevPTAM * spi;

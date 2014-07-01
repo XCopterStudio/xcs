@@ -12,63 +12,47 @@ namespace localization {
 class ScaleEstimation {
 public:
     ScaleEstimation();
-    SE3Element offsetMatrix() const;
-    double scale() const;
-    void scale(const double scale);
-    
+
+    inline const SE3Element& offsetMatrix() const {
+        return offsetMatrix_;
+    }
+
+    inline double scale() const {
+        return scale_;
+    }
+
+    void initializeScale(const double scale);
+
+    void updateScale(const TooN::Vector<3> ptamDiff, const TooN::Vector<3> imuDiff, const TooN::Vector<3> ptamPose);
+
+    void scalingFixpoint(const TooN::Vector<3> scalingFixpoint) {
+        scalingFixpoint_ = scalingFixpoint;
+    }
+
+    inline const TooN::Vector<3>& scalingFixpoint() const {
+        return scalingFixpoint_;
+    }
+
     /*
      * Transformations (rewrite to config for other drones)
      */
     static const SE3Element droneToFront;
-    /*
-     * Until revision all the public API bellow is deprecated.
-     */
-    TooN::Vector<6> getCurrentOffsets();
-    
-    TooN::Vector<3> getCurrentScales();
-    
-    void setCurrentScales(TooN::Vector<3> scales);
 
-    void updateScaleXYZ(TooN::Vector<3> ptamDiff, TooN::Vector<3> imuDiff, TooN::Vector<3> OrgPtamPose);
-
-    //TooN::Vector<3> transformPTAMObservation(double x, double y, double z);
-    TooN::Vector<3> transformPTAMObservation(double x, double y, double z, double yaw);
-    TooN::Vector<6> transformPTAMObservation(TooN::Vector<6> obs);
-    TooN::Vector<6> backTransformPTAMObservation(TooN::Vector<6> obs);
-
-    // when scaling factors are updated, exacly one point stays the same.
-    // if useScalingFixpoint, this point is the current PTAM pose, otherwise it is sclingFixpoint (which is a PTAM-coordinate(!))
-    TooN::Vector<3> scalingFixpoint; // in PTAM's system (!)
-    bool useScalingFixpoint;
-    bool allSyncLocked;
-    
-    
-    
 private:
     typedef std::vector<ScaleStruct> ScalePairsType;
 
-    // relation parameters (ptam to imu scale / offset)
-    bool offsets_xyz_initialized;
-    bool scale_xyz_initialized;
-    double xy_scale, z_scale;
-    double scale_from_xy;
-    double scale_from_z;
-    double roll_offset, pitch_offset, yaw_offset;
-    double x_offset, y_offset, z_offset;
+    bool useScalingFixpoint_;
+    TooN::Vector<3> scalingFixpoint_;
+
+    double scale_;
+    double initialScale_;
+
+    SE3Element offsetMatrix_;
+
 
     // intermediate values for re-estimation of relaton parameters
-    double xyz_sum_IMUxIMU;
-    double xyz_sum_PTAMxPTAM;
-    double xyz_sum_PTAMxIMU;
-    double rp_offset_framesContributed;
-    ScalePairsType scalePairs_; // TODO change to stack allocation
-
-    double initialScaleSet; // M: ?
-
-    int scalePairsIn, scalePairsOut;
-    
-    // coordinate transformations
-
+    double xyz_sum_PTAMxIMU_; // TODO potential use for scale accuracy (or precision?)
+    ScalePairsType scalePairs_;
 };
 
 }

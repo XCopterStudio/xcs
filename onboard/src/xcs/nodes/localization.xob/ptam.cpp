@@ -58,10 +58,9 @@ Ptam::~Ptam() {
 }
 
 inline void dbgPrintSE3(const string &tag, const TooN::SE3<> &pose) {
-    double dbgRoll, dbgPitch, dbgYaw;
-    rod2rpy(pose.get_rotation(), &dbgRoll, &dbgPitch, &dbgYaw);
-    const auto dbgTrans = pose.get_translation();
-    XCS_LOG_INFO("PTAM (" << tag << "): " << dbgTrans[0] << " " << dbgTrans[1] << " " << dbgTrans[2] << " " << dbgRoll << " " << dbgPitch << " " << dbgYaw);
+    const TooN::Vector<3> angles = so3ToAngles(pose.get_rotation());
+    const auto translation = pose.get_translation();
+    XCS_LOG_INFO("PTAM (" << tag << "): " << translation[0] << " " << translation[1] << " " << translation[2] << " " << angles[0] << " " << angles[1] << " " << angles[2]);
 }
 
 void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
@@ -94,19 +93,20 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     glWindow_->SetupVideoOrtho();
     glWindow_->SetupVideoRasterPosAndZoom();
 
-    const SE3Element droneToWPred(vectToSe3(filterPosePrePTAM.slice<0, 6>()));
+    const SE3Element droneToWPred(vectorToSe3(filterPosePrePTAM.slice<0, 6>()));
     const SE3Element worldUToCam(scaleEstimation_.droneToFront * droneToWPred.inverse() * scaleEstimation_.offsetMatrix());
     const SE3Element ptamToCamPPred(worldUToCam.get_rotation(), worldUToCam.get_translation() / scaleEstimation_.scale());
 
     // set
     dbgPrintSE3("predicted", ptamToCamPPred);
-    ptamTracker_->setPredictedCamFromW(ptamToCamPPred); // TODO patch TUM API
+    ptamTracker_->setPredictedCamFromW(ptamToCamPPred);
     //ptamTracker_->setLastFrameLost((goodCount_ < -10), (videoFrameID%2 != 0));
     ptamTracker_->setLastFrameLost((goodCount_ < -20), (frameNo_ % 3 == 0));
 
     // track
     ptamTracker_->TrackFrame(frame_, true);
     const SE3Element ptamToCamPResult = ptamTracker_->GetCurrentPose();
+    dbgPrintSE3("result", ptamToCamPResult);
     const SE3Element camPToPtamResult(ptamToCamPResult.inverse());
     const SE3Element camToWorldU(camPToPtamResult.get_rotation(), camPToPtamResult.get_translation() * scaleEstimation_.scale());
 
@@ -122,7 +122,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     }
     if (ptamTracker_->lastStepResult == ptamTracker_->I_SECOND) {
         //PTAMInitializedClock = getMS(); TODO this is used in MapView to redraw something(?) only after 200 ms
-        scaleEstimation_.scale(ptamMapMaker_->initialScaleFactor); // TODO (Michal): use initial scale factor = 1
+        scaleEstimation_.initializeScale(ptamMapMaker_->initialScaleFactor); // TODO (Michal): use initial scale factor = 1
         ptamMapMaker_->currentScaleFactor = ptamMapMaker_->initialScaleFactor;
 
         XCS_LOG_INFO("PTAM initialized!");
@@ -243,7 +243,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
     const TooN::Vector<3> ptamPositionForScale(droneToWResult.get_translation() / scaleEstimation_.scale());
     const TooN::Vector<3> scalingFixpoint((scaleEstimation_.offsetMatrix().inverse() * droneToWResult).get_translation() / scaleEstimation_.scale());
-    
+
     // if interval is started: add one step.
     const double includedTime = timestamp - ptamPositionForScaleTakenTimestamp_;
     if (framesIncludedForScaleXYZ_ >= 0) {
@@ -284,7 +284,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
                 diffIMU[2] *= zFactor;
 
                 // hidden helluva calculations for scale estimate
-                scaleEstimation_.updateScaleXYZ(diffPTAM, diffIMU, scalingFixpoint);
+                scaleEstimation_.updateScale(diffPTAM, diffIMU, scalingFixpoint);
                 ptamMapMaker_->currentScaleFactor = scaleEstimation_.scale();
             }
             framesIncludedForScaleXYZ_ = -1; // causing reset afterwards
@@ -303,7 +303,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
 
     if (lockNextFrame_ && isGood) {
-        scaleEstimation_.scalingFixpoint = scalingFixpoint;
+        scaleEstimation_.scalingFixpoint(scalingFixpoint);
         lockNextFrame_ = false;
         //filter->useScalingFixpoint = true; // this was commented out in original TUM
 
@@ -591,8 +591,7 @@ void Ptam::resetPtam() {
     ptamTracker_->minKFTimeDist = 0;
     DEBUG_PRINT("PTAM: R6");
 
-    predConvert_.setPosRPY(0, 0, 0, 0, 0, 0);
-    predIMUOnlyForScale_.setPosRPY(0, 0, 0, 0, 0, 0);
+    predIMUOnlyForScale_.resetPos();
     DEBUG_PRINT("PTAM: R7");
 
     goodCount_ = 0;
