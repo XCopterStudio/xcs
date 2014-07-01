@@ -1,7 +1,8 @@
-//var DfgState = ENUM(
-//    "DFG_STATE_NODES_LOADED", "DFG_STATE_CREATED", "DFG_STATE_STARTED", "DFG_STATE_STOPPED",    // DFG STATE
-//    "DFG_STATE_USER_DFG_LOADED", "DFG_STATE_DEFAULT_DFG_LOADED", "DFG_STATE_NODE_DFG_LOADED"    // LOADED DFG TYPE
-//    );
+var DfgState = ENUM(
+    "DFG_STATE_NODES_LOADED", 
+    "DFG_STATE_CREATED", "DFG_STATE_STARTED", "DFG_STATE_STOPPED"//,    // DFG STATE
+    //"DFG_STATE_USER_DFG_LOADED", "DFG_STATE_DEFAULT_DFG_LOADED", "DFG_STATE_NODE_DFG_LOADED"    // LOADED DFG TYPE
+    );
 
 var DataFlowGraphView = Backbone.View.extend({
     id : 'data-flow-graph',
@@ -13,6 +14,7 @@ var DataFlowGraphView = Backbone.View.extend({
         "click #dfgCreate" : "dfgCreate",
         "click #dfgStart" : "dfgStart",
         "click #dfgStop" : "dfgStop",
+        "click #dfgDestroy" : "dfgDestroy",
         "click #dfgReset" : "dfgReset",
         "click #dfgSaveDfg" : "dfgSaveDfg",
         "click .dfgLoadDfg" : "dfgLoadDfg",
@@ -653,6 +655,24 @@ var DataFlowGraphView = Backbone.View.extend({
         this.model.requestStop();
     },
     
+    dfgDestroy: function() {
+        var self = this;
+        self.model.reset();
+        self.model.requestReset(function(id, responseType, responseData) {
+            if(responseType == ResponseType.Done) {
+                if(responseData.prototype) {
+                    self.model.setPrototype(responseData.prototype);
+                }
+                if(responseData.clone) {
+                    self.model.setClone(responseData.clone);
+                }
+                if(responseData.savedDfg) {
+                    self.model.setSavedDfg(responseData.savedDfg);
+                }
+            }
+        });
+    },
+    
     dfgReset : function(all) {
         // default value 4 all is true
         all = typeof all !== 'undefined' ? all : true;
@@ -661,21 +681,7 @@ var DataFlowGraphView = Backbone.View.extend({
         this.dfgGraph.clear();
         
         if(all) {
-            var self = this;
-            self.model.reset();
-            self.model.requestReset(function(id, responseType, responseData) {
-                if(responseType == ResponseType.Done) {
-                    if(responseData.prototype) {
-                        self.model.setPrototype(responseData.prototype);
-                    }
-                    if(responseData.clone) {
-                        self.model.setClone(responseData.clone);
-                    }
-                    if(responseData.savedDfg) {
-                        self.model.setSavedDfg(responseData.savedDfg);
-                    }
-                }
-            });
+            this.dfgDestry();
         }
     }, 
     

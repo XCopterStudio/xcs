@@ -125,6 +125,7 @@
                                 <button id="dfgCreate" type="button" class="btn btn-warning navbar-btn">Create DFG</button>
                                 <button id="dfgStart" type="button" class="btn btn-danger navbar-btn">Start DFG</button>
                                 <button id="dfgStop" type="button" class="btn btn-danger navbar-btn">Stop DFG</button>
+                                <button id="dfgDestroy" type="button" class="btn btn-danger navbar-btn">Destroy DFG</button>
                             </div>
                             
                             <div class="nav navbar-nav navbar-right">
