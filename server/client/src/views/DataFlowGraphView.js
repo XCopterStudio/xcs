@@ -308,8 +308,11 @@ var DataFlowGraphView = Backbone.View.extend({
     
     onDfgDefChange : function(model) {
         // TODO: show some question? 
+        
         var graph = model.get("dfgDef");
-        this.loadGraph(graph.DFG);
+        if(graph && graph.DFG) {
+            this.loadGraph(graph.DFG);
+        }
     },
      
     onDataFlowGraphChange : function(model) {
@@ -370,7 +373,7 @@ var DataFlowGraphView = Backbone.View.extend({
             }
         }
         catch(ex) {
-            console.log("...ERROR: " + ex.message);
+            console.error("...ERROR: " + ex.message);
             this.dfgReset(false);
         }
     },
@@ -715,7 +718,16 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgLoadDfg : function(model) {
         var dfg = $(model.target);
         var dfgFilename = dfg.html();
-        this.model.requestLoadDfg(dfgFilename);
+        
+        var self = this;
+        self.model.requestLoadDfg(dfgFilename, function(id, responseType, responseData) {
+            if(responseType == ResponseType.Done) {
+                if(responseData.DFG && responseData.filename) { 
+                    self.model.setDfgDef("");
+                    self.model.setDfgDef(responseData);
+                }
+            }
+        });
     },
     
     /********************

@@ -113,7 +113,7 @@ var DataFlowGraph = Backbone.Model.extend({
         
         // set dfg definition
         if(data.dfgDef) {
-            this.set("dfgDef", data.dfgDef);
+            this.setDfgDef(data.dfgDef);
         }
         
         // set availabel dfg for load 
@@ -131,6 +131,10 @@ var DataFlowGraph = Backbone.Model.extend({
         if(data.prototype) {
             this.setPrototype(data.prototype);
         }
+    },
+    
+    setDfgDef: function(dfgDef) {
+        this.set("dfgDef", dfgDef);
     },
     
     setSavedDfg: function(savedDfg) {
@@ -227,7 +231,6 @@ var DataFlowGraph = Backbone.Model.extend({
     
     requestLoad: function(response) {
         //TODO: rename DFG_LOAD
-        //TODO: what to do with request id of seved dfg
         this.sendRequest("SAVED_DFG", "", response);
         this.sendRequest("DFG_LOAD", "", response);
     },
