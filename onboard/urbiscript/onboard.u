@@ -338,19 +338,17 @@ class Onboard {
         setting.setAndSave("DFG", dfg);
 
         //resend info about saved dfg
-        doSavedDfg_();
-
-        // TODO: what to return
-        return "";
+        return doSavedDfg_();
     };
 
     function doSavedDfg_() {
         var filePath = getUserDfgPath_();
         var dfgs = XSettings.getSettingsFiles(filePath.asString(), "DFG");
-        this.onboardSender_.sendDfg4Load(dfgs);
+ 
+        var data = [ => ];
+        data["savedDfg"] = dfgs;
 
-        // TODO: what to return
-        return "";
+        return data;
     };
 
     function doLoadDfg_(filename) {
