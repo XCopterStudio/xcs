@@ -567,10 +567,21 @@ var DataFlowGraphView = Backbone.View.extend({
 //            }
 //        };
     },
-    
+
     dfgLoad : function() {
-        this.model.reset();
-        this.model.requestLoad();
+        var self = this;
+        
+        self.model.reset();
+        self.model.requestLoad(function(id, responseType, responseData) {
+            if(responseType == ResponseType.Done) {
+                if(responseData.prototype) {
+                    self.model.setPrototype(responseData.prototype);
+                }
+                if(responseData.clone) {
+                    self.model.setClone(responseData.clone);
+                }
+            }
+        });
     },
     
     dfgCreate : function() {
@@ -644,8 +655,18 @@ var DataFlowGraphView = Backbone.View.extend({
         this.dfgGraph.clear();
         
         if(all) {
-            this.model.reset();
-            this.model.requestReset();
+            var self = this;
+            self.model.reset();
+            self.model.requestReset(function(id, responseType, responseData) {
+                if(responseType == ResponseType.Done) {
+                    if(responseData.prototype) {
+                        self.model.setPrototype(responseData.prototype);
+                    }
+                    if(responseData.clone) {
+                        self.model.setClone(responseData.clone);
+                    }
+                }
+            });
         }
     }, 
     

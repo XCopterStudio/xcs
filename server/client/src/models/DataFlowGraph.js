@@ -47,6 +47,8 @@ var DataFlowGraphNode = Backbone.Model.extend({
     }
 });
 
+var ResponseType = ENUM("Done", "Error");
+
 var DataFlowGraph = Backbone.Model.extend({    
     requestId_ : 0,
     
@@ -60,7 +62,7 @@ var DataFlowGraph = Backbone.Model.extend({
         getAndRemoveResponse : function(requestId) {
             if(this[requestId]) {
                 var response = this[requestId];
-                this[requestId].remove();
+                delete this[requestId];
                 return response;
             }
         },
@@ -87,9 +89,16 @@ var DataFlowGraph = Backbone.Model.extend({
             
             if(data.response.id && data.response.respondType && data.response.respondData && data.response.requestId) {
                 var id = data.response.id 
-                var responseType = data.response.respondType;
+                var responseTypeText = data.response.respondType;
                 var responseData = data.response.respondData;
                 var requestId = data.response.requestId;
+                
+                var responseType;
+                switch(responseTypeText) {
+                    case "Done": responseType = ResponseType.Done; break;
+                    case "Error": responseType = ResponseType.Error; break;
+                    default: responseType = ResponseType.None; break;
+                }
                 
                 // run response action
                 var responseAction = this.responses.getAndRemoveResponse(requestId);
@@ -120,76 +129,85 @@ var DataFlowGraph = Backbone.Model.extend({
         
         // set prototypes
         if(data.prototype) {
-            //console.log("..." + data.prototype.length);
-            for(var j = 0; j < data.prototype.length; ++j) {
-                var p = data.prototype[j];
-                //console.log("..." + JSON.stringify(p));
-                
-                if(p.name) {  
-                    // get old prototype or create new
-                    var prot;
-                    var oldProt = this.get("xprototype").findWhere({"name": p.name});
-                    if(oldProt) {
-                        prot = oldProt;
-                    }
-                    else {
-                        //create new prototype node
-                        prot = new DataFlowGraphNode();
-                        prot.set("name", p.name);
-                        
-                        // add prototype to collection
-                        this.get("xprototype").add(prot);
-                    }
+            console.log("...prototypes");
+            this.setPrototype(data.prototype);
+        }
+    },
+    
+    setClone: function(clone) {
+        //TODO: set clones
+    },
+    
+    setPrototype: function(prototype) {
+        console.log("..." + prototype.length);
+        for(var j = 0; j < prototype.length; ++j) {
+            var p = prototype[j];
+            //console.log("..." + JSON.stringify(p));
+            
+            if(p.name) {  
+                // get old prototype or create new
+                var prot;
+                var oldProt = this.get("xprototype").findWhere({"name": p.name});
+                if(oldProt) {
+                    prot = oldProt;
+                }
+                else {
+                    //create new prototype node
+                    prot = new DataFlowGraphNode();
+                    prot.set("name", p.name);
                     
-                    //read vars
-                    if(p.var) {
-                        for(var i = 0; i < p.var.length; ++i) {
-                            var oldXVar = prot.get("xvar").findWhere({"name": p.var[i].name});
-                            if(!oldXVar) {
-                                prot.get("xvar").add(new DataFlowGraphNodeIO({
-                                    name : p.var[i].name,
-                                    synType : p.var[i].synType,
-                                    semType : p.var[i].semType
-                                }));
-                            }
+                    // add prototype to collection
+                    this.get("xprototype").add(prot);
+                }
+                
+                //read vars
+                if(p.var) {
+                    for(var i = 0; i < p.var.length; ++i) {
+                        var oldXVar = prot.get("xvar").findWhere({"name": p.var[i].name});
+                        if(!oldXVar) {
+                            prot.get("xvar").add(new DataFlowGraphNodeIO({
+                                name : p.var[i].name,
+                                synType : p.var[i].synType,
+                                semType : p.var[i].semType
+                            }));
                         }
                     }
-                    
-                    // read inputports
-                    if(p.inputPort) {
-                        for(var i = 0; i < p.inputPort.length; ++i) {
-                            var oldXIPort = prot.get("xinputPort").findWhere({"name": p.inputPort[i].name});
-                            if(!oldXIPort) {
-                                prot.get("xinputPort").add(new DataFlowGraphNodeIO({
-                                    name : p.inputPort[i].name,
-                                    synType : p.inputPort[i].synType,
-                                    semType : p.inputPort[i].semType
-                                }));
-                            }
+                }
+                
+                // read inputports
+                if(p.inputPort) {
+                    for(var i = 0; i < p.inputPort.length; ++i) {
+                        var oldXIPort = prot.get("xinputPort").findWhere({"name": p.inputPort[i].name});
+                        if(!oldXIPort) {
+                            prot.get("xinputPort").add(new DataFlowGraphNodeIO({
+                                name : p.inputPort[i].name,
+                                synType : p.inputPort[i].synType,
+                                semType : p.inputPort[i].semType
+                            }));
                         }
                     }
                 }
             }
+        }
+        
+        //TODO: what about removing last prototype?
+        // check deleted protypes
+        var p2Del = [];
+        //console.log("..." + this.get("xprototype").length);
+        for(var j = 0; j < this.get("xprototype").length; ++j) {
+            var p = this.get("xprototype").at(j);
+            //console.log("... " + p.get("name"));
+            var prot = $.grep(prototype, function(item){ return item.name == p.get("name"); });
             
-            //TODO: what about removing last prototype?
-            // check deleted protypes
-            var p2Del = [];
-            //console.log("..." + this.get("xprototype").length);
-            for(var j = 0; j < this.get("xprototype").length; ++j) {
-                var p = this.get("xprototype").at(j);
-                //console.log("... " + p.get("name"));
-                var prot = $.grep(data.prototype, function(item){ return item.name == p.get("name"); });
-                
-                // prototype was deleted
-                if(prot.length == 0) {
-                    p2Del.push(p);
-                }
+            // prototype was deleted
+            if(prot.length == 0) {
+                p2Del.push(p);
             }
-            
-            // remove deleted prototypes
-            for(var j = 0; j < p2Del.length; ++j) {
-                this.get("xprototype").remove(p);
-            }
+        }
+        
+        // remove deleted prototypes
+        for(var j = 0; j < p2Del.length; ++j) {
+            this.get("xprototype").remove(p);
         }
     },
     
