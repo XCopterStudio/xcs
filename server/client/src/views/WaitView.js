@@ -42,7 +42,7 @@ var WaitView = Backbone.View.extend({
     
                         // run action
                         try {
-                            waitAction.get("action")();
+                            waitAction.get("action")(event);
                         }
                         catch(ex) {
                             console.log(ex.message);

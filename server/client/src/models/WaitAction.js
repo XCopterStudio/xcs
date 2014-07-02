@@ -9,9 +9,22 @@ var WaitAction = Backbone.Model.extend({
         selector: "",
     },
 
-    initialize : function(selector, actionType, action) {
+    initialize : function(selector, actionType, action, autoStartStop) {
+        // default value 4 autoStartStop is true
+        autoStartStop = typeof autoStartStop !== 'undefined' ? autoStartStop : true;
+        
         if(action) {
-            this.set("action", action);
+            if(autoStartStop) {
+                var self = this;
+                this.set("action", function(event) {
+                    self.start();
+                    action(event);
+                    self.stop();
+                });
+            }
+            else {
+                this.set("action", action);
+            }
         }
         
         if(actionType) {
