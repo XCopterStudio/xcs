@@ -78,14 +78,35 @@ var DataFlowGraphView = Backbone.View.extend({
         this.onStateChanged();
         
         var self = this;
-        app.Wait.setWaitAction(new WaitAction("#dfgLoad", WaitActionType.Click, function() { self.dfgLoad(); }));
-        app.Wait.setWaitAction(new WaitAction("#dfgCreate", WaitActionType.Click, function() { self.dfgCreate(); }));
-        app.Wait.setWaitAction(new WaitAction("#dfgStart", WaitActionType.Click, function() { self.dfgStart(); }));
-        app.Wait.setWaitAction(new WaitAction("#dfgStop", WaitActionType.Click, function() { self.dfgStop(); }));
-        app.Wait.setWaitAction(new WaitAction("#dfgDestroy", WaitActionType.Click, function() { self.dfgDestroy(); }));
-        app.Wait.setWaitAction(new WaitAction("#dfgReset", WaitActionType.Click, function() { self.dfgReset(); }));
-        app.Wait.setWaitAction(new WaitAction("#dfgSaveDfg", WaitActionType.Click, function() { self.dfgSaveDfg(); }));
         
+        var loadAction = new WaitAction("#dfgLoad", WaitActionType.Click)
+        loadAction.set("action", function() { loadAction.start(); self.dfgLoad(function() { loadAction.stop() }); });
+        app.Wait.setWaitAction(loadAction);
+        
+        var createAction = new WaitAction("#dfgCreate", WaitActionType.Click)
+        createAction.set("action", function() { createAction.start(); self.dfgCreate(function() { createAction.stop() }); });
+        app.Wait.setWaitAction(createAction);
+        
+        var startAction = new WaitAction("#dfgStart", WaitActionType.Click)
+        startAction.set("action", function() { startAction.start(); self.dfgStart(function() { startAction.stop() }); });
+        app.Wait.setWaitAction(startAction);
+        
+        var stopAction = new WaitAction("#dfgStop", WaitActionType.Click)
+        stopAction.set("action", function() { stopAction.start(); self.dfgStop(function() { stopAction.stop() }); });
+        app.Wait.setWaitAction(stopAction);
+        
+        var destroyAction = new WaitAction("#dfgDestroy", WaitActionType.Click)
+        destroyAction.set("action", function() { destroyAction.start(); self.dfgDestroy(function() { destroyAction.stop() }); });
+        app.Wait.setWaitAction(destroyAction);
+        
+        var resetAction = new WaitAction("#dfgReset", WaitActionType.Click)
+        resetAction.set("action", function() { resetAction.start(); self.dfgReset(true, function() { resetAction.stop() }); });
+        app.Wait.setWaitAction(resetAction);
+        
+        var saveDfgAction = new WaitAction("#dfgSaveDfg", WaitActionType.Click)
+        saveDfgAction.set("action", function() { saveDfgAction.start(); self.dfgSaveDfg(function() { saveDfgAction.stop() }); });
+        app.Wait.setWaitAction(saveDfgAction);
+             
         var flowGraphConsole = $('#flow-graph-console');
         flowGraphConsole.append('<textarea id="flow-graph-txt" rows="15" cols="150"></textarea>');
         
@@ -308,10 +329,20 @@ var DataFlowGraphView = Backbone.View.extend({
         loadItems.html('');
         
         var self = this;
+        var loadDfgAction = {};
         for(var i = 0; i < dfgs.length; ++i) {
             var id = "dfgLoadDfg_" + this.trimId(dfgs[i]);
             loadItems.append('<li><a class="btn dfgLoadDfg" id="' + id + '" role="button" filename="' + dfgs[i] + '">' + dfgs[i] + '</a></li>');
-            app.Wait.setWaitAction(new WaitAction("#" + id, WaitActionType.Click, function(model) { self.dfgLoadDfg(model); }));
+            
+            loadDfgAction[id] = new WaitAction("#" + id, WaitActionType.Click);
+            loadDfgAction[id].set("action", function(event) { 
+                var hrefId = $(event.target).attr("id");
+                loadDfgAction[hrefId].start(); 
+                self.dfgLoadDfg(event, function() { 
+                    loadDfgAction[hrefId].stop(); 
+                }); 
+            });
+            app.Wait.setWaitAction(loadDfgAction[id]);
         }
     },
     
@@ -573,7 +604,7 @@ var DataFlowGraphView = Backbone.View.extend({
 //        };
     },
 
-    dfgLoad : function() {
+    dfgLoad : function(response) {
         var self = this;
         
         self.model.reset();
@@ -591,10 +622,14 @@ var DataFlowGraphView = Backbone.View.extend({
                 
                 self.setDfgState(DfgState.DFG_STATE_NODES_LOADED);
             }
+            
+            if(response) {
+                response();
+            }
         });
     },
     
-    dfgCreate : function() {
+    dfgCreate : function(response) {
         // load dfg 2 json object
         var jsonDfg = this.dfgGraph.toJSON()
         
@@ -650,29 +685,41 @@ var DataFlowGraphView = Backbone.View.extend({
                 if(responseType == ResponseType.Done) {
                     self.setDfgState(DfgState.DFG_STATE_CREATED);
                 }
+            
+                if(response) {
+                    response();
+                }
             });
         }
     },
     
-    dfgStart : function() {
+    dfgStart : function(response) {
         var self = this;
         self.model.requestStart(function(id, responseType, responseData) {
             if(responseType == ResponseType.Done) {
                 self.setDfgState(DfgState.DFG_STATE_STARTED);
             }
+            
+            if(response) {
+                response();
+            }
         });
     },
     
-    dfgStop : function() {
+    dfgStop : function(response) {
         var self = this;
         self.model.requestStop(function(id, responseType, responseData) {
             if(responseType == ResponseType.Done) {
                 self.setDfgState(DfgState.DFG_STATE_STOPPED);
             }
+            
+            if(response) {
+                response();
+            }
         });
     },
     
-    dfgDestroy: function() {
+    dfgDestroy: function(response) {
         var self = this;
         self.model.reset();
         self.model.requestReset(function(id, responseType, responseData) {
@@ -689,10 +736,15 @@ var DataFlowGraphView = Backbone.View.extend({
                 
                 self.setDfgState(DfgState.DFG_STATE_DESTROYED);
             }
+            
+            console.log("ppppppppppppppppppppp");
+            if(response) {
+                response();
+            }
         });
     },
     
-    dfgReset : function(all) {
+    dfgReset : function(all, response) {
         // default value 4 all is true
         all = typeof all !== 'undefined' ? all : true;
         
@@ -700,11 +752,14 @@ var DataFlowGraphView = Backbone.View.extend({
         this.dfgGraph.clear();
         
         if(all) {
-            this.dfgDestroy();
+            this.dfgDestroy(response);
+        }
+        else if(response) {
+            response();
         }
     }, 
     
-    dfgSaveDfg : function() {
+    dfgSaveDfg : function(response) {
         var inputFilename = $('#dfgSaveDfg-filename');
         
         // read filenam
@@ -720,6 +775,11 @@ var DataFlowGraphView = Backbone.View.extend({
         //show error message
         if(errorMsg != '') {
             console.log(errorMsg);
+            
+            if(response) {
+                response();
+            }
+            
             return;
         }        
 
@@ -737,10 +797,14 @@ var DataFlowGraphView = Backbone.View.extend({
                     self.model.setSavedDfg(responseData.savedDfg);
                 }
             }
+            
+            if(response) {
+                response();
+            }
         });
     },
     
-    dfgLoadDfg : function(event) {
+    dfgLoadDfg : function(event, response) {
         console.log("dfgLoadDfg");
         var dfg = $(event.target);
         //var dfgFilename = dfg.html();
@@ -753,6 +817,10 @@ var DataFlowGraphView = Backbone.View.extend({
                     self.model.setDfgDef("");
                     self.model.setDfgDef(responseData);
                 }
+            }
+            
+            if(response) {
+                response();
             }
         });
     },
@@ -840,7 +908,7 @@ var DataFlowGraphView = Backbone.View.extend({
         };
         
         if(((this.dfgState_ & DfgState.DFG_STATE_NODES_LOADED) != DfgState.DFG_STATE_NODES_LOADED)) {
-            $("#dfgLoad").html("Load nodes");
+            app.Wait.setWaitHtml("#dfgLoad", "Load nodes");
             
             buttons.create.disabled = true;
             buttons.start.disabled = true;
@@ -852,7 +920,7 @@ var DataFlowGraphView = Backbone.View.extend({
             buttons.loadDfg.disabled = true; 
         }
         else {
-            $("#dfgLoad").html("Reload nodes");
+            app.Wait.setWaitHtml("#dfgLoad", "Reload nodes");
             
             buttons.create.disabled = false;
             buttons.start.disabled = false;
