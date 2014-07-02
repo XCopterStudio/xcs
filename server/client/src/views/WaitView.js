@@ -18,13 +18,21 @@ var WaitView = Backbone.View.extend({
 //        this.setWaitAction(action);
     },
     
+    setWaitHtml : function(selector, content) {
+        if($(selector).hasClass("wait-control")) {
+            $(selector+">.contentDiv").html(content);
+        }
+        else {
+            $(selector).html(content);
+        }
+    },
+    
     setWaitAction : function(waitAction) {
         if(waitAction.isInit()) {
             
             this.listenTo(waitAction, 'change:actionState', this.onWaitActionStateChange_);
              
             $(waitAction.get("selector")).each(function() {
-                console.log("cus");
                 var self = $(this);
                 
                 // append class
@@ -32,6 +40,9 @@ var WaitView = Backbone.View.extend({
                     self.addClass('wait-control');
                 }
         
+                // wrap content to div
+                self.html('<div class="contentDiv">' + self.html() + '</div>');
+                
                 // appent spinner
                 self.append('<div class="wait-container"><i class="icon-spinner wait-icon"></i><div class="wait-text">Wait...</div></div>');
                 
