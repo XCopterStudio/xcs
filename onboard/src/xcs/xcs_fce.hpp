@@ -10,7 +10,7 @@ namespace xcs{
     \return value from interval if input value is outside of the interval then return one of the interval boundary
     */
     template <typename T>
-    constexpr inline T valueInRange(const T value, const T from, const T to) {
+    inline T valueInRange(const T value, const T from, const T to) {
         return (value < from) ? from :
             (value > to) ? to :
             value;
@@ -25,24 +25,24 @@ namespace xcs{
     \return value from interval if input value is outside of the interval then return one of the interval boundary
     */
     template <typename T>
-    constexpr inline T valueInRange(const T value, const T range) {
+    inline T valueInRange(const T value, const T range) {
         return valueInRange(value, -range, range);
     }
 
-    constexpr inline double degreesToRadians(const double degrees){
+    inline double degreesToRadians(const double degrees){
         return M_PI * (degrees / 180.0);
     }
 
-    constexpr inline double radiansToDegrees(const double radians){
+    inline double radiansToDegrees(const double radians){
         return 180.0 * (radians / M_PI);
     }
 
-    constexpr inline double miliDegreesToRadias(const int degrees) {
+    inline double miliDegreesToRadias(const int degrees) {
         return (double)(degrees * M_PI / 180000);
     }
 
     template <typename T>
-    constexpr int sgn(const T val) {
+    int sgn(const T val) {
         return (T(0) < val) - (val < T(0));
     }
 
@@ -53,8 +53,6 @@ namespace xcs{
 
         return temp;
     }
-
-    
 }
 
 #endif
