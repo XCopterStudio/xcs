@@ -8,18 +8,7 @@ var DataFlowGraphView = Backbone.View.extend({
     id : 'data-flow-graph',
     
     el : '#dfg',
-    
-    events : {
-        "click #dfgLoad" : "dfgLoad",
-        "click #dfgCreate" : "dfgCreate",
-        "click #dfgStart" : "dfgStart",
-        "click #dfgStop" : "dfgStop",
-        "click #dfgDestroy" : "dfgDestroy",
-        "click #dfgReset" : "dfgReset",
-        "click #dfgSaveDfg" : "dfgSaveDfg",
-        "click .dfgLoadDfg" : "dfgLoadDfg",
-    },
-    
+        
     dfgGraph : {},
     
     dfgToolboxNodes : {},
@@ -87,6 +76,15 @@ var DataFlowGraphView = Backbone.View.extend({
     ****************************/
     initializeDfg : function() {
         this.onStateChanged();
+        
+        var self = this;
+        app.Wait.setWaitAction(new WaitAction("#dfgLoad", WaitActionType.Click, function() { self.dfgLoad(); }));
+        app.Wait.setWaitAction(new WaitAction("#dfgCreate", WaitActionType.Click, function() { self.dfgCreate(); }));
+        app.Wait.setWaitAction(new WaitAction("#dfgStart", WaitActionType.Click, function() { self.dfgStart(); }));
+        app.Wait.setWaitAction(new WaitAction("#dfgStop", WaitActionType.Click, function() { self.dfgStop(); }));
+        app.Wait.setWaitAction(new WaitAction("#dfgDestroy", WaitActionType.Click, function() { self.dfgDestroy(); }));
+        app.Wait.setWaitAction(new WaitAction("#dfgReset", WaitActionType.Click, function() { self.dfgReset(); }));
+        app.Wait.setWaitAction(new WaitAction("#dfgSaveDfg", WaitActionType.Click, function() { self.dfgSaveDfg(); }));
         
         var flowGraphConsole = $('#flow-graph-console');
         flowGraphConsole.append('<textarea id="flow-graph-txt" rows="15" cols="150"></textarea>');
@@ -305,10 +303,15 @@ var DataFlowGraphView = Backbone.View.extend({
         var dfgs = model.get("savedDfg");
         
         var loadItems = $('#DFG-saved-items');
+        
+        //NOTE: there should be no need to unregister old click events - jquery should handle it yourself
         loadItems.html('');
         
+        var self = this;
         for(var i = 0; i < dfgs.length; ++i) {
-            loadItems.append('<li><a class="btn dfgLoadDfg" id="dfgLoadDfg_' + this.trimId(dfgs[i]) + '" role="button">' + dfgs[i] + '</a></li>');
+            var id = "dfgLoadDfg_" + this.trimId(dfgs[i]);
+            loadItems.append('<li><a class="btn dfgLoadDfg" id="' + id + '" role="button" filename="' + dfgs[i] + '">' + dfgs[i] + '</a></li>');
+            app.Wait.setWaitAction(new WaitAction("#" + id, WaitActionType.Click, function(model) { self.dfgLoadDfg(model); }));
         }
     },
     
@@ -327,18 +330,11 @@ var DataFlowGraphView = Backbone.View.extend({
         this.loadGraph(graph);
     },
     
-    loadGraph : function(dfg, append) {
-        // TODO: load default DFG
-        //console.log("load graph: " + dfg);
-        console.log("load graph");
-        
+    loadGraph : function(dfg, append) {        
         // default value 4 append is false
         append = typeof append !== 'undefined' ? append : false;
         
         try {
-            //this.dfgGraph.fromJSON(JSON.parse(dfg));
-            //this.dfgGraph.resetCells(this.dfgGraph.getElements());
-            
             if(!append) {
                 this.dfgReset(false);
             }
@@ -744,9 +740,11 @@ var DataFlowGraphView = Backbone.View.extend({
         });
     },
     
-    dfgLoadDfg : function(model) {
-        var dfg = $(model.target);
-        var dfgFilename = dfg.html();
+    dfgLoadDfg : function(event) {
+        console.log("dfgLoadDfg");
+        var dfg = $(event.target);
+        //var dfgFilename = dfg.html();
+        var dfgFilename = dfg.attr("filename");
         
         var self = this;
         self.model.requestLoadDfg(dfgFilename, function(id, responseType, responseData) {
