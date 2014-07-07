@@ -42,6 +42,7 @@ class XLocalization : public XObject {
     double imuTimeShift_;
     ::urbi::UImage lastFrame_;
     std::mutex lastFrameMtx_;
+    TimePoint lastFrameTime_;
 
     void onChangeVelocity(xcs::CartesianVector measuredVelocity);
     void onChangeRotation(xcs::EulerianVector measuredAnglesRotation);
