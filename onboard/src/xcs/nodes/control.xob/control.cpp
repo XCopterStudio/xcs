@@ -30,9 +30,10 @@ void Control::desireSpeed(const xcs::SpeedControl &speedControl){
 xcs::FlyControl Control::computeControl(){
 
     double vx = vxPID_.getCorrection(velocity_.x, desireSpeed_.vx);
-    double vy = vxPID_.getCorrection(velocity_.y, desireSpeed_.vy);
+    double vy = vyPID_.getCorrection(velocity_.y, desireSpeed_.vy);
 
-    printf("Control: Control error vx: %f vy: %f vz: %f \n", vx,vy,velocity_.z);
+    //printf("Control: actual speed [%f,%f,%f,%f] \n", velocity_.x, velocity_.y, velocity_.z, rotation_.psi);
+    //printf("Control: Control error vx: %f vy: %f vz: %f \n", vx,vy,velocity_.z);
 
     xcs::FlyControl flyControl;
     flyControl.roll =  valueInRange<double>(cos(rotation_.psi)*vx + sin(rotation_.psi)*vy, MAX_VALUE);
@@ -40,7 +41,7 @@ xcs::FlyControl Control::computeControl(){
     flyControl.yaw = valueInRange<double>(psiPID_.getCorrection(rotation_.psi, desireSpeed_.psi), MAX_VALUE);
     flyControl.gaz = valueInRange<double>(vzPID_.getCorrection(velocity_.z, desireSpeed_.vz), MAX_VALUE);
 
-    printf("Control: Desire fly control [%f,%f,%f,%f]\n", flyControl.roll, flyControl.pitch, flyControl.yaw, flyControl.gaz);
+    //printf("Control: Desire fly control [%f,%f,%f,%f]\n", flyControl.roll, flyControl.pitch, flyControl.yaw, flyControl.gaz);
 
     return flyControl;
 }

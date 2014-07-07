@@ -38,26 +38,29 @@ void XLocalization::onChangeTimeImu(double internalTime) {
     }
 
     double ekfTime = internalTime - imuTimeShift_ - IMU_DELAY;
-    lastMeasurement_.velocity.z /= std::abs(ekfTime - lastMeasurementTime_);
-    lastMeasurement_.angularRotationPsi /= std::abs(ekfTime - lastMeasurementTime_);
+    if (std::abs(ekfTime - lastMeasurementTime_) > 1e-10){
 
-    //if (std::abs(lastMeasurement_.angularRotationPsi) > M_PI_4) { // discard bigger change than M_PI_4
-    //    lastMeasurement_.angularRotationPsi = 0;
-    //}
+        lastMeasurement_.velocity.z /= std::abs(ekfTime - lastMeasurementTime_);
+        lastMeasurement_.angularRotationPsi /= std::abs(ekfTime - lastMeasurementTime_);
 
-    lastMeasurementTime_ = ekfTime;
-    // TODO: compute measurement time delay
-    ekf_.measurementImu(lastMeasurement_, ekfTime);
-    ptam_->measurementImu(lastMeasurement_, ekfTime);
+        if (std::abs(lastMeasurement_.angularRotationPsi) > M_PI_4) { // discard bigger change than M_PI_4
+            lastMeasurement_.angularRotationPsi = 0;
+        }
 
-    //printf("Measurement time %f actual time %f \n", actualTime, timeFromStart());
+        lastMeasurementTime_ = ekfTime;
+        // TODO: compute measurement time delay
+        ekf_.measurementImu(lastMeasurement_, ekfTime);
+        ptam_->measurementImu(lastMeasurement_, ekfTime);
 
-    // update actual position of drone
-    DroneState state = ekf_.computeState(timeFromStart());
-    position = state.position;
-    velocity = state.velocity;
-    rotation = state.angles;
-    velocityPsi = state.angularRotationPsi;
+        //printf("Measurement time %f actual time %f \n", actualTime, timeFromStart());
+
+        // update actual position of drone
+        DroneState state = ekf_.computeState(timeFromStart());
+        position = state.position;
+        velocity = state.velocity;
+        rotation = state.angles;
+        velocityPsi = state.angularRotationPsi;
+    }
 }
 
 void XLocalization::onChangeVideo(urbi::UImage image) {
