@@ -15,7 +15,7 @@ void OptionVisitor::visit(NavdataDemo* demo){
         miliDegreesToRadias(demo->psi));
     dataReceiver_.notify("rotation", rotation);
 
-    CartesianVector velocity(-demo->vy / 1000.0,
+    CartesianVector velocity(demo->vy / 1000.0,
         demo->vx / 1000.0,
         demo->vz / 1000.0);
     dataReceiver_.notify("velocity", velocity);
@@ -33,8 +33,8 @@ void OptionVisitor::visit(NavdataTime* time){
 }
 
 void OptionVisitor::visit(NavdataRawMeasures* rawMeasures){
-    CartesianVectorChronologic acceleration(rawMeasures->raw_accs[0],
-        rawMeasures->raw_accs[1],
+    CartesianVectorChronologic acceleration(rawMeasures->raw_accs[1],
+        rawMeasures->raw_accs[0],
         rawMeasures->raw_accs[2],
         0);
     dataReceiver_.notify("acceleration", acceleration);
@@ -48,8 +48,8 @@ void OptionVisitor::visit(NavdataRawMeasures* rawMeasures){
 void OptionVisitor::visit(NavdataPressureRaw* pressureRaw){}
 
 void OptionVisitor::visit(NavdataMagneto* magneto){
-    CartesianVectorChronologic acceleration(magneto->mx,
-        magneto->my,
+    CartesianVectorChronologic acceleration(magneto->my,
+        magneto->mx,
         magneto->mz,
         0);
     dataReceiver_.notify("magneto", magneto);
