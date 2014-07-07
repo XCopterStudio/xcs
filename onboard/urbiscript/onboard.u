@@ -168,6 +168,8 @@ class Onboard {
                 echo("receive request: " + id + " (data: " + requestData + ")");
             };
 
+            //sleep(2s);
+
             try {
                 switch(id) {
                     case "DFG_LOAD":
@@ -243,7 +245,7 @@ class Onboard {
         };
 
         if(!stopped && checkStopped) {
-            throw Exception.new("Nothing to create!");
+            throw Exception.new("Nothing to stop!");
         };
 
         // TODO: what to return
@@ -333,7 +335,8 @@ class Onboard {
         var rewrite = requestData["rewrite"];
         var dfg = requestData["DFG"];
 
-        var filePath = getUserDfgPath_() / Path.new(filename);
+        //var filePath = getUserDfgPaths_()[0] / Path.new(filename);
+        var filePath = getUserDfgPaths_(filename, false)[0];
         var setting = XSettings.new(filePath.asString(), rewrite);
         setting.setAndSave("DFG", dfg);
 
@@ -342,9 +345,17 @@ class Onboard {
     };
 
     function doSavedDfg_() {
-        var filePath = getUserDfgPath_();
-        var dfgs = XSettings.getSettingsFiles(filePath.asString(), "DFG");
+        var filePaths = getUserDfgPaths_();
+        var dfgs = [];
+        echo("...... " + filePaths);
+        for(var path: filePaths) {
+            echo("...... " + path);
+            dfgs += XSettings.getSettingsFiles(path.asString(), "DFG");
+        };
+        //var dfgs = XSettings.getSettingsFiles(filePath.asString(), "DFG");
  
+        echo("...... " + dfgs);
+
         var data = [ => ];
         data["savedDfg"] = dfgs;
 
@@ -352,7 +363,8 @@ class Onboard {
     };
 
     function doLoadDfg_(filename) {
-        var filePath = getUserDfgPath_() / Path.new(filename);
+        //var filePath = getUserDfgPaths_() / Path.new(filename);
+        var filePath = getUserDfgPaths_(filename)[0];
         var setting = XSettings.new(filePath.asString(), false);
         var dfg = [ => ]; 
         dfg["filename"] = filename;
@@ -500,6 +512,15 @@ class Onboard {
     function loadScript_(script) {
         try {
             echo("loading script: " + script + "...");
+
+            var p = Path.new(script);
+            if(!p.absolute()) {
+                var foundedScript = this.getScriptPaths_(script);
+                if(!foundedScript.isNil()) {
+                    script = foundedScript;
+                }
+            };
+
             load(script);
             echo("...script loaded");
         }
@@ -676,17 +697,18 @@ class Onboard {
         // remember dfg communication state
         var commStarted = this.dfgCommStarted_;
         var added = false;
+        var otherFiles = [];
 
         try {
             // stop dfg communication - it sends 
             this.stopDfgCommunication();
 
             // find all xobjects
-            var xobjectPaths = this.getXObjectPaths_();
-            var otherFiles = [];
+            var xobjectPaths = this.getXObjectPaths_();      
             for(var dirPath: xobjectPaths) {
                 var dir = Directory.new(dirPath);
                 for(var path: dir.asList()) {
+                
                     if(xobjectsFE.has(path.basename().split(".").back())
                         && this.xobjectsSettings_.containsPath(path)) {
                         var m = this.xobjectsSettings_.getXObjectSettingsFromPath(path);
@@ -762,41 +784,131 @@ class Onboard {
         loadScripts_(uscriptList);
     };
 
-    function getXObjectPaths_() {
-        //TODO: return valid xobject path
-        return [
-            Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/projects/onboard/lib/Release/"),
-            Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/projects/onboard/bin/Release/")
-        ];
+    function getBasePaths_(customPath = nil) {
+        //var dirPath = System.env["URBI_UOBJECT_PATH"];
+        var dirPaths = UObject.searchPath|;
+        if(dirPaths.isNil() || dirPaths.size() == 0) {
+            echo("ERROR: search path for xobjects is not set");
+            dirPaths = []|;
+        };
+        
+        if(!customPath.isNil()) {
+            var customPaths = [];
+
+            if(!customPath.isA(List)) {
+                customPath = [customPath];
+            };
+            
+            for(var i = 0; i < customPath.size(); ++i) {
+                if(customPath[i].isA(String)) {
+                    customPath[i] = Path.new(customPath[i]);
+                };
+            };
+            
+            for(var i = 0; i < dirPaths.size(); ++i) {
+                for(var j = 0; j < customPath.size(); ++j) {
+                    if(customPath[j].isA(Path)) {
+                        customPaths << dirPaths[i] / customPath[j];
+                    };
+                };
+            }; 
+
+            return customPaths;
+        };
+
+        return dirPaths;
     };
 
-    function getScriptPaths_() {
-        //TODO: return valid script path
-        return [
-            Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/urbiscript/"),
-            Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/urbiscript/boot/")
-        ];
+    function getXObjectPaths_() {
+        return this.getBasePaths_();
+    };
+
+    function getScriptPaths_(script = nil) {
+        if(script.isNil()) {
+            var basePaths = this.getBasePaths_("urbiscript/");
+
+            var dirPaths = [];
+            for(var p: basePaths) {
+                if(p.exists() && p.isDir()) {
+                    dirPaths << p;
+                };
+            };
+
+            return dirPaths;
+        }
+        else {
+            var basePaths = this.getBasePaths_(Path.new("urbiscript/") / Path.new(script));
+
+            for(var p: basePaths) {
+                if(p.exists() && p.isReg()) {
+                    return p;
+                };
+            };
+
+            return nil;
+        };
     };
 
     function getXObjectSettingFilePaths_() {
-        //TODO: return valide config path
-        return [
-            Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/xsetting/xobjects.xs")
-        ];
+        var basePaths = this.getBasePaths_("xsetting/xobjects.xs");
+        var dirPaths = [];
+        for(var p: basePaths) {
+            if(p.exists() && p.isReg()) {
+                dirPaths << p;
+            };
+        };
+
+        return dirPaths;
     };
 
-    function getUserDfgPath_() {
+    function getUserDfgPaths_(file = nil, checkExists = false) {
         //TODO: return valide path 4 user dfg
-        return getUserDataPath_() / Path.new("DFG/");
+
+        var type = "DFG/";
+        if(!file.isNil()) {
+            type += file;
+        };
+        var paths = getUserDataPaths_(type, file.isNil(), checkExists);
+        
+        if(!file.isNil()) {
+            var existedPaths = [];
+            for(var p: paths) {
+                if(p.exists()) {
+                    existedPaths << p;
+                };
+            };
+
+            if(existedPaths.size() > 0) {
+                return existedPaths;
+            };
+        };
+        
+        return paths;
+
+        //return getUserDataPaths_() / Path.new("DFG/");
     };
 
-    function getUserDataPath_() {
+    function getUserDataPaths_(type, isDir, checkExists) {
         //TODO: return valide user data path
-        return Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/xsetting/userdata");
+        
+        var basePaths = this.getBasePaths_(Path.new("xsetting/userdata/") / Path.new(type));
+        var dirPaths = [];
+        for(var p: basePaths) {
+            if(!checkExists || (p.exists() && ((isDir && p.isDir()) || (!isDir && p.isReg())))) {
+            //if((!checkExists || p.exists()) && ((isDir && p.isDir()) || (!isDir && p.isReg()))) {
+                dirPaths << p;
+            };
+        };
+
+        return dirPaths;
+        
+        //return Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/xsetting/userdata");
     };
 }|;
 
+
 var onboard = Onboard.new() |;
+
 
 //class Global.C {
 //    var p = "";
