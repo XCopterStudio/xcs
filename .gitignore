@@ -15,6 +15,7 @@
 3rd-party/libav
 3rd-party/opencv
 3rd-party/ptam
+3rd-party/pthreads
 3rd-party/urbi
 3rd-party/urbi_d
 
