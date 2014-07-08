@@ -100,6 +100,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
     // set
     ptamTracker_->setPredictedCamFromW(ptamToCamPPred);
+
     //ptamTracker_->setLastFrameLost((goodCount_ < -10), (videoFrameID%2 != 0));
     ptamTracker_->setLastFrameLost((goodCount_ < -20), (frameNo_ % 3 == 0)); // TODO (Michal): What is this?
 
