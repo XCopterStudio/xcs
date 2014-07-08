@@ -589,7 +589,7 @@ class Onboard {
         };
     };
 
-    function loadXObject_(xobjectPath, xobjectName = nil) {
+    function loadXObject_(xobjectPath, xobjectName = nil, addToRegister = true) {
         //log
         echo("loading xobject: " + xobjectPath.asString() + "...");
 
@@ -614,19 +614,14 @@ class Onboard {
 
         //find all xobject in file with current filename
         var xobjectsNames = [];
-        //if(!xobjectName.isNil()) {
-        //    xobjectsNames << xobjectName;
-        //}
-        //else {
-            for(var xoi: this.xobjectInfo_) {
-                if(xoi.second().filename == filename) {
-                    xobjectsNames << xoi.first();
-                };
+        for(var xoi: this.xobjectInfo_) {
+            if(xoi.second().filename == filename) {
+                xobjectsNames << xoi.first();
             };
-            if(xobjectsNames.empty()) {
-                xobjectsNames << filename;
-            };
-        //};
+        };
+        if(xobjectsNames.empty()) {
+            xobjectsNames << filename;
+        };
 
         // check if it is not already loaded
         var xoName = xobjectsNames.front();
@@ -639,34 +634,36 @@ class Onboard {
                 echo("...loading module: " + filename);
                 System.loadModule(filename);
 
-                // send just one dfg info - it is not thread safety
-                var started = this.dfgCommStarted_;
-                try {
-                    this.stopDfgCommunication();
+                if(addToRegister) {
+                    // send just one dfg info - it is not thread safety
+                    var started = this.dfgCommStarted_;
+                    try {
+                        this.stopDfgCommunication();
 
-                    for(var xon: xobjectsNames) {
-                        echo("...loading xobject: " + xon);
-                        var name = xon;
-                        if(!xobjectName.isNil()) {
-                            name = xobjectName;
-                        };
+                        for(var xon: xobjectsNames) {
+                            echo("...loading xobject: " + xon);
+                            var name = xon;
+                            if(!xobjectName.isNil()) {
+                                name = xobjectName;
+                            };
 
-                        if(this.privateObjects_.has(xon) || !this.isXObject_(name)) {
-                            this.loadedPrivateObjects_[xon] = List.new();
-                            echo("...xobject is private (" + this.privateObjects_.has(xon) + ") (" + !this.isXObject_(xon) + ")");
-                        }
-                        else {
-                            this.loadedXObjects_[xon] = List.new();
-                            added = true;
+                            if(this.privateObjects_.has(xon) || !this.isXObject_(name)) {
+                                this.loadedPrivateObjects_[xon] = List.new();
+                                echo("...xobject is private (" + this.privateObjects_.has(xon) + ") (" + !this.isXObject_(xon) + ")");
+                            }
+                            else {
+                                this.loadedXObjects_[xon] = List.new();
+                                added = true;
+                            };
+                            //echo("...xobject loaded");
                         };
-                        //echo("...xobject loaded");
-                    };
-                }
-                finally {
-                    if(started) {
-                        this.startDfgCommunication();
-                        if(added) {
-                            this.loadedXObjects_.elementAdded!;
+                    }
+                    finally {
+                        if(started) {
+                            this.startDfgCommunication();
+                            if(added) {
+                                this.loadedXObjects_.elementAdded!;
+                            };
                         };
                     };
                 };
@@ -677,10 +674,12 @@ class Onboard {
         };
 
         //erase record from 4load
-        for(var xon: xobjectsNames) {
-            if(this.xobjects4load_.has(xon)) {
-                this.xobjects4load_.erase(xon);
-                echo("...xobject erase from array of xobjects 4 load");
+        if(addToRegister) {
+            for(var xon: xobjectsNames) {
+                if(this.xobjects4load_.has(xon)) {
+                    this.xobjects4load_.erase(xon);
+                    echo("...xobject erase from array of xobjects 4 load");
+                };
             };
         };
 
@@ -762,7 +761,7 @@ class Onboard {
 
     function loadSettings_() {
         //load settings
-        loadXObject_("xsettings", "XSettings");
+        loadXObject_("xsettings", "XSettings", false);
         loadScript_("settings_collection.u");
 
         // load xobjcts paths
