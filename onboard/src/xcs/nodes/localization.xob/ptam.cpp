@@ -20,42 +20,44 @@ using namespace xcs;
 using namespace xcs::nodes;
 using namespace xcs::nodes::localization;
 
-const int Ptam::FRAME_WIDTH = 640;
-const int Ptam::FRAME_HEIGHT = 360;
-
 void Ptam::on_key_down(int key) {
     if (key == 32) { // space
-        ptamTracker_->pressSpacebar();
+        if (ptamReady_) {
+            ptamTracker_->pressSpacebar();
+        }
     }
 }
 
 Ptam::Ptam(Ekf &ekf) :
-  ekf_(ekf),
-  showWindow_(true) {
-    // TODO load camera parameters from configuration (these are for AR Drone Parrot 2.0)
-    cameraParameters_[0] = 0.771557;
-    cameraParameters_[1] = 1.368560;
-    cameraParameters_[2] = 0.552779;
-    cameraParameters_[3] = 0.444056;
-    cameraParameters_[4] = 1.156010;
+  ptamReady_(false),
+  ekf_(ekf) {
+    /* 
+     * Default values
+     */
+    parameters_["showWindow"] = 0;
+    parameters_["frameWidth"] = 640;
+    parameters_["frameHeight"] = 360;
+    // other defaults to zero
 
-    // initialization    
-    resetPtam();
-
-    if (showWindow_) {
-        glWindow_ = GLWindow2Ptr(new GLWindow2(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), "PTAM Drone Camera Feed", this));
-    }
+    cameraParameters_.resize(5);
 
     frameNo_ = 0;
     lockNextFrame_ = false;
     mapLocked_ = false;
     forceKF_ = false;
     // framesIncludedForScaleXYZ_ = -1; NOTE: not initialized
-    maxKF_ = 60;
-
 }
 
 Ptam::~Ptam() {
+}
+
+void Ptam::cameraParameters(const CameraParameters& values) {
+    cameraParameters_ = values; // TODO refresh camera?
+}
+
+void Ptam::parameters(const Parameters& values) {
+    parameters_ = values;
+    resetPtam();
 }
 
 inline void dbgPrintSE3(const string &tag, const TooN::SE3<> &pose, const double timestamp) {
@@ -67,9 +69,17 @@ inline void dbgPrintSE3(const string &tag, const TooN::SE3<> &pose, const double
 void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     frameNo_ += 1;
 
-//    if (frameNo_ % 4 != 0) { // TODO: slow machine, only half a frame rate
-//        return;
-//    }
+    //    if (frameNo_ % 4 != 0) { // TODO: slow machine, only half a frame rate
+    //        return;
+    //    }
+
+    /*
+     * This runs in UNotifyThreaded and it probably uses a thread pool,
+     * this ensures consistent access to PTAM objects
+     */
+    if (!ptamReady_) {
+        return;
+    }
 
     if (resetPtamRequested_) {
         resetPtam();
@@ -134,7 +144,6 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     if (ptamTracker_->lastStepResult == ptamTracker_->I_FIRST) {
         XCS_LOG_INFO("PTAM initialization started (took first KF)");
     }
-
 
 
 
@@ -301,7 +310,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
         lockNextFrame_ = false;
         //filter->useScalingFixpoint = true; // this was commented out in original TUM
 
-        XCS_LOG_INFO("locking scale fixpoint to " << scalingFixpoint[0] << " " << scalingFixpoint[1] << " " << scalingFixpoint[2]);
+        XCS_LOG_INFO("Locking scale fixpoint to " << scalingFixpoint[0] << " " << scalingFixpoint[1] << " " << scalingFixpoint[2]);
     }
 
 
@@ -572,16 +581,30 @@ TooN::Vector<3> Ptam::evalNavQue(Timestamp from, Timestamp to, bool* zCorrupted,
 }
 
 void Ptam::resetPtam() {
+    ptamReady_ = false;
+    int frameWidth = static_cast<int> (parameters_["frameWidth"]);
+    int frameHeight = static_cast<int> (parameters_["frameHeight"]);
+    showWindow_ = parameters_["showWindow"] > 0;
+
+    if (showWindow_) {
+        if (!glWindow_) {
+            glWindow_ = GLWindow2Ptr(new GLWindow2(CVD::ImageRef(frameWidth, frameHeight), "PTAM Drone Camera Feed", this));
+        }
+    } else {
+        glWindow_.reset();
+    }
+
+
     // (re) create all PTAM instances
     ptamCamera_ = ATANCameraPtr(new ATANCamera(cameraParameters_));
     ptamMap_ = MapPtr(new Map());
     ptamMapMaker_ = MapMakerPtr(new MapMaker(*ptamMap_, *ptamCamera_));
-    ptamTracker_ = TrackerPtr(new Tracker(CVD::ImageRef(FRAME_WIDTH, FRAME_HEIGHT), *ptamCamera_, *ptamMap_, *ptamMapMaker_));
+    ptamTracker_ = TrackerPtr(new Tracker(CVD::ImageRef(frameWidth, frameHeight), *ptamCamera_, *ptamMap_, *ptamMapMaker_));
 
-    // TODO configuration
-    ptamMapMaker_->minKFDist = 0;
-    ptamMapMaker_->minKFWiggleDist = 0;
-    ptamTracker_->minKFTimeDist = 0;
+    ptamMapMaker_->minKFDist = parameters_["minKFDist"];
+    ptamMapMaker_->minKFWiggleDist = parameters_["minKFWiggleDist"];
+    ptamTracker_->minKFTimeDist = parameters_["minKFTimeDist"];
+    maxKF_ = static_cast<int> (parameters_["maxKF"]);
 
     predIMUOnlyForScale_.resetPos();
 
@@ -591,4 +614,5 @@ void Ptam::resetPtam() {
     lockNextFrame_ = false;
 
     resetPtamRequested_ = false;
+    ptamReady_ = true;
 }

@@ -36,7 +36,7 @@ class XLocalization : public XObject {
     localization::DroneStateMeasurement lastMeasurement_;
     double lastMeasurementTime_;
 
-    
+
     Clock clock_;
     TimePoint startTime_;
     double imuTimeShift_;
@@ -55,13 +55,16 @@ class XLocalization : public XObject {
     void onChangeVideoTime(xcs::Timestamp internalTime); // TODE deprecated use onChanheTimeCam or vice versa
 
     void onChangeFlyControl(const xcs::FlyControl flyControl);
-    
+
     void onChangePtamControl(const std::string &ptamControl);
 
     inline double timeFromStart() {
         return std::chrono::duration_cast<std::chrono::milliseconds>(
                 clock_.now() - startTime_).count() / 1000.0;
     };
+
+    void loadParameters(const xcs::Settings &settings);
+
 public:
     // imu measurements
     XInputPort<xcs::CartesianVector> measuredVelocity;
@@ -83,9 +86,8 @@ public:
     XVar<double> velocityPsi;
 
     XLocalization(const std::string &name);
-    
-    void init();
-    void loadParameters(const std::string &file);
+
+    void init(const std::string &configFile);
 };
 
 }

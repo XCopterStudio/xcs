@@ -16,6 +16,9 @@
 #include <memory>
 #include <chrono>
 #include <mutex>
+#include <vector>
+#include <map>
+#include <atomic>
 
 class Tracker;
 class ATANCamera;
@@ -36,6 +39,9 @@ enum PtamStatusType {
 
 class Ptam : public MouseKeyHandler {
 public:
+    typedef std::vector<double> CameraParameters;
+    typedef std::map<std::string, double> Parameters;
+
     Ptam(Ekf &ekf);
     virtual ~Ptam();
 
@@ -50,8 +56,12 @@ public:
     void measurementImu(const DroneStateMeasurement measurement, const double timestamp);
 
     virtual void on_key_down(int key);
-    
+
     void pressSpacebar();
+
+    void cameraParameters(const CameraParameters& values);
+    
+    void parameters(const Parameters& values);
 private:
     typedef std::unique_ptr<Tracker> TrackerPtr;
     typedef std::unique_ptr<ATANCamera> ATANCameraPtr;
@@ -61,11 +71,13 @@ private:
     typedef std::chrono::high_resolution_clock Clock;
     typedef std::chrono::time_point<Clock> TimePoint;
 
-    /*! Default frame size */
-    static const int FRAME_WIDTH;
-    static const int FRAME_HEIGHT;
+    /*
+     * Configuration
+     */
+    CameraParameters cameraParameters_;
+    Parameters parameters_;
+    bool showWindow_;
 
-    TooN::Vector<5> cameraParameters_;
 
     TrackerPtr ptamTracker_;
     ATANCameraPtr ptamCamera_;
@@ -81,7 +93,8 @@ private:
     int frameNo_; // frame sequence number TODO use atomic for threaded video update
     CVD::Image<CVD::byte> frame_;
 
-    bool resetPtamRequested_;
+    std::atomic<bool> resetPtamRequested_;
+    std::atomic<bool> ptamReady_;
     bool mapLocked_; // XVar candidate
     bool forceKF_; // XVar candidate
     int maxKF_; // XVar candidate
@@ -104,8 +117,6 @@ private:
     localization::ImuMeasurements imuMeasurements_;
     std::mutex imuMeasurementsMtx_;
 
-    bool showWindow_; // TODO: Load from settings
-    
     TooN::Vector<3> evalNavQue(xcs::Timestamp from, xcs::Timestamp to, bool* zCorrupted, bool* allCorrupted);
 
     void resetPtam();
