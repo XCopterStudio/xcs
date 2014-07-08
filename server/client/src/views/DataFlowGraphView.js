@@ -619,12 +619,16 @@ var DataFlowGraphView = Backbone.View.extend({
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
                 }
-                
-                self.setDfgState(DfgState.DFG_STATE_NODES_LOADED);
             }
             
+            // response
             if(response) {
                 response();
+            }
+            
+            // set state - must be at the end
+            if(responseType == ResponseType.Done) {
+                self.setDfgState(DfgState.DFG_STATE_NODES_LOADED);
             }
         });
     },
@@ -682,12 +686,14 @@ var DataFlowGraphView = Backbone.View.extend({
             // send request
             var self = this;
             self.model.requestCreate(dfg, function(id, responseType, responseData) {
-                if(responseType == ResponseType.Done) {
-                    self.setDfgState(DfgState.DFG_STATE_CREATED);
-                }
-            
+                //response action
                 if(response) {
                     response();
+                }
+                
+                // set state - must be at the end
+                if(responseType == ResponseType.Done) {
+                    self.setDfgState(DfgState.DFG_STATE_CREATED);
                 }
             });
         }
@@ -696,12 +702,14 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgStart : function(response) {
         var self = this;
         self.model.requestStart(function(id, responseType, responseData) {
-            if(responseType == ResponseType.Done) {
-                self.setDfgState(DfgState.DFG_STATE_STARTED);
-            }
-            
+            //response action
             if(response) {
                 response();
+            }
+            
+            // set state - must be at the end
+            if(responseType == ResponseType.Done) {
+                self.setDfgState(DfgState.DFG_STATE_STARTED);
             }
         });
     },
@@ -709,12 +717,13 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgStop : function(response) {
         var self = this;
         self.model.requestStop(function(id, responseType, responseData) {
-            if(responseType == ResponseType.Done) {
-                self.setDfgState(DfgState.DFG_STATE_STOPPED);
-            }
-            
             if(response) {
                 response();
+            }
+            
+            // set state - must be at the end
+            if(responseType == ResponseType.Done) {
+                self.setDfgState(DfgState.DFG_STATE_STOPPED);
             }
         });
     },
@@ -733,13 +742,15 @@ var DataFlowGraphView = Backbone.View.extend({
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
                 }
-                
-                self.setDfgState(DfgState.DFG_STATE_DESTROYED);
             }
             
-            console.log("ppppppppppppppppppppp");
             if(response) {
                 response();
+            }
+            
+            // set state - must be at the end
+            if(responseType == ResponseType.Done) {
+                self.setDfgState(DfgState.DFG_STATE_DESTROYED);
             }
         });
     },
@@ -826,8 +837,9 @@ var DataFlowGraphView = Backbone.View.extend({
     },
     
     setDfgState : function(state) {
-        console.log("set state: " + DfgState.getName(state));
-        console.log("... old states: " + DfgState.getNames(this.dfgState_));
+        //debug
+        //console.log("set state: " + DfgState.getName(state));
+        //console.log("... old states: " + DfgState.getNames(this.dfgState_));
         
         var stateSetted = false;
         switch(state) {
@@ -887,7 +899,8 @@ var DataFlowGraphView = Backbone.View.extend({
                 break;
         }
         
-        console.log("... new states: " + DfgState.getNames(this.dfgState_));
+        //debug
+        //console.log("... new states: " + DfgState.getNames(this.dfgState_));
         
         if(stateSetted) {
             this.onStateChanged();    

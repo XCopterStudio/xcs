@@ -67,14 +67,15 @@ var WaitView = Backbone.View.extend({
     },
     
     onWaitActionStateChange_ : function(waitAction) {
-        console.log("zmena stavu: " + waitAction.get("actionState"));
+        //debug
+        //console.log("zmena stavu: " + waitAction.get("actionState"));
+        
         if(waitAction.get("actionState") == WaitActionState.Started) {
             $(waitAction.get("selector")).each(function() { 
                 var self = $(this);
             
                 // add spin class
                 self.find(".wait-icon").each(function() {
-                    console.log('ee');
                     var waitIcon = $(this);
                     if(!waitIcon.hasClass('icon-spin')) {
                         waitIcon.addClass('icon-spin');
