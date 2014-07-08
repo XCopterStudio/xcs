@@ -170,7 +170,20 @@
         <div class="col-xs-3">
             <!-- TODO: change style -->
             <div class="panel panel-default DFG">   <!--style="background-color: transparent"-->
-                <div class="panel-group panel-body" id="flow-graph-toolbox"></div>
+                <div class="panel-group panel-body" id="flow-graph-toolbox">
+                    <div class="panel panel-default" id="xnodes">
+                        <div class="panel-heading">
+                            <!--<h4 class="panel-title">  -->
+                                <a data-toggle="collapse" href="#xnodes-list">
+                                    DFG nodes
+                                </a>
+                                <span id="xnodes-list-count" class="badge  pull-right" data-toggle="tooltip" title="number of DFG nodes">0</span>
+                            <!--</h4>  -->
+                        </div>
+                        <div id="xnodes-list" class="panel-collapse collapse">
+                        </div>
+                    </div> 
+                </div>
             </div>
         </div>
         <div class="col-xs-9">  

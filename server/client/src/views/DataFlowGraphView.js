@@ -165,31 +165,27 @@ var DataFlowGraphView = Backbone.View.extend({
             title = id;
         }
         
-        var toolbox = $('#flow-graph-toolbox');
+        var toolbox = $('#xnodes-list');
         toolbox.append('\
-            <div class="panel panel-default" id="xprototype_' + id + '">         \
-                <div class="panel-heading">                                     \
-                    <!--<h4 class="panel-title">  -->                                 \
-                        <a data-toggle="collapse" href="#collapse_' + id + '" class="drag_init" id="' + id + '">  \
-                            ' + title + '                                      \
-                        </a>                                                    \
-                        <span class="badge  pull-right" data-toggle="tooltip" title="počet instancí">0</span> \
-                    <!--</h4>  -->                                                     \
-                </div>                                                         \
-                <div id="collapse_' + id + '" class="panel-collapse collapse">  \
-                   <!--<div class="panel-body drag_init" id="' + id + '">\
-                        bla bla bla\
-                    </div>-->     \
-                </div>                                                          \
-            </div>                                                              \
+            <div class="panel-body drag_init" id="' + id + '">  \
+                ' + title + '                                   \
+            </div>                                              \
         ');
+        
+        //set number of nodes
+        var counter = $('#xnodes-list-count');
+        counter.html(parseInt(counter.html()) + 1);
         
         this.initializeDfgToolbox4Drag();
     },
     
     removeNodeFromDfgToolbox : function(id) {
-        var node = $('#xprototype_' + id);
+        var node = $('#' + id);
         node.remove();
+        
+        //set number of nodes
+        var counter = $('#xnodes-list-count');
+        counter.html(parseInt(counter.html()) - 1);
     },
     
     initializeDfgToolbox4Drag : function() {
