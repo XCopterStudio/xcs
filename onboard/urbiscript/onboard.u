@@ -321,11 +321,13 @@ class Onboard {
     // start dfg communication and send info about loaded xobjects and default dfg
     function doDfgLoad_() {
         var prototypeData = getNodesPrototypesInfo_();
-        var cloneData = getNodesCloneInfo_();
+        var prototypePrivateData = getNodesPrototypesInfo_(true);
+        //var cloneData = getNodesCloneInfo_();
 
         var data = [ => ];
         data["prototype"] = prototypeData;
-        data["clone"] = cloneData;
+        //data["clone"] = cloneData;
+        data["prototypePrivate"] = prototypePrivateData;
 
         return data;
     };
@@ -400,27 +402,42 @@ class Onboard {
         this.onboardSender_.sendPrototypeClone(prototypesData, clonesData);
     };
 
-    function getNodesPrototypesInfo_(prototypesPrivate = false) {
-        var prototypesData = [];
+    function getNodesPrototypesInfo_(prototypePrivate = false) {
+        var prototypeData = [];
+
+        //debug
+        if(prototypePrivate) {
+            echo(".sending info about PRIVATE xobject:");
+        }
+        else {
+            echo(".sending info about PUBLIC xobject:");
+        };
 
         // prepare data for yet not loaded xobjects
         for(var kvpXO: this.xobjects4load_) {
-            var pData = getNodeData_(kvpXO.first().asString(), prototypesPrivate);
+            var pData = getNodeData_(kvpXO.first().asString(), prototypePrivate);
             
             if(!pData.empty()) {
-                prototypesData << pData;
+                prototypeData << pData;
             };
         };
 
         // prepare data for loaded xobjects
-        for(var p: this.loadedXObjects_) {
-            prototypesData << getNodeData_(p.first().asString());
+        if(prototypePrivate) {
+            for(var l: this.loadedPrivateObjects_) {
+                prototypeData << getNodeData_(l.first().asString());
+            };
+        }
+        else {
+            for(var l: this.loadedXObjects_) {
+                prototypeData << getNodeData_(l.first().asString());
+            };
         };
 
-        return prototypesData;
+        return prototypeData;
     };
 
-    function getNodeData_(key, prototypesPrivate = false) {
+    function getNodeData_(key, prototypePrivate = false) {
         var pData = [ => ];
 
         try {
@@ -469,12 +486,12 @@ class Onboard {
                 //TODO: not tested
                 // dont send info about private/not private objects
                 var end = this.privateObjects_.has(key);
-                if(prototypesPrivate) {
+                if(prototypePrivate) {
                     end != end;
                 };
 
                 if(end) {
-                    if(prototypesPrivate) {
+                    if(prototypePrivate) {
                         echo("... " + key + " is NOT private object - doesnt send info.");
                     }
                     else {
