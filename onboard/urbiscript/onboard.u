@@ -347,15 +347,10 @@ class Onboard {
     function doSavedDfg_() {
         var filePaths = getUserDfgPaths_();
         var dfgs = [];
-        echo("...... " + filePaths);
         for(var path: filePaths) {
-            echo("...... " + path);
             dfgs += XSettings.getSettingsFiles(path.asString(), "DFG");
         };
-        //var dfgs = XSettings.getSettingsFiles(filePath.asString(), "DFG");
  
-        echo("...... " + dfgs);
-
         var data = [ => ];
         data["savedDfg"] = dfgs;
 
@@ -405,27 +400,13 @@ class Onboard {
         this.onboardSender_.sendPrototypeClone(prototypesData, clonesData);
     };
 
-    function getNodesPrototypesInfo_() {
+    function getNodesPrototypesInfo_(prototypesPrivate = false) {
         var prototypesData = [];
 
         // prepare data for yet not loaded xobjects
         for(var kvpXO: this.xobjects4load_) {
-            // dont send info about private objects
-            if(this.privateObjects_.has(kvpXO.first())) {
-                echo("... " + kvpXO.first() + " is private object - doesnt send info.");
-                continue;
-            };
-
-            var pData = [ => ];
-
-            try {
-                pData["name"] = kvpXO.first();
-            }
-            catch(var ex){
-                echo("!!!!!ERROR: " + ex.asString());
-                pData.clear();
-            };
-
+            var pData = getNodeData_(kvpXO.first().asString(), prototypesPrivate);
+            
             if(!pData.empty()) {
                 prototypesData << pData;
             };
@@ -433,60 +414,89 @@ class Onboard {
 
         // prepare data for loaded xobjects
         for(var p: this.loadedXObjects_) {
-            var pData = [ => ];
-
-            try {
-                var key = p.first().asString();
-                echo("...sending info about loaded xobject: " + key);
-
-                // determine if we have enough information about current key
-                if(this.xobjectInfo_.has(key)) {
-                    var name = this.xobjectInfo_[key].name;
-
-                    // get info about xvars and inout ports
-                    var xvars = System.eval(name + ".getXVars()");
-                    var xinputPorts = System.eval(name + ".getXInputPorts()");
-
-                    // prepare data about xvars
-                    var varList = [];
-                    for(var xv: xvars) {
-                        var pVar = [ => ];
-                        pVar["name"] = xv;
-                        pVar["synType"] = System.eval(name + ".getSynType(\"" + xv + "\")");
-                        pVar["semType"] = System.eval(name + ".getSemType(\"" + xv + "\")");
-                        varList << pVar;
-                    };
-
-                    // prepare data about input ports
-                    var portList = [];
-                    for(var xip: xinputPorts) {
-                        var pPort = [ => ];
-                        pPort["name"] = xip;
-                        pPort["synType"] = System.eval(name + ".getSynType(\"" + xip + "\")");
-                        pPort["semType"] = System.eval(name + ".getSemType(\"" + xip + "\")");
-                        portList  << pPort;
-                    };
-
-                    pData["name"] = key;
-                    pData["var"] = varList;
-                    pData["inputPort"] = portList;
-                }
-                else {
-                    echo("...there is no info for: " + key);
-                    //TODO: move object to loadedPrivateObjects and erase it from loadedXObject (we are in foreach loop...)
-                    //if(!this.loadedPrivateObjects_.has(key)) {
-                    //    this.loadedPrivateObjects_[p.first()] = p.second()
-                    //}
-                };
-            }
-            catch(var ex) {
-                echo("chyba: " + ex.asString());
-            };
-
-            prototypesData << pData;
+            prototypesData << getNodeData_(p.first().asString());
         };
 
         return prototypesData;
+    };
+
+    function getNodeData_(key, prototypesPrivate = false) {
+        var pData = [ => ];
+
+        try {
+            //var key = p.first().asString();
+            echo("...sending info about loaded xobject: " + key);
+
+            // determine if we have enough information about current key
+            if(this.xobjectInfo_.has(key)) {
+                var name = this.xobjectInfo_[key].name;
+
+                // get info about xvars and inout ports
+                var xvars = System.eval(name + ".getXVars()");
+                var xinputPorts = System.eval(name + ".getXInputPorts()");
+
+                // prepare data about xvars
+                var varList = [];
+                for(var xv: xvars) {
+                    var pVar = [ => ];
+                    pVar["name"] = xv;
+                    pVar["synType"] = System.eval(name + ".getSynType(\"" + xv + "\")");
+                    pVar["semType"] = System.eval(name + ".getSemType(\"" + xv + "\")");
+                    varList << pVar;
+                };
+
+                // prepare data about input ports
+                var portList = [];
+                for(var xip: xinputPorts) {
+                    var pPort = [ => ];
+                    pPort["name"] = xip;
+                    pPort["synType"] = System.eval(name + ".getSynType(\"" + xip + "\")");
+                    pPort["semType"] = System.eval(name + ".getSemType(\"" + xip + "\")");
+                    portList  << pPort;
+                };
+
+                pData["name"] = key;
+                pData["var"] = varList;
+                pData["inputPort"] = portList;
+            }
+            else {
+                echo("...there is no info for: " + key);
+                //TODO: move object to loadedPrivateObjects and erase it from loadedXObject (we are in foreach loop...)
+                //if(!this.loadedPrivateObjects_.has(key)) {
+                //    this.loadedPrivateObjects_[p.first()] = p.second()
+                //}
+
+                //TODO: not tested
+                // dont send info about private/not private objects
+                var end = this.privateObjects_.has(key);
+                if(prototypesPrivate) {
+                    end != end;
+                };
+
+                if(end) {
+                    if(prototypesPrivate) {
+                        echo("... " + key + " is NOT private object - doesnt send info.");
+                    }
+                    else {
+                        echo("... " + key + " is private object - doesnt send info.");
+                    };
+                }
+                else {
+                    try {
+                        pData["name"] = key;
+                    }
+                    catch(var ex){
+                        echo("!!!!!ERROR: " + ex.asString());
+                        pData.clear();
+                    };
+                };
+            };
+        }
+        catch(var ex) {
+            echo("ERROR: " + ex.asString());
+        };
+
+        return pData;
     };
 
     function getNodesCloneInfo_() {
@@ -579,7 +589,7 @@ class Onboard {
         };
     };
 
-    function loadXObject_(xobjectPath) {
+    function loadXObject_(xobjectPath, xobjectName = nil) {
         //log
         echo("loading xobject: " + xobjectPath.asString() + "...");
 
@@ -604,14 +614,19 @@ class Onboard {
 
         //find all xobject in file with current filename
         var xobjectsNames = [];
-        for(var xoi: this.xobjectInfo_) {
-            if(xoi.second().filename == filename) {
-                xobjectsNames << xoi.first();
+        //if(!xobjectName.isNil()) {
+        //    xobjectsNames << xobjectName;
+        //}
+        //else {
+            for(var xoi: this.xobjectInfo_) {
+                if(xoi.second().filename == filename) {
+                    xobjectsNames << xoi.first();
+                };
             };
-        };
-        if(xobjectsNames.empty()) {
-            xobjectsNames << filename;
-        };
+            if(xobjectsNames.empty()) {
+                xobjectsNames << filename;
+            };
+        //};
 
         // check if it is not already loaded
         var xoName = xobjectsNames.front();
@@ -631,9 +646,14 @@ class Onboard {
 
                     for(var xon: xobjectsNames) {
                         echo("...loading xobject: " + xon);
-                        if(this.privateObjects_.has(xon) || !this.isXObject_(xon)) {
+                        var name = xon;
+                        if(!xobjectName.isNil()) {
+                            name = xobjectName;
+                        };
+
+                        if(this.privateObjects_.has(xon) || !this.isXObject_(name)) {
                             this.loadedPrivateObjects_[xon] = List.new();
-                            echo("...xobject is private");
+                            echo("...xobject is private (" + this.privateObjects_.has(xon) + ") (" + !this.isXObject_(xon) + ")");
                         }
                         else {
                             this.loadedXObjects_[xon] = List.new();
@@ -709,11 +729,10 @@ class Onboard {
                 var dir = Directory.new(dirPath);
                 for(var path: dir.asList()) {
                 
-                    if(xobjectsFE.has(path.basename().split(".").back())
-                        && this.xobjectsSettings_.containsPath(path)) {
+                    if(xobjectsFE.has(path.basename().split(".").back()) && this.xobjectsSettings_.containsPath(path)) {
                         var m = this.xobjectsSettings_.getXObjectSettingsFromPath(path);
                         for(var kvp: m) {
-                            if(!this.xobjects4load_.has(kvp.first())) {
+                            if(!(this.xobjects4load_.has(kvp.first()) && this.xobjectInfo_.has(kvp.first()))) {
                                 this.xobjectInfo_[kvp.first()] = kvp.second();
                                 this.xobjects4load_[kvp.first()] = path;
                                 added = true;
@@ -742,18 +761,28 @@ class Onboard {
     };
 
     function loadSettings_() {
-        var key = "xsettings";
-
-        // mark settings as private object
-        if(!privateObjects_.has(key)) {
-            privateObjects_ << key;
-        };
-
-        loadXObject_(key);
+        //load settings
+        loadXObject_("xsettings", "XSettings");
         loadScript_("settings_collection.u");
 
-        // load settings from files
-        xobjectsSettings_ = SettingsCollection.new(this.getXObjectSettingFilePaths_());
+        // load xobjcts paths
+        var xobjectsPaths = this.getXObjectSettingFilePaths_();
+        var xobjectsPrivatePaths = this.getXObjectSettingFilePaths_(true);
+        
+        // mark private xobjects as private
+        this.xobjectsSettings_ = SettingsCollection.new(xobjectsPrivatePaths);
+        var modules = this.xobjectsSettings_.getMap();
+        for(var module: modules) {
+            var xobjects = this.xobjectsSettings_.getXObjectSettings(module.first());
+            for(var xobject: xobjects) {
+                if(!this.privateObjects_.has(xobject.first())) {
+                    this.privateObjects_ << xobject.first();
+                };
+            };
+        };
+
+        // load settings for public/private xobjects
+        this.xobjectsSettings_ = SettingsCollection.new(xobjectsPaths + xobjectsPrivatePaths);
     };
 
     function loadCore_() {
@@ -849,8 +878,15 @@ class Onboard {
         };
     };
 
-    function getXObjectSettingFilePaths_() {
-        var basePaths = this.getBasePaths_("xsetting/xobjects.xs");
+    function getXObjectSettingFilePaths_(xobjectsPrivate = false) {
+        var basePaths = "";
+        if(xobjectsPrivate) {
+            basePaths = this.getBasePaths_("xsetting/xobjectsPrivate.xs");
+        }
+        else {
+            basePaths = this.getBasePaths_("xsetting/xobjects.xs");
+        };
+        
         var dirPaths = [];
         for(var p: basePaths) {
             if(p.exists() && p.isReg()) {

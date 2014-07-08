@@ -53,7 +53,7 @@ class SettingsCollection {
         return defaultValue;
     };
 
-    function getMap(key) {
+    function getMap(key = "") {
         var map = [ => ];
         for(var setting: xobjectsSettings_) {
             var m = setting.getMap(key);

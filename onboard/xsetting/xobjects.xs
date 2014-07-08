@@ -1,17 +1,3 @@
-xjson
-{
-    name "XJson"
-    init ""
-}
-xxci
-{
-    name "XXci"
-    init
-    {
-        "xci dodo" "\"xci_dodo\""
-        "xci parrot" "\"xci_parrot\""
-    }
-}
 xdatalogger
 {
     name XDatalogger
@@ -28,8 +14,12 @@ xonboard
     name "XOnboard"
     init ""
 }
-xsettings
+xxci
 {
-    name "XSettings"
-    init "\"./xobjects.xs\""    ;TODO: change file name
+    name "XXci"
+    init
+    {
+        "xci dodo" "\"xci_dodo\""
+        "xci parrot" "\"xci_parrot\""
+    }
 }
