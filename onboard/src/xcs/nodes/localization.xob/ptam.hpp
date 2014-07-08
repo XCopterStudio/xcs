@@ -58,7 +58,6 @@ private:
     typedef std::unique_ptr<Map> MapPtr;
     typedef std::unique_ptr<MapMaker> MapMakerPtr;
     typedef std::unique_ptr<GLWindow2> GLWindow2Ptr;
-    typedef std::unique_ptr<MouseKeyHandler> MouseKeyHandlerPtr;
     typedef std::chrono::high_resolution_clock Clock;
     typedef std::chrono::time_point<Clock> TimePoint;
 
@@ -99,14 +98,14 @@ private:
 
 
     GLWindow2Ptr glWindow_;
-    MouseKeyHandlerPtr glWindowKeyHandler_;
 
     Ekf &ekf_;
 
     localization::ImuMeasurements imuMeasurements_;
     std::mutex imuMeasurementsMtx_;
 
-
+    bool showWindow_; // TODO: Load from settings
+    
     TooN::Vector<3> evalNavQue(xcs::Timestamp from, xcs::Timestamp to, bool* zCorrupted, bool* allCorrupted);
 
     void resetPtam();

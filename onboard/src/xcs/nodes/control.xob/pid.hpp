@@ -14,9 +14,9 @@ namespace xcs{
     public:
         PID(const pid_type p = 1, const pid_type i = 0, const pid_type d = 0);
 
-        inline void P(const pid_type &p){ P_(p); };
-        inline void I(const pid_type &i){ I_(i); };
-        inline void D(const pid_type &d){ D_(d); };
+        inline void P(const pid_type &p){ P_ = p; };
+        inline void I(const pid_type &i){ I_ = i; };
+        inline void D(const pid_type &d){ D_ = d; };
         
         value_type getCorrection(const value_type &actualValue, const value_type &desireValue);
     };

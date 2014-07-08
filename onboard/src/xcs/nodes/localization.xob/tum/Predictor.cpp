@@ -40,33 +40,37 @@ Predictor::~Predictor(void) {
 // also: does not filter z-data, only sets corrupted-flag...
 
 void Predictor::predictOneStep(const ImuMeasurementChronologic &imuMeasurement) {
+    // angles
+    roll = imuMeasurement.first.angles.phi;
+    pitch = imuMeasurement.first.angles.theta;
+    yaw = imuMeasurement.first.angles.psi;
+
     double timespan = imuMeasurement.second - lastAddedDronetime; // in seconds
     lastAddedDronetime = imuMeasurement.second;
-    if (timespan > 0.05 || timespan < 1e-6)
+    if (timespan > 0.05 || timespan < 1e-6) {
         timespan = std::max(0.0, std::min(0.005, timespan)); // clamp strange values
+    }
 
     // horizontal speed integration
     // (mm / s)/1.000 * (mics/1.000.000) = meters.
     double dxDrone = imuMeasurement.first.velocity.x * timespan; // in meters
     double dyDrone = imuMeasurement.first.velocity.y * timespan; // in meters
 
-    double yawRad = imuMeasurement.first.angles.psi;
-    x += sin(yawRad) * dxDrone + cos(yawRad) * dyDrone;
-    y += cos(yawRad) * dxDrone - sin(yawRad) * dyDrone;
+    yaw = imuMeasurement.first.angles.psi;
+    x += cos(yaw) * dxDrone + sin(yaw) * dyDrone;
+    y += -sin(yaw) * dxDrone + cos(yaw) * dyDrone;
 
     // height
     if (abs(z - imuMeasurement.first.altitude) > 0.12) {
-        if (std::abs(z - imuMeasurement.first.altitude) > abs(zCorruptedJump))
+        if (std::abs(z - imuMeasurement.first.altitude) > abs(zCorruptedJump)) {
             zCorruptedJump = z - imuMeasurement.first.altitude;
+        }
         zCorrupted = true;
     }
 
     z = imuMeasurement.first.altitude;
 
-    // angles
-    roll = imuMeasurement.first.angles.phi;
-    pitch = imuMeasurement.first.angles.theta;
-    yaw = imuMeasurement.first.angles.psi;
+
 }
 
 void Predictor::resetPos() {

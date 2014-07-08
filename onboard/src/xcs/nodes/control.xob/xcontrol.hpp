@@ -1,6 +1,8 @@
 #ifndef XCONTROL_H
 #define XCONTROL_H
 
+#include <atomic>
+
 #include "control.hpp"
 
 #include <xcs/types/eulerian_vector.hpp>
@@ -19,6 +21,8 @@ namespace control{
     class XControl : public XObject{
         Control control_;
 
+        std::atomic<bool> stoped;
+
         void onChangeVelocity(xcs::CartesianVector velocity);
         void onChangeRotation(xcs::EulerianVector rotation);
         void onChangeDesireSpeed(xcs::SpeedControl desireSpeed);
@@ -31,6 +35,9 @@ namespace control{
         xcs::nodes::XVar<xcs::FlyControl> flyControl;
 
         XControl(const std::string& name);
+        void loadParameters(const std::string &file);
+        inline void start(){ stoped = false; };
+        inline void stop(){ stoped = true; };
     };
 
 }}}

@@ -38,36 +38,44 @@ void XLocalization::onChangeTimeImu(double internalTime) {
     }
 
     double ekfTime = internalTime - imuTimeShift_ - IMU_DELAY;
-    lastMeasurement_.velocity.z /= std::abs(ekfTime - lastMeasurementTime_);
-    lastMeasurement_.angularRotationPsi /= std::abs(ekfTime - lastMeasurementTime_);
+    if (std::abs(ekfTime - lastMeasurementTime_) > 1e-10){
 
-    //if (std::abs(lastMeasurement_.angularRotationPsi) > M_PI_4) { // discard bigger change than M_PI_4
-    //    lastMeasurement_.angularRotationPsi = 0;
-    //}
+        lastMeasurement_.velocity.z /= std::abs(ekfTime - lastMeasurementTime_);
+        lastMeasurement_.angularRotationPsi /= std::abs(ekfTime - lastMeasurementTime_);
 
-    lastMeasurementTime_ = ekfTime;
-    // TODO: compute measurement time delay
-    ekf_.measurementImu(lastMeasurement_, ekfTime);
-    ptam_->measurementImu(lastMeasurement_, ekfTime);
+        if (std::abs(lastMeasurement_.angularRotationPsi) > M_PI_4) { // discard bigger change than M_PI_4
+            lastMeasurement_.angularRotationPsi = 0;
+        }
 
-    //printf("Measurement time %f actual time %f \n", actualTime, timeFromStart());
+        lastMeasurementTime_ = ekfTime;
+        // TODO: compute measurement time delay
+        ekf_.measurementImu(lastMeasurement_, ekfTime);
+        ptam_->measurementImu(lastMeasurement_, ekfTime);
 
-    // update actual position of drone
-    DroneState state = ekf_.computeState(timeFromStart());
-    position = state.position;
-    velocity = state.velocity;
-    rotation = state.angles;
-    velocityPsi = state.angularRotationPsi;
+        //printf("Measurement time %f actual time %f \n", actualTime, timeFromStart());
+
+        // update actual position of drone
+        DroneState state = ekf_.computeState(timeFromStart());
+        position = state.position;
+        velocity = state.velocity;
+        rotation = state.angles;
+        velocityPsi = state.angularRotationPsi;
+    }
 }
 
 void XLocalization::onChangeVideo(urbi::UImage image) {
     lock_guard<mutex> lock(lastFrameMtx_);
     // store image until onChangeVideoTime
     lastFrame_ = image;
+    lastFrameTime_ = clock_.now();
 }
 
 void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
-   double ekfTime = internalTime - imuTimeShift_ - CAM_DELAY;
+
+    if (duration2sec(clock_.now() - lastFrameTime_) > 0.05) {
+        return;
+    }
+    double ekfTime = internalTime - imuTimeShift_ - CAM_DELAY;
 
     // convert image to grayscale for PTAM
     urbi::UImage bwImage;
@@ -102,19 +110,19 @@ void XLocalization::onChangePtamControl(const std::string &ptamControl) {
 //================ public functions ==================
 
 XLocalization::XLocalization(const std::string &name) :
-XObject(name),
-measuredVelocity("VELOCITY"),
-measuredAnglesRotation("ROTATION"),
-measuredAltitude("ALTITUDE"),
-timeImu("TIME_LOC"),
-video("FRONT_CAMERA"),
-videoTime("TIME_LOC"),
-flyControl("FLY_CONTROL"),
-ptamControl("COMMAND"),
-position("POSITION_ABS"),
-velocity("VELOCITY_ABS"),
-rotation("ROTATION"),
-velocityPsi("ROTATION_VELOCITY_ABS") {
+  XObject(name),
+  measuredVelocity("VELOCITY"),
+  measuredAnglesRotation("ROTATION"),
+  measuredAltitude("ALTITUDE"),
+  timeImu("TIME_LOC"),
+  video("FRONT_CAMERA"),
+  videoTime("TIME_LOC"),
+  flyControl("FLY_CONTROL"),
+  ptamControl("COMMAND"),
+  position("POSITION_ABS"),
+  velocity("VELOCITY_ABS"),
+  rotation("ROTATION"),
+  velocityPsi("ROTATION_VELOCITY_ABS") {
     startTime_ = clock_.now();
     lastMeasurementTime_ = 0;
     imuTimeShift_ = std::numeric_limits<double>::max();
@@ -144,12 +152,12 @@ void XLocalization::init() {
     ptam_ = PtamPtr(new Ptam(ekf_));
 }
 
-void XLocalization::loadParameters(const std::string &file){
+void XLocalization::loadParameters(const std::string &file) {
     Settings settings(file);
 
-    try{
+    try {
         Parameters modelParameters(10, 0);
-        for (unsigned int i = 0; i < 10; ++i){
+        for (unsigned int i = 0; i < 10; ++i) {
             stringstream name;
             name << "ModelParameters.c" << i;
             modelParameters[i] = settings.get<double>(name.str());
@@ -181,8 +189,7 @@ void XLocalization::loadParameters(const std::string &file){
         ptamVar[4] = settings.get<double>("PtamVariance.theta");
         ptamVar[5] = settings.get<double>("PtamVariance.psi");
         ekf_.ptamVariances(ptamVar);
-    }
-    catch (boost::property_tree::ptree_error error){
+    } catch (boost::property_tree::ptree_error error) {
         XCS_LOG_ERROR("Localization cannot load parameters from file " << file << "\n With boost error: " << error.what());
     }
 }

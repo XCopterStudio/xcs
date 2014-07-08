@@ -1,0 +1,27 @@
+vxPID
+{
+  P 1.0
+  I 0
+  D 0  
+}
+
+vyPID
+{
+  P 1.0
+  I 0
+  D 0  
+}
+
+vzPID
+{
+  P 4.0
+  I 0
+  D 0  
+}
+
+psiPID
+{
+  P 1.0
+  I 0
+  D 0  
+}

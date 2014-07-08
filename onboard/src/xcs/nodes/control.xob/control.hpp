@@ -11,14 +11,18 @@ namespace xcs{
 namespace nodes{
 namespace control{
 
+    typedef double PID_TYPE;
+    typedef double RETURN_TYPE;
+    typedef xcs::PID<PID_TYPE, RETURN_TYPE> PID;
+
     class Control{
         static const double MAX_VALUE;
 
         // PID
-        xcs::PID<double, double> vxPID_;
-        xcs::PID<double, double> vyPID_;
-        xcs::PID<double, double> vzPID_;
-        xcs::PID<double, double> psiPID_;
+        PID vxPID_;
+        PID vyPID_;
+        PID vzPID_;
+        PID psiPID_;
 
         // Drone state
         xcs::CartesianVector velocity_;
@@ -26,8 +30,6 @@ namespace control{
 
         // Drone desire speed
         xcs::SpeedControl desireSpeed_;
-
-        
         
     public:
         Control();
@@ -38,6 +40,11 @@ namespace control{
         void desireSpeed(const xcs::SpeedControl &speedControl);
 
         xcs::FlyControl computeControl();
+
+        inline void setVxPID(PID_TYPE P, PID_TYPE I, PID_TYPE D){ vxPID_.P(P); vxPID_.I(I); vxPID_.D(D);  };
+        inline void setVyPID(PID_TYPE P, PID_TYPE I, PID_TYPE D){ vyPID_.P(P); vyPID_.I(I); vyPID_.D(D); };;
+        inline void setVzPID(PID_TYPE P, PID_TYPE I, PID_TYPE D){ vzPID_.P(P); vzPID_.I(I); vzPID_.D(D); };;
+        inline void setPsiPID(PID_TYPE P, PID_TYPE I, PID_TYPE D){ psiPID_.P(P); psiPID_.I(I); psiPID_.D(D); };;
     };
 
 }}}
