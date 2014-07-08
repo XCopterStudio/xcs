@@ -72,7 +72,7 @@ void XLocalization::onChangeVideo(urbi::UImage image) {
 
 void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
 
-    if (duration2sec(clock_.now() - lastFrameTime_) > 0.05) {
+    if (duration2sec(clock_.now() - lastFrameTime_) > 0.5) {
         return;
     }
     double ekfTime = internalTime - imuTimeShift_ - CAM_DELAY;
@@ -145,52 +145,68 @@ XLocalization::XLocalization(const std::string &name) :
     XBindVar(velocityPsi);
 
     XBindFunction(XLocalization, init);
-    XBindFunction(XLocalization, loadParameters);
 }
 
-void XLocalization::init() {
+void XLocalization::init(const std::string &configFile) {
     ptam_ = PtamPtr(new Ptam(ekf_));
+    
+    loadParameters(Settings(configFile));
 }
 
-void XLocalization::loadParameters(const std::string &file) {
-    Settings settings(file);
-
+void XLocalization::loadParameters(const Settings& settings) {
     try {
+        /*
+         * EKF parameters
+         */
         Parameters modelParameters(10, 0);
-        for (unsigned int i = 0; i < 10; ++i) {
+        for (auto i = 0; i < 10; ++i) {
             stringstream name;
-            name << "ModelParameters.c" << i;
+            name << "Ekf.ModelParameters.c" << i;
             modelParameters[i] = settings.get<double>(name.str());
         }
         ekf_.modelParameters(modelParameters);
 
         Variances modelVar(4, 0);
-        modelVar[0] = settings.get<double>("ModelVariance.roll");
-        modelVar[1] = settings.get<double>("ModelVariance.pitch");
-        modelVar[2] = settings.get<double>("ModelVariance.yaw");
-        modelVar[3] = settings.get<double>("ModelVariance.gaz");
+        modelVar[0] = settings.get<double>("Ekf.ModelVariance.roll");
+        modelVar[1] = settings.get<double>("Ekf.ModelVariance.pitch");
+        modelVar[2] = settings.get<double>("Ekf.ModelVariance.yaw");
+        modelVar[3] = settings.get<double>("Ekf.ModelVariance.gaz");
         ekf_.modelVariances(modelVar);
 
         Variances imuVar(7, 0);
-        imuVar[0] = settings.get<double>("ImuVariance.z");
-        imuVar[1] = settings.get<double>("ImuVariance.velocityX");
-        imuVar[2] = settings.get<double>("ImuVariance.velocityY");
-        imuVar[3] = settings.get<double>("ImuVariance.velocityZ");
-        imuVar[4] = settings.get<double>("ImuVariance.phi");
-        imuVar[5] = settings.get<double>("ImuVariance.theta");
-        imuVar[6] = settings.get<double>("ImuVariance.velocityPsi");
+        imuVar[0] = settings.get<double>("Ekf.ImuVariance.z");
+        imuVar[1] = settings.get<double>("Ekf.ImuVariance.velocityX");
+        imuVar[2] = settings.get<double>("Ekf.ImuVariance.velocityY");
+        imuVar[3] = settings.get<double>("Ekf.ImuVariance.velocityZ");
+        imuVar[4] = settings.get<double>("Ekf.ImuVariance.phi");
+        imuVar[5] = settings.get<double>("Ekf.ImuVariance.theta");
+        imuVar[6] = settings.get<double>("Ekf.ImuVariance.velocityPsi");
         ekf_.imuVariances(imuVar);
 
         Variances ptamVar(6, 0);
-        ptamVar[0] = settings.get<double>("PtamVariance.x");
-        ptamVar[1] = settings.get<double>("PtamVariance.y");
-        ptamVar[2] = settings.get<double>("PtamVariance.z");
-        ptamVar[3] = settings.get<double>("PtamVariance.phi");
-        ptamVar[4] = settings.get<double>("PtamVariance.theta");
-        ptamVar[5] = settings.get<double>("PtamVariance.psi");
+        ptamVar[0] = settings.get<double>("Ekf.PtamVariance.x");
+        ptamVar[1] = settings.get<double>("Ekf.PtamVariance.y");
+        ptamVar[2] = settings.get<double>("Ekf.PtamVariance.z");
+        ptamVar[3] = settings.get<double>("Ekf.PtamVariance.phi");
+        ptamVar[4] = settings.get<double>("Ekf.PtamVariance.theta");
+        ptamVar[5] = settings.get<double>("Ekf.PtamVariance.psi");
         ekf_.ptamVariances(ptamVar);
+        
+        /*
+         * PTAM parameters
+         */
+        Ptam::CameraParameters cameraParameters;
+        for (auto i = 0; i < 5; ++i) {
+            stringstream name;
+            name << "Ptam.CameraParameters.c" << i;
+            cameraParameters.push_back(settings.get<double>(name.str()));
+        }
+        ptam_->cameraParameters(cameraParameters);
+        
+        ptam_->parameters(settings.getMap<double>("Ptam.Ptam"));
+        
     } catch (boost::property_tree::ptree_error error) {
-        XCS_LOG_ERROR("Localization cannot load parameters from file " << file << "\n With boost error: " << error.what());
+        XCS_LOG_ERROR("Localization: Cannot load parameters from file. Error: " << error.what());
     }
 }
 

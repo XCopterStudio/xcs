@@ -1,42 +1,60 @@
-ModelParameters 
-{
-  c0  10.32
-  c1  0
-  c2  0.58
-  c3  0
-  c4  6.108
-  c5  0.175
-  c6  4.363
-  c7  0.175
-  c8  1.4
-  c9  1.4
+Ekf {
+  ModelParameters 
+  {
+    c0  10.32
+    c1  0
+    c2  0.58
+    c3  0
+    c4  6.108
+    c5  0.175
+    c6  4.363 
+    ;c7  0.175
+    c7  0.000875
+    c8  1.4
+    c9  1.4
+  }
+  
+  ModelVariance
+  {
+    roll  1
+    pitch 1
+    yaw   10
+    gaz   1
+  }
+  
+  ImuVariance
+  {
+    z           0.0004
+    velocityX   0.000025
+    velocityY   0.000025
+    velocityZ   0.01
+    phi         0.0003
+    theta       0.0003
+    velocityPsi 0.005
+  }
 }
 
-ModelVariance
-{
-  roll  3
-  pitch 3
-  yaw   9
-  gaz   1
-}
+Ptam {
+  ; camera calibration for PTAM camera model
+  CameraParameters {
+    c0  0.771557
+    c1  1.368560
+    c2  0.552779
+    c3  0.444056
+    c4  1.156010
+  }
 
-ImuVariance
-{
-  z           0.0004
-  velocityX   0.000025
-  velocityY   0.000025
-  velocityZ   0.01
-  phi         0.0003
-  theta       0.0003
-  velocityPsi 0.001
-}
+  Ptam {
+    ; frame buffer size of PTAM (pixels)
+    frameWidth       640
+    frameHeight      360
 
-PtamVariance
-{
-  x     0.01
-  y     0.01
-  z     0.01
-  phi   0.122
-  theta 0.122
-  psi   0.122
+    ; display OpenGL window (debug, Linux only)
+    showWindow       1
+  
+    minKFDist        0
+    minKFTimeDist    0
+    minKFWiggleDist  0  
+    maxKF            60
+  }
 }
