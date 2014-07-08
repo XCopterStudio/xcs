@@ -58,9 +58,9 @@ var DataFlowGraphView = Backbone.View.extend({
         
         this.listenTo(this.model, "change:dataFlowGraph", this.onDataFlowGraphChange);
         this.listenTo(this.model.get("xprototype"), "add", this.onPrototypeAdd);
-        this.listenTo(this.model.get("xprototypeAdmin"), "add", this.onCloneAdd);
+        this.listenTo(this.model.get("xprototypePrivate"), "add", this.onPrototypePrivateAdd);
         this.listenTo(this.model.get("xprototype"), "remove", this.onPrototypeRemove);
-        this.listenTo(this.model.get("xprototypeAdmin"), "remove", this.onCloneRemove);
+        this.listenTo(this.model.get("xprototypePrivate"), "remove", this.onPrototypePrivateRemove);
 
         this.listenTo(this.model, "change:savedDfg", this.onSavedDfgChange);
         this.listenTo(this.model, "change:dfgDef", this.onDfgDefChange);
@@ -174,19 +174,25 @@ var DataFlowGraphView = Backbone.View.extend({
         ');
         
         //set number of nodes
-        var counter = $('#xnodes-list-count');
+        var counter = $('#' + toolboxItemId + '-count');
         counter.html(parseInt(counter.html()) + 1);
         
         this.initializeDfgToolbox4Drag();
     },
     
-    removeNodeFromDfgToolbox : function(id) {
+    removeNodeFromDfgToolbox : function(id, privatePrototype) {
         var node = $('#' + id);
         node.remove();
         
         //set number of nodes
-        var counter = $('#xnodes-list-count');
-        counter.html(parseInt(counter.html()) - 1);
+        if(privatePrototype) {
+            var counter = $('#xnodes-private-list-count');
+            counter.html(parseInt(counter.html()) - 1);
+        }
+        else {
+            var counter = $('#xnodes-list-count');
+            counter.html(parseInt(counter.html()) - 1);
+        }
     },
     
     initializeDfgToolbox4Drag : function() {
@@ -408,9 +414,12 @@ var DataFlowGraphView = Backbone.View.extend({
         }
     },
     
-    onPrototypeAdd : function(modelPrototype) {
+    onPrototypeAdd : function(modelPrototype, privatePrototype) {
+        // default value 4 privatePrototype is false
+        privatePrototype = privatePrototype != true ? false : true;
+        
         //DEBUG
-        //console.log("onPrototypeAdd " + JSON.stringify(modelPrototype.toJSON()));
+        console.log((privatePrototype ? "onPrototypePrivateAdd: " : "onPrototypeAdd: ") + JSON.stringify(modelPrototype.toJSON()));
         
         // get prototype name
         var prototypeName = modelPrototype.get("name");
@@ -422,49 +431,59 @@ var DataFlowGraphView = Backbone.View.extend({
         }
         
         // add 2 toolbox - show to user
-        this.addNode2DfgToolbox(prototypeId, prototypeName, 'xnodes-list');
+        this.addNode2DfgToolbox(prototypeId, prototypeName, (privatePrototype ? 'xnodes-private-list' : 'xnodes-list'));
         this.dfgToolboxNodes[prototypeId] = modelPrototype;
         
         //DEBUG
         //console.log("added: " + prototypeName + " = " + this.dfgToolboxNodes[prototypeName].get("name"));
         
         //watch 4 changes
-        this.listenTo(modelPrototype, "change", this.onPrototypeChange);
+        if(privatePrototype) {
+            this.listenTo(modelPrototype, "change", this.onPrototypePrivateChange);
+        }
+        else {
+            this.listenTo(modelPrototype, "change", this.onPrototypeChange);
+        }
     },
     
-    onCloneAdd : function(modelClone) {
-        //DEBUG
-        console.log("onCloneAdd " + JSON.stringify(modelClone.toJSON()));
-        
-        //watch 4 changes
-        this.listenTo(modelClone, "change", this.onCloneChange);
-        
-        // TODO: add new clone 2 toolbox
-        //...
-        
-        // get prototype name
-        var cloneName = modelClone.get("name");
-        var cloneId = this.trimId(cloneName);
-        
-        // get all xvars
-        modelClone.get("xvar").forEach(function(xvar) {
-            var xvarName = xvar.get("name");
-            var xvarSynType = xvar.get("synType");
-            var xvarSemType = xvar.get("semType");
-        });
-        
-        // get all xinputports
-        modelClone.get("xinputPort").forEach(function(xvar) {
-            var xinputPortName = xvar.get("name");
-            var xinputPortSynType = xvar.get("synType");
-            var xinputPortSemType = xvar.get("semType");
-        });
+    onPrototypePrivateAdd : function(modelPrototype) {
+        this.onPrototypeAdd(modelPrototype, true);
+        //del
+//        //DEBUG
+//        console.log("onPrototypePrivateAdd: " + JSON.stringify(modelClone.toJSON()));
+//        
+//        //watch 4 changes
+//        this.listenTo(modelClone, "change", this.onPrototypePrivateChange);
+//        
+//        // TODO: add new clone 2 toolbox
+//        //...
+//        
+//        // get prototype name
+//        var cloneName = modelClone.get("name");
+//        var cloneId = this.trimId(cloneName);
+//        
+//        // get all xvars
+//        modelClone.get("xvar").forEach(function(xvar) {
+//            var xvarName = xvar.get("name");
+//            var xvarSynType = xvar.get("synType");
+//            var xvarSemType = xvar.get("semType");
+//        });
+//        
+//        // get all xinputports
+//        modelClone.get("xinputPort").forEach(function(xvar) {
+//            var xinputPortName = xvar.get("name");
+//            var xinputPortSynType = xvar.get("synType");
+//            var xinputPortSemType = xvar.get("semType");
+//        });
     },
     
-    onPrototypeRemove : function(modelPrototype) {
+    onPrototypeRemove : function(modelPrototype, privatePrototype) {
+        // default value 4 privatePrototype is false
+        privatePrototype = privatePrototype != true ? false : true;
+
         //DEBUG
-        //console.log("onPrototypeRemove " + JSON.stringify(modelPrototype.toJSON()));
-        
+        console.log((privatePrototype ? "onPrototypePrivateRemove: " : "onPrototypeRemove: ") + JSON.stringify(modelPrototype.toJSON()));
+
         // get prototype name
         var prototypeName = modelPrototype.get("name");
         var prototypeId = this.trimId(prototypeName);
@@ -482,23 +501,29 @@ var DataFlowGraphView = Backbone.View.extend({
         this.stopListening(this.dfgToolboxNodes[prototypeId]);
         
         //delete from GUI
-        this.removeNodeFromDfgToolbox(prototypeId);
+        this.removeNodeFromDfgToolbox(prototypeId, privatePrototype);
         
         // delete old model
         delete this.dfgToolboxNodes[prototypeId];
     },
     
-    onCloneRemove : function(modelClone) {
-        //DEBUG
-        console.log("onCloneRemove " + JSON.stringify(modelClone.toJSON()));
+    onPrototypePrivateRemove : function(modelPrototype) {
+        this.onPrototypeRemove(modelPrototype, true);
         
-        //TODO: remove clone from GUI
+        //del
+//        //DEBUG
+//        console.log("onPrototypePrivateRemove: " + JSON.stringify(modelClone.toJSON()));
+//        
+//        //TODO: remove clone from GUI
     },
     
-    onPrototypeChange : function(modelPrototype) {
-        //DEBUG
-        //console.log("onPrototypeChange " + JSON.stringify(modelPrototype.toJSON()));
+    onPrototypeChange : function(modelPrototype, privatePrototype) {
+        // default value 4 privatePrototype is false
+        privatePrototype = privatePrototype != true ? false : true;
         
+        //DEBUG
+        console.log((privatePrototype ? "onPrototypePrivateChange: " : "onPrototypeChange: ") + JSON.stringify(modelPrototype.toJSON()));
+
         // get prototype name
         var prototypeName = modelPrototype.get("name");
         var prototypeId = this.trimId(prototypeName);
@@ -519,33 +544,41 @@ var DataFlowGraphView = Backbone.View.extend({
         this.dfgToolboxNodes[prototypeId] = modelPrototype;
         
         //watch 4 changes
-        this.listenTo(modelPrototype, "change", this.onPrototypeChange);
+        if(privatePrototype) {
+            this.listenTo(modelPrototype, "change", this.onPrototypePrivateChange);
+        }
+        else {
+            this.listenTo(modelPrototype, "change", this.onPrototypeChange);
+        }
     },
     
-    onCloneChange : function(modelClone) {
-        //DEBUG
-        console.log("onCloneChange " + JSON.stringify(modelClone.toJSON()));
+    onPrototypePrivateChange : function(modelPrototype) {
+        this.onPrototypeChange(modelPrototype, true);
         
-        //TODO: change existed clone
-        //...
-        
-        // get prototype name
-        var cloneName = modelClone.get("name");
-        var cloneId = this.trimId(cloneName);
-        
-        // get all xvars
-        modelClone.get("xvar").forEach(function(xvar) {
-            var xvarName = xvar.get("name");
-            var xvarSynType = xvar.get("synType");
-            var xvarSemType = xvar.get("semType");
-        });
-        
-        // get all xinputports
-        modelClone.get("xinputPort").forEach(function(xvar) {
-            var xinputPortName = xvar.get("name");
-            var xinputPortSynType = xvar.get("synType");
-            var xinputPortSemType = xvar.get("semType");
-        });
+        //del
+//        //DEBUG
+//        console.log("onPrototypePrivateChange " + JSON.stringify(modelClone.toJSON()));
+//        
+//        //TODO: change existed clone
+//        //...
+//        
+//        // get prototype name
+//        var cloneName = modelClone.get("name");
+//        var cloneId = this.trimId(cloneName);
+//        
+//        // get all xvars
+//        modelClone.get("xvar").forEach(function(xvar) {
+//            var xvarName = xvar.get("name");
+//            var xvarSynType = xvar.get("synType");
+//            var xvarSemType = xvar.get("semType");
+//        });
+//        
+//        // get all xinputports
+//        modelClone.get("xinputPort").forEach(function(xvar) {
+//            var xinputPortName = xvar.get("name");
+//            var xinputPortSynType = xvar.get("synType");
+//            var xinputPortSemType = xvar.get("semType");
+//        });
     },
     
     onInputChange : function(xcState) {
@@ -570,7 +603,7 @@ var DataFlowGraphView = Backbone.View.extend({
 //                        "semType" : "COMMAND"
 //                    }]
 //                }],
-//                "prototypeAdmin" : [{
+//                "prototypePrivate" : [{
 //                    "name" : "XXci",
 //                    "var" : [{
 //                        "name" : "fly",
@@ -623,8 +656,8 @@ var DataFlowGraphView = Backbone.View.extend({
                 if(responseData.prototype) {
                     self.model.setPrototype(responseData.prototype);
                 }
-                if(responseData.prototypeAdmin) {
-                    self.model.setPrototypeAdmin(responseData.prototypeAdmin);
+                if(responseData.prototypePrivate) {
+                    self.model.setPrototypePrivate(responseData.prototypePrivate);
                 }
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
@@ -746,8 +779,8 @@ var DataFlowGraphView = Backbone.View.extend({
                 if(responseData.prototype) {
                     self.model.setPrototype(responseData.prototype);
                 }
-                if(responseData.setPrototypeAdmin) {
-                    self.model.setPrototypeAdmin(responseData.prototypeAdmin);
+                if(responseData.prototypePrivate) {
+                    self.model.setPrototypePrivate(responseData.prototypePrivate);
                 }
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);

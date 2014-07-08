@@ -73,7 +73,7 @@ var DataFlowGraph = Backbone.Model.extend({
         "savedDfg" : "",
         "dataFlowGraph" : "",
         "xprototype" : new Backbone.Collection([], { model : DataFlowGraphNode }),
-        "xprototypeAdmin" : new Backbone.Collection([], { model : DataFlowGraphNode })
+        "xprototypePrivate" : new Backbone.Collection([], { model : DataFlowGraphNode })
     },
     
     initialize : function() { 
@@ -140,8 +140,8 @@ var DataFlowGraph = Backbone.Model.extend({
         this.set("savedDfg", savedDfg);
     },
     
-    setPrototypeAdmin: function(prototype) {
-        this.setPrototype(prototype, "xprototypeAdmin");
+    setPrototypePrivate: function(prototype) {
+        this.setPrototype(prototype, "xprototypePrivate");
     },
     
     setPrototype: function(prototype, prototypeName) {
@@ -221,8 +221,8 @@ var DataFlowGraph = Backbone.Model.extend({
     
     reset: function() {
         // remove clones
-        while(this.get("xprototypeAdmin").length > 0) {
-            this.get("xprototypeAdmin").pop();
+        while(this.get("xprototypePrivate").length > 0) {
+            this.get("xprototypePrivate").pop();
         }
         
         // remove prototypes

@@ -183,6 +183,18 @@
                         <div id="xnodes-list" class="panel-collapse collapse">
                         </div>
                     </div> 
+                    <div class="panel panel-default" id="xnodes-private">
+                        <div class="panel-heading">
+                            <!--<h4 class="panel-title">  -->
+                                <a data-toggle="collapse" href="#xnodes-private-list">
+                                    DFG nodes
+                                </a>
+                                <span id="xnodes-private-list-count" class="badge  pull-right" data-toggle="tooltip" title="number of DFG private nodes">0</span>
+                            <!--</h4>  -->
+                        </div>
+                        <div id="xnodes-private-list" class="panel-collapse collapse">
+                        </div>
+                    </div> 
                 </div>
             </div>
         </div>
