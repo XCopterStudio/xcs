@@ -73,7 +73,7 @@ var DataFlowGraph = Backbone.Model.extend({
         "savedDfg" : "",
         "dataFlowGraph" : "",
         "xprototype" : new Backbone.Collection([], { model : DataFlowGraphNode }),
-        "xclone" : new Backbone.Collection([], { model : DataFlowGraphNode })
+        "xprototypeAdmin" : new Backbone.Collection([], { model : DataFlowGraphNode })
     },
     
     initialize : function() { 
@@ -140,11 +140,14 @@ var DataFlowGraph = Backbone.Model.extend({
         this.set("savedDfg", savedDfg);
     },
     
-    setClone: function(clone) {
-        //TODO: set clones
+    setPrototypeAdmin: function(prototype) {
+        this.setPrototype(prototype, "xprototypeAdmin");
     },
     
-    setPrototype: function(prototype) {
+    setPrototype: function(prototype, prototypeName) {
+        // default value 4 prototypeName is "xprototype"
+        prototypeName = typeof prototypeName !== 'undefined' ? prototypeName : "xprototype";
+        
         for(var j = 0; j < prototype.length; ++j) {
             var p = prototype[j];
             //console.log("..." + JSON.stringify(p));
@@ -152,7 +155,7 @@ var DataFlowGraph = Backbone.Model.extend({
             if(p.name) {  
                 // get old prototype or create new
                 var prot;
-                var oldProt = this.get("xprototype").findWhere({"name": p.name});
+                var oldProt = this.get(prototypeName).findWhere({"name": p.name});
                 if(oldProt) {
                     prot = oldProt;
                 }
@@ -162,7 +165,7 @@ var DataFlowGraph = Backbone.Model.extend({
                     prot.set("name", p.name);
                     
                     // add prototype to collection
-                    this.get("xprototype").add(prot);
+                    this.get(prototypeName).add(prot);
                 }
                 
                 //read vars
@@ -199,8 +202,8 @@ var DataFlowGraph = Backbone.Model.extend({
         // check deleted protypes
         var p2Del = [];
         //console.log("..." + this.get("xprototype").length);
-        for(var j = 0; j < this.get("xprototype").length; ++j) {
-            var p = this.get("xprototype").at(j);
+        for(var j = 0; j < this.get(prototypeName).length; ++j) {
+            var p = this.get(prototypeName).at(j);
             //console.log("... " + p.get("name"));
             var prot = $.grep(prototype, function(item){ return item.name == p.get("name"); });
             
@@ -212,14 +215,14 @@ var DataFlowGraph = Backbone.Model.extend({
         
         // remove deleted prototypes
         for(var j = 0; j < p2Del.length; ++j) {
-            this.get("xprototype").remove(p);
+            this.get(prototypeName).remove(p);
         }
     },
     
     reset: function() {
         // remove clones
-        while(this.get("xclone").length > 0) {
-            this.get("xclone").pop();
+        while(this.get("xprototypeAdmin").length > 0) {
+            this.get("xprototypeAdmin").pop();
         }
         
         // remove prototypes

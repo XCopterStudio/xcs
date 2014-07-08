@@ -58,9 +58,9 @@ var DataFlowGraphView = Backbone.View.extend({
         
         this.listenTo(this.model, "change:dataFlowGraph", this.onDataFlowGraphChange);
         this.listenTo(this.model.get("xprototype"), "add", this.onPrototypeAdd);
-        this.listenTo(this.model.get("xclone"), "add", this.onCloneAdd);
+        this.listenTo(this.model.get("xprototypeAdmin"), "add", this.onCloneAdd);
         this.listenTo(this.model.get("xprototype"), "remove", this.onPrototypeRemove);
-        this.listenTo(this.model.get("xclone"), "remove", this.onCloneRemove);
+        this.listenTo(this.model.get("xprototypeAdmin"), "remove", this.onCloneRemove);
 
         this.listenTo(this.model, "change:savedDfg", this.onSavedDfgChange);
         this.listenTo(this.model, "change:dfgDef", this.onDfgDefChange);
@@ -160,12 +160,13 @@ var DataFlowGraphView = Backbone.View.extend({
         return id.replace(/ /g,'');
     },
     
-    addNode2DfgToolbox : function(id, title) {
+    addNode2DfgToolbox : function(id, title, toolboxItemId) {
         if(!title) {
             title = id;
         }
         
-        var toolbox = $('#xnodes-list');
+        //var toolbox = $('#xnodes-list');
+        var toolbox = $('#' + toolboxItemId);
         toolbox.append('\
             <div class="panel-body drag_init" id="' + id + '">  \
                 ' + title + '                                   \
@@ -421,7 +422,7 @@ var DataFlowGraphView = Backbone.View.extend({
         }
         
         // add 2 toolbox - show to user
-        this.addNode2DfgToolbox(prototypeId, prototypeName);
+        this.addNode2DfgToolbox(prototypeId, prototypeName, 'xnodes-list');
         this.dfgToolboxNodes[prototypeId] = modelPrototype;
         
         //DEBUG
@@ -569,6 +570,19 @@ var DataFlowGraphView = Backbone.View.extend({
 //                        "semType" : "COMMAND"
 //                    }]
 //                }],
+//                "prototypeAdmin" : [{
+//                    "name" : "XXci",
+//                    "var" : [{
+//                        "name" : "fly",
+//                        "synType" : "xcs::nodes::xci::FlyParam",
+//                        "semType" : "FLY_PARAM"
+//                    }],
+//                    "inputPort" : [{
+//                        "name" : "command",
+//                        "synType" : "std::string",
+//                        "semType" : "COMMAND"
+//                    }]
+//                }],
 //                "clone" : [{
 //                    "name" : "Dodo",
 //                    "prototype" : "XXci",
@@ -609,8 +623,8 @@ var DataFlowGraphView = Backbone.View.extend({
                 if(responseData.prototype) {
                     self.model.setPrototype(responseData.prototype);
                 }
-                if(responseData.clone) {
-                    self.model.setClone(responseData.clone);
+                if(responseData.prototypeAdmin) {
+                    self.model.setPrototypeAdmin(responseData.prototypeAdmin);
                 }
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
@@ -732,8 +746,8 @@ var DataFlowGraphView = Backbone.View.extend({
                 if(responseData.prototype) {
                     self.model.setPrototype(responseData.prototype);
                 }
-                if(responseData.clone) {
-                    self.model.setClone(responseData.clone);
+                if(responseData.setPrototypeAdmin) {
+                    self.model.setPrototypeAdmin(responseData.prototypeAdmin);
                 }
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
