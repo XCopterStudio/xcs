@@ -336,7 +336,7 @@ var DataFlowGraphView = Backbone.View.extend({
             
             loadDfgAction[id] = new WaitAction("#" + id, WaitActionType.Click);
             loadDfgAction[id].set("action", function(event) { 
-                var hrefId = $(event.target).attr("id");
+                var hrefId = $(event.currentTarget).attr("id");
                 loadDfgAction[hrefId].start(); 
                 self.dfgLoadDfg(event, function() { 
                     loadDfgAction[hrefId].stop(); 
@@ -806,7 +806,7 @@ var DataFlowGraphView = Backbone.View.extend({
     
     dfgLoadDfg : function(event, response) {
         console.log("dfgLoadDfg");
-        var dfg = $(event.target);
+        var dfg = $(event.currentTarget);
         //var dfgFilename = dfg.html();
         var dfgFilename = dfg.attr("filename");
         
