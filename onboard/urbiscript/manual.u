@@ -15,8 +15,8 @@ var xciVersion = "xci_parrot";
  */
 var xci = XXci.new(xciVersion);
 
-var logname = Date.now().asString().replace(" ", "_");
-var logger = XDatalogger.new("logs/" + logname + ".txt");
+var logname = Date.now().asString().replace(" ", "_").replace(":","-");
+var logger = XDatalogger.new("../logs/" + logname + ".txt");
 
 /*
  * Connect nodes
@@ -100,7 +100,10 @@ function demo(xci, r, p, y, g, duration, n) {
     echo("Finished");
 }|;
 
-function ptam(xci, left, leftDuration, forward, forwardDuration) {
+function ptam(xci, forward, forwardDuration) {
+    xci.command = "TakeOff";
+    sleep(7s);
+
     var fc0 = FlyControl.new();    
     fc0.roll = 0;
     fc0.pitch = 0;
@@ -111,27 +114,40 @@ function ptam(xci, left, leftDuration, forward, forwardDuration) {
     var fcUp = FlyControl.new();    
     fcUp.roll = 0;
     fcUp.pitch = 0;
-    fcUp.yaw = 0;
-    fcUp.gaz = 0.3;
+    fcUp.yaw = 0;                                               
+    fcUp.gaz = 0.4;
     xci.flyControl = (Global.fc = fcUp);
-    sleep(1s);
+    sleep(2s);
+    
     xci.flyControl = (Global.fc = fc0);
-    sleep(1s);
+    sleep(2s);
     
     echo("Risen");
     
-    // a bit right
-    var fcLeft = FlyControl.new();    
-    fcLeft.roll = left;
-    fcLeft.pitch = 0;
-    fcLeft.yaw = 0;
-    fcLeft.gaz = 0;
-    xci.flyControl = (Global.fc = fcLeft);
-    sleep(leftDuration);
+    var fcDown = FlyControl.new();    
+    fcDown.roll = 0;
+    fcDown.pitch = 0;
+    fcDown.yaw = 0;                                               
+    fcDown.gaz = -0.4;
+    xci.flyControl = (Global.fc = fcDown);
+    sleep(2s);
+    
     xci.flyControl = (Global.fc = fc0);
     sleep(1s);
     
-    echo("Righted");
+    // up down
+    xci.flyControl = (Global.fc = fcUp);
+    sleep(4s);
+    
+    xci.flyControl = (Global.fc = fc0);
+    sleep(1s);
+    
+    xci.flyControl = (Global.fc = fcDown);
+    sleep(2s);
+    
+    xci.flyControl = (Global.fc = fc0);
+    sleep(5s);
+    
     
     // a bit forward 
     var fcForw = FlyControl.new();    
@@ -142,7 +158,18 @@ function ptam(xci, left, leftDuration, forward, forwardDuration) {
     xci.flyControl = (Global.fc = fcForw);
     sleep(forwardDuration);
     xci.flyControl = (Global.fc = fc0);
+    sleep(3s);
+        
+    fcForw.roll = 0;
+    fcForw.pitch = -forward;
+    fcForw.yaw = 0;
+    fcForw.gaz = 0;
+    xci.flyControl = (Global.fc = fcForw);
+    sleep(forwardDuration);
+    xci.flyControl = (Global.fc = fc0);
     sleep(1s);
+    
+    xci.command = "Land";
     
     echo("Finished");
 }|;

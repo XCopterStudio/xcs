@@ -19,6 +19,7 @@ namespace xcs{
         inline void D(const pid_type &d){ D_ = d; };
         
         value_type getCorrection(const value_type &actualValue, const value_type &desireValue);
+        value_type getCorrection(const value_type &error);
     };
 
     template <class pid_type, class value_type>
@@ -38,6 +39,12 @@ namespace xcs{
         sumError_ += error;
         lastValue_ = actualValue;
         return P_*error + I_*sumError_ + D_*valueChange;
+    }
+
+    template <class pid_type, class value_type>
+    value_type PID<pid_type, value_type>::getCorrection(const value_type &error){
+        sumError_ += error;
+        return P_*error + I_*sumError_;
     }
 
 }

@@ -23,12 +23,12 @@ function serverConnect(ip, port, xci, fprSetter, xciVersion = "xci_parrot") {
     ]);
     fprSetter(flyParamReceiver); // NOTE: temporary patch for fly control logging
     // Onboard state receiver
-    var onboardReceiver = Receiver.new("onboard", [
-        "mode" => "MODE",
-    ]);
+    //var onboardReceiver = Receiver.new("onboard", [
+    //    "mode" => "MODE",
+    //]);
 
     var semanticReceiver = SemanticReceiver.new(adapter, UJson);
-    semanticReceiver.addReceiver(onboardReceiver);
+    //semanticReceiver.addReceiver(onboardReceiver);
     semanticReceiver.addReceiver(flyParamReceiver);
 
     var flashSender = FlashSender.new(adapter, UJson);
@@ -43,7 +43,7 @@ function serverConnect(ip, port, xci, fprSetter, xciVersion = "xci_parrot") {
     flyParamReceiver.&gaz >> xci.&gaz;
     flyParamReceiver.&command >> xci.&command;
 
-    onboardReceiver.&mode >> Onboard.&changeMode;
+    //onboardReceiver.&mode >> Onboard.&changeMode;
 
     if(xciVersion == "xci_parrot") {
         xci.&altitude >> semanticSender.&altitude;
