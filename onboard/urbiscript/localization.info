@@ -6,17 +6,18 @@ ModelParameters
   c3  0
   c4  6.108
   c5  0.175
-  c6  4.363
-  c7  0.175
+  c6  4.363 
+  ;c7  0.175
+  c7  0.000875
   c8  1.4
   c9  1.4
 }
 
 ModelVariance
 {
-  roll  3
-  pitch 3
-  yaw   9
+  roll  1
+  pitch 1
+  yaw   10
   gaz   1
 }
 
@@ -28,7 +29,7 @@ ImuVariance
   velocityZ   0.01
   phi         0.0003
   theta       0.0003
-  velocityPsi 0.001
+  velocityPsi 0.005
 }
 
 PtamVariance
