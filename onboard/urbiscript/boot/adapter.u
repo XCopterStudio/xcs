@@ -186,8 +186,8 @@ class OnboardSender {
         //this.adapter.send(this.json.encode(data) + "\n");
     };
 
-    function sendDataFlowGraph(dataFlowGraphData) {
-        sendData("dataFlowGraph", dataFlowGraphData);
+    function sendDdfg(ddfg) {
+        sendData("ddfg", ddfg);
     };
 
     function sendPrototype(prototypesData) {

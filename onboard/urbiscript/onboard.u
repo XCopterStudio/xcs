@@ -6,7 +6,7 @@ class Onboard {
     var loadedXObjects_ = [ => ];           // list of pairs (loaded xobjects; copies)
     var loadedPrivateObjects_ = [ => ];     // list of pairs (loaded uobjects; copies)
     var privateObjects_ = [];               // objects, which are not visible for user
-    var dataFlowGraph_ = "";                // data flow graph
+    var ddfg_ = "";                // data flow graph
     var dfgCommStarted_ = false;            // data flow graph communication started
     var onboardSender_;
     var onboardReceiver_;
@@ -46,40 +46,10 @@ class Onboard {
         sleep(1s);
 
         //loadXObject_("xci dodo");
-
         loadXobjects4load_();
 
-        //DEBUG: test load wanted xobjects
-        //var xos = [];
-        //for(var xo: xobjects) {
-        //    if(["xci_dodo", "xci_parrot", "onboard", "datalogger"].has(xo.basename().split(".").front())) {
-        //        xos << xo;
-        //    };
-        //};
-        //xos << "neexsitujici_xobject";
-        //xobjects = xos;
-        //// load wanted xobjects
-        //loadXObjects_(xobjects);
-        //echo(Onboard.localSlotNames());
-
-        //DEBUG: test send dataflow graph data
-        //this.dataFlowGraph_ = "<xml><block type=\"connect\" id=\"2\" x=\"148\" y=\"385\"><field name=\"XOB1\">subject</field><field name=\"XVAR1\">out</field><field name=\"XOB2\">observer</field><field name=\"XVAR2\">in</field></block></xml>";
-        this.dataFlowGraph_ = "test data flow graph";
-
-
-        //this.loadedXObjects_["xxci"] = ["xci_dodooo"];
-
-        //sleep(1s);
-        //this.loadedXObjects_["xci"] = ["xci1", "xci2"];
-
-
-        //this.loadedXObjects_["xci"] = ["xciiiiiiiiii_dodo", "xciiiiiiiiiiii_parrot"];
-        //stopDfgCommunication();
-        //this.dataFlowGraph_ = "test 2 data flow graph";
-        //this.loadedXObjects_["xci2"] = ["xci2_dodo", "xci2_parrot"];
-        //startDfgCommunication();
-        //this.dataFlowGraph_ = "test 3 data flow graph";
-        //this.loadedXObjects_["xci3"] = ["xci3_dodo", "xci3_parrot"];
+        // load ddfg from settings
+        loadDdfg_();
 
         ///
         /// DEBUG: SETTINGS
@@ -323,11 +293,13 @@ class Onboard {
         var prototypeData = getNodesPrototypesInfo_();
         var prototypePrivateData = getNodesPrototypesInfo_(true);
         //var cloneData = getNodesCloneInfo_();
+        var ddfgData;
 
         var data = [ => ];
         data["prototype"] = prototypeData;
         //data["clone"] = cloneData;
         data["prototypePrivate"] = prototypePrivateData;
+        data["ddfg"] = this.ddfg_;
 
         return data;
     };
@@ -373,10 +345,10 @@ class Onboard {
     // initialize sending information about data flow graph
     function initDfgCommunication_() {
         // initialization 4 sending information about current data flow graph
-        this.dataFlowGraph_ = "";
-        at(this.&dataFlowGraph_.changed?) {
+        this.ddfg_ = "";
+        at(this.&ddfg_.changed?) {
             if(this.dfgCommStarted_) {
-                sendDefaultDfg_();
+                sendDdfg_();
             };
         };
 
@@ -389,10 +361,11 @@ class Onboard {
         };
     };
 
-    function sendDefaultDfg_() {
-        this.onboardSender_.sendDataFlowGraph(this.dataFlowGraph_);
+    function sendDdfg_() {
+        this.onboardSender_.sendDdfg(this.ddfg_);
     };
 
+    ///[Obsolete("send DFG_LOAD request instead")]
     function sendNodesInfo_() {
         var prototypesData = getNodesPrototypesInfo_();
         var clonesData = getNodesCloneInfo_();
@@ -801,6 +774,15 @@ class Onboard {
         this.xobjectsSettings_ = SettingsCollection.new(xobjectsPaths + xobjectsPrivatePaths);
     };
 
+    function loadDdfg_() {
+        var ddfgPath = getDdfgPath_();
+
+        if(!ddfgPath.isNil()) {
+            var setting = XSettings.new(ddfgPath.asString(), false);
+            this.ddfg_ = setting.get("DFG");
+        };
+    };
+
     function loadCore_() {
        // module names to be loaded
         var moduleList = [
@@ -903,14 +885,26 @@ class Onboard {
             basePaths = this.getBasePaths_("xsetting/xobjects.xs");
         };
         
-        var dirPaths = [];
+        var filePaths = [];
         for(var p: basePaths) {
             if(p.exists() && p.isReg()) {
-                dirPaths << p;
+                filePaths  << p;
             };
         };
 
-        return dirPaths;
+        return filePaths;
+    };
+
+    function getDdfgPath_() {
+        var basePaths = this.getBasePaths_("xsetting/ddfg.xs");
+        
+        for(var p: basePaths) {
+            if(p.exists() && p.isReg()) {
+                return p;
+            };
+        };
+
+        return nil;
     };
 
     function getUserDfgPaths_(file = nil, checkExists = false) {
