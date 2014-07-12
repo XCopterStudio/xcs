@@ -56,7 +56,7 @@ var DataFlowGraphView = Backbone.View.extend({
         this.onInputChange(app.XcopterState);      
         this.listenTo(app.XcopterState, "change:onboard", this.onInputChange);
         
-        this.listenTo(this.model, "change:dataFlowGraph", this.onDataFlowGraphChange);
+        this.listenTo(this.model, "change:ddfg", this.onDdfgChange);
         this.listenTo(this.model.get("xprototype"), "add", this.onPrototypeAdd);
         this.listenTo(this.model.get("xprototypePrivate"), "add", this.onPrototypePrivateAdd);
         this.listenTo(this.model.get("xprototype"), "remove", this.onPrototypeRemove);
@@ -358,9 +358,9 @@ var DataFlowGraphView = Backbone.View.extend({
         }
     },
      
-    onDataFlowGraphChange : function(model) {
+    onDdfgChange : function(model) {
         // TODO: show some question? 
-        var graph = model.get("dataFlowGraph");       
+        var graph = model.get("ddfg");       
         this.loadGraph(graph);
     },
     
@@ -589,7 +589,7 @@ var DataFlowGraphView = Backbone.View.extend({
 //        var test = {
 //            "type" : "onboard",
 //            "data" : {
-//                "dataFlowGraph" : '<xml><block type="connect" id="2" x="148" y="385"><field name="XOB1">subject</field><field name="XVAR1">out</field><field name="XOB2">observer</field><field name="XVAR2">in</field></block></xml>',
+//                "ddfg" : '<xml><block type="connect" id="2" x="148" y="385"><field name="XOB1">subject</field><field name="XVAR1">out</field><field name="XOB2">observer</field><field name="XVAR2">in</field></block></xml>',
 //                "prototype" : [{
 //                    "name" : "XXci",
 //                    "var" : [{
@@ -661,6 +661,9 @@ var DataFlowGraphView = Backbone.View.extend({
                 }
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
+                }
+                if(responseData.ddfg) {
+                    self.model.setDdfg(responseData.ddfg);
                 }
             }
             

@@ -71,7 +71,7 @@ var DataFlowGraph = Backbone.Model.extend({
     defaults : {
         "dfgDef" : "",
         "savedDfg" : "",
-        "dataFlowGraph" : "",
+        "ddfg" : "",
         "xprototype" : new Backbone.Collection([], { model : DataFlowGraphNode }),
         "xprototypePrivate" : new Backbone.Collection([], { model : DataFlowGraphNode })
     },
@@ -121,15 +121,19 @@ var DataFlowGraph = Backbone.Model.extend({
         }
         
         // set default dataFlowGraph
-        if(data.dataFlowGraph) {
-            //TODO: merge current dataFlowGtraph with recieved data.dataFlowGraph
-            this.set("dataFlowGraph", data.dataFlowGraph);
+        if(data.ddfg) {
+            //TODO: merge current dataFlowGtraph with recieved data.ddfg
+            this.set("ddfg", data.ddfg);
         }
         
         // set prototypes
         if(data.prototype) {
             this.setPrototype(data.prototype);
         }
+    },
+    
+    setDdfg: function(ddfg) {
+        this.set("ddfg", ddfg);
     },
     
     setDfgDef: function(dfgDef) {
