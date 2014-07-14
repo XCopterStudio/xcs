@@ -1,6 +1,6 @@
 var DfgState = ENUM(
     "DFG_STATE_NODES_LOADED", 
-    "DFG_STATE_CREATED", "DFG_STATE_STARTED", "DFG_STATE_STOPPED", "DFG_STATE_DESTROYED"//,    // DFG STATE
+    "DFG_STATE_NOTCREATED", "DFG_STATE_CREATED", "DFG_STATE_STARTED", "DFG_STATE_STOPPED" //,    // DFG STATE
     //"DFG_STATE_USER_DFG_LOADED", "DFG_STATE_DEFAULT_DFG_LOADED", "DFG_STATE_NODE_DFG_LOADED"    // LOADED DFG TYPE
     );
 
@@ -48,7 +48,7 @@ var DataFlowGraphView = Backbone.View.extend({
     
     dfgCounter : [],
     
-    dfgState_ : DfgState.DFG_STATE_DESTROYED,
+    dfgState_ : DfgState.DFG_STATE_NOTCREATED,
     
     initialize : function() {
         this.model = new DataFlowGraph();
@@ -277,6 +277,8 @@ var DataFlowGraphView = Backbone.View.extend({
         }
         
         m.setAutoSize();
+        
+        m.setState(NodeState.NOTCREATED);
         
         this.dfgGraph.addCell(m);
         this.dfgModels.addModel(modelId, m);
@@ -748,6 +750,16 @@ var DataFlowGraphView = Backbone.View.extend({
                     response();
                 }
                 
+                // set nodes states
+                if(responseData) {
+                    for(var i = 0; i < responseData.length; ++i) {
+                        var model = self.dfgModels[responseData[i]];
+                        if(model) {
+                            model.setState(NodeState.CREATED);
+                        }
+                    }
+                }
+                
                 // set state - must be at the end
                 if(responseType == ResponseType.Done) {
                     self.setDfgState(DfgState.DFG_STATE_CREATED);
@@ -807,7 +819,7 @@ var DataFlowGraphView = Backbone.View.extend({
             
             // set state - must be at the end
             if(responseType == ResponseType.Done) {
-                self.setDfgState(DfgState.DFG_STATE_DESTROYED);
+                self.setDfgState(DfgState.DFG_STATE_NOTCREATED);
             }
         });
     },
@@ -904,7 +916,7 @@ var DataFlowGraphView = Backbone.View.extend({
                 this.dfgState_ |= state;
                 stateSetted = true;
                 break;
-            case DfgState.DFG_STATE_DESTROYED:
+            case DfgState.DFG_STATE_NOTCREATED:
                 if(((this.dfgState_ & DfgState.DFG_STATE_STOPPED) == DfgState.DFG_STATE_STOPPED) ||
                   ((this.dfgState_ & DfgState.DFG_STATE_CREATED) == DfgState.DFG_STATE_CREATED)) {
                     // remove old state
@@ -917,9 +929,9 @@ var DataFlowGraphView = Backbone.View.extend({
                 }
                 break;
             case DfgState.DFG_STATE_CREATED:
-                if(((this.dfgState_ & DfgState.DFG_STATE_DESTROYED) == DfgState.DFG_STATE_DESTROYED)) {
+                if(((this.dfgState_ & DfgState.DFG_STATE_NOTCREATED) == DfgState.DFG_STATE_NOTCREATED)) {
                     // remove old state
-                    this.dfgState_ &= ~DfgState.DFG_STATE_DESTROYED;
+                    this.dfgState_ &= ~DfgState.DFG_STATE_NOTCREATED;
                     
                     // add new state
                     this.dfgState_ |= state;
@@ -1001,7 +1013,7 @@ var DataFlowGraphView = Backbone.View.extend({
             buttons.saveDfg.disabled = false; 
             buttons.loadDfg.disabled = false;
         
-            if(((this.dfgState_ & DfgState.DFG_STATE_DESTROYED) == DfgState.DFG_STATE_DESTROYED)) {
+            if(((this.dfgState_ & DfgState.DFG_STATE_NOTCREATED) == DfgState.DFG_STATE_NOTCREATED)) {
                 buttons.start.disabled = true;
                 buttons.stop.disabled = true;
                 buttons.destroy.disabled = true;
