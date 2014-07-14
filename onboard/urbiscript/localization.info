@@ -32,6 +32,16 @@ Ekf {
     theta       0.0003
     velocityPsi 0.005
   }
+
+  PtamVariance
+  {
+    x     0.01
+    y     0.01
+    z     0.01
+    phi   0.122
+    theta 0.122
+    psi   0.122
+  }
 }
 
 Ptam {
