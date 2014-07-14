@@ -1,3 +1,6 @@
+var NodeState = ENUM("NOTCREATED", "CREATED", "STARTED", "STOPPED");
+
+
 var DataFlowGraphDefaultModel = joint.shapes.devs.Model.extend({
     inPortsType: {},
     outPortsType: {},
@@ -17,6 +20,27 @@ var DataFlowGraphDefaultModel = joint.shapes.devs.Model.extend({
         },
     }, joint.shapes.devs.Model.prototype.defaults),
     
+    setState : function(state) {
+        var color = '#FFFFFF';
+        
+        switch(state) {
+            case NodeState.NOTCREATED:
+                color = '#5bc0de';
+                break;
+            case NodeState.CREATED:
+                color = '#428bca';
+                break;
+            case NodeState.STARTED:
+                color = '#5cb85c';
+                break;
+            case NodeState.STOPPED:
+                color = '#f0ad4e';
+                break;
+        }
+
+        this.attr('rect/fill', color);
+    },
+    
     setId : function(newId) {
         this.set('id', newId);
     },
@@ -26,7 +50,7 @@ var DataFlowGraphDefaultModel = joint.shapes.devs.Model.extend({
     },
     
     setLabel : function(newLabel) {
-        this.attr('.label/text', newLabel); 
+        this.attr('.label/text', newLabel);
     },
     
     setAutoSize : function(maxCount) {

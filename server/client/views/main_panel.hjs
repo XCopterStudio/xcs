@@ -122,9 +122,9 @@
                         <div class="collapse navbar-collapse" id="nbDfg">
                             <div class="nav navbar-nav">
                                 <button id="dfgLoad" type="button" class="btn btn-info navbar-btn">Reload nodes</button>
-                                <button id="dfgCreate" type="button" class="btn btn-warning navbar-btn">Create DFG</button>
-                                <button id="dfgStart" type="button" class="btn btn-danger navbar-btn">Start DFG</button>
-                                <button id="dfgStop" type="button" class="btn btn-danger navbar-btn">Stop DFG</button>
+                                <button id="dfgCreate" type="button" class="btn btn-primary navbar-btn">Create DFG</button>
+                                <button id="dfgStart" type="button" class="btn btn-success navbar-btn">Start DFG</button>
+                                <button id="dfgStop" type="button" class="btn btn-warning navbar-btn">Stop DFG</button>
                                 <button id="dfgDestroy" type="button" class="btn btn-danger navbar-btn">Destroy DFG</button>
                             </div>
                             
