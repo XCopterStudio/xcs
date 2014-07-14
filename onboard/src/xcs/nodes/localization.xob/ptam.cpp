@@ -121,9 +121,13 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     const SE3Element camToWorldU(camPToPtamResult.get_rotation(), camPToPtamResult.get_translation() * scaleEstimation_.scale());
 
     const SE3Element droneToWResult(scaleEstimation_.offsetMatrix() * camToWorldU * scaleEstimation_.droneToFront);
+
+    scaleEstimation_.initializeOffset(droneToWPred * droneToWResult.inverse());
+    dbgPrintSE3("newoff", scaleEstimation_.offsetMatrix(), timestamp);
+
     dbgPrintSE3("dronetowp", droneToWPred, timestamp);
     dbgPrintSE3("dronetowr", droneToWResult, timestamp);
-
+    dbgPrintSE3("offset", scaleEstimation_.offsetMatrix(), timestamp);
 
 
     // init failed?
@@ -138,6 +142,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
         XCS_LOG_INFO("PTAM initialized!");
         XCS_LOG_INFO("initial scale: " << scaleEstimation_.scale());
+        XCS_LOG_INFO("initial offset: " << scaleEstimation_.offsetMatrix());
         //node->publishCommand("u l PTAM initialized (took second KF)"); // TODO what is this for
         framesIncludedForScaleXYZ_ = -1;
         lockNextFrame_ = true;
@@ -236,6 +241,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     // if framesIncludedForScale > 36						===> set framesIncludedForScale=-1 
 
     // include!
+    XCS_LOG_INFO("PTAM (metadata): " << timestamp << " " << ptamTracker_->lastStepResult << " " << (goodCount_ >= 3));
 
     // TODO: make shure filter is handled properly with permanent roll-forwards.
     if (goodCount_ >= 3) {
@@ -291,7 +297,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
                 // hidden helluva calculations for scale estimate
                 //scaleEstimation_.updateScale(diffPTAM, diffIMU, scalingFixpoint);
                 ptamMapMaker_->currentScaleFactor = scaleEstimation_.scale();
-                XCS_LOG_INFO("New scale: " << ptamMapMaker_->currentScaleFactor << "from diffs: " << diffPTAM << "; " << diffIMU);
+                XCS_LOG_INFO("New scale: " << ptamMapMaker_->currentScaleFactor << " from diffs: " << diffPTAM << "; " << diffIMU);
             }
             framesIncludedForScaleXYZ_ = -1; // causing reset afterwards
         }
