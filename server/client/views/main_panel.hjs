@@ -206,7 +206,18 @@
                 </div>
             </div>
         </div>
+        
+        <!-- context menu -->
+        <ul id="dfg-screen-context-menu" class="dropdown-menu" role="menu" style="display:none" >
+            <li role="presentation"><a tabindex="-1" action="LOAD">Create node</a></li>
+            <li role="presentation" class="divider"></li>
+            <li role="presentation"><a tabindex="-1" action="START">Start node</a></li>
+            <li role="presentation"><a tabindex="-1" action="STOP">Stop node</a></li>
+            <li role="presentation" class="divider"></li>
+            <li role="presentation"><a tabindex="-1" action="DESTROY">Destroy node</a></li>
+        </ul>
     </div>
+    
     <div class="row">
         <div class="col-xs-12">
             <div id="flow-graph-console"></div>

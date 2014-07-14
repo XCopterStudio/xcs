@@ -281,6 +281,17 @@ var DataFlowGraphView = Backbone.View.extend({
         this.dfgGraph.addCell(m);
         this.dfgModels.addModel(modelId, m);
         
+        //set context menu
+        $("#flow-graph-screen .Model").contextMenu({
+            parentSelector:     "#flow-graph-screen",
+            menuSelector:       "#dfg-screen-context-menu",
+            menuSelected:       function (target, selectedMenuItem) {
+                var msg = "You selected the menu item '" + selectedMenuItem.attr("action") +
+                    "' on the value '" + target.attr("model-id") + "'";
+                console.log(msg);
+            }
+        });
+        
         return modelId;
     },
     
