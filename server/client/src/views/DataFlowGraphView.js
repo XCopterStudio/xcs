@@ -745,11 +745,6 @@ var DataFlowGraphView = Backbone.View.extend({
             // send request
             var self = this;
             self.model.requestCreate(dfg, function(id, responseType, responseData) {
-                //response action
-                if(response) {
-                    response();
-                }
-                
                 // set nodes states
                 if(responseData) {
                     for(var i = 0; i < responseData.length; ++i) {
@@ -758,6 +753,11 @@ var DataFlowGraphView = Backbone.View.extend({
                             model.setState(NodeState.CREATED);
                         }
                     }
+                }
+                
+                //response action
+                if(response) {
+                    response();
                 }
                 
                 // set state - must be at the end
@@ -771,6 +771,16 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgStart : function(response) {
         var self = this;
         self.model.requestStart(function(id, responseType, responseData) {
+            // set nodes states
+            if(responseData) {
+                for(var i = 0; i < responseData.length; ++i) {
+                    var model = self.dfgModels[responseData[i]];
+                    if(model) {
+                        model.setState(NodeState.STARTED);
+                    }
+                }
+            }
+            
             //response action
             if(response) {
                 response();
@@ -786,6 +796,16 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgStop : function(response) {
         var self = this;
         self.model.requestStop(function(id, responseType, responseData) {
+            // set nodes states
+            if(responseData) {
+                for(var i = 0; i < responseData.length; ++i) {
+                    var model = self.dfgModels[responseData[i]];
+                    if(model) {
+                        model.setState(NodeState.STOPPED);
+                    }
+                }
+            }
+            
             if(response) {
                 response();
             }
@@ -810,6 +830,18 @@ var DataFlowGraphView = Backbone.View.extend({
                 }
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
+                }
+                
+                console.log("ddddddddddddddddddddddddddd");
+                
+                // set nodes states
+                if(responseData.destroyed) {
+                    for(var i = 0; i < responseData.destroyed.length; ++i) {
+                        var model = self.dfgModels[responseData.destroyed[i]];
+                        if(model) {
+                            model.setState(NodeState.NOTCREATED);
+                        }
+                    }
                 }
             }
             
