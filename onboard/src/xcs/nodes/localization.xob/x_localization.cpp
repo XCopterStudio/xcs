@@ -38,7 +38,7 @@ void XLocalization::onChangeTimeImu(double internalTime) {
     }
 
     double ekfTime = internalTime - imuTimeShift_ - IMU_DELAY;
-    if (std::abs(ekfTime - lastMeasurementTime_) > 1e-10){
+    if (std::abs(ekfTime - lastMeasurementTime_) > 1e-10) {
 
         lastMeasurement_.velocity.z /= std::abs(ekfTime - lastMeasurementTime_);
         lastMeasurement_.angularRotationPsi /= std::abs(ekfTime - lastMeasurementTime_);
@@ -86,6 +86,9 @@ void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
     }
     ptam_->handleFrame(bwImage, ekfTime); // this will do update EKF
 
+    // update PTAM status
+    ptamStatus = static_cast<int> (ptam_->ptamStatus());
+
     // update current state of drone
     DroneState state = ekf_.computeState(timeFromStart());
     position = state.position;
@@ -118,7 +121,8 @@ XLocalization::XLocalization(const std::string &name) :
   position("POSITION_ABS"),
   velocity("VELOCITY_ABS"),
   rotation("ROTATION"),
-  velocityPsi("ROTATION_VELOCITY_ABS") {
+  velocityPsi("ROTATION_VELOCITY_ABS"),
+  ptamStatus("PTAM_STATUS") {
     startTime_ = clock_.now();
     lastMeasurementTime_ = 0;
     imuTimeShift_ = std::numeric_limits<double>::max();
@@ -145,7 +149,7 @@ XLocalization::XLocalization(const std::string &name) :
 
 void XLocalization::init(const std::string &configFile) {
     ptam_ = PtamPtr(new Ptam(ekf_));
-    
+
     loadParameters(Settings(configFile));
 }
 
@@ -187,7 +191,7 @@ void XLocalization::loadParameters(const Settings& settings) {
         ptamVar[4] = settings.get<double>("Ekf.PtamVariance.theta");
         ptamVar[5] = settings.get<double>("Ekf.PtamVariance.psi");
         ekf_.ptamVariances(ptamVar);
-        
+
         /*
          * PTAM parameters
          */
@@ -198,9 +202,9 @@ void XLocalization::loadParameters(const Settings& settings) {
             cameraParameters.push_back(settings.get<double>(name.str()));
         }
         ptam_->cameraParameters(cameraParameters);
-        
+
         ptam_->parameters(settings.getMap<double>("Ptam.Ptam"));
-        
+
     } catch (boost::property_tree::ptree_error error) {
         XCS_LOG_ERROR("Localization: Cannot load parameters from file. Error: " << error.what());
     }

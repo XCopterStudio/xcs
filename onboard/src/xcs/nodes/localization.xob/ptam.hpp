@@ -62,6 +62,9 @@ public:
     void cameraParameters(const CameraParameters& values);
     
     void parameters(const Parameters& values);
+    
+    inline localization::PtamStatusType ptamStatus() { return ptamStatus_; }
+    
 private:
     typedef std::unique_ptr<Tracker> TrackerPtr;
     typedef std::unique_ptr<ATANCamera> ATANCameraPtr;
@@ -87,10 +90,17 @@ private:
     localization::ScaleEstimation scaleEstimation_;
 
     Predictor predIMUOnlyForScale_; // used for scale calculation. needs to be updated with every new navinfo..., // TODO navdata should be fed to this predictor
-    int goodCount_; // number of succ. tracked frames in a row.
-    int goodObservations_; // another metric of tracking quality (TODO explain better)
+    /*!
+     * >= 0 no. of succesfully tracked frames in a row
+     * <= 0 no. of unsuccesfully tracked frames in a row
+     */
+    int goodCount_;
+    /*!
+     * No. of observations that were used by EKF.
+     */
+    int goodObservations_;
 
-    int frameNo_; // frame sequence number TODO use atomic for threaded video update
+    int frameNo_;
     CVD::Image<CVD::byte> frame_;
 
     std::atomic<bool> resetPtamRequested_;
@@ -99,8 +109,12 @@ private:
     bool forceKF_; // XVar candidate
     int maxKF_; // XVar candidate
 
-    int framesIncludedForScaleXYZ_;
-    bool lockNextFrame_;
+    /*!
+     * -1    scale estimate acquisition not active
+     * >= 0  no. of frames for scale estimate interval
+     */
+    int framesForScaleInterval_;
+    bool updateFixpoint_;
     TimePoint lastGoodYawClock_;
 
     TooN::Vector<3> lastPtamPositionForScale_;
