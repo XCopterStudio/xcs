@@ -137,12 +137,12 @@ var DataFlowGraphView = Backbone.View.extend({
             gridSize: 10,   // size of grid in px (how many px reprezents one cell)
             model: this.dfgGraph,
             validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
-                if(magnetS && magnetT && magnetS.getAttribute("type") == "in" && magnetT.getAttribute("type") == "out") {
+                if(magnetS && magnetT && magnetS.getAttribute("type") == "out" && magnetT.getAttribute("type") == "in") {
                     var idS = magnetS.getAttribute("port");
                     var idT = magnetT.getAttribute("port");
 
-                    var sameSemT = cellViewS.model.inPortsType[idS].semType == cellViewT.model.outPortsType[idT].semType;
-                    var sameSynT = cellViewS.model.inPortsType[idS].synType == cellViewT.model.outPortsType[idT].synType;
+                    var sameSemT = cellViewS.model.outPortsType[idS].semType == cellViewT.model.inPortsType[idT].semType;
+                    var sameSynT = cellViewS.model.outPortsType[idS].synType == cellViewT.model.inPortsType[idT].synType;
                     
                     var valid = sameSemT && sameSynT;
                     
@@ -152,7 +152,7 @@ var DataFlowGraphView = Backbone.View.extend({
                 return false;
             },
             validateMagnet: function(cellView, magnet) {
-                return magnet.getAttribute('type') != "out";
+                return magnet.getAttribute('type') != "in";
             },
             snapLinks: { radius: 45 },
         });
@@ -253,7 +253,7 @@ var DataFlowGraphView = Backbone.View.extend({
             modelId = nodeId + this.dfgCounter[nodeId];
         }
         
-        var m = new DataFlowGraphDefaultModel({
+        var m = new (joint.shapes.dfg.DataFlowGraphDefaultModel)({
             position: { x: x, y: y },
         });
         m.setId(modelId);
@@ -266,7 +266,7 @@ var DataFlowGraphView = Backbone.View.extend({
                 var xvarName = xvar.get("name");
                 var xvarSynType = xvar.get("synType");
                 var xvarSemType = xvar.get("semType");   
-                m.addInputPort(xvarName, xvarSemType, xvarSynType);
+                m.addOutpuPort(xvarName, xvarSemType, xvarSynType);
             });
         }
         
@@ -276,7 +276,7 @@ var DataFlowGraphView = Backbone.View.extend({
                 var xinputPortName = xvar.get("name");
                 var xinputPortSynType = xvar.get("synType");
                 var xinputPortSemType = xvar.get("semType");
-                m.addOutpuPort(xinputPortName, xinputPortSemType, xinputPortSynType);
+                m.addInputPort(xinputPortName, xinputPortSemType, xinputPortSynType);
             });
         }
         
@@ -289,8 +289,8 @@ var DataFlowGraphView = Backbone.View.extend({
         
         //set context menu
         var self = this;
-        $("#flow-graph-screen .Model").contextMenu({
-            parentSelector:     "#flow-graph-screen",
+        $("#flow-graph-screen .DataFlowGraphDefaultModel").contextMenu({
+            parentSelector:     "#dfg",
             menuSelector:       "#dfg-screen-context-menu",
             menuSelected:       function (target, selectedMenuItem) {
                 var action = selectedMenuItem.attr("action");

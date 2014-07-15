@@ -21,7 +21,6 @@
 <!-- jointJS -->
 <!-- TODO: this version should contain own version of backbone and underscore - change version -->
 <script type="text/javascript" src="js/jointjs/joint.nojquery.js"></script>
-<script type="text/javascript" src="js/jointjs/joint.shapes.devs.js"></script>
 <!-- Custom scripts -->
 <script type="text/javascript" src="js/custom.js"></script>
 <!-- 

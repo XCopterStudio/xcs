@@ -4,7 +4,8 @@ var FlashMessagesView = Backbone.View.extend({
 
     initialize : function() {
         this.listenTo(app.XcopterState, "change:flash", this.flash);
-        console.log(this.$el);
+        //del
+        //console.log(this.$el);
     },
 
     render : function() {
