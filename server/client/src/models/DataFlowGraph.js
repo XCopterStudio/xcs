@@ -202,7 +202,6 @@ var DataFlowGraph = Backbone.Model.extend({
             }
         }
         
-        //TODO: what about removing last prototype?
         // check deleted protypes
         var p2Del = [];
         //console.log("..." + this.get("xprototype").length);

@@ -381,6 +381,10 @@ var DataFlowGraphView = Backbone.View.extend({
         // default value 4 append is false
         append = typeof append !== 'undefined' ? append : false;
         
+        if(!dfg) {
+            return;
+        }
+        
         try {
             if(!append) {
                 this.dfgReset(false);
@@ -676,6 +680,7 @@ var DataFlowGraphView = Backbone.View.extend({
                     self.model.setSavedDfg(responseData.savedDfg);
                 }
                 if(responseData.ddfg) {
+                    self.model.setDdfg("");
                     self.model.setDdfg(responseData.ddfg);
                 }
             }
@@ -830,6 +835,10 @@ var DataFlowGraphView = Backbone.View.extend({
                 }
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
+                }
+                if(responseData.ddfg) {
+                    self.model.setDdfg("");
+                    self.model.setDdfg(responseData.ddfg);
                 }
                 
                 // set nodes states
