@@ -244,8 +244,10 @@ var DataFlowGraph = Backbone.Model.extend({
         this.sendRequest("DFG_CREATE", dfg, response);
     },
     
-    requestStart: function(response) {
-        this.sendRequest("DFG_START", "", response);
+    requestStart: function(modelId, response) {
+        // default value 4 modelId is ""
+        modelId = typeof modelId !== 'undefined' ? modelId : "";
+        this.sendRequest("DFG_START", modelId, response);
     },
     
     requestStop: function(response) {

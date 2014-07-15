@@ -297,6 +297,7 @@ var DataFlowGraphView = Backbone.View.extend({
                         self.dfgCreate(response, modelId)
                         break;
                     case "START":
+                        self.dfgStart(response, modelId);
                         break;
                     case "STOP":
                         break;
@@ -732,9 +733,9 @@ var DataFlowGraphView = Backbone.View.extend({
         }
     },
     
-    dfgStart : function(response) {
+    dfgStart : function(response, modelId) {
         var self = this;
-        self.model.requestStart(function(id, responseType, responseData) {
+        self.model.requestStart(modelId, function(id, responseType, responseData) {
             // set nodes states
             if(responseData) {
                 for(var i = 0; i < responseData.length; ++i) {
@@ -751,7 +752,7 @@ var DataFlowGraphView = Backbone.View.extend({
             }
             
             // set state - must be at the end
-            if(responseType == ResponseType.Done) {
+            if(responseType == ResponseType.Done && !modelId) {
                 self.setDfgState(DfgState.DFG_STATE_STARTED);
             }
         });
