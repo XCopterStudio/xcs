@@ -17,6 +17,10 @@ const double XLocalization::IMU_DELAY = 0.040; // 40ms
 const double XLocalization::FLY_CONTROL_SEND_TIME = 0.075; // 75ms
 const double XLocalization::CAM_DELAY = 0.100; // 
 
+const std::string XLocalization::CTRL_INIT_KF = "init";
+const std::string XLocalization::CTRL_TAKE_KF = "keyframe";
+const std::string XLocalization::CTRL_RESET_PTAM = "reset";
+
 void XLocalization::onChangeVelocity(xcs::CartesianVector measuredVelocity) {
     lastMeasurement_.velocity.x = measuredVelocity.x;
     lastMeasurement_.velocity.y = measuredVelocity.y;
@@ -38,7 +42,7 @@ void XLocalization::onChangeTimeImu(double internalTime) {
     }
 
     double ekfTime = internalTime - imuTimeShift_;
-    if (std::abs(ekfTime - lastMeasurementTime_) > 1e-10){
+    if (std::abs(ekfTime - lastMeasurementTime_) > 1e-10) {
 
         lastMeasurement_.velocity.z /= std::abs(ekfTime - lastMeasurementTime_);
         lastMeasurement_.angularRotationPsi /= std::abs(ekfTime - lastMeasurementTime_);
@@ -64,6 +68,9 @@ void XLocalization::onChangeTimeImu(double internalTime) {
 }
 
 void XLocalization::onChangeVideo(urbi::UImage image) {
+    if (!ptamEnabled_) {
+        return;
+    }
     lock_guard<mutex> lock(lastFrameMtx_);
     // store image until onChangeVideoTime
     lastFrame_ = image;
@@ -71,6 +78,9 @@ void XLocalization::onChangeVideo(urbi::UImage image) {
 }
 
 void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
+    if (!ptamEnabled_) {
+        return;
+    }
     double ekfTime = internalTime - imuTimeShift_;
 
     // convert image to grayscale for PTAM
@@ -102,8 +112,20 @@ void XLocalization::onChangeFlyControl(const xcs::FlyControl flyControl) {
 }
 
 void XLocalization::onChangePtamControl(const std::string &ptamControl) {
-    std::cerr << "PTAM control " << ptamControl << std::endl;
-    ptam_->pressSpacebar();
+    if (ptamControl == CTRL_INIT_KF) {
+        ptam_->takeInitKF();
+    } else if (ptamControl == CTRL_TAKE_KF) {
+        ptam_->takeKF();
+    } else if (ptamControl == CTRL_RESET_PTAM) {
+        ptam_->reset();
+    } else {
+        XCS_LOG_WARN("Unknown PTAM control '" << ptamControl << "'." << endl);
+    }
+
+}
+
+void XLocalization::onChangePtamEnabled(const bool ptamEnabled) {
+    ptamEnabled_ = ptamEnabled;
 }
 
 //================ public functions ==================
@@ -118,6 +140,7 @@ XLocalization::XLocalization(const std::string &name) :
   videoTime("TIME_LOC"),
   flyControl("FLY_CONTROL"),
   ptamControl("COMMAND"),
+  ptamEnabled("ENABLED"),
   position("POSITION_ABS"),
   velocity("VELOCITY_ABS"),
   rotation("ROTATION"),
@@ -126,6 +149,7 @@ XLocalization::XLocalization(const std::string &name) :
     startTime_ = clock_.now();
     lastMeasurementTime_ = 0;
     imuTimeShift_ = std::numeric_limits<double>::max();
+    ptamEnabled_ = true;
 
     XBindVarF(measuredVelocity, &XLocalization::onChangeVelocity);
     XBindVarF(measuredAnglesRotation, &XLocalization::onChangeRotation);
@@ -138,11 +162,13 @@ XLocalization::XLocalization(const std::string &name) :
 
     XBindVarF(flyControl, &XLocalization::onChangeFlyControl);
     XBindVarF(ptamControl, &XLocalization::onChangePtamControl);
+    XBindVarF(ptamEnabled, &XLocalization::onChangePtamEnabled);
 
     XBindVar(position);
     XBindVar(velocity);
     XBindVar(rotation);
     XBindVar(velocityPsi);
+    XBindVar(ptamStatus);
 
     XBindFunction(XLocalization, init);
 }
