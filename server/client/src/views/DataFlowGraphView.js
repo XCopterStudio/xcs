@@ -37,6 +37,17 @@ var DataFlowGraphView = Backbone.View.extend({
                 this.removeModel(ps[i]);
             }
         },
+        
+        count: function() {
+            var c = 0;
+            for(var p in this) {
+                if (this.hasOwnProperty(p) && !_.isFunction(this[p])) {
+                    ++c;
+                }
+            }
+            
+            return c;
+        },
     },
     
     dfgCounter : [],
@@ -447,7 +458,7 @@ var DataFlowGraphView = Backbone.View.extend({
         privatePrototype = privatePrototype != true ? false : true;
         
         //DEBUG
-        console.log((privatePrototype ? "onPrototypePrivateAdd: " : "onPrototypeAdd: ") + JSON.stringify(modelPrototype.toJSON()));
+        //console.log((privatePrototype ? "onPrototypePrivateAdd: " : "onPrototypeAdd: ") + JSON.stringify(modelPrototype.toJSON()));
         
         // get prototype name
         var prototypeName = modelPrototype.get("name");
@@ -483,7 +494,7 @@ var DataFlowGraphView = Backbone.View.extend({
         privatePrototype = privatePrototype != true ? false : true;
 
         //DEBUG
-        console.log((privatePrototype ? "onPrototypePrivateRemove: " : "onPrototypeRemove: ") + JSON.stringify(modelPrototype.toJSON()));
+        //console.log((privatePrototype ? "onPrototypePrivateRemove: " : "onPrototypeRemove: ") + JSON.stringify(modelPrototype.toJSON()));
 
         // get prototype name
         var prototypeName = modelPrototype.get("name");
@@ -517,7 +528,7 @@ var DataFlowGraphView = Backbone.View.extend({
         privatePrototype = privatePrototype != true ? false : true;
         
         //DEBUG
-        console.log((privatePrototype ? "onPrototypePrivateChange: " : "onPrototypeChange: ") + JSON.stringify(modelPrototype.toJSON()));
+        //console.log((privatePrototype ? "onPrototypePrivateChange: " : "onPrototypeChange: ") + JSON.stringify(modelPrototype.toJSON()));
 
         // get prototype name
         var prototypeName = modelPrototype.get("name");
@@ -633,8 +644,14 @@ var DataFlowGraphView = Backbone.View.extend({
                     self.model.setSavedDfg(responseData.savedDfg);
                 }
                 if(responseData.ddfg) {
-                    self.model.setDdfg("");
-                    self.model.setDdfg(responseData.ddfg);
+                    if(self.dfgModels.count() == 0) {
+                        self.model.setDdfg("");
+                        self.model.setDdfg(responseData.ddfg);
+                    }
+                    //debug
+                    else {
+                        console.log("!!! DDFG will not be loaded - DFG contains " + self.dfgModels.count() + " nodes!");
+                    }
                 }
             }
             
@@ -777,23 +794,32 @@ var DataFlowGraphView = Backbone.View.extend({
         });
     },
     
-    dfgDestroy: function(response, modelId) {
+    dfgDestroy: function(response, modelId, reset) {
+        // default value 4 reset is false
+        reset = typeof reset !== 'undefined' ? reset : false;
+        
         var self = this;
-        //self.model.reset();
+        
+        if(reset) {
+            self.model.reset();
+        }
+        
         self.model.requestReset(modelId, function(id, responseType, responseData) {
             if(responseType == ResponseType.Done) {
-                if(responseData.prototype) {
-                    self.model.setPrototype(responseData.prototype);
-                }
-                if(responseData.prototypePrivate) {
-                    self.model.setPrototypePrivate(responseData.prototypePrivate);
-                }
-                if(responseData.savedDfg) {
-                    self.model.setSavedDfg(responseData.savedDfg);
-                }
-                if(responseData.ddfg) {
-                    self.model.setDdfg("");
-                    self.model.setDdfg(responseData.ddfg);
+                if(reset) {
+                    if(responseData.prototype) {
+                        self.model.setPrototype(responseData.prototype);
+                    }
+                    if(responseData.prototypePrivate) {
+                        self.model.setPrototypePrivate(responseData.prototypePrivate);
+                    }
+                    if(responseData.savedDfg) {
+                        self.model.setSavedDfg(responseData.savedDfg);
+                    }
+                    if(responseData.ddfg) {
+                        self.model.setDdfg("");
+                        self.model.setDdfg(responseData.ddfg);
+                    }
                 }
                 
                 // set nodes states
@@ -826,7 +852,8 @@ var DataFlowGraphView = Backbone.View.extend({
         this.dfgGraph.clear();
         
         if(all) {
-            this.dfgDestroy(response);
+            var modelId;
+            this.dfgDestroy(response, modelId, true);
         }
         else if(response) {
             response();
