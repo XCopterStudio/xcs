@@ -310,6 +310,7 @@ var DataFlowGraphView = Backbone.View.extend({
                         self.dfgDestroy(response, modelId);
                         break;
                     case "DELETE":
+                        self.dfgDestroy(response, modelId);
                         self.dfgModels.removeModel(modelId);
                         break;
                 }
