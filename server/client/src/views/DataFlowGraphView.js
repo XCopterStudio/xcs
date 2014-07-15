@@ -36,7 +36,7 @@ var DataFlowGraphView = Backbone.View.extend({
             var ps = [];
             for(var p in this) {
                 if (this.hasOwnProperty(p) && !_.isFunction(this[p])) {
-                    ps.push(this[p]);
+                    ps.push(p);
                 }
             }
             
@@ -831,8 +831,6 @@ var DataFlowGraphView = Backbone.View.extend({
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
                 }
-                
-                console.log("ddddddddddddddddddddddddddd");
                 
                 // set nodes states
                 if(responseData.destroyed) {
