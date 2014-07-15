@@ -14,6 +14,7 @@ XObject::XObject(const std::string& name) : UObject(name) {
     XBindFunction(XObject, getXInputPorts);
     XBindFunction(XObject, startXO);
     XBindFunction(XObject, stopXO);
+    XBindFunction(XObject, getState);
 
     setState(XObject::STATE_CREATED);
 }

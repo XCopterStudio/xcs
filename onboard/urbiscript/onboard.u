@@ -14,6 +14,7 @@ class Onboard {
     var xobjectInfo_ = [ => ];
     var dfgLobby_;
     var json_;
+    var xobjectStates_ = [ "STATE_CREATED" => 0, "STATE_STARTED" => 1, "STATE_STOPED" => 2];
 
     function init() {
         echo("init...");
@@ -236,9 +237,10 @@ class Onboard {
         var startedXo = [];
 
         for(var slot: this.dfgLobby_.localSlotNames()) {
-            if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("startXO")) {
+            var xo = this.dfgLobby_.getLocalSlot(slot).value();
+            if(xo.hasSlot("startXO") && xo.hasSlot("getState") && xo.getState() != this.xobjectStates_["STATE_STARTED"]) {
                 if(requestData == "" || requestData == slot) {
-                    this.dfgLobby_.getLocalSlot(slot).value().startXO();
+                    xo.startXO();
                     started = true;
                     startedXo << slot;
                 };
