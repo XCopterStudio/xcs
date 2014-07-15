@@ -60,11 +60,19 @@ Ptam {
     frameHeight      360
 
     ; display OpenGL window (debug, Linux only)
-    showWindow       1
-  
-    minKFDist        0
+    showWindow       0
+
+    ; minimum keyframe distance (meters)
+    minKFDist        0.2
+    ; min. distance between two KF (relative to mean scene depth)
+    minKFWiggleDist  0.5
+    
+    ; min time between two KF.
+    ;  => PTAM takes a new KF if (PTAMMinKFTimeDiff && (PTAMMinKFDist || 
+    ;     PTAMMinKFWiggleDist)), and tracking is good etc.
     minKFTimeDist    0
-    minKFWiggleDist  0  
+
+    ; maximum no. of stored keyframes
     maxKF            60
   }
 }
