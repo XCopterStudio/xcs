@@ -310,8 +310,12 @@ var DataFlowGraphView = Backbone.View.extend({
                         self.dfgDestroy(response, modelId);
                         break;
                     case "DELETE":
-                        self.dfgDestroy(response, modelId);
-                        self.dfgModels.removeModel(modelId);
+                        self.dfgDestroy(
+                            function() { 
+                                self.dfgModels.removeModel(modelId);  
+                                app.Flash.flashSuccess("Node " + modelId + " is deleted.");
+                            }, 
+                            modelId, false, false);
                         break;
                 }
             }
@@ -634,9 +638,18 @@ var DataFlowGraphView = Backbone.View.extend({
         
         self.model.reset();
         self.model.requestLoad(function(id, responseType, responseData) {
+            //show error
+            if(responseType == ResponseType.Error) {
+                app.Flash.flashError("Error when try to load nodes: " + responseData + ".");
+            }
+            
             if(responseType == ResponseType.Done) {
                 if(responseData.prototype) {
                     self.model.setPrototype(responseData.prototype);
+                    
+                    // show result
+                    var successCount = self.model.get("xprototype").length;
+                    app.Flash.flashSuccess("" + successCount + " " + (successCount == 1 ? "node is" : "nodes are") + " loaded.");
                 }
                 if(responseData.prototypePrivate) {
                     self.model.setPrototypePrivate(responseData.prototypePrivate);
@@ -689,7 +702,7 @@ var DataFlowGraphView = Backbone.View.extend({
                     var cloneId = cell.id;
                     var modelPrototype = this.dfgToolboxNodes[prototypeId];
                     if(!modelPrototype) {
-                        console.error("ERROR(dfgCreate): " + prototypeId + " is not loaded!");
+                        app.Flash.flashError("Error when try to create nodes: " + prototypeId + " is not loaded!");
                         return;
                     }
                     
@@ -723,14 +736,25 @@ var DataFlowGraphView = Backbone.View.extend({
             // send request
             var self = this;
             self.model.requestCreate(dfg, function(id, responseType, responseData) {
+                //show error
+                if(responseType == ResponseType.Error) {
+                    app.Flash.flashError("Error when try to create nodes: " + responseData + ".");
+                }
+                
                 // set nodes states
-                if(responseData) {
+                else if(responseData) {
+                    var successCount = 0;
+                    
                     for(var i = 0; i < responseData.length; ++i) {
                         var model = self.dfgModels[responseData[i]];
                         if(model) {
                             model.setState(NodeState.CREATED);
+                            ++successCount;
                         }
                     }
+                    
+                    // show result
+                    app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " created.");
                 }
                 
                 //response action
@@ -749,14 +773,25 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgStart : function(response, modelId) {
         var self = this;
         self.model.requestStart(modelId, function(id, responseType, responseData) {
+            //show error
+            if(responseType == ResponseType.Error) {
+                app.Flash.flashError("Error when try to start nodes: " + responseData + ".");
+            }
+            
             // set nodes states
-            if(responseData) {
+            else if(responseData) {
+                var successCount = 0;
+                
                 for(var i = 0; i < responseData.length; ++i) {
                     var model = self.dfgModels[responseData[i]];
                     if(model) {
                         model.setState(NodeState.STARTED);
+                        ++successCount;
                     }
                 }
+                
+                // show result
+                app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " started.");
             }
             
             //response action
@@ -774,14 +809,25 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgStop : function(response, modelId) {
         var self = this;
         self.model.requestStop(modelId, function(id, responseType, responseData) {
+            //show error
+            if(responseType == ResponseType.Error) {
+                app.Flash.flashError("Error when try to stop nodes: " + responseData + ".");
+            }
+            
             // set nodes states
-            if(responseData) {
+            else if(responseData) {
+                var successCount = 0;
+                
                 for(var i = 0; i < responseData.length; ++i) {
                     var model = self.dfgModels[responseData[i]];
                     if(model) {
                         model.setState(NodeState.STOPPED);
+                        ++successCount;
                     }
                 }
+                
+                // show result
+                app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " stopped.");
             }
             
             if(response) {
@@ -795,9 +841,10 @@ var DataFlowGraphView = Backbone.View.extend({
         });
     },
     
-    dfgDestroy: function(response, modelId, reset) {
-        // default value 4 reset is false
+    dfgDestroy: function(response, modelId, reset, checkDestroyed) {
+        // default value
         reset = typeof reset !== 'undefined' ? reset : false;
+        checkDestroyed = typeof checkDestroyed !== 'undefined' ? checkDestroyed : true;
         
         var self = this;
         
@@ -806,10 +853,19 @@ var DataFlowGraphView = Backbone.View.extend({
         }
         
         self.model.requestReset(modelId, function(id, responseType, responseData) {
-            if(responseType == ResponseType.Done) {
+            //show error
+            if(responseType == ResponseType.Error) {
+                app.Flash.flashError("Error when try to destroy nodes: " + responseData + ".");
+            }
+            
+            else if(responseType == ResponseType.Done) {
                 if(reset) {
                     if(responseData.prototype) {
                         self.model.setPrototype(responseData.prototype);
+                        
+                        // show result
+                        var successCount = self.model.get("xprototype").length;
+                        app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " loaded.");
                     }
                     if(responseData.prototypePrivate) {
                         self.model.setPrototypePrivate(responseData.prototypePrivate);
@@ -825,11 +881,22 @@ var DataFlowGraphView = Backbone.View.extend({
                 
                 // set nodes states
                 if(responseData.destroyed) {
+                    var successCount = 0;
+                    
                     for(var i = 0; i < responseData.destroyed.length; ++i) {
                         var model = self.dfgModels[responseData.destroyed[i]];
                         if(model) {
                             model.setState(NodeState.NOTCREATED);
+                            ++successCount;
                         }
+                    }
+                    
+                    // show result
+                    if(successCount > 0) {
+                        app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " destroyed.");
+                    }
+                    else if(checkDestroyed) {
+                        app.Flash.flashError("Error when try to destroy nodes: nothing to destroy.");
                     }
                 }
             }
@@ -854,9 +921,11 @@ var DataFlowGraphView = Backbone.View.extend({
         
         if(all) {
             var modelId;
-            this.dfgDestroy(response, modelId, true);
+            this.dfgDestroy(response, modelId, true, false);
+            app.Flash.flashSuccess("Data flow graph is resetted.");
         }
         else if(response) {
+            app.Flash.flashSuccess("Data flow graph is resetted.");
             response();
         }
     }, 

@@ -15,7 +15,7 @@ var FlashMessagesView = Backbone.View.extend({
         this.flashInfo(model.get("flash"));
     },
     
-    flashSucces : function(message) {
+    flashSuccess : function(message) {
         this.flashMessage(message, "success", "Success:");
     },
     
