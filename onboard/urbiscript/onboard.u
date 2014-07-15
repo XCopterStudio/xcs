@@ -176,7 +176,7 @@ class Onboard {
                 this.onboardSender_.sendResponse(id, responseType, responseData, requestId);
             }
             catch(var ex) {
-                echo("ERROR while try send respond: " + ex.asString());
+                echo("ERROR while try to send respond: " + ex.asString());
             };
         }
         else {
@@ -230,7 +230,7 @@ class Onboard {
         };
 
         if(!stopped && checkStopped) {
-            throw Exception.new("Nothing to stop!");
+            throw Exception.new("nothing to stop");
         };
 
         return stoppedXo;
@@ -253,7 +253,7 @@ class Onboard {
         };
         
         if(!started) {
-            throw Exception.new("Nothing to start!");
+            throw Exception.new("nothing to start");
         };
 
         return startedXo;
@@ -306,7 +306,7 @@ class Onboard {
         };
 
         if(!created) {
-            throw Exception.new("Nothing to create!");
+            throw Exception.new("nothing to create");
         }; 
 
         return this.dfgLobby_.localSlotNames();
