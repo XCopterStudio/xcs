@@ -14,14 +14,6 @@ xsettings
         "XSettings" "\"./xobjects.xs\", false"    ;TODO: change file name
     }
 }
-x_localization
-{
-    name "XLocalization"
-    init 
-    {
-        "XLocalization" "\"xsetting/xlocalization.xs\""    ;TODO: set valid file neme
-    }
-}
 ;xlinedrawer
 ;{
 ;    name "XLineDrawer"

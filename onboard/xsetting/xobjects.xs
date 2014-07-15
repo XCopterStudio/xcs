@@ -49,3 +49,11 @@ xhermit_movement
         "XHermitMovement" ""
     }
 }
+;xlocalization
+;{
+;    name "XLocalization"
+;    init 
+;    {
+;        "XLocalization" "\"xsetting/xlocalization.xs\""    ;TODO: set valid file neme
+;    }
+;}
