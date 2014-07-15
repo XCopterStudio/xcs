@@ -110,23 +110,24 @@ var DataFlowGraphView = Backbone.View.extend({
         var saveDfgAction = new WaitAction("#dfgSaveDfg", WaitActionType.Click)
         saveDfgAction.set("action", function() { saveDfgAction.start(); self.dfgSaveDfg(function() { saveDfgAction.stop() }); });
         app.Wait.setWaitAction(saveDfgAction);
-             
-        var flowGraphConsole = $('#flow-graph-console');
-        flowGraphConsole.append('<textarea id="flow-graph-txt" rows="15" cols="150"></textarea>');
         
         this.dfgGraph = new joint.dia.Graph;
         this.listenTo(this.dfgGraph, 'change:target', this.setLink);
         this.listenTo(this.dfgGraph, 'change:source', this.setLink);
 
-        this.dfgGraph.on('change', function(model) {
-            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
-        });
-        this.dfgGraph.on('add', function(cell) {
-            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
-        });
-        this.dfgGraph.on('remove', function(cell) {
-            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
-        });
+        //debug
+//        var flowGraphConsole = $('#flow-graph-console');
+//        flowGraphConsole.append('<textarea id="flow-graph-txt" rows="15" cols="150"></textarea>');
+//        
+//        this.dfgGraph.on('change', function(model) {
+//            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
+//        });
+//        this.dfgGraph.on('add', function(cell) {
+//            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
+//        });
+//        this.dfgGraph.on('remove', function(cell) {
+//            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
+//        });
 
         this.initializeDfgToolbox4Drop();
            

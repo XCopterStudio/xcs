@@ -140,7 +140,6 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     },
     
     addInputPort : function(portId, semT, synT) {
-        console.log("in");
         var inPorts = this.get('inPorts').slice();
         inPorts.push(portId);
         this.inPortsType[portId] = {semType: semT, synType: synT};
@@ -148,7 +147,6 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     },
     
     addOutpuPort : function(portId, semT, synT) {
-        console.log("out");
         var outp = this.get('outPorts').slice();
         outp.push(portId);
         this.outPortsType[portId] = {semType: semT, synType: synT};
