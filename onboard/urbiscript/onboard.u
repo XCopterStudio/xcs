@@ -186,7 +186,7 @@ class Onboard {
     };
 
     // stop all xobjects and delete them and optionally resend info about loaded xobjects
-    function doDfgReset_(resend, requestData) {
+    function doDfgReset_(resend, requestData = nil) {
         var destroyedXo = [];
 
         // stop all xobjects
@@ -194,7 +194,7 @@ class Onboard {
 
         //delete all xobjects - should call destructors
         for(var slot: this.dfgLobby_.localSlotNames()) {
-            if(requestData == "" || requestData == slot) {
+            if(requestData.isNil() || requestData == "" || requestData == slot) {
                 this.dfgLobby_.getLocalSlot(slot).value = nil;
                 this.dfgLobby_.removeLocalSlot(slot);
 
@@ -204,7 +204,7 @@ class Onboard {
 
         // send info about loaded xobjects
         var data = [ => ];
-        if(resend && requestData == "") {
+        if(resend && (requestData.isNil() || requestData == "")) {
             data = doDfgLoad_();
         };
 
@@ -214,14 +214,14 @@ class Onboard {
     };
 
     // stop all xobjects
-    function doDfgStop_(checkStopped, requestData) {
+    function doDfgStop_(checkStopped, requestData = nil) {
         var stopped = false;
         var stoppedXo = [];
 
         for(var slot: this.dfgLobby_.localSlotNames()) {
             var xo = this.dfgLobby_.getLocalSlot(slot).value();
             if(xo.hasSlot("stopXO") && xo.hasSlot("getState") && xo.getState() == this.xobjectStates_["STATE_STARTED"]) {
-                if(requestData == "" || requestData == slot) {
+                if(requestData.isNil() || requestData == "" || requestData == slot) {
                     xo.stopXO();
                     stopped = true;
                     stoppedXo << slot;
@@ -237,14 +237,14 @@ class Onboard {
     };
 
     // start all xobjects
-    function doDfgStart_(requestData) {
+    function doDfgStart_(requestData = nil) {
         var started = false;
         var startedXo = [];
 
         for(var slot: this.dfgLobby_.localSlotNames()) {
             var xo = this.dfgLobby_.getLocalSlot(slot).value();
             if(xo.hasSlot("startXO") && xo.hasSlot("getState") && xo.getState() != this.xobjectStates_["STATE_STARTED"]) {
-                if(requestData == "" || requestData == slot) {
+                if(requestData.isNil() || requestData == "" || requestData == slot) {
                     xo.startXO();
                     started = true;
                     startedXo << slot;
@@ -290,25 +290,18 @@ class Onboard {
                 var targetId = l["target"]["id"];
                 var targetPort = l["target"]["port"];
 
-                //debug
-                //echo("...local slot names: " + this.dfgLobby_.localSlotNames());
-                //echo("...try connect: " + sourceId + "." + sourcePort + " >> " + targetId + "." + targetPort);
-
                 if(this.dfgLobby_.hasLocalSlot(sourceId) && this.dfgLobby_.hasLocalSlot(targetId)) {
                     var source = this.dfgLobby_.getLocalSlot(sourceId).value();
                     var target = this.dfgLobby_.getLocalSlot(targetId).value();
 
                     if(source.hasLocalSlot(sourcePort) && target.hasLocalSlot(targetPort)) {
-                        //debug
-                        //echo("...connecting: " + sourceId + "." + sourcePort + " >> " + targetId + "." + targetPort);
-
                         source.getLocalSlot(sourcePort) >>  target.getLocalSlot(targetPort);
                     };
                 };
             };
         }
         catch(var ex) {
-            doDfgReset_(false, "");
+            doDfgReset_(false);
             throw ex;
         };
 
