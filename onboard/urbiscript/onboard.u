@@ -186,6 +186,8 @@ class Onboard {
 
     // stop all xobjects and delete them and optionally resend info about loaded xobjects
     function doDfgReset_(resend) {
+        var destroyedXo = [];
+
         // stop all xobjects
         doDfgStop_(false);
 
@@ -193,24 +195,31 @@ class Onboard {
         for(var slot: this.dfgLobby_.localSlotNames()) {
             this.dfgLobby_.getLocalSlot(slot).value = nil;
             this.dfgLobby_.removeLocalSlot(slot);
+
+            destroyedXo << slot;
         };
 
         // send info about loaded xobjects
+        var data = [ => ];
         if(resend) {
-            return doDfgLoad_();
+            data = doDfgLoad_();
         };
 
-        return "";
+        data["destroyed"] = destroyedXo;
+
+        return data;
     };
 
     // stop all xobjects
     function doDfgStop_(checkStopped) {
         var stopped = false;
+        var stoppedXo = [];
 
         for(var slot: this.dfgLobby_.localSlotNames()) {
             if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("stopXO")) {
                 this.dfgLobby_.getLocalSlot(slot).value().stopXO();
                 stopped = true;
+                stoppedXo << slot;
             };
         };
 
@@ -218,18 +227,19 @@ class Onboard {
             throw Exception.new("Nothing to stop!");
         };
 
-        // TODO: what to return
-        return "";
+        return stoppedXo;
     };
 
     // start all xobjects
     function doDfgStart_() {
         var started = false;
+        var startedXo = [];
 
         for(var slot: this.dfgLobby_.localSlotNames()) {
             if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("startXO")) {
                 this.dfgLobby_.getLocalSlot(slot).value().startXO();
                 started = true;
+                startedXo << slot;
             };
         };
 
@@ -237,7 +247,7 @@ class Onboard {
             throw Exception.new("Nothing to start!");
         };
 
-        return "";
+        return startedXo;
     };
     
     // reset old dfg and create new one
