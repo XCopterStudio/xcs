@@ -147,7 +147,7 @@ class Onboard {
                     case "DFG_CREATE":
                         responseData = doDfgCreate_(requestData);
                     case "DFG_START":
-                        responseData = doDfgStart_();
+                        responseData = doDfgStart_(requestData);
                     case "DFG_STOP":
                         responseData = doDfgStop_(true);
                     case "DFG_RESET":
@@ -231,18 +231,20 @@ class Onboard {
     };
 
     // start all xobjects
-    function doDfgStart_() {
+    function doDfgStart_(requestData) {
         var started = false;
         var startedXo = [];
 
         for(var slot: this.dfgLobby_.localSlotNames()) {
             if(this.dfgLobby_.getLocalSlot(slot).value().hasSlot("startXO")) {
-                this.dfgLobby_.getLocalSlot(slot).value().startXO();
-                started = true;
-                startedXo << slot;
+                if(requestData == "" || requestData == slot) {
+                    this.dfgLobby_.getLocalSlot(slot).value().startXO();
+                    started = true;
+                    startedXo << slot;
+                };
             };
         };
-
+        
         if(!started) {
             throw Exception.new("Nothing to start!");
         };
@@ -254,11 +256,7 @@ class Onboard {
     function doDfgCreate_(requestData) {
         var created = false;
 
-        try {
-            //del
-            // reset dfg
-            //doDfgReset_(false);
-            
+        try {            
             // prototypes
             for(var p: requestData["prototype"]) {
                 var id = p["id"];
