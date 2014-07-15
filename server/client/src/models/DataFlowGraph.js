@@ -202,7 +202,6 @@ var DataFlowGraph = Backbone.Model.extend({
             }
         }
         
-        //TODO: what about removing last prototype?
         // check deleted protypes
         var p2Del = [];
         //console.log("..." + this.get("xprototype").length);
@@ -245,16 +244,16 @@ var DataFlowGraph = Backbone.Model.extend({
         this.sendRequest("DFG_CREATE", dfg, response);
     },
     
-    requestStart: function(response) {
-        this.sendRequest("DFG_START", "", response);
+    requestStart: function(modelId, response) {
+        this.sendRequest("DFG_START", modelId, response);
     },
     
-    requestStop: function(response) {
-        this.sendRequest("DFG_STOP", "", response);
+    requestStop: function(modelId, response) {
+        this.sendRequest("DFG_STOP", modelId, response);
     },
     
-    requestReset: function(response) {
-        this.sendRequest("DFG_RESET", "", response);
+    requestReset: function(modelId, response) {
+        this.sendRequest("DFG_RESET", modelId, response);
     },
     
     requestSaveDfg: function(dfg, filename, rewrite, response) {

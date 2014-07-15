@@ -8,8 +8,8 @@ Ekf {
     c4  6.108
     c5  0.175
     c6  4.363 
-    ;c7  0.175
-    c7  0.000875
+    c7  0.175
+    ;c7  0.000875
     c8  1.4
     c9  1.4
   }
@@ -18,29 +18,29 @@ Ekf {
   {
     roll  1
     pitch 1
-    yaw   10
+    yaw   80
     gaz   1
   }
   
   ImuVariance
   {
     z           0.0004
-    velocityX   0.000025
-    velocityY   0.000025
+    velocityX   0.0002
+    velocityY   0.0002
     velocityZ   0.01
     phi         0.0003
     theta       0.0003
-    velocityPsi 0.005
+    velocityPsi 0.0012
   }
 
   PtamVariance
   {
-    x     0.01
-    y     0.01
-    z     0.01
-    phi   0.122
-    theta 0.122
-    psi   0.122
+    x     0.0001
+    y     0.0001
+    z     0.0001
+    phi   0.0003
+    theta 0.0003
+    psi   0.0003
   }
 }
 

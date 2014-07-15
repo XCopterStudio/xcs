@@ -2,6 +2,80 @@
 /*jslint browser: true*/
 /*global $, jQuery*/
 
+/****************/
+/* CONTEXT MENU */
+/****************/
+(function ($, window) {
+    $.fn.contextMenu = function (options) {   
+        return this.each(function () {
+            $(this).on("contextmenu", function (e) {
+                // show context menu
+                $(options.menuSelector)
+                    .data("contextMenuTarget", $(e.currentTarget))
+                    .show()
+                    .css({
+                        left: getLeft(e),
+                        top: getTop(e),
+                    })
+                    .off('click')
+                    .on('click', function (e) {
+                        // hide context menu
+                        $(this).hide();
+                
+                        // get information about click action
+                        var target = $(this).data("contextMenuTarget");
+                        var selectedMenuItem = $(e.target);
+                        
+                        // call click action
+                        options.menuSelected.call(this, target, selectedMenuItem);
+                });
+                
+                return false;
+            });
+    
+            //make sure menu closes on any click
+            $(options.parentSelector).click(function () {
+                $(options.menuSelector).hide();
+            });
+        });
+    
+        function getLeft(e) {
+            // select parent element - bordet for context menu
+            var parent = $(options.parentSelector);
+            
+            // get coordinates
+            var mouseX = e.pageX - parent.offset().left;
+            var parentWidth = parent.width(); //$(window).width();
+            var menuWidth = $(options.menuSelector).width();
+
+            // determine if the menu will drop left/right
+            if (mouseX + menuWidth > parentWidth && menuWidth < mouseX) {
+                return e.pageX - menuWidth;
+            } 
+            
+            return e.pageX;
+        }        
+        
+        function getTop(e) {
+            // select parent element - bordet for context menu
+            var parent = $(options.parentSelector);
+            
+            // get coordinates
+            var mouseY = e.pageY - parent.offset().top;
+            var parentHeight = parent.height();
+            var menuHeight = $(options.menuSelector).height();
+            
+            // determine if the menu will drop up/down
+            if (mouseY + menuHeight > parentHeight && menuHeight < mouseY) {
+                return e.pageY - menuHeight;
+            } 
+            
+            return e.pageY;
+        }
+    
+    };
+})(jQuery, window);
+
 $.fn.toggleClick = function () {
     'use strict';
     var methods = arguments, // store the passed arguments for future reference

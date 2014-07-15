@@ -1,6 +1,6 @@
 var DfgState = ENUM(
     "DFG_STATE_NODES_LOADED", 
-    "DFG_STATE_CREATED", "DFG_STATE_STARTED", "DFG_STATE_STOPPED", "DFG_STATE_DESTROYED"//,    // DFG STATE
+    "DFG_STATE_NOTCREATED", "DFG_STATE_CREATED", "DFG_STATE_STARTED", "DFG_STATE_STOPPED" //,    // DFG STATE
     //"DFG_STATE_USER_DFG_LOADED", "DFG_STATE_DEFAULT_DFG_LOADED", "DFG_STATE_NODE_DFG_LOADED"    // LOADED DFG TYPE
     );
 
@@ -16,13 +16,6 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgModels : {
         addModel: function(id, model) {
             this[id] = model;
-            
-            var self = this;
-            
-            // remove model on double click
-            $('g[model-id="' + id + '"]').dblclick(function(eventObject){
-                self.removeModel(this.getAttribute('model-id'));
-            }); 
         },
         
         removeModel: function(id) {
@@ -36,7 +29,7 @@ var DataFlowGraphView = Backbone.View.extend({
             var ps = [];
             for(var p in this) {
                 if (this.hasOwnProperty(p) && !_.isFunction(this[p])) {
-                    ps.push(this[p]);
+                    ps.push(p);
                 }
             }
             
@@ -44,11 +37,22 @@ var DataFlowGraphView = Backbone.View.extend({
                 this.removeModel(ps[i]);
             }
         },
+        
+        count: function() {
+            var c = 0;
+            for(var p in this) {
+                if (this.hasOwnProperty(p) && !_.isFunction(this[p])) {
+                    ++c;
+                }
+            }
+            
+            return c;
+        },
     },
     
     dfgCounter : [],
     
-    dfgState_ : DfgState.DFG_STATE_DESTROYED,
+    dfgState_ : DfgState.DFG_STATE_NOTCREATED,
     
     initialize : function() {
         this.model = new DataFlowGraph();
@@ -75,7 +79,7 @@ var DataFlowGraphView = Backbone.View.extend({
     ** DATA FLOW GRAPH SECTION **
     ****************************/
     initializeDfg : function() {
-        this.onStateChanged();
+        //this.onStateChanged();
         
         var self = this;
         
@@ -278,8 +282,40 @@ var DataFlowGraphView = Backbone.View.extend({
         
         m.setAutoSize();
         
+        m.setState(NodeState.NOTCREATED);
+        
         this.dfgGraph.addCell(m);
         this.dfgModels.addModel(modelId, m);
+        
+        //set context menu
+        var self = this;
+        $("#flow-graph-screen .Model").contextMenu({
+            parentSelector:     "#flow-graph-screen",
+            menuSelector:       "#dfg-screen-context-menu",
+            menuSelected:       function (target, selectedMenuItem) {
+                var action = selectedMenuItem.attr("action");
+                var modelId = target.attr("model-id");
+                var response;
+                switch(action) {
+                    case "CREATE":
+                        self.dfgCreate(response, modelId)
+                        break;
+                    case "START":
+                        self.dfgStart(response, modelId);
+                        break;
+                    case "STOP":
+                        self.dfgStop(response, modelId);
+                        break;
+                    case "DESTROY":
+                        self.dfgDestroy(response, modelId);
+                        break;
+                    case "DELETE":
+                        self.dfgDestroy(response, modelId);
+                        self.dfgModels.removeModel(modelId);
+                        break;
+                }
+            }
+        });
         
         return modelId;
     },
@@ -368,6 +404,10 @@ var DataFlowGraphView = Backbone.View.extend({
         // default value 4 append is false
         append = typeof append !== 'undefined' ? append : false;
         
+        if(!dfg) {
+            return;
+        }
+        
         try {
             if(!append) {
                 this.dfgReset(false);
@@ -419,7 +459,7 @@ var DataFlowGraphView = Backbone.View.extend({
         privatePrototype = privatePrototype != true ? false : true;
         
         //DEBUG
-        console.log((privatePrototype ? "onPrototypePrivateAdd: " : "onPrototypeAdd: ") + JSON.stringify(modelPrototype.toJSON()));
+        //console.log((privatePrototype ? "onPrototypePrivateAdd: " : "onPrototypeAdd: ") + JSON.stringify(modelPrototype.toJSON()));
         
         // get prototype name
         var prototypeName = modelPrototype.get("name");
@@ -448,33 +488,6 @@ var DataFlowGraphView = Backbone.View.extend({
     
     onPrototypePrivateAdd : function(modelPrototype) {
         this.onPrototypeAdd(modelPrototype, true);
-        //del
-//        //DEBUG
-//        console.log("onPrototypePrivateAdd: " + JSON.stringify(modelClone.toJSON()));
-//        
-//        //watch 4 changes
-//        this.listenTo(modelClone, "change", this.onPrototypePrivateChange);
-//        
-//        // TODO: add new clone 2 toolbox
-//        //...
-//        
-//        // get prototype name
-//        var cloneName = modelClone.get("name");
-//        var cloneId = this.trimId(cloneName);
-//        
-//        // get all xvars
-//        modelClone.get("xvar").forEach(function(xvar) {
-//            var xvarName = xvar.get("name");
-//            var xvarSynType = xvar.get("synType");
-//            var xvarSemType = xvar.get("semType");
-//        });
-//        
-//        // get all xinputports
-//        modelClone.get("xinputPort").forEach(function(xvar) {
-//            var xinputPortName = xvar.get("name");
-//            var xinputPortSynType = xvar.get("synType");
-//            var xinputPortSemType = xvar.get("semType");
-//        });
     },
     
     onPrototypeRemove : function(modelPrototype, privatePrototype) {
@@ -482,7 +495,7 @@ var DataFlowGraphView = Backbone.View.extend({
         privatePrototype = privatePrototype != true ? false : true;
 
         //DEBUG
-        console.log((privatePrototype ? "onPrototypePrivateRemove: " : "onPrototypeRemove: ") + JSON.stringify(modelPrototype.toJSON()));
+        //console.log((privatePrototype ? "onPrototypePrivateRemove: " : "onPrototypeRemove: ") + JSON.stringify(modelPrototype.toJSON()));
 
         // get prototype name
         var prototypeName = modelPrototype.get("name");
@@ -509,12 +522,6 @@ var DataFlowGraphView = Backbone.View.extend({
     
     onPrototypePrivateRemove : function(modelPrototype) {
         this.onPrototypeRemove(modelPrototype, true);
-        
-        //del
-//        //DEBUG
-//        console.log("onPrototypePrivateRemove: " + JSON.stringify(modelClone.toJSON()));
-//        
-//        //TODO: remove clone from GUI
     },
     
     onPrototypeChange : function(modelPrototype, privatePrototype) {
@@ -522,7 +529,7 @@ var DataFlowGraphView = Backbone.View.extend({
         privatePrototype = privatePrototype != true ? false : true;
         
         //DEBUG
-        console.log((privatePrototype ? "onPrototypePrivateChange: " : "onPrototypeChange: ") + JSON.stringify(modelPrototype.toJSON()));
+        //console.log((privatePrototype ? "onPrototypePrivateChange: " : "onPrototypeChange: ") + JSON.stringify(modelPrototype.toJSON()));
 
         // get prototype name
         var prototypeName = modelPrototype.get("name");
@@ -554,31 +561,6 @@ var DataFlowGraphView = Backbone.View.extend({
     
     onPrototypePrivateChange : function(modelPrototype) {
         this.onPrototypeChange(modelPrototype, true);
-        
-        //del
-//        //DEBUG
-//        console.log("onPrototypePrivateChange " + JSON.stringify(modelClone.toJSON()));
-//        
-//        //TODO: change existed clone
-//        //...
-//        
-//        // get prototype name
-//        var cloneName = modelClone.get("name");
-//        var cloneId = this.trimId(cloneName);
-//        
-//        // get all xvars
-//        modelClone.get("xvar").forEach(function(xvar) {
-//            var xvarName = xvar.get("name");
-//            var xvarSynType = xvar.get("synType");
-//            var xvarSemType = xvar.get("semType");
-//        });
-//        
-//        // get all xinputports
-//        modelClone.get("xinputPort").forEach(function(xvar) {
-//            var xinputPortName = xvar.get("name");
-//            var xinputPortSynType = xvar.get("synType");
-//            var xinputPortSemType = xvar.get("semType");
-//        });
     },
     
     onInputChange : function(xcState) {
@@ -663,7 +645,14 @@ var DataFlowGraphView = Backbone.View.extend({
                     self.model.setSavedDfg(responseData.savedDfg);
                 }
                 if(responseData.ddfg) {
-                    self.model.setDdfg(responseData.ddfg);
+                    if(self.dfgModels.count() == 0) {
+                        self.model.setDdfg("");
+                        self.model.setDdfg(responseData.ddfg);
+                    }
+                    //debug
+                    else {
+                        console.log("!!! DDFG will not be loaded - DFG contains " + self.dfgModels.count() + " nodes!");
+                    }
                 }
             }
             
@@ -679,7 +668,7 @@ var DataFlowGraphView = Backbone.View.extend({
         });
     },
     
-    dfgCreate : function(response) {
+    dfgCreate : function(response, modelId) {
         // load dfg 2 json object
         var jsonDfg = this.dfgGraph.toJSON()
         
@@ -687,14 +676,13 @@ var DataFlowGraphView = Backbone.View.extend({
             // prepare object 4 dfg info
             var dfg = {
                 prototype: [],
-                clone: [],
                 link: []
             };
                 
             for(var i = 0; i < jsonDfg.cells.length; ++i) {
                 var cell = jsonDfg.cells[i];
                 
-                // prototypes and clones
+                // nodes
                 if(cell.inPorts && cell.outPorts && cell.id && cell.origId) {
                     // load prototypes info
                     var prototypeId = cell.origId;
@@ -705,14 +693,17 @@ var DataFlowGraphView = Backbone.View.extend({
                         return;
                     }
                     
+                    if(modelId && modelId != cloneId) {
+                        continue;
+                    }
+                    
                     // prepate loaded prototypes info 4 sending
                     dfg.prototype.push({
                         id: cloneId,
                         name: modelPrototype.get("name"),
                     });
-                    
-                    //TODO: load and send information about clones
                 }
+                
                 // links
                 else if(cell.source && cell.target && cell.source.id && cell.target.id && cell.type && cell.type == "link") {
                     // prepare links info 4 sending
@@ -732,61 +723,114 @@ var DataFlowGraphView = Backbone.View.extend({
             // send request
             var self = this;
             self.model.requestCreate(dfg, function(id, responseType, responseData) {
+                // set nodes states
+                if(responseData) {
+                    for(var i = 0; i < responseData.length; ++i) {
+                        var model = self.dfgModels[responseData[i]];
+                        if(model) {
+                            model.setState(NodeState.CREATED);
+                        }
+                    }
+                }
+                
                 //response action
                 if(response) {
                     response();
                 }
                 
                 // set state - must be at the end
-                if(responseType == ResponseType.Done) {
+                if(responseType == ResponseType.Done && !modelId) {
                     self.setDfgState(DfgState.DFG_STATE_CREATED);
                 }
             });
         }
     },
     
-    dfgStart : function(response) {
+    dfgStart : function(response, modelId) {
         var self = this;
-        self.model.requestStart(function(id, responseType, responseData) {
+        self.model.requestStart(modelId, function(id, responseType, responseData) {
+            // set nodes states
+            if(responseData) {
+                for(var i = 0; i < responseData.length; ++i) {
+                    var model = self.dfgModels[responseData[i]];
+                    if(model) {
+                        model.setState(NodeState.STARTED);
+                    }
+                }
+            }
+            
             //response action
             if(response) {
                 response();
             }
             
             // set state - must be at the end
-            if(responseType == ResponseType.Done) {
+            if(responseType == ResponseType.Done && !modelId) {
                 self.setDfgState(DfgState.DFG_STATE_STARTED);
             }
         });
     },
     
-    dfgStop : function(response) {
+    dfgStop : function(response, modelId) {
         var self = this;
-        self.model.requestStop(function(id, responseType, responseData) {
+        self.model.requestStop(modelId, function(id, responseType, responseData) {
+            // set nodes states
+            if(responseData) {
+                for(var i = 0; i < responseData.length; ++i) {
+                    var model = self.dfgModels[responseData[i]];
+                    if(model) {
+                        model.setState(NodeState.STOPPED);
+                    }
+                }
+            }
+            
             if(response) {
                 response();
             }
             
             // set state - must be at the end
-            if(responseType == ResponseType.Done) {
+            if(responseType == ResponseType.Done && !modelId) {
                 self.setDfgState(DfgState.DFG_STATE_STOPPED);
             }
         });
     },
     
-    dfgDestroy: function(response) {
+    dfgDestroy: function(response, modelId, reset) {
+        // default value 4 reset is false
+        reset = typeof reset !== 'undefined' ? reset : false;
+        
         var self = this;
-        self.model.reset();
-        self.model.requestReset(function(id, responseType, responseData) {
+        
+        if(reset) {
+            self.model.reset();
+        }
+        
+        self.model.requestReset(modelId, function(id, responseType, responseData) {
             if(responseType == ResponseType.Done) {
-                if(responseData.prototype) {
-                    self.model.setPrototype(responseData.prototype);
+                if(reset) {
+                    if(responseData.prototype) {
+                        self.model.setPrototype(responseData.prototype);
+                    }
+                    if(responseData.prototypePrivate) {
+                        self.model.setPrototypePrivate(responseData.prototypePrivate);
+                    }
+                    if(responseData.savedDfg) {
+                        self.model.setSavedDfg(responseData.savedDfg);
+                    }
+                    if(responseData.ddfg) {
+                        self.model.setDdfg("");
+                        self.model.setDdfg(responseData.ddfg);
+                    }
                 }
-                if(responseData.prototypePrivate) {
-                    self.model.setPrototypePrivate(responseData.prototypePrivate);
-                }
-                if(responseData.savedDfg) {
-                    self.model.setSavedDfg(responseData.savedDfg);
+                
+                // set nodes states
+                if(responseData.destroyed) {
+                    for(var i = 0; i < responseData.destroyed.length; ++i) {
+                        var model = self.dfgModels[responseData.destroyed[i]];
+                        if(model) {
+                            model.setState(NodeState.NOTCREATED);
+                        }
+                    }
                 }
             }
             
@@ -795,8 +839,8 @@ var DataFlowGraphView = Backbone.View.extend({
             }
             
             // set state - must be at the end
-            if(responseType == ResponseType.Done) {
-                self.setDfgState(DfgState.DFG_STATE_DESTROYED);
+            if(responseType == ResponseType.Done && !modelId) {
+                self.setDfgState(DfgState.DFG_STATE_NOTCREATED);
             }
         });
     },
@@ -809,7 +853,8 @@ var DataFlowGraphView = Backbone.View.extend({
         this.dfgGraph.clear();
         
         if(all) {
-            this.dfgDestroy(response);
+            var modelId;
+            this.dfgDestroy(response, modelId, true);
         }
         else if(response) {
             response();
@@ -893,7 +938,7 @@ var DataFlowGraphView = Backbone.View.extend({
                 this.dfgState_ |= state;
                 stateSetted = true;
                 break;
-            case DfgState.DFG_STATE_DESTROYED:
+            case DfgState.DFG_STATE_NOTCREATED:
                 if(((this.dfgState_ & DfgState.DFG_STATE_STOPPED) == DfgState.DFG_STATE_STOPPED) ||
                   ((this.dfgState_ & DfgState.DFG_STATE_CREATED) == DfgState.DFG_STATE_CREATED)) {
                     // remove old state
@@ -906,9 +951,9 @@ var DataFlowGraphView = Backbone.View.extend({
                 }
                 break;
             case DfgState.DFG_STATE_CREATED:
-                if(((this.dfgState_ & DfgState.DFG_STATE_DESTROYED) == DfgState.DFG_STATE_DESTROYED)) {
+                if(((this.dfgState_ & DfgState.DFG_STATE_NOTCREATED) == DfgState.DFG_STATE_NOTCREATED)) {
                     // remove old state
-                    this.dfgState_ &= ~DfgState.DFG_STATE_DESTROYED;
+                    this.dfgState_ &= ~DfgState.DFG_STATE_NOTCREATED;
                     
                     // add new state
                     this.dfgState_ |= state;
@@ -948,9 +993,9 @@ var DataFlowGraphView = Backbone.View.extend({
         //debug
         //console.log("... new states: " + DfgState.getNames(this.dfgState_));
         
-        if(stateSetted) {
-            this.onStateChanged();    
-        }
+//        if(stateSetted) {
+//            this.onStateChanged();    
+//        }
     },
     
     onStateChanged : function() {
@@ -990,7 +1035,7 @@ var DataFlowGraphView = Backbone.View.extend({
             buttons.saveDfg.disabled = false; 
             buttons.loadDfg.disabled = false;
         
-            if(((this.dfgState_ & DfgState.DFG_STATE_DESTROYED) == DfgState.DFG_STATE_DESTROYED)) {
+            if(((this.dfgState_ & DfgState.DFG_STATE_NOTCREATED) == DfgState.DFG_STATE_NOTCREATED)) {
                 buttons.start.disabled = true;
                 buttons.stop.disabled = true;
                 buttons.destroy.disabled = true;

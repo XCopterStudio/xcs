@@ -34,11 +34,11 @@ void XLocalization::onChangeAltitude(double altitude) {
 
 void XLocalization::onChangeTimeImu(double internalTime) {
     if (imuTimeShift_ == std::numeric_limits<double>::max()) {
-        imuTimeShift_ = internalTime - timeFromStart();
+        imuTimeShift_ = internalTime - timeFromStart() + IMU_DELAY;
     }
 
-    double ekfTime = internalTime - imuTimeShift_ - IMU_DELAY;
-    if (std::abs(ekfTime - lastMeasurementTime_) > 1e-10) {
+    double ekfTime = internalTime - imuTimeShift_;
+    if (std::abs(ekfTime - lastMeasurementTime_) > 1e-10){
 
         lastMeasurement_.velocity.z /= std::abs(ekfTime - lastMeasurementTime_);
         lastMeasurement_.angularRotationPsi /= std::abs(ekfTime - lastMeasurementTime_);
@@ -71,7 +71,7 @@ void XLocalization::onChangeVideo(urbi::UImage image) {
 }
 
 void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
-    double ekfTime = internalTime - imuTimeShift_ - CAM_DELAY;
+    double ekfTime = internalTime - imuTimeShift_;
 
     // convert image to grayscale for PTAM
     urbi::UImage bwImage;
