@@ -245,17 +245,15 @@ var DataFlowGraph = Backbone.Model.extend({
     },
     
     requestStart: function(modelId, response) {
-        // default value 4 modelId is ""
-        modelId = typeof modelId !== 'undefined' ? modelId : "";
         this.sendRequest("DFG_START", modelId, response);
     },
     
-    requestStop: function(response) {
-        this.sendRequest("DFG_STOP", "", response);
+    requestStop: function(modelId, response) {
+        this.sendRequest("DFG_STOP", modelId, response);
     },
     
-    requestReset: function(response) {
-        this.sendRequest("DFG_RESET", "", response);
+    requestReset: function(modelId, response) {
+        this.sendRequest("DFG_RESET", modelId, response);
     },
     
     requestSaveDfg: function(dfg, filename, rewrite, response) {

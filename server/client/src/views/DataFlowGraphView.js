@@ -300,13 +300,12 @@ var DataFlowGraphView = Backbone.View.extend({
                         self.dfgStart(response, modelId);
                         break;
                     case "STOP":
+                        self.dfgStop(response, modelId);
                         break;
                     case "DESTROY":
+                        self.dfgDestroy(response, modelId);
                         break;
                 }
-//                var msg = "You selected the menu item '" + selectedMenuItem.attr("action") +
-//                    "' on the value '" + target.attr("model-id") + "'";
-//                console.log(msg);
             }
         });
         
@@ -758,9 +757,9 @@ var DataFlowGraphView = Backbone.View.extend({
         });
     },
     
-    dfgStop : function(response) {
+    dfgStop : function(response, modelId) {
         var self = this;
-        self.model.requestStop(function(id, responseType, responseData) {
+        self.model.requestStop(modelId, function(id, responseType, responseData) {
             // set nodes states
             if(responseData) {
                 for(var i = 0; i < responseData.length; ++i) {
@@ -776,16 +775,16 @@ var DataFlowGraphView = Backbone.View.extend({
             }
             
             // set state - must be at the end
-            if(responseType == ResponseType.Done) {
+            if(responseType == ResponseType.Done && !modelId) {
                 self.setDfgState(DfgState.DFG_STATE_STOPPED);
             }
         });
     },
     
-    dfgDestroy: function(response) {
+    dfgDestroy: function(response, modelId) {
         var self = this;
-        self.model.reset();
-        self.model.requestReset(function(id, responseType, responseData) {
+        //self.model.reset();
+        self.model.requestReset(modelId, function(id, responseType, responseData) {
             if(responseType == ResponseType.Done) {
                 if(responseData.prototype) {
                     self.model.setPrototype(responseData.prototype);
@@ -817,7 +816,7 @@ var DataFlowGraphView = Backbone.View.extend({
             }
             
             // set state - must be at the end
-            if(responseType == ResponseType.Done) {
+            if(responseType == ResponseType.Done && !modelId) {
                 self.setDfgState(DfgState.DFG_STATE_NOTCREATED);
             }
         });
