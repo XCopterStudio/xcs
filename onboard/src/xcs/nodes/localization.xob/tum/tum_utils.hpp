@@ -25,7 +25,7 @@ inline SE3Element vectorToSe3(const TooN::Vector<6> &pose) {
 
     TooN::Matrix<3, 3> mat;
     mat(0, 0) = cPsi * cPhi + sPsi * sThe * sPhi;
-    mat(0, 1) = sPsi * sThe;
+    mat(0, 1) = sPsi * cThe;
     mat(0, 2) = cPsi * sPhi - cPhi * sPsi * sThe;
 
     mat(1, 0) = -sPsi * cPhi + cPsi * sThe * sPhi;
@@ -47,11 +47,7 @@ inline TooN::Vector<3> so3ToAngles(const TooN::SO3<> &pose) {
 
     result[0] = atan2(-mat(2, 0), mat(2, 2)); // phi
     result[1] = atan2(mat(2, 1), hypot(mat(2, 0), mat(2, 2))); // theta
-    if(result[1] == 0) {
-        result[2] = atan2(0, 1);
-    } else {
-        result[2] = atan2(mat(0, 1) / sin(result[1]), mat(1, 1) / cos(result[1])); // psi
-    }
+    result[2] = atan2(mat(0, 1), mat(1, 1)); // psi
 
     return result;
 }
