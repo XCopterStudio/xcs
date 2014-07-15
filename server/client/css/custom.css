@@ -30,7 +30,6 @@ body { background-image: url("../image/first_aid_kit.png"); }
 .inline-middle { display: inline-block; vertical-align: middle; }
 
 /*** GRIDSTER ***/
-
 .widget { background-color: whitesmoke; border-radius: 3px; }
 
 .widget-line { font-size: 28pt; line-height: 48pt; text-align: right; }
@@ -49,7 +48,6 @@ body { background-image: url("../image/first_aid_kit.png"); }
 }
 
 /*** SIDEPANELs ***/
-
 .sidepanel {
     margin: 10px auto;
     position: absolute;
@@ -69,14 +67,12 @@ body { background-image: url("../image/first_aid_kit.png"); }
 .menu-item { background-color: whitesmoke; }
 
 /*** DFG ***/
-
 .DFG {
     overflow: auto;
     height: 540px;
 }
 
 /*** DROPDOWN SUBMENU ***/
-
 .dropdown-menu .sub-menu-left {
     right: 100%;
     position: absolute;
@@ -106,7 +102,6 @@ body { background-image: url("../image/first_aid_kit.png"); }
 }
 
 /*** WAIT VIEW ***/
-
 .wait-container {
     display: inline-block;
     opacity: 0;
@@ -142,4 +137,14 @@ body { background-image: url("../image/first_aid_kit.png"); }
     opacity: 0.9;
     width: 100%;
     height: 100%;
+}
+
+/*** FLASH ***/
+#flash-messages {
+    float: right; 
+    position: fixed; 
+    top: 5px; 
+    right: 5px; 
+    z-index: 999; 
+    opacity: 0.75;
 }
