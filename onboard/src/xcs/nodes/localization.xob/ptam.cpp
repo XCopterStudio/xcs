@@ -20,14 +20,6 @@ using namespace xcs;
 using namespace xcs::nodes;
 using namespace xcs::nodes::localization;
 
-void Ptam::on_key_down(int key) {
-    if (key == 32) { // space
-        if (ptamReady_) {
-            ptamTracker_->pressSpacebar();
-        }
-    }
-}
-
 Ptam::Ptam(Ekf &ekf) :
   ptamReady_(false),
   ekf_(ekf) {
@@ -361,8 +353,16 @@ void Ptam::measurementImu(const DroneStateMeasurement measurement, const double 
     imuMeasurements_.push_back(copyMeasurement);
 }
 
-void Ptam::pressSpacebar() {
+void Ptam::takeInitKF() {
     ptamTracker_->pressSpacebar();
+}
+
+void Ptam::takeKF() {
+    forceKF_ = true;
+}
+
+void Ptam::reset() {
+    resetPtamRequested_;
 }
 
 TooN::Vector<3> Ptam::evalNavQue(Timestamp from, Timestamp to, bool* zCorrupted, bool* allCorrupted) {

@@ -55,15 +55,25 @@ public:
      */
     void measurementImu(const DroneStateMeasurement measurement, const double timestamp);
 
-    virtual void on_key_down(int key);
-
-    void pressSpacebar();
-
     void cameraParameters(const CameraParameters& values);
     
     void parameters(const Parameters& values);
     
     inline localization::PtamStatusType ptamStatus() { return ptamStatus_; }
+    
+    /*
+     * Control functions
+     */
+    void takeInitKF();
+    
+    void takeKF();
+    
+    /*!
+     * \note handleFrame must be called to take effect of the reset, i.e. PTAM won't
+     * be reset until PTAM is enabled (in XLocalization).
+     */
+    void reset();
+
     
 private:
     typedef std::unique_ptr<Tracker> TrackerPtr;

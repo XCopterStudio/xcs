@@ -4,6 +4,7 @@
 #include <chrono>
 #include <memory>
 #include <mutex>
+#include <atomic>
 
 #include "ekf.hpp"
 #include "ptam.hpp"
@@ -28,6 +29,10 @@ class XLocalization : public XObject {
     static const double IMU_DELAY;
     static const double FLY_CONTROL_SEND_TIME;
     static const double CAM_DELAY;
+    
+    static const std::string CTRL_INIT_KF;
+    static const std::string CTRL_TAKE_KF;
+    static const std::string CTRL_RESET_PTAM;
 
     localization::Ekf ekf_;
 
@@ -43,6 +48,7 @@ class XLocalization : public XObject {
     ::urbi::UImage lastFrame_;
     std::mutex lastFrameMtx_;
     TimePoint lastFrameTime_;
+    std::atomic<bool> ptamEnabled_;
 
     void onChangeVelocity(xcs::CartesianVector measuredVelocity);
     void onChangeRotation(xcs::EulerianVector measuredAnglesRotation);
@@ -57,6 +63,8 @@ class XLocalization : public XObject {
     void onChangeFlyControl(const xcs::FlyControl flyControl);
 
     void onChangePtamControl(const std::string &ptamControl);
+    
+    void onChangePtamEnabled(const bool ptamEnabled);
 
     inline double timeFromStart() {
         return std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -78,6 +86,7 @@ public:
     XInputPort<xcs::FlyControl> flyControl;
     // PTAM control
     XInputPort<std::string> ptamControl;
+    XVar<bool> ptamEnabled;
 
     // computed ekf output
     XVar<xcs::CartesianVector> position;
@@ -85,7 +94,7 @@ public:
     XVar<xcs::EulerianVector> rotation;
     XVar<double> velocityPsi;
     // PTAM status
-    XVar<bool> ptamStatus;
+    XVar<int> ptamStatus;
 
     XLocalization(const std::string &name);
 
