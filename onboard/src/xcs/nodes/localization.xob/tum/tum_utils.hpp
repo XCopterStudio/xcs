@@ -47,7 +47,11 @@ inline TooN::Vector<3> so3ToAngles(const TooN::SO3<> &pose) {
 
     result[0] = atan2(-mat(2, 0), mat(2, 2)); // phi
     result[1] = atan2(mat(2, 1), hypot(mat(2, 0), mat(2, 2))); // theta
-    result[2] = atan2(mat(0, 1), mat(1, 1)); // psi
+    if(result[1] == 0) {
+        result[2] = atan2(0, 1);
+    } else {
+        result[2] = atan2(mat(0, 1) / sin(result[1]), mat(1, 1) / cos(result[1])); // psi
+    }
 
     return result;
 }

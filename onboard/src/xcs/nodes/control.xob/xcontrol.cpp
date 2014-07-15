@@ -23,6 +23,20 @@ void XControl::onChangeDesireSpeed(xcs::SpeedControl desireSpeed){
     control_.desireSpeed(desireSpeed);
 }
 
+void XControl::loadParameters(const std::string &file){
+    Settings settings(file);
+
+    try{
+        control_.setVxPID(settings.get<PID_TYPE>("vxPID.P"), settings.get<PID_TYPE>("vxPID.I"), settings.get<PID_TYPE>("vxPID.D"));
+        control_.setVyPID(settings.get<PID_TYPE>("vyPID.P"), settings.get<PID_TYPE>("vyPID.I"), settings.get<PID_TYPE>("vyPID.D"));
+        control_.setVzPID(settings.get<PID_TYPE>("vzPID.P"), settings.get<PID_TYPE>("vzPID.I"), settings.get<PID_TYPE>("vzPID.D"));
+        control_.setPsiPID(settings.get<PID_TYPE>("psiPID.P"), settings.get<PID_TYPE>("psiPID.I"), settings.get<PID_TYPE>("psiPID.D"));
+    }
+    catch (boost::property_tree::ptree_error error){
+        XCS_LOG_ERROR("Control cannot load parameters from file " << file << "\n With boost error: " << error.what());
+    }
+}
+
 // ================= public functions =====================
 XControl::XControl(const std::string& name) : XObject(name),
 velocity("VELOCITY_ABS"),
@@ -41,20 +55,11 @@ flyControl("FLY_CONTROL")
     XBindFunction(XControl, loadParameters);
     XBindFunction(XControl, start);
     XBindFunction(XControl, stop);
+    XBindFunction(XControl, init);
 }
 
-void XControl::loadParameters(const std::string &file){
-    Settings settings(file);
-
-    try{
-        control_.setVxPID(settings.get<PID_TYPE>("vxPID.P"), settings.get<PID_TYPE>("vxPID.I"), settings.get<PID_TYPE>("vxPID.D"));
-        control_.setVyPID(settings.get<PID_TYPE>("vyPID.P"), settings.get<PID_TYPE>("vyPID.I"), settings.get<PID_TYPE>("vyPID.D"));
-        control_.setVzPID(settings.get<PID_TYPE>("vzPID.P"), settings.get<PID_TYPE>("vzPID.I"), settings.get<PID_TYPE>("vzPID.D"));
-        control_.setPsiPID(settings.get<PID_TYPE>("psiPID.P"), settings.get<PID_TYPE>("psiPID.I"), settings.get<PID_TYPE>("psiPID.D"));
-    }
-    catch (boost::property_tree::ptree_error error){
-        XCS_LOG_ERROR("Control cannot load parameters from file " << file << "\n With boost error: " << error.what());
-    }
+void XControl::init(const std::string &file){
+    loadParameters(file);
 }
 
 XStart(XControl);

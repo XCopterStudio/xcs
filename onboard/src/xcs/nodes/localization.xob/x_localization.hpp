@@ -84,6 +84,8 @@ public:
     XVar<xcs::CartesianVector> velocity;
     XVar<xcs::EulerianVector> rotation;
     XVar<double> velocityPsi;
+    // PTAM status
+    XVar<bool> ptamStatus;
 
     XLocalization(const std::string &name);
 
