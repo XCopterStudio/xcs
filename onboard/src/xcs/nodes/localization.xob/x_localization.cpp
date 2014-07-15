@@ -71,10 +71,6 @@ void XLocalization::onChangeVideo(urbi::UImage image) {
 }
 
 void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
-
-    if (duration2sec(clock_.now() - lastFrameTime_) > 0.5) {
-        return;
-    }
     double ekfTime = internalTime - imuTimeShift_ - CAM_DELAY;
 
     // convert image to grayscale for PTAM
@@ -134,7 +130,7 @@ XLocalization::XLocalization(const std::string &name) :
 
     XBindVarF(video, &XLocalization::onChangeVideo);
     XBindVar(videoTime);
-    UNotifyThreadedChange(videoTime.Data(), &XLocalization::onChangeVideoTime, urbi::LOCK_FUNCTION);
+    UNotifyThreadedChange(videoTime.Data(), &XLocalization::onChangeVideoTime, urbi::LOCK_FUNCTION_DROP);
 
     XBindVarF(flyControl, &XLocalization::onChangeFlyControl);
     XBindVarF(ptamControl, &XLocalization::onChangePtamControl);

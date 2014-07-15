@@ -23,6 +23,8 @@ public:
 
     void initializeScale(const double scale);
 
+    void initializeOffset(const SE3Element& offset);
+
     void updateScale(const TooN::Vector<3> ptamDiff, const TooN::Vector<3> imuDiff, const TooN::Vector<3> ptamPose);
 
     void scalingFixpoint(const TooN::Vector<3> scalingFixpoint) {
@@ -46,6 +48,8 @@ private:
 
     double scale_;
     double initialScale_;
+
+    bool offsetInitialized_;
 
     SE3Element offsetMatrix_;
 

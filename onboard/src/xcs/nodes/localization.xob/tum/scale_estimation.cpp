@@ -9,13 +9,15 @@ const SE3Element ScaleEstimation::droneToFront = SE3Element(TooN::SO3<double>(To
 
 ScaleEstimation::ScaleEstimation() :
   useScalingFixpoint_(false),
-  scale_(1), initialScale_(1) {
+  scale_(1), initialScale_(1),
+  offsetInitialized_(false) {
 
 }
 
-
 void ScaleEstimation::initializeScale(const double scale) {
     initialScale_ = scale_ = scale;
+    offsetMatrix_ = SE3Element();
+    offsetInitialized_ = false;
 
     /* Michal: some magic constants (0.2) from TUM. */
     xyz_sum_PTAMxIMU_ = 0.2;
@@ -27,6 +29,13 @@ void ScaleEstimation::initializeScale(const double scale) {
             TooN::makeVector(0.2, 0.2, 0.2) * sqrt(scale)
             ));
 
+}
+
+void ScaleEstimation::initializeOffset(const SE3Element& offset) {
+    if (!offsetInitialized_) { // TODO obtain both matrices and calculate on demand (and what about anles averaging?)
+        offsetMatrix_ = offset;
+        offsetInitialized_ = true;
+    }
 }
 
 void ScaleEstimation::updateScale(const TooN::Vector<3> ptamDiff, const TooN::Vector<3> imuDiff, const TooN::Vector<3> ptamPose) {

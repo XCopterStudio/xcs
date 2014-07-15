@@ -121,9 +121,13 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     const SE3Element camToWorldU(camPToPtamResult.get_rotation(), camPToPtamResult.get_translation() * scaleEstimation_.scale());
 
     const SE3Element droneToWResult(scaleEstimation_.offsetMatrix() * camToWorldU * scaleEstimation_.droneToFront);
+
+    scaleEstimation_.initializeOffset(droneToWPred * droneToWResult.inverse());
+    dbgPrintSE3("newoff", scaleEstimation_.offsetMatrix(), timestamp);
+
     dbgPrintSE3("dronetowp", droneToWPred, timestamp);
     dbgPrintSE3("dronetowr", droneToWResult, timestamp);
-
+    dbgPrintSE3("offset", scaleEstimation_.offsetMatrix(), timestamp);
 
 
     // init failed?
@@ -236,6 +240,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     // if framesIncludedForScale > 36						===> set framesIncludedForScale=-1 
 
     // include!
+    XCS_LOG_INFO("PTAM (metadata): " << timestamp << " " << ptamTracker_->lastStepResult << " " << static_cast<int>(goodCount_ >= 3));
 
     // TODO: make shure filter is handled properly with permanent roll-forwards.
     if (goodCount_ >= 3) {
@@ -263,9 +268,6 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     }
 
     if (goodCount_ >= 3) {
-        // filter stuff
-        lastScaleEKFtimestamp_ = timestamp;
-
         if (includedTime >= 2.0 && framesIncludedForScaleXYZ_ > 1) // ADD! (if too many, was resetted before...)
         {
             TooN::Vector<3> diffPTAM = ptamPositionForScale - lastPtamPositionForScale_;
@@ -289,9 +291,9 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
                 diffIMU[2] *= zFactor;
 
                 // hidden helluva calculations for scale estimate
-                //scaleEstimation_.updateScale(diffPTAM, diffIMU, scalingFixpoint);
+                scaleEstimation_.updateScale(diffPTAM, diffIMU, scalingFixpoint);
                 ptamMapMaker_->currentScaleFactor = scaleEstimation_.scale();
-                XCS_LOG_INFO("New scale: " << ptamMapMaker_->currentScaleFactor << "from diffs: " << diffPTAM << "; " << diffIMU);
+                XCS_LOG_INFO("New scale: " << ptamMapMaker_->currentScaleFactor << " from diffs: " << diffPTAM << "; " << diffIMU << ", times " << ptamPositionForScaleTakenTimestamp_ << ", " << timestamp);
             }
             framesIncludedForScaleXYZ_ = -1; // causing reset afterwards
         }
@@ -533,6 +535,7 @@ TooN::Vector<3> Ptam::evalNavQue(Timestamp from, Timestamp to, bool* zCorrupted,
     Timestamp firstAdded = 0, lastAdded = 0;
     double firstZ = 0;
     predIMUOnlyForScale_.resetPos();
+    int samples = 0;
 
     { // lock the queue
         lock_guard<mutex> lock(imuMeasurementsMtx_);
@@ -550,6 +553,7 @@ TooN::Vector<3> Ptam::evalNavQue(Timestamp from, Timestamp to, bool* zCorrupted,
                 lastAdded = frontStamp;
                 // add
                 predIMUOnlyForScale_.predictOneStep(*it);
+                samples += 1;
                 // pop
                 //navInfoQueue.pop_front();
             } else {
@@ -558,6 +562,7 @@ TooN::Vector<3> Ptam::evalNavQue(Timestamp from, Timestamp to, bool* zCorrupted,
         }
 
     }
+    cout << from << ";" << to << " " << firstAdded << ";" << lastAdded << " " << samples << endl;
     //printf("QueEval: before: %i; skipped: %i, used: %i, left: %i\n", totSize, skipped, used, navInfoQueue.size());
     predIMUOnlyForScale_.z -= firstZ; // make height to height-diff
 
