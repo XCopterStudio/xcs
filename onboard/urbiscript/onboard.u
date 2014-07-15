@@ -165,7 +165,7 @@ class Onboard {
                 };
             }
             catch(var ex) {
-                //TODO: what to do with errors? send to client?
+                //TODOoo: what to do with errors? send to client? + send current state (all created/started/stopped nodes)
                 echo("ERROR(" + id + "): " + ex.asString());
                 responseData = ex.message;
                 responseType = "Error";
@@ -255,24 +255,27 @@ class Onboard {
         var created = false;
 
         try {
+            //del
             // reset dfg
-            doDfgReset_(false);
+            //doDfgReset_(false);
             
             // prototypes
             for(var p: requestData["prototype"]) {
                 var id = p["id"];
                 var name = p["name"];
 
-                var createPart = "";
-                if(this.xobjectInfo_.has(name)) {
-                    createPart = this.xobjectInfo_[name].name + ".new(" + this.xobjectInfo_[name].initParam + ")";
-                }
-                else {
-                    createPart = id + ".()";
-                };
+                if(!this.dfgLobby_.hasLocalSlot(id)) {
+                    var createPart = "";
+                    if(this.xobjectInfo_.has(name)) {
+                        createPart = this.xobjectInfo_[name].name + ".new(" + this.xobjectInfo_[name].initParam + ")";
+                    }
+                    else {
+                        createPart = id + ".()";
+                    };
 
-                this.dfgLobby_.setSlot(id, System.eval(createPart + ";"));
-                created = true;
+                    this.dfgLobby_.setSlot(id, System.eval(createPart + ";"));
+                    created = true;
+                };
             };
 
             // links
@@ -282,8 +285,21 @@ class Onboard {
                 var targetId = l["target"]["id"];
                 var targetPort = l["target"]["port"];
 
-                this.dfgLobby_.getLocalSlot(sourceId).value().getLocalSlot(sourcePort) >> 
-                    this.dfgLobby_.getLocalSlot(targetId).value().getLocalSlot(targetPort);
+                //debug
+                //echo("...local slot names: " + this.dfgLobby_.localSlotNames());
+                //echo("...try connect: " + sourceId + "." + sourcePort + " >> " + targetId + "." + targetPort);
+
+                if(this.dfgLobby_.hasLocalSlot(sourceId) && this.dfgLobby_.hasLocalSlot(targetId)) {
+                    var source = this.dfgLobby_.getLocalSlot(sourceId).value();
+                    var target = this.dfgLobby_.getLocalSlot(targetId).value();
+
+                    if(source.hasLocalSlot(sourcePort) && target.hasLocalSlot(targetPort)) {
+                        //debug
+                        //echo("...connecting: " + sourceId + "." + sourcePort + " >> " + targetId + "." + targetPort);
+
+                        source.getLocalSlot(sourcePort) >>  target.getLocalSlot(targetPort);
+                    };
+                };
             };
         }
         catch(var ex) {
