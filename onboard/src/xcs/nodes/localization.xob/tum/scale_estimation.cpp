@@ -32,7 +32,7 @@ void ScaleEstimation::initializeScale(const double scale) {
 }
 
 void ScaleEstimation::initializeOffset(const SE3Element& offset) {
-    if (!offsetInitialized_) {
+    if (!offsetInitialized_) { // TODO obtain both matrices and calculate on demand (and what about anles averaging?)
         offsetMatrix_ = offset;
         offsetInitialized_ = true;
     }
