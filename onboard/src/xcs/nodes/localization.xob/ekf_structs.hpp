@@ -20,14 +20,6 @@ struct DroneState {
     DroneState() : angularRotationPsi(0), updateMeasurementID(0) {
     };
 
-    inline DroneState(const TooN::Vector<10> &vector) :
-      position(vector[0], vector[1], vector[2]),
-      velocity(vector[3], vector[4], vector[5]),
-      angles(vector[6], vector[7], vector[8]),
-      angularRotationPsi(vector[9]),
-      updateMeasurementID(0) {
-    }
-
     inline DroneState(const arma::mat &mat) :
       position(mat.at(0, 0), mat.at(1, 0), mat.at(2, 0)),
       velocity(mat.at(3, 0), mat.at(4, 0), mat.at(5, 0)),
@@ -96,8 +88,10 @@ struct CameraMeasurement {
         return measurement;
     }
 
-    inline CameraMeasurement(const TooN::SE3<> &pose) :
-      position(pose.get_translation()[0], pose.get_translation()[1], pose.get_translation()[2]) {
+    inline CameraMeasurement(const TooN::SE3<> &pose) {
+        position.x = pose.get_translation()[0];
+        position.y = pose.get_translation()[1];
+        position.z = pose.get_translation()[2];
         const auto poseAngles = so3ToAngles(pose.get_rotation());
         angles.phi = poseAngles[0];
         angles.theta = poseAngles[1];

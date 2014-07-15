@@ -26,6 +26,8 @@ namespace control{
         void onChangeVelocity(xcs::CartesianVector velocity);
         void onChangeRotation(xcs::EulerianVector rotation);
         void onChangeDesireSpeed(xcs::SpeedControl desireSpeed);
+
+        void loadParameters(const std::string &file);
     public:
         // Incoming data
         xcs::nodes::XInputPort<xcs::CartesianVector> velocity;
@@ -35,7 +37,7 @@ namespace control{
         xcs::nodes::XVar<xcs::FlyControl> flyControl;
 
         XControl(const std::string& name);
-        void loadParameters(const std::string &file);
+        void init(const std::string &file);
         inline void start(){ stoped = false; };
         inline void stop(){ stoped = true; };
     };

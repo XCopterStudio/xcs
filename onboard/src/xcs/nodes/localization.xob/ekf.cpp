@@ -5,6 +5,8 @@
 
 #include <cmath>
 
+#define ARMA_NO_DEBUG
+
 using namespace arma;
 using namespace boost;
 using namespace std;
@@ -113,7 +115,8 @@ DroneStateDistributionChronologic Ekf::predictAndUpdateFromImu(const DroneStateD
         //            imuMeasurements_[measurementIndex].first.angles.theta,
         //            imuMeasurements_[measurementIndex].first.angularRotationPsi);
 
-        newState.first = updateIMU(newState.first, imuMeasurements_[measurementIndex++].first);
+        newState.first = updateIMU(newState.first, imuMeasurements_[measurementIndex].first);
+        measurementIndex++;
         if (saveInterResults) {
             droneStates_.push_back(newState);
         }
@@ -328,8 +331,20 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     newState.first.updateMeasurementID = imuMeasurement.measurementID;
 
     // update deviation
-    newState.second = (mat(10, 10).eye() - gain * measurementJacobian) * state.second;
+    newState.second = (mat(10, 10).eye() - gain*measurementJacobian) * state.second;
 
+    /*mat error = (newStateMean - static_cast<mat>(state.first))*(newStateMean - static_cast<mat>(state.first)).t();
+    printf("error %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e \n", 
+        error.at(0, 0),
+        error.at(1, 1),
+        error.at(2, 2), 
+        error.at(3, 3), 
+        error.at(4, 4), 
+        error.at(5, 5), 
+        error.at(6, 6),
+        error.at(7, 7),
+        error.at(8, 8),
+        error.at(9, 9));*/
 
     //M: printf("EKF: Computed drone updatedState [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
     //        newState.first.position.x, newState.first.position.y, newState.first.position.z,
@@ -363,8 +378,8 @@ DroneStateDistribution Ekf::updateCam(const DroneStateDistribution &state, const
     // compute predicted measurement 
     mat predictedMeasurement(6, 1);
     predictedMeasurement(0, 0) = state.first.position.x;
-    predictedMeasurement(1, 0) = state.first.velocity.y;
-    predictedMeasurement(2, 0) = state.first.velocity.z;
+    predictedMeasurement(1, 0) = state.first.position.y;
+    predictedMeasurement(2, 0) = state.first.position.z;
     predictedMeasurement(3, 0) = state.first.angles.phi;
     predictedMeasurement(4, 0) = state.first.angles.theta;
     predictedMeasurement(5, 0) = state.first.angles.psi;
@@ -373,9 +388,11 @@ DroneStateDistribution Ekf::updateCam(const DroneStateDistribution &state, const
     DroneStateDistribution newState;
     mat newStateMean = static_cast<mat> (state.first) + gain * (static_cast<mat> (camMeasurement) - predictedMeasurement);
     newState.first = newStateMean;
+    newState.first.updateMeasurementID = state.first.updateMeasurementID;
 
     // update deviation
     newState.second = (mat(10, 10).eye() - gain * measurementJacobian) * state.second;
+
 
     //M: printf("EKF: Computed drone updatedState [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
     //        newState.first.position.x, newState.first.position.y, newState.first.position.z,
@@ -519,19 +536,19 @@ void Ekf::flyControl(const FlyControl flyControl, const double timestamp) {
 };
 
 void Ekf::measurementImu(const DroneStateMeasurement &measurement, const double timestamp) {
-    //XCS_LOG_INFO("Inserted new imu measurement with timestamp: " << timestamp);
+    unique_lock<shared_mutex> lock(bigSharedMtx_);
     ImuMeasurementChronologic copyMeasurement(measurement, timestamp);
     copyMeasurement.first.measurementID = IDCounter_++;
-    unique_lock<shared_mutex> lock(bigSharedMtx_);
+    XCS_LOG_INFO("Inserted new imu measurement with timestamp: " << timestamp);
     imuMeasurements_.push_back(copyMeasurement);
     int index = findNearest(droneStates_, timestamp); // TODO: check -1 when findNearest cannot find any state which we can update
     droneStates_.push_back(predictAndUpdateFromImu(droneStates_[index], timestamp));
+    XCS_LOG_INFO("PTAM (imu): " << droneStates_.back().first.first.position.x << " " << droneStates_.back().first.first.position.y << " " << droneStates_.back().first.first.position.z << " " << droneStates_.back().first.first.angles.phi << " " << droneStates_.back().first.first.angles.theta << " " << droneStates_.back().first.first.angles.psi << " " << timestamp);
 };
 
 void Ekf::measurementCam(const CameraMeasurement &measurement, const double timestamp) {
-    XCS_LOG_INFO("Inserted new camera measurement with timestamp: " << timestamp);
     unique_lock<shared_mutex> lock(bigSharedMtx_); // Note: Maybe upgradable lock could be used, but this is not a conditinal writer.
-
+    XCS_LOG_INFO("Inserted new camera measurement with timestamp: " << timestamp);
     int index = findNearest(droneStates_, timestamp);
     DroneStateDistributionChronologic newState = droneStates_[index];
     //delete all old droneStates
@@ -539,11 +556,13 @@ void Ekf::measurementCam(const CameraMeasurement &measurement, const double time
 
     // create new droneStates up to the time of last imuMeasurements
     newState = predict(newState, timestamp);
+    XCS_LOG_INFO("PTAM (cam_predict): " << newState.first.first.position.x << " " << newState.first.first.position.y << " " << newState.first.first.position.z << " " << newState.first.first.angles.phi << " " << newState.first.first.angles.theta << " " << newState.first.first.angles.psi << " " << timestamp);
     newState.first = updateCam(newState.first, measurement);
+    XCS_LOG_INFO("PTAM (cam_update): " << newState.first.first.position.x << " " << newState.first.first.position.y << " " << newState.first.first.position.z << " " << newState.first.first.angles.phi << " " << newState.first.first.angles.theta << " " << newState.first.first.angles.psi << " " << timestamp);
     // save cam update
     droneStates_.push_back(newState);
     // update up to the last imu measurements
-    newState = predictAndUpdateFromImu(newState, imuMeasurements_.back().second, true);
+    predictAndUpdateFromImu(newState, imuMeasurements_.back().second, true);
 
     // clear old imuMeasurements and flyControls
     clearUpToTime(imuMeasurements_, timestamp);

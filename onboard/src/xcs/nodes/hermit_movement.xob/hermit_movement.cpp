@@ -12,7 +12,7 @@ using namespace xcs::nodes::hermit;
 
 const unsigned int HermitMovement::POINTS_ON_METER = 10;
 const double HermitMovement::EPSILON = 0.1;
-const double HermitMovement::MAX_SPEED = 0.5;
+const double HermitMovement::MAX_SPEED = 0.3;
 
 double HermitMovement::computeDistance(const xcs::Checkpoint &targetCheckpoint, const xcs::CartesianVector &actualPosition){
     double temp = hypot(targetCheckpoint.x - actualPosition.x, targetCheckpoint.y - actualPosition.y);
@@ -79,24 +79,24 @@ xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
 
     if (!newCheckpoint_){
         double distance = computeDistance(targetCheckpoint, dronePosition_);
-        //double step = 1.0 / (distance * POINTS_ON_METER);
+        double step = 1.0 / (distance * POINTS_ON_METER);
         double boundSpeed = valueInRange(speed, 0.0, MAX_SPEED);
 
-        //Checkpoint droneCheckpoint(dronePosition_.x, dronePosition_.y, dronePosition_.z,
-        //   0, 0, 0);
+        Checkpoint droneCheckpoint(dronePosition_.x, dronePosition_.y, dronePosition_.z,
+            droneVelocity_.x, droneVelocity_.y, droneVelocity_.z);
 
-        // Checkpoint interCheckpoint = computeHermitPoint(droneCheckpoint, targetCheckpoint, step);
+         Checkpoint interCheckpoint = computeHermitPoint(droneCheckpoint, targetCheckpoint, step);
 
-        /*double deltaX = interCheckpoint.x - dronePosition_.x;
+        double deltaX = interCheckpoint.x - dronePosition_.x;
         double deltaY = interCheckpoint.y - dronePosition_.y;
-        double deltaZ = interCheckpoint.z - dronePosition_.z;*/
+        double deltaZ = interCheckpoint.z - dronePosition_.z;
 
-        double deltaX = targetCheckpoint.x - dronePosition_.x;
+        /*double deltaX = targetCheckpoint.x - dronePosition_.x;
         double deltaY = targetCheckpoint.y - dronePosition_.y;
-        double deltaZ = targetCheckpoint.z - dronePosition_.z;
+        double deltaZ = targetCheckpoint.z - dronePosition_.z;*/
 
-        double norm = 2;
-        //double norm = boundSpeed / std::abs(std::max(deltaX, std::max(deltaY, deltaZ)));
+        //double norm = 2;
+        double norm = boundSpeed / std::max(std::abs(deltaX), std::max(std::abs(deltaY), std::abs(deltaZ)));
 
         if (distance < EPSILON){
             printf("Drone achieved destination: [%f,%f,%f] \n", targetCheckpoint.x, targetCheckpoint.y, targetCheckpoint.z);
@@ -107,11 +107,12 @@ xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
         printf("Drone state: [%f,%f,%f,%f] \n", dronePosition_.x, dronePosition_.y, dronePosition_.z,droneRotation_.psi);
         //TODO: use yaw difference
         //printf("Hermit: Control speed [%f,%f,%f,%f] \n", norm*deltaX*boundSpeed, norm*deltaY*boundSpeed, norm*deltaZ*boundSpeed, 0);
-        return SpeedControl(valueInRange(norm*deltaX*boundSpeed, -boundSpeed, boundSpeed),
+        return SpeedControl(norm*deltaX, norm*deltaY, norm*deltaZ,0);
+        /*return SpeedControl(valueInRange(norm*deltaX*boundSpeed, -boundSpeed, boundSpeed),
             valueInRange(norm*deltaY*boundSpeed, -boundSpeed, boundSpeed),
             valueInRange(norm*deltaZ*boundSpeed, -boundSpeed, boundSpeed),
             0
-            );
+            );*/
     }
     else{
         return SpeedControl();

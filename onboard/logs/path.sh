@@ -9,10 +9,10 @@ FILE=$1
 TMP=tmp.dat
 TMP2=tmp2.dat
 TMP3=tmp3.dat
-POSE_SAMPLE=5
+POSE_SAMPLE=50
 
-grep -v "register" "$FILE" | grep position >$TMP
-grep -v "register" "$FILE" | grep rotation >$TMP2
+grep -v "register" "$FILE" | grep ekf_position >$TMP
+grep -v "register" "$FILE" | grep ekf_rotation >$TMP2
 
 paste "$TMP" "$TMP2" >"$TMP3"
 #TERM_BEG="set term pdfcairo size 10,8; set output 'path$2.pdf'; set grid;"
