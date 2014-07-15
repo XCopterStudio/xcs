@@ -215,6 +215,8 @@
             <li role="presentation"><a tabindex="-1" action="STOP">Stop node</a></li>
             <li role="presentation" class="divider"></li>
             <li role="presentation"><a tabindex="-1" action="DESTROY">Destroy node</a></li>
+            <li role="presentation" class="divider"></li>
+            <li role="presentation"><a tabindex="-1" action="DELETE">Delete node</a></li>
         </ul>
     </div>
     

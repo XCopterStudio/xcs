@@ -16,13 +16,6 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgModels : {
         addModel: function(id, model) {
             this[id] = model;
-            
-            var self = this;
-            
-            // remove model on double click
-            $('g[model-id="' + id + '"]').dblclick(function(eventObject){
-                self.removeModel(this.getAttribute('model-id'));
-            }); 
         },
         
         removeModel: function(id) {
@@ -304,6 +297,9 @@ var DataFlowGraphView = Backbone.View.extend({
                         break;
                     case "DESTROY":
                         self.dfgDestroy(response, modelId);
+                        break;
+                    case "DELETE":
+                        self.dfgModels.removeModel(modelId);
                         break;
                 }
             }
