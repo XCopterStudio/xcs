@@ -284,13 +284,28 @@ var DataFlowGraphView = Backbone.View.extend({
         this.dfgModels.addModel(modelId, m);
         
         //set context menu
+        var self = this;
         $("#flow-graph-screen .Model").contextMenu({
             parentSelector:     "#flow-graph-screen",
             menuSelector:       "#dfg-screen-context-menu",
             menuSelected:       function (target, selectedMenuItem) {
-                var msg = "You selected the menu item '" + selectedMenuItem.attr("action") +
-                    "' on the value '" + target.attr("model-id") + "'";
-                console.log(msg);
+                var action = selectedMenuItem.attr("action");
+                var modelId = target.attr("model-id");
+                var response;
+                switch(action) {
+                    case "CREATE":
+                        self.dfgCreate(response, modelId)
+                        break;
+                    case "START":
+                        break;
+                    case "STOP":
+                        break;
+                    case "DESTROY":
+                        break;
+                }
+//                var msg = "You selected the menu item '" + selectedMenuItem.attr("action") +
+//                    "' on the value '" + target.attr("model-id") + "'";
+//                console.log(msg);
             }
         });
         
@@ -465,33 +480,6 @@ var DataFlowGraphView = Backbone.View.extend({
     
     onPrototypePrivateAdd : function(modelPrototype) {
         this.onPrototypeAdd(modelPrototype, true);
-        //del
-//        //DEBUG
-//        console.log("onPrototypePrivateAdd: " + JSON.stringify(modelClone.toJSON()));
-//        
-//        //watch 4 changes
-//        this.listenTo(modelClone, "change", this.onPrototypePrivateChange);
-//        
-//        // TODO: add new clone 2 toolbox
-//        //...
-//        
-//        // get prototype name
-//        var cloneName = modelClone.get("name");
-//        var cloneId = this.trimId(cloneName);
-//        
-//        // get all xvars
-//        modelClone.get("xvar").forEach(function(xvar) {
-//            var xvarName = xvar.get("name");
-//            var xvarSynType = xvar.get("synType");
-//            var xvarSemType = xvar.get("semType");
-//        });
-//        
-//        // get all xinputports
-//        modelClone.get("xinputPort").forEach(function(xvar) {
-//            var xinputPortName = xvar.get("name");
-//            var xinputPortSynType = xvar.get("synType");
-//            var xinputPortSemType = xvar.get("semType");
-//        });
     },
     
     onPrototypeRemove : function(modelPrototype, privatePrototype) {
@@ -526,12 +514,6 @@ var DataFlowGraphView = Backbone.View.extend({
     
     onPrototypePrivateRemove : function(modelPrototype) {
         this.onPrototypeRemove(modelPrototype, true);
-        
-        //del
-//        //DEBUG
-//        console.log("onPrototypePrivateRemove: " + JSON.stringify(modelClone.toJSON()));
-//        
-//        //TODO: remove clone from GUI
     },
     
     onPrototypeChange : function(modelPrototype, privatePrototype) {
@@ -571,31 +553,6 @@ var DataFlowGraphView = Backbone.View.extend({
     
     onPrototypePrivateChange : function(modelPrototype) {
         this.onPrototypeChange(modelPrototype, true);
-        
-        //del
-//        //DEBUG
-//        console.log("onPrototypePrivateChange " + JSON.stringify(modelClone.toJSON()));
-//        
-//        //TODO: change existed clone
-//        //...
-//        
-//        // get prototype name
-//        var cloneName = modelClone.get("name");
-//        var cloneId = this.trimId(cloneName);
-//        
-//        // get all xvars
-//        modelClone.get("xvar").forEach(function(xvar) {
-//            var xvarName = xvar.get("name");
-//            var xvarSynType = xvar.get("synType");
-//            var xvarSemType = xvar.get("semType");
-//        });
-//        
-//        // get all xinputports
-//        modelClone.get("xinputPort").forEach(function(xvar) {
-//            var xinputPortName = xvar.get("name");
-//            var xinputPortSynType = xvar.get("synType");
-//            var xinputPortSemType = xvar.get("semType");
-//        });
     },
     
     onInputChange : function(xcState) {
@@ -697,7 +654,7 @@ var DataFlowGraphView = Backbone.View.extend({
         });
     },
     
-    dfgCreate : function(response) {
+    dfgCreate : function(response, modelId) {
         // load dfg 2 json object
         var jsonDfg = this.dfgGraph.toJSON()
         
@@ -705,14 +662,13 @@ var DataFlowGraphView = Backbone.View.extend({
             // prepare object 4 dfg info
             var dfg = {
                 prototype: [],
-                clone: [],
                 link: []
             };
                 
             for(var i = 0; i < jsonDfg.cells.length; ++i) {
                 var cell = jsonDfg.cells[i];
                 
-                // prototypes and clones
+                // nodes
                 if(cell.inPorts && cell.outPorts && cell.id && cell.origId) {
                     // load prototypes info
                     var prototypeId = cell.origId;
@@ -723,14 +679,17 @@ var DataFlowGraphView = Backbone.View.extend({
                         return;
                     }
                     
+                    if(modelId && modelId != cloneId) {
+                        continue;
+                    }
+                    
                     // prepate loaded prototypes info 4 sending
                     dfg.prototype.push({
                         id: cloneId,
                         name: modelPrototype.get("name"),
                     });
-                    
-                    //TODO: load and send information about clones
                 }
+                
                 // links
                 else if(cell.source && cell.target && cell.source.id && cell.target.id && cell.type && cell.type == "link") {
                     // prepare links info 4 sending
@@ -766,7 +725,7 @@ var DataFlowGraphView = Backbone.View.extend({
                 }
                 
                 // set state - must be at the end
-                if(responseType == ResponseType.Done) {
+                if(responseType == ResponseType.Done && !modelId) {
                     self.setDfgState(DfgState.DFG_STATE_CREATED);
                 }
             });
