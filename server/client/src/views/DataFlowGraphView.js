@@ -978,15 +978,24 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgLoadDfg : function(event, response) {
         console.log("dfgLoadDfg");
         var dfg = $(event.currentTarget);
-        //var dfgFilename = dfg.html();
         var dfgFilename = dfg.attr("filename");
         
         var self = this;
         self.model.requestLoadDfg(dfgFilename, function(id, responseType, responseData) {
-            if(responseType == ResponseType.Done) {
-                if(responseData.DFG && responseData.filename) { 
-                    self.model.setDfgDef("");
-                    self.model.setDfgDef(responseData);
+            //show error
+            if(responseType == ResponseType.Error) {
+                app.Flash.flashError("Error when try to load saved data flow graph: " + responseData + ".");
+            }
+            else if(responseType == ResponseType.Done) {
+                if(responseData.DFG && responseData.filename) {
+                    var modelId;
+                    self.dfgDestroy(
+                        function() { 
+                            self.model.setDfgDef("");
+                            self.model.setDfgDef(responseData);
+                            app.Flash.flashSuccess('Saved data flow graph "' + responseData.filename + '" loaded.');
+                        }, 
+                        modelId, false, false);
                 }
             }
             
