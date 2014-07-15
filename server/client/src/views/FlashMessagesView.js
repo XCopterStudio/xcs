@@ -12,13 +12,39 @@ var FlashMessagesView = Backbone.View.extend({
     },
 
     flash : function(model) {
-        console.log('>>> Flashing!!!');
-        // var elem = this.$el.append('<div class="alert alert-info">' +
-        // model.get("flash") + '</div>');
-        var elem = $(
-                '<div class="alert alert-info fade in">' + model.get("flash")
-                        + '</div>').appendTo("#flash-messages");
-        console.log(elem);
+        this.flashInfo(model.get("flash"));
+    },
+    
+    flashSucces : function(message) {
+        this.flashMessage(message, "success", "Success:");
+    },
+    
+    flashInfo : function(message) {
+        this.flashMessage(message, "info", "Information:");
+    },
+    
+    flashWarning : function(message) {
+        this.flashMessage(message, "warning", "Warning:");
+    },
+    
+    flashError : function(message) {
+        this.flashMessage(message, "danger", "Error:");
+    },
+    
+    flashMessage : function(message, type, head) {
+        // create flash div
+        var flash = 
+            '<div class="alert alert-' + type + ' alert-dismissible fade in" role="alert">  \
+                <button type="button" class="close" data-dismiss="alert">                   \
+                    <span aria-hidden="true">&times;</span>                                 \
+                    <span class="sr-only">Close flash</span></button>                       \
+                <strong>' + head + '</strong> ' + message + '                               \
+            </div>';
+        
+        // show flash
+        var elem = $(flash).appendTo("#flash-messages");
+        
+        // close flash after 5s
         window.setTimeout(function() {
             elem.alert('close');
         }, 5000);
