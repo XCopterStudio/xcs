@@ -75,7 +75,7 @@ var DataFlowGraphView = Backbone.View.extend({
     ** DATA FLOW GRAPH SECTION **
     ****************************/
     initializeDfg : function() {
-        this.onStateChanged();
+        //this.onStateChanged();
         
         var self = this;
         
@@ -969,9 +969,9 @@ var DataFlowGraphView = Backbone.View.extend({
         //debug
         //console.log("... new states: " + DfgState.getNames(this.dfgState_));
         
-        if(stateSetted) {
-            this.onStateChanged();    
-        }
+//        if(stateSetted) {
+//            this.onStateChanged();    
+//        }
     },
     
     onStateChanged : function() {
