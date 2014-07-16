@@ -6,9 +6,4 @@ include_directories(${rapidjson_INCLUDE_DIRS})
 file(GLOB SOURCES *.cpp)
 file(GLOB HEADERS *.hpp)
 
-add_library(${PROJECT_NAME} MODULE ${SOURCES} ${HEADERS})
-
-x_target_link_libraries(${PROJECT_NAME} xobject)
-
-find_package(UrbiAll)
-use_urbi(${PROJECT_NAME})
+add_x_object(${PROJECT_NAME} ${SOURCES} ${HEADERS})

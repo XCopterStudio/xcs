@@ -10,12 +10,7 @@ elseif(X_LIN)
     include_directories(${PTAM_ROOT}/include)
 endif()
 
-add_library(${PROJECT_NAME} MODULE ${SOURCES} ${HEADERS})
-
-x_target_link_libraries(${PROJECT_NAME} xobject)
-
-find_package(UrbiAll)
-use_urbi(${PROJECT_NAME})
+add_x_object(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 find_package(Boost 1.55 REQUIRED COMPONENTS thread)
 include_directories(${Boost_INCLUDE_DIRS})

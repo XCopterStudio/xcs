@@ -4,13 +4,10 @@ project(${PROJECT_NAME})
 file(GLOB SOURCES *.cpp)
 file(GLOB HEADERS *.hpp)
 
+# TODO convert to pure XObject and SHARED library to allow linking
 x_add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
 
 x_target_link_libraries(${PROJECT_NAME} xcs xobject)
-
-#if(X_LIN)
-#add_definitions(-rdynamic)
-#endif()
 
 find_package(UrbiAll)
 use_urbi(${PROJECT_NAME})
