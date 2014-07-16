@@ -60,7 +60,7 @@ Ptam {
     frameHeight      360
 
     ; display OpenGL window (debug, Linux only)
-    showWindow       0
+    showWindow       1
 
     ; minimum keyframe distance (meters)
     minKFDist        0.2

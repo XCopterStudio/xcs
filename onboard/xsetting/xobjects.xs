@@ -3,7 +3,7 @@ xdatalogger
     name "XDatalogger"
     init 
     {
-        "XDatalogger" "\"logs/test.txt\""   ;TODO: change file name - or file name like xinputport
+        "XDatalogger" "\"experiments/sample3-out.txt\""   ;TODO: change file name - or file name like xinputport
         ;"XDatalogger" "\"logs/\" + Date.now().asString().replace(\" \", \"_\") + \".txt\""
     }
 }
@@ -12,7 +12,7 @@ xdataplayer
     name "XDataplayer"
     init 
     {
-        "XDataplayer" "\"logs/test.txt\""   ;TODO: change file name - or file name like xinputport
+        "XDataplayer" "\"experiments/sample3.txt\""   ;TODO: change file name - or file name like xinputport
     }
 }
 xonboard
@@ -49,11 +49,11 @@ xhermit_movement
         "XHermitMovement" ""
     }
 }
-;xlocalization
-;{
-;    name "XLocalization"
-;    init 
-;    {
-;        "XLocalization" "\"xsetting/xlocalization.xs\""    ;TODO: set valid file neme
-;    }
-;}
+xlocalization
+{
+    name "XLocalization"
+    init 
+    {
+        "XLocalization" "\"xsetting/xlocalization.xs\""
+    }
+}
