@@ -32,6 +32,9 @@ namespace nodes {
         xcs::nodes::XInputPort<xcs::EulerianVector> droneRotation;
         // xvars
         xcs::nodes::XVar<xcs::SpeedControl> speedControl;
+        xcs::nodes::XVar<bool> reachedCheckpoint;
+
+        void callbackHermit(bool reached);
 
         XHermitMovement(const std::string& name);
     };

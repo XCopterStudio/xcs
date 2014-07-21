@@ -1,9 +1,8 @@
 #ifndef HERMIT_MOVEMENT_H
 #define HERMIT_MOVEMENT_H
 
-#include <mutex>
 #include <atomic>
-#include <thread>
+#include <functional>
 
 #include <xcs/tsqueue.hpp>
 #include <xcs/types/checkpoint.hpp>
@@ -30,6 +29,9 @@ namespace hermit{
         xcs::CartesianVector droneVelocity_;
         xcs::EulerianVector droneRotation_;
 
+        // callback function when checkpoint is reached
+        std::function<void(bool)> reachedCallback_;
+
         // command variable
         std::atomic<bool> clear_;
         bool newCheckpoint_;
@@ -40,7 +42,7 @@ namespace hermit{
         xcs::Checkpoint computeHermitPoint(const xcs::Checkpoint &start, const xcs::Checkpoint &end, double step);
 
     public:
-        HermitMovement();
+        HermitMovement(std::function<void(bool)> reachedCallback = nullptr);
 
         // Programmer have to ensure calling next four function in proper order (position,velocity,rotation,flyOnCheckpoint) and together!!!
         void dronePosition(const xcs::CartesianVector &dronePosition);

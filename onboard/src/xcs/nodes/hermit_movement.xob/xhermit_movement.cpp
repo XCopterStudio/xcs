@@ -1,4 +1,5 @@
 #include "xhermit_movement.hpp"
+#include <functional>
 
 using namespace xcs::nodes;
 
@@ -26,17 +27,24 @@ void XHermitMovement::onChangeDroneRotation(xcs::EulerianVector rotation){
 
 //==================== public functions =============
 XHermitMovement::XHermitMovement(const std::string& name) : XObject(name) ,
+hermitMovement_(boost::bind(&XHermitMovement::callbackHermit, this, _1)),
 command("COMMAND"),
 checkpoint("CHECKPOINT"),
 dronePosition("POSITION_ABS"),
 droneRotation("ROTATION"),
-speedControl("SPEED_CONTROL_ABS")
+speedControl("SPEED_CONTROL_ABS"),
+reachedCheckpoint("BOOL")
 {
     XBindVarF(command, &XHermitMovement::onChangeCommand);
     XBindVarF(checkpoint, &XHermitMovement::onChangeAddCheckpoint);
     XBindVarF(dronePosition, &XHermitMovement::onChangeDronePosition);
     XBindVarF(droneRotation, &XHermitMovement::onChangeDroneRotation);
     XBindVar(speedControl);
+    XBindVar(reachedCheckpoint);
+}
+
+void XHermitMovement::callbackHermit(bool reached){
+    reachedCheckpoint = reached;
 }
 
 XStart(XHermitMovement);
