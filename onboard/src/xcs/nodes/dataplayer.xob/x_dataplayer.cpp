@@ -15,7 +15,6 @@ using namespace xcs;
 using namespace xcs::nodes;
 using namespace xcs::nodes::dataplayer;
 
-
 const std::string XDataplayer::CMD_PLAY = "Play";
 const std::string XDataplayer::CMD_PAUSE = "Pause";
 
@@ -81,6 +80,11 @@ void XDataplayer::processHeaderLine(const std::string &line) {
 
     if (check != "register") {
         XCS_LOG_WARN("Unrecognized header '" << check << "'.");
+        return;
+    }
+
+    if (!isChannelNameValid(channelName)) {
+        XCS_LOG_WARN("Invalid channel name '" << channelName << "'.");
         return;
     }
 

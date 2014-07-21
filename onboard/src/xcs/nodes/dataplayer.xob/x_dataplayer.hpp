@@ -10,6 +10,8 @@
 #include <memory>
 #include <chrono>
 
+#include <boost/regex.hpp>
+
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
 #include <xcs/nodes/xobject/x_var.hpp>
@@ -35,6 +37,16 @@ public:
     xcs::nodes::XVar<bool> finished;
 
     void init(const std::string &file);
+
+    inline static bool isChannelNameValid(const std::string &name) {
+        const static boost::regex VALID_NAME("[a-zA-Z_][a-zA-Z0-9_]*");
+
+        if (name == "finished" || name == "command") {
+            return false;
+        }
+
+        return boost::regex_match(name, VALID_NAME);
+    }
 private:
     typedef std::map<std::string, std::string> SyntacticMap;
     typedef std::map<std::string, std::unique_ptr<dataplayer::VideoPlayer >> VideoPlayerMap;
@@ -60,6 +72,8 @@ private:
      * Period (ms) of iteration of the main loop when player is paused.
      */
     const static size_t IDLE_SLEEP = 100;
+    
+    
 
     static xcs::SyntacticCategoryMap syntacticCategoryMap_;
 
