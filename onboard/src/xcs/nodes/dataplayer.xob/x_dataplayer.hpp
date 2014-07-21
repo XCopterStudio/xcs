@@ -12,6 +12,7 @@
 
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
+#include <xcs/nodes/xobject/x_var.hpp>
 #include <xcs/types/timestamp.hpp>
 #include <xcs/types/type_utils.hpp>
 #include <xcs/xci/data_receiver.hpp>
@@ -39,12 +40,10 @@ public:
     XDataplayer(const std::string& name);
     virtual ~XDataplayer();
 
-    urbi::UVar playbackModeUVar;
-    urbi::UVar playbackSpeedUVar;
-
     xcs::nodes::XInputPort<std::string> command;
     xcs::nodes::XInputPort<xcs::Timestamp> seek;
 
+    xcs::nodes::XVar<bool> finished;
 
     void init(const std::string &file);
 private:

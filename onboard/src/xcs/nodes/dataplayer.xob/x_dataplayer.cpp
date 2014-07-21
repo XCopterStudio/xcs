@@ -28,12 +28,17 @@ XDataplayer::XDataplayer(const std::string& name) :
   xcs::nodes::XObject(name),
   command("COMMAND"),
   seek("INTEGER"),
+  finished("ENABLED"),
   isPlaying_(false),
   endAll_(false) {
     fillTypeCategories(syntacticCategoryMap_);
 
     XBindFunction(XDataplayer, init);
     XBindVarF(command, &XDataplayer::onCommand);
+    
+    XBindVar(finished);
+    
+    finished = false;
 }
 
 XDataplayer::~XDataplayer() {
@@ -107,15 +112,18 @@ void XDataplayer::loop() {
         }
 
         auto actualTime = Clock::now();
-        int sleepTime = ts*1000000 - std::chrono::duration_cast<std::chrono::microseconds>(actualTime - startTime_).count();
+        int sleepTime = ts * 1000000 - std::chrono::duration_cast<std::chrono::microseconds>(actualTime - startTime_).count();
         // wait for it
         if (sleepTime > 0)
-        this_thread::sleep_for(chrono::microseconds(sleepTime)); //TODO implement pause functionality
+            this_thread::sleep_for(chrono::microseconds(sleepTime)); //TODO implement pause functionality
 
         // notify it
         processLogLine(name, ts);
     }
-    XCS_LOG_INFO("Log play finished.");
+    if (!endAll_) {
+        finished = true;
+        XCS_LOG_INFO("Log play finished.");
+    }
 }
 
 void XDataplayer::processLogLine(const std::string &channel, const Timestamp timestamp) {
