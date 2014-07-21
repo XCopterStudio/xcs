@@ -354,7 +354,9 @@ void Ptam::measurementImu(const DroneStateMeasurement measurement, const double 
 }
 
 void Ptam::takeInitKF() {
-    ptamTracker_->pressSpacebar();
+    if (ptamReady_) {
+        ptamTracker_->pressSpacebar();
+    }
 }
 
 void Ptam::takeKF() {
