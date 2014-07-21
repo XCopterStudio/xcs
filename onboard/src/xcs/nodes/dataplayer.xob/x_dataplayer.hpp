@@ -1,5 +1,5 @@
-#ifndef DATALOGGER_H
-#define DATALOGGER_H
+#ifndef DATAPLAYER_H
+#define DATAPLAYER_H
 
 #include <string>
 #include <fstream>
