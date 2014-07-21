@@ -144,6 +144,8 @@ private:
     TooN::Vector<3> evalNavQue(xcs::Timestamp from, xcs::Timestamp to, bool* zCorrupted, bool* allCorrupted);
 
     void resetPtam();
+    
+    void createPtam();
 
 };
 

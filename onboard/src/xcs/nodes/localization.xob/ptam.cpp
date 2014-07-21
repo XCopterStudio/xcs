@@ -411,6 +411,31 @@ TooN::Vector<3> Ptam::evalNavQue(Timestamp from, Timestamp to, bool* zCorrupted,
 
 void Ptam::resetPtam() {
     ptamReady_ = false;
+    if (!ptamTracker_) {
+        createPtam();
+    }
+
+    ptamTracker_->resetMap();
+
+    ptamMapMaker_->minKFDist = parameters_["minKFDist"];
+    ptamMapMaker_->minKFWiggleDist = parameters_["minKFWiggleDist"];
+    ptamTracker_->minKFTimeDist = parameters_["minKFTimeDist"];
+    maxKF_ = static_cast<int> (parameters_["maxKF"]);
+
+    predIMUOnlyForScale_.resetPos();
+
+    goodCount_ = 0;
+    forceKF_ = false;
+    goodObservations_ = 0;
+    updateFixpoint_ = false;
+    ptamStatus_ = PTAM_IDLE;
+
+    resetPtamRequested_ = false;
+    ptamReady_ = true;
+}
+
+void Ptam::createPtam() {
+    ptamReady_ = false;
     int frameWidth = static_cast<int> (parameters_["frameWidth"]);
     int frameHeight = static_cast<int> (parameters_["frameHeight"]);
     showWindow_ = parameters_["showWindow"] > 0;
@@ -430,19 +455,5 @@ void Ptam::resetPtam() {
     ptamMapMaker_ = MapMakerPtr(new MapMaker(*ptamMap_, *ptamCamera_));
     ptamTracker_ = TrackerPtr(new Tracker(CVD::ImageRef(frameWidth, frameHeight), *ptamCamera_, *ptamMap_, *ptamMapMaker_));
 
-    ptamMapMaker_->minKFDist = parameters_["minKFDist"];
-    ptamMapMaker_->minKFWiggleDist = parameters_["minKFWiggleDist"];
-    ptamTracker_->minKFTimeDist = parameters_["minKFTimeDist"];
-    maxKF_ = static_cast<int> (parameters_["maxKF"]);
-
-    predIMUOnlyForScale_.resetPos();
-
-    goodCount_ = 0;
-    forceKF_ = false;
-    goodObservations_ = 0;
-    updateFixpoint_ = false;
-    ptamStatus_ = PTAM_IDLE;
-
-    resetPtamRequested_ = false;
     ptamReady_ = true;
 }
