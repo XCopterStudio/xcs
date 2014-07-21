@@ -35,9 +35,9 @@ XDataplayer::XDataplayer(const std::string& name) :
 
     XBindFunction(XDataplayer, init);
     XBindVarF(command, &XDataplayer::onCommand);
-    
+
     XBindVar(finished);
-    
+
     finished = false;
 }
 
@@ -111,11 +111,12 @@ void XDataplayer::loop() {
             break;
         }
 
-        auto actualTime = Clock::now();
-        int sleepTime = ts * 1000000 - std::chrono::duration_cast<std::chrono::microseconds>(actualTime - startTime_).count();
+        auto currentTime = Clock::now();
+        int sleepTime = ts * 1000000 - std::chrono::duration_cast<std::chrono::microseconds>(currentTime - startTime_).count();
         // wait for it
-        if (sleepTime > 0)
+        if (sleepTime > 0) {
             this_thread::sleep_for(chrono::microseconds(sleepTime)); //TODO implement pause functionality
+        }
 
         // notify it
         processLogLine(name, ts);
@@ -190,10 +191,17 @@ void XDataplayer::videoDecoder() {
 
 void XDataplayer::onCommand(const std::string &command) {
     if (command == CMD_PLAY) {
+        if (!paused) {
+            startTime_ = Clock::now();
+        } else {
+            startTime_ += (Clock::now() - pausedTime_);
+            paused = false;
+        }
         isPlaying_ = true;
-        startTime_ = Clock::now();
     } else if (command == CMD_PAUSE) {
         isPlaying_ = false;
+        pausedTime_ = Clock::now();
+        paused = true;
     }
 }
 

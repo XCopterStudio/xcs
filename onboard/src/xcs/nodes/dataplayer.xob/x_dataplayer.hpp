@@ -92,10 +92,13 @@ private:
     /*! Do we produce data? */
     std::atomic<bool> isPlaying_;
 
-    TimePoint startTime_;
-
     /*! Thread control (termination). */
     std::atomic<bool> endAll_;
+
+    TimePoint startTime_;
+    TimePoint pausedTime_;
+    bool paused;
+
 
     std::thread dataLoopThread_;
     std::thread videoDecodeThread_;
