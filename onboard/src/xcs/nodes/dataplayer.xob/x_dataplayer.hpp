@@ -24,16 +24,6 @@
 namespace xcs {
 namespace nodes {
 
-namespace dataplayer {
-
-// TODO remove?
-
-enum PlaybackMode {
-    PLAYBACK_SMOOTH, //! speed scaling is done smoothly,
-    PLAYBACK_SKIPPED // speed scaling is done by skipping samples
-};
-};
-
 class XDataplayer : public xcs::nodes::XObject {
 public:
 
@@ -41,7 +31,6 @@ public:
     virtual ~XDataplayer();
 
     xcs::nodes::XInputPort<std::string> command;
-    xcs::nodes::XInputPort<xcs::Timestamp> seek;
 
     xcs::nodes::XVar<bool> finished;
 
@@ -82,9 +71,6 @@ private:
     VideoJobsQueue videoJobs_;
     VideoResultQueueMap videoResults_;
 
-    dataplayer::PlaybackMode playbackMode_; //TODO remove?
-    double playbackSpeed_; //TODO implement?
-
     std::string filename_;
     /*! Input file stream. */
     std::ifstream file_;
@@ -105,10 +91,6 @@ private:
 
     xci::DataReceiver dataReceiver_;
 
-
-    //TODO?    void playbackSpeed(double value);
-    //TODO?    void playbackMode(dataplayer::PlaybackMode value);
-    //TODO?    void playbackSeek(xcs::TimestampType timestamp);
 
     void loadHeader();
 

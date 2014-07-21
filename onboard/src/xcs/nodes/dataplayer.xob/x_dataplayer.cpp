@@ -27,7 +27,6 @@ xcs::SyntacticCategoryMap XDataplayer::syntacticCategoryMap_;
 XDataplayer::XDataplayer(const std::string& name) :
   xcs::nodes::XObject(name),
   command("COMMAND"),
-  seek("INTEGER"),
   finished("ENABLED"),
   isPlaying_(false),
   endAll_(false) {
@@ -115,7 +114,7 @@ void XDataplayer::loop() {
         int sleepTime = ts * 1000000 - std::chrono::duration_cast<std::chrono::microseconds>(currentTime - startTime_).count();
         // wait for it
         if (sleepTime > 0) {
-            this_thread::sleep_for(chrono::microseconds(sleepTime)); //TODO implement pause functionality
+            this_thread::sleep_for(chrono::microseconds(sleepTime));
         }
 
         // notify it
