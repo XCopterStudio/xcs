@@ -10,6 +10,8 @@
 #include <memory>
 #include <chrono>
 
+#include <boost/regex.hpp>
+
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
 #include <xcs/nodes/xobject/x_var.hpp>
@@ -24,16 +26,6 @@
 namespace xcs {
 namespace nodes {
 
-namespace dataplayer {
-
-// TODO remove?
-
-enum PlaybackMode {
-    PLAYBACK_SMOOTH, //! speed scaling is done smoothly,
-    PLAYBACK_SKIPPED // speed scaling is done by skipping samples
-};
-};
-
 class XDataplayer : public xcs::nodes::XObject {
 public:
 
@@ -41,11 +33,20 @@ public:
     virtual ~XDataplayer();
 
     xcs::nodes::XInputPort<std::string> command;
-    xcs::nodes::XInputPort<xcs::Timestamp> seek;
 
     xcs::nodes::XVar<bool> finished;
 
     void init(const std::string &file);
+
+    inline static bool isChannelNameValid(const std::string &name) {
+        const static boost::regex VALID_NAME("[a-zA-Z_][a-zA-Z0-9_]*");
+
+        if (name == "finished" || name == "command") {
+            return false;
+        }
+
+        return boost::regex_match(name, VALID_NAME);
+    }
 private:
     typedef std::map<std::string, std::string> SyntacticMap;
     typedef std::map<std::string, std::unique_ptr<dataplayer::VideoPlayer >> VideoPlayerMap;
@@ -71,6 +72,8 @@ private:
      * Period (ms) of iteration of the main loop when player is paused.
      */
     const static size_t IDLE_SLEEP = 100;
+    
+    
 
     static xcs::SyntacticCategoryMap syntacticCategoryMap_;
 
@@ -82,9 +85,6 @@ private:
     VideoJobsQueue videoJobs_;
     VideoResultQueueMap videoResults_;
 
-    dataplayer::PlaybackMode playbackMode_; //TODO remove?
-    double playbackSpeed_; //TODO implement?
-
     std::string filename_;
     /*! Input file stream. */
     std::ifstream file_;
@@ -92,20 +92,19 @@ private:
     /*! Do we produce data? */
     std::atomic<bool> isPlaying_;
 
-    TimePoint startTime_;
-
     /*! Thread control (termination). */
     std::atomic<bool> endAll_;
+
+    TimePoint startTime_;
+    TimePoint pausedTime_;
+    bool paused;
+
 
     std::thread dataLoopThread_;
     std::thread videoDecodeThread_;
 
     xci::DataReceiver dataReceiver_;
 
-
-    //TODO?    void playbackSpeed(double value);
-    //TODO?    void playbackMode(dataplayer::PlaybackMode value);
-    //TODO?    void playbackSeek(xcs::TimestampType timestamp);
 
     void loadHeader();
 

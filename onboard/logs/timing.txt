@@ -1,0 +1,6 @@
+register flag ENABLED int
+
+2.0	flag	1
+3.0	flag	0
+4.0	flag	1
+5.0	flag	0
