@@ -95,6 +95,8 @@ public:
      * \param time EKF time.
      */
     DroneState computeState(const double time); // compute prediction state up to this time 
+
+    void reset();
 };
 
 }

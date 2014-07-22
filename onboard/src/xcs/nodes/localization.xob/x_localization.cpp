@@ -19,7 +19,8 @@ const double XLocalization::CAM_DELAY = 0.100; //
 
 const std::string XLocalization::CTRL_INIT_KF = "init";
 const std::string XLocalization::CTRL_TAKE_KF = "keyframe";
-const std::string XLocalization::CTRL_RESET_PTAM = "reset";
+const std::string XLocalization::CTRL_RESET_PTAM = "resetPtam"; 
+const std::string XLocalization::CTRL_RESET_EKF = "resetEkf";
 
 void XLocalization::onChangeVelocity(xcs::CartesianVector measuredVelocity) {
     lastMeasurement_.velocity.x = measuredVelocity.x;
@@ -118,6 +119,8 @@ void XLocalization::onChangePtamControl(const std::string &ptamControl) {
         ptam_->takeKF();
     } else if (ptamControl == CTRL_RESET_PTAM) {
         ptam_->reset();
+    } else if (ptamControl == CTRL_RESET_EKF){
+        ekf_.reset();
     } else {
         XCS_LOG_WARN("Unknown PTAM control '" << ptamControl << "'." << endl);
     }

@@ -333,7 +333,7 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     // update deviation
     newState.second = (mat(10, 10).eye() - gain*measurementJacobian) * state.second;
 
-    /*mat error = (newStateMean - static_cast<mat>(state.first))*(newStateMean - static_cast<mat>(state.first)).t();
+    mat error = (newStateMean - static_cast<mat>(state.first))*(newStateMean - static_cast<mat>(state.first)).t();
     printf("error %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e \n", 
         error.at(0, 0),
         error.at(1, 1),
@@ -344,7 +344,7 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
         error.at(6, 6),
         error.at(7, 7),
         error.at(8, 8),
-        error.at(9, 9));*/
+        error.at(9, 9));
 
     //M: printf("EKF: Computed drone updatedState [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
     //        newState.first.position.x, newState.first.position.y, newState.first.position.z,
@@ -574,4 +574,21 @@ DroneState Ekf::computeState(const double time) {
     int index = findNearest(droneStates_, time);
     DroneStateDistributionChronologic state = droneStates_[index];
     return predict(state, time).first.first;
+}
+
+void Ekf::reset(){
+    unique_lock<shared_mutex> lock(bigSharedMtx_);
+    double altitude = droneStates_.back().first.first.position.z;
+
+    // clear all deques
+    flyControls_.clear();
+    imuMeasurements_.clear();
+    droneStates_.clear();
+
+    // add default element in all queue
+    flyControls_.push_back(FlyControlChronologic(FlyControl(), 0));
+    imuMeasurements_.push_back(ImuMeasurementChronologic(DroneStateMeasurement(), 0));
+    droneStates_.push_back(DroneStateDistributionChronologic(
+        DroneStateDistribution(DroneState(xcs::CartesianVector(0,0,altitude)), arma::mat(10, 10, fill::eye)),
+        0));
 }

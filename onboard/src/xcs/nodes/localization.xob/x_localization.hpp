@@ -33,6 +33,7 @@ class XLocalization : public XObject {
     static const std::string CTRL_INIT_KF;
     static const std::string CTRL_TAKE_KF;
     static const std::string CTRL_RESET_PTAM;
+    static const std::string CTRL_RESET_EKF;
 
     localization::Ekf ekf_;
 
