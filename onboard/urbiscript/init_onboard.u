@@ -20,7 +20,8 @@ moduleList += nodeList;
 // modify list for Linux platform
 if (System.Platform.hostOs == "Linux") {
     for (var i = 0; i < moduleList.size(); i++) {
-        moduleList[i] = "lib" + moduleList[i];
+        //moduleList[i] = "lib" + moduleList[i];
+        moduleList[i] = moduleList[i];
     }
 };
 
