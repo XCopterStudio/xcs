@@ -15,7 +15,6 @@ using namespace xcs;
 using namespace xcs::nodes;
 using namespace xcs::nodes::dataplayer;
 
-
 const std::string XDataplayer::CMD_PLAY = "Play";
 const std::string XDataplayer::CMD_PAUSE = "Pause";
 
@@ -27,13 +26,17 @@ xcs::SyntacticCategoryMap XDataplayer::syntacticCategoryMap_;
 XDataplayer::XDataplayer(const std::string& name) :
   xcs::nodes::XObject(name),
   command("COMMAND"),
-  seek("INTEGER"),
+  finished("ENABLED"),
   isPlaying_(false),
   endAll_(false) {
     fillTypeCategories(syntacticCategoryMap_);
 
     XBindFunction(XDataplayer, init);
     XBindVarF(command, &XDataplayer::onCommand);
+
+    XBindVar(finished);
+
+    finished = false;
 }
 
 XDataplayer::~XDataplayer() {
@@ -80,6 +83,11 @@ void XDataplayer::processHeaderLine(const std::string &line) {
         return;
     }
 
+    if (!isChannelNameValid(channelName)) {
+        XCS_LOG_WARN("Invalid channel name '" << channelName << "'.");
+        return;
+    }
+
     SimpleXVar &xvar = dataReceiver_.registerOutput(channelName, XType(synType, semanticType, XType::DATAFLOWTYPE_XVAR));
     XBindVarRename(xvar, channelName);
 
@@ -106,16 +114,20 @@ void XDataplayer::loop() {
             break;
         }
 
-        auto actualTime = Clock::now();
-        int sleepTime = ts*1000000 - std::chrono::duration_cast<std::chrono::microseconds>(actualTime - startTime_).count();
+        auto currentTime = Clock::now();
+        int sleepTime = ts * 1000000 - std::chrono::duration_cast<std::chrono::microseconds>(currentTime - startTime_).count();
         // wait for it
-        if (sleepTime > 0)
-        this_thread::sleep_for(chrono::microseconds(sleepTime)); //TODO implement pause functionality
+        if (sleepTime > 0) {
+            this_thread::sleep_for(chrono::microseconds(sleepTime));
+        }
 
         // notify it
         processLogLine(name, ts);
     }
-    XCS_LOG_INFO("Log play finished.");
+    if (!endAll_) {
+        finished = true;
+        XCS_LOG_INFO("Log play finished.");
+    }
 }
 
 void XDataplayer::processLogLine(const std::string &channel, const Timestamp timestamp) {
@@ -182,10 +194,17 @@ void XDataplayer::videoDecoder() {
 
 void XDataplayer::onCommand(const std::string &command) {
     if (command == CMD_PLAY) {
+        if (!paused) {
+            startTime_ = Clock::now();
+        } else {
+            startTime_ += (Clock::now() - pausedTime_);
+            paused = false;
+        }
         isPlaying_ = true;
-        startTime_ = Clock::now();
     } else if (command == CMD_PAUSE) {
         isPlaying_ = false;
+        pausedTime_ = Clock::now();
+        paused = true;
     }
 }
 

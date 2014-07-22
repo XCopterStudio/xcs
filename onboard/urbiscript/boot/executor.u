@@ -1,0 +1,80 @@
+class Global.SyntacticTypes {
+    var STRING = "Ss";
+}|;
+
+class XObject {
+    var inputs_ = [ => ];
+    var outputs_ = [ => ];
+    
+    function getXVars() {
+        return outputs_.keys;
+    }|;
+    
+    function getXInputPorts() {
+        return inputs_.keys;
+    }|;
+    
+    function getSynType(channel) {
+        if(channel in inputs_) {
+            inputs_[channel].first;
+        } else if (channel in outputs_) {
+            outputs_[channel].first;
+        } else {
+            throw Exception.new("Unknown channel '" + channel + "'.");
+        }
+    }|;
+    
+    function getSemType(channel) {
+        if(channel in inputs_) {
+            inputs_[channel].second;
+        } else if (channel in outputs_) {
+            outputs_[channel].second;
+        } else {
+            throw Exception.new("Unknown channel '" + channel + "'.");
+        }
+    }|;
+    
+    function startXO() {
+        
+    }|;
+    
+    function stopXO() {
+        
+    }|;
+}|;
+
+
+class Executor : XObject {
+    var inputs_ = [
+        "code" => (Global.SyntacticTypes.STRING, "URBISCRIPT"),
+        "control" => (Global.SyntacticTypes.STRING, "CONTROL"),
+    ];
+    var outputs_ = [
+    ];
+    
+    var code;
+    
+    function init(lobby) {
+        var this.lobby_ = lobby;
+        var this.control = "";
+        var this.tag = Tag.new();
+        var this.job;
+        var that = this;
+
+        &control.notifyChange(function() {
+            echo("Changed: " + that.control);
+            if(that.control == "run") {
+                //that.tag: System.eval(that.code, that.lobby_),; // run in background (which doesn't work well with >>)
+                that.job = disown({that.tag: System.eval(that.code, that.lobby_)}); // run in background
+            } else if(that.control == "freeze") {
+                that.tag.freeze();
+            } else if(that.control == "unfreeze") {
+                that.tag.unfreeze();
+            } else if(that.control == "stop") {
+                that.tag.stop();
+                that.job.terminate();
+            }
+        });
+    }|;
+    
+}|;

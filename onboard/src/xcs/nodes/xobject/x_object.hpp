@@ -21,7 +21,6 @@ public:
     virtual ~XObject();
     void startXO();
     void stopXO();
-    const std::string getType(const std::string& xVarName) const;
     const std::string getSynType(const std::string& xVarName) const;
     const std::string getSemType(const std::string& xVarName) const;
     StringList getXVars() const;

@@ -1,7 +1,8 @@
 //PRIORITY 1
 
 function isSameType(outputXObject, inputXObject, outputXVarName, inputXInputPortName) {
-	return outputXObject.getType(outputXVarName) == inputXObject.getType(inputXInputPortName);
+	outputXObject.getSemType(outputXVarName) == inputXObject.getSemType(inputXInputPortName)
+		&& outputXObject.getSynType(outputXVarName) == inputXObject.getSynType(inputXInputPortName);
 }|;
 
 function connect(outputXObject, inputXObject, outputXVarAddress, inputXInputPortAddress, outputXVarName, inputXInputPortName) {

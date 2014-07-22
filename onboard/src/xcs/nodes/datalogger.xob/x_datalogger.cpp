@@ -8,6 +8,7 @@
 #include <xcs/nodes/xobject/x.h>
 #include <xcs/logging.hpp>
 
+#include <xcs/nodes/dataplayer.xob/x_dataplayer.hpp>
 
 using namespace std;
 using namespace std::chrono;
@@ -58,6 +59,11 @@ void XDatalogger::registerData(const std::string &name, const std::string &seman
         return;
     }
 
+    if (!XDataplayer::isChannelNameValid(name)) {
+        XCS_LOG_WARN("Invalid channel name '" << name << "'.");
+        return;
+    }
+
     SyntacticCategoryType syntacticCategory = syntacticCategoryMap_.at(syntacticType);
     if (syntacticCategory == CATEGORY_VIDEO) {
         send("throw \"Use registerVideo function for video data (" + name + ")\";");
@@ -91,6 +97,11 @@ void XDatalogger::registerVideo(int width, int height, const std::string &name, 
     if (!inited_ || !validRegister()) {
         return;
     }
+    
+    if (!XDataplayer::isChannelNameValid(name)) {
+        XCS_LOG_WARN("Invalid channel name '" << name << "'.");
+        return;
+    }
 
     SyntacticCategoryType syntacticCategory = syntacticCategoryMap_.at(syntacticType);
     if (syntacticCategory != CATEGORY_VIDEO) {
@@ -101,8 +112,8 @@ void XDatalogger::registerVideo(int width, int height, const std::string &name, 
     path videoFile(filename_);
     videoFile.replace_extension(); // remove
     videoFile += "-" + name;
-    videoFile += ".avi";    
-    
+    videoFile += ".avi";
+
     registerHeader(name, semanticType, syntacticType);
     VideoWriter* function = new VideoWriter(std::string());
     function->init(videoFile.string(), width, height, name, context_, uvar);
