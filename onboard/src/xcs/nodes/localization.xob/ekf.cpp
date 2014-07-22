@@ -69,17 +69,24 @@ int Ekf::findMeasurementIndex(const int &ID) {
 DroneStateDistributionChronologic Ekf::predict(const DroneStateDistributionChronologic& state, const double &endTime) {
     DroneStateDistributionChronologic newState = state;
     double flyControlTime = state.second;
+    XCS_LOG_INFO("Predict up to time %f" << flyControlTime);
     int controlIndex = findNearest(flyControls_, flyControlTime);
 
     do { // predict state up to the measurement time
         double nextControlTime = 0;
-        if (controlIndex < (flyControls_.size() - 1)) {
+        if (controlIndex < (flyControls_.size() - 1) && controlIndex != -1) {
             nextControlTime = flyControls_[controlIndex + 1].second;
         } else {
             nextControlTime = std::numeric_limits<double>::max();
         }
+ 
         double delta = std::min(nextControlTime, endTime) - flyControlTime;
-        newState.first = predict(newState.first, flyControls_[controlIndex].first, delta);
+        if (controlIndex >= 0){
+            newState.first = predict(newState.first, flyControls_[controlIndex].first, delta);
+        }
+        else{
+            newState.first = predict(newState.first, xcs::FlyControl(), delta);
+        }
 
 
         flyControlTime = nextControlTime;
@@ -333,7 +340,7 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     // update deviation
     newState.second = (mat(10, 10).eye() - gain*measurementJacobian) * state.second;
 
-    mat error = (newStateMean - static_cast<mat>(state.first))*(newStateMean - static_cast<mat>(state.first)).t();
+    /*mat error = (newStateMean - static_cast<mat>(state.first))*(newStateMean - static_cast<mat>(state.first)).t();
     printf("error %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e \n", 
         error.at(0, 0),
         error.at(1, 1),
@@ -344,7 +351,7 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
         error.at(6, 6),
         error.at(7, 7),
         error.at(8, 8),
-        error.at(9, 9));
+        error.at(9, 9));*/
 
     //M: printf("EKF: Computed drone updatedState [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
     //        newState.first.position.x, newState.first.position.y, newState.first.position.z,
@@ -591,4 +598,6 @@ void Ekf::reset(){
     droneStates_.push_back(DroneStateDistributionChronologic(
         DroneStateDistribution(DroneState(xcs::CartesianVector(0,0,altitude)), arma::mat(10, 10, fill::eye)),
         0));
+
+    IDCounter_ = 1;
 }

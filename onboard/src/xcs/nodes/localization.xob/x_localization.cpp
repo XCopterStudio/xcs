@@ -109,20 +109,20 @@ void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
 
 void XLocalization::onChangeFlyControl(const xcs::FlyControl flyControl) {
     //printf("FlyControl time %f\n", timeFromStart());
-    ekf_.flyControl(flyControl, timeFromStart() + FLY_CONTROL_SEND_TIME); // TODO: compute flyControl delay
+    ekf_.flyControl(flyControl, timeFromStart() + FLY_CONTROL_SEND_TIME);
 }
 
-void XLocalization::onChangePtamControl(const std::string &ptamControl) {
-    if (ptamControl == CTRL_INIT_KF) {
+void XLocalization::onChangeControl(const std::string &control) {
+    if (control == CTRL_INIT_KF) {
         ptam_->takeInitKF();
-    } else if (ptamControl == CTRL_TAKE_KF) {
+    } else if (control == CTRL_TAKE_KF) {
         ptam_->takeKF();
-    } else if (ptamControl == CTRL_RESET_PTAM) {
+    } else if (control == CTRL_RESET_PTAM) {
         ptam_->reset();
-    } else if (ptamControl == CTRL_RESET_EKF){
+    } else if (control == CTRL_RESET_EKF){
         ekf_.reset();
     } else {
-        XCS_LOG_WARN("Unknown PTAM control '" << ptamControl << "'." << endl);
+        XCS_LOG_WARN("Unknown PTAM control '" << control << "'." << endl);
     }
 
 }
@@ -142,7 +142,7 @@ XLocalization::XLocalization(const std::string &name) :
   video("FRONT_CAMERA"),
   videoTime("TIME_LOC"),
   flyControl("FLY_CONTROL"),
-  ptamControl("COMMAND"),
+  control("COMMAND"),
   ptamEnabled("ENABLED"),
   position("POSITION_ABS"),
   velocity("VELOCITY_ABS"),
@@ -164,7 +164,7 @@ XLocalization::XLocalization(const std::string &name) :
     UNotifyThreadedChange(videoTime.Data(), &XLocalization::onChangeVideoTime, urbi::LOCK_FUNCTION_DROP);
 
     XBindVarF(flyControl, &XLocalization::onChangeFlyControl);
-    XBindVarF(ptamControl, &XLocalization::onChangePtamControl);
+    XBindVarF(control, &XLocalization::onChangeControl);
     XBindVarF(ptamEnabled, &XLocalization::onChangePtamEnabled);
 
     XBindVar(position);

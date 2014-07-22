@@ -63,7 +63,7 @@ class XLocalization : public XObject {
 
     void onChangeFlyControl(const xcs::FlyControl flyControl);
 
-    void onChangePtamControl(const std::string &ptamControl);
+    void onChangeControl(const std::string &control);
     
     void onChangePtamEnabled(const bool ptamEnabled);
 
@@ -86,7 +86,7 @@ public:
     // drone fly control
     XInputPort<xcs::FlyControl> flyControl;
     // PTAM control
-    XInputPort<std::string> ptamControl;
+    XInputPort<std::string> control;
     XVar<bool> ptamEnabled;
 
     // computed ekf output
