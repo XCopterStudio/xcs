@@ -20,6 +20,7 @@ public:
     template<class T>
     SimpleXVar& operator=(const T&);
     void Init(xcs::nodes::XObject& parent, const std::string& varname);
+    void PrivateInit(xcs::nodes::XObject& parent, const std::string& varname);
 private:
     urbi::UVar* data_;
     XType xType_;

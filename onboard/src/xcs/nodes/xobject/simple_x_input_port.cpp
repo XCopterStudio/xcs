@@ -16,7 +16,11 @@ SimpleXInputPort::~SimpleXInputPort() {
 void SimpleXInputPort::Init(XObject& parent, const string& varname) {
     parent.registerXInputPort(varname, Type());
     
-    if(input_ != NULL) {
+    PrivateInit(parent, varname);
+}
+
+void SimpleXInputPort::PrivateInit(XObject& parent, const string& varname) {
+    if (input_ != NULL) {
         delete input_;
     }
     input_ = new InputPort(parent.__name, varname, parent.ctx_);

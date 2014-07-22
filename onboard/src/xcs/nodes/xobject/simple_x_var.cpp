@@ -15,6 +15,10 @@ SimpleXVar::~SimpleXVar() {
 void SimpleXVar::Init(XObject& parent, const string& varname) {
     parent.registerXVar(varname, Type());
 
+    PrivateInit(parent, varname);
+}
+
+void SimpleXVar::PrivateInit(XObject& parent, const string& varname) {
     if (data_ != NULL) {
         delete data_;
     }

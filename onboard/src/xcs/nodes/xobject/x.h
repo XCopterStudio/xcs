@@ -6,7 +6,9 @@
 
 GD_CATEGORY(Test.All);
 
-# define XBindVar(x) x.Init(*this, #x)
+# define XBindVar(x) XBindVarRename(x, #x)
+
+# define XBindPrivateVar(x) x.PrivateInit(*this, #x)
 
 # define XBindVarRename(x, name) x.Init(*this, name)
 

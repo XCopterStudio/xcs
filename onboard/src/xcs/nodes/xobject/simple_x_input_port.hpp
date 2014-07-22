@@ -17,6 +17,7 @@ public:
     urbi::InputPort& Data();
     const XType& Type() const;
     void Init(xcs::nodes::XObject& parent, const std::string& varname);
+    void PrivateInit(xcs::nodes::XObject& parent, const std::string& varname);
 private:
     urbi::InputPort* input_;
     XType xType_;
