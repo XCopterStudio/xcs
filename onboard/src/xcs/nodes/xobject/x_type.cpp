@@ -24,5 +24,5 @@ const string XType::toString() const {
 }
 
 bool XType::SemanticTypeInfo::operator ==(const SemanticTypeInfo& other) const {
-    return name == name;
+    return name == other.name;
 }
