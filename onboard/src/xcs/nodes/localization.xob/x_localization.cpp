@@ -142,7 +142,7 @@ XLocalization::XLocalization(const std::string &name) :
   video("FRONT_CAMERA"),
   videoTime("TIME_LOC"),
   flyControl("FLY_CONTROL"),
-  control("COMMAND"),
+  control("CONTROL"),
   ptamEnabled("ENABLED"),
   position("POSITION_ABS"),
   velocity("VELOCITY_ABS"),
