@@ -19,10 +19,6 @@ bool XType::operator==(const XType& other) const {
     return semType ==  other.semType && synType == other.synType;
 }
 
-const string XType::toString() const {
-    return synType + " - " + semType.name; // NOTE: here's place for SemanticTypeInfo to string conversion
-}
-
 bool XType::SemanticTypeInfo::operator ==(const SemanticTypeInfo& other) const {
     return name == other.name;
 }

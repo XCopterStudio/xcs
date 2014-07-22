@@ -7,7 +7,6 @@ using namespace urbi;
 using namespace xcs::nodes;
 
 XObject::XObject(const std::string& name) : UObject(name) {
-    XBindFunction(XObject, getType);
     XBindFunction(XObject, getSynType);
     XBindFunction(XObject, getSemType);
     XBindFunction(XObject, getXVars);
@@ -46,14 +45,6 @@ bool XObject::registerXChild(const string& xVarName, const XType& type, const XT
     }
 
     return false;
-}
-
-const string XObject::getType(const string& xVarName) const {
-    if(xVarsType_.count(xVarName) == 0) {
-        return "";
-    }
-
-    return xVarsType_.at(xVarName).toString();
 }
 
 const string XObject::getSynType(const string& xVarName) const {
