@@ -1,15 +1,13 @@
-System.system("start cmd.exe /k \"node d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/server/server.js\"")|;
-sleep(2s);
+//System.system("start cmd.exe /k \"node d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/server/server.js\"")|;
+//sleep(2s);
 
 class Onboard {
     
     class XcsPaths {
-        var scripts = {if("XCS_SCRIPTS_PATH" in System.env) System.env["XCS_SCRIPTS_PATH"] else Path.cwd / "urbiscript"};
-        var settings = {if("XCS_SETTINGS_PATH" in System.env) System.env["XCS_SETTINGS_PATH"] else Path.cwd / "xsettings"};
+        var scripts = { if("XCS_SCRIPTS_PATH" in System.env) Path.new(System.env["XCS_SCRIPTS_PATH"]) else Path.cwd / "urbiscript" };
+        var settings = { if("XCS_SETTINGS_PATH" in System.env) Path.new(System.env["XCS_SETTINGS_PATH"]) else Path.cwd / "xsettings" };
 
         function getScript(filename) {
-            echo("/////////////////////" + scripts);
-
             scripts / filename;
         }|;
 
@@ -22,7 +20,7 @@ class Onboard {
     var loadedXObjects_ = [ => ];           // list of pairs (loaded xobjects; copies)
     var loadedPrivateObjects_ = [ => ];     // list of pairs (loaded uobjects; copies)
     var privateObjects_ = [];               // objects, which are not visible for user
-    var ddfg_ = "";                // data flow graph
+    var ddfg_ = "";                         // data flow graph
     var dfgCommStarted_ = false;            // data flow graph communication started
     var onboardSender_;
     var onboardReceiver_;
