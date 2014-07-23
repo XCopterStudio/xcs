@@ -31,9 +31,18 @@ var DataFlowGraphNode = Backbone.Model.extend({
             this.set("xinputPort", new Backbone.Collection([], { model : DataFlowGraphNodeIO }));
         }
         
+        // init property xinputPort
+        if(this.has("registerXVar")) {
+            this.set("registerXVar", this.get("registerXVar").clone());
+        }
+        else {
+            this.set("registerXVar", new Backbone.Collection([], { model : DataFlowGraphNodeIO }));
+        }
+        
         // propagate add on xvar and xinputPort like change
         this.listenTo(this.get("xvar"), "add", this.onXvarAdd);
         this.listenTo(this.get("xinputPort"), "add", this.onXinputPortAdd);
+        this.listenTo(this.get("registerXVar"), "add", this.onRegisterXVarAdd);
     },
     
     onXvarAdd : function() {
@@ -44,7 +53,12 @@ var DataFlowGraphNode = Backbone.Model.extend({
     onXinputPortAdd : function() {
         this.trigger("change", this);
         this.trigger("change:xinputPort", this);
-    }
+    },
+    
+    onRegisterXVarAdd : function() {
+        this.trigger("change", this);
+        this.trigger("change:registerXVar", this);
+    },
 });
 
 var ResponseType = ENUM("Done", "Error");
@@ -195,6 +209,20 @@ var DataFlowGraph = Backbone.Model.extend({
                                 name : p.inputPort[i].name,
                                 synType : p.inputPort[i].synType,
                                 semType : p.inputPort[i].semType
+                            }));
+                        }
+                    }
+                }
+                
+                // read registerXVars
+                if(p.registerXVar) {
+                    for(var i = 0; i < p.registerXVar.length; ++i) {
+                        var oldRegister = prot.get("registerXVar").findWhere({"name": p.registerXVar[i]});
+                        if(!oldRegister) {
+                            prot.get("registerXVar").add(new DataFlowGraphNodeIO({
+                                name : p.registerXVar[i],
+                                synType : "",
+                                semType : ""
                             }));
                         }
                     }

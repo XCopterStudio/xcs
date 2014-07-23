@@ -5,6 +5,7 @@ joint.shapes.dfg = {};
 joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_.extend({}, joint.shapes.basic.PortsModelInterface, {
     inPortsType: {},
     outPortsType: {},
+    registerXVars: [],
     
     markup: '<g class="rotatable"><g class="scalable"><rect></rect></g><text class="label"></text><g class="inPorts"></g><g class="outPorts"></g></g>',
     portMarkup: '<g class="port<%= id %>"><circle></circle><text></text></g>',
@@ -54,11 +55,17 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
                 fill: '#E74C3C',
                 //stroke: '#E74C3C',
                 type: 'in',
+                customType: 'port',
+            },
+            '.inPorts circle[customType="registerXVar"]': { 
+                fill: 'black',
+                stroke: 'yellow',
             },
             '.outPorts circle': { 
                 fill: '#16A085', 
                 //stroke: '#16A085',
-                type: 'out' 
+                type: 'out',
+                customType: 'port',
             }
         },
     }, joint.shapes.basic.Generic.prototype.defaults),
@@ -70,12 +77,29 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
         var portTextSelector = portSelector + '>text';
         var portCircleSelector = portSelector + '>circle';
 
-        attrs[portTextSelector] = { text: portName };
-        attrs[portCircleSelector] = { port: { id: portName || _.uniqueId(type) , type: type } };
-        attrs[portSelector] = { ref: 'rect', 'ref-y': (index + 0.5) * (1 / total) };
+        attrs[portTextSelector] = { 
+            text: portName 
+        };
         
-        if (selector === '.outPorts') { attrs[portSelector]['ref-dx'] = 0; }
-
+        attrs[portCircleSelector] = { 
+            port: { 
+                id: portName || _.uniqueId(type), 
+                type: type,
+                
+                //del
+                //customType: (this.registerXVars.indexOf(portName) >= 0 ? 'registerXVar' : 'port')
+            }
+        };
+        
+        attrs[portSelector] = { 
+            ref: 'rect', 
+            'ref-y': (index + 0.5) * (1 / total),
+        };
+        
+        if(selector === '.outPorts') { 
+            attrs[portSelector]['ref-dx'] = 0; 
+        }
+        
         return attrs;
     },
     
@@ -137,6 +161,23 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     
     setModel : function(model) {
         this.model = model;
+    },
+    
+    addRegisterXVar : function(portId) {
+        if(this.registerXVars.indexOf(portId) < 0) {
+            this.registerXVars.push(portId);
+        }
+        
+        this.addInputPort(portId, "*", "*");
+        
+        this.attr('circle[port="' + portId + '"]/customType', "registerXVar");
+        
+        //del
+//        var registerXVarsCircle = $('.inPorts circle[customType="registerXVar"]');
+//        var css = this.attr('.inPorts circle[port="' + portId + '"]');
+//        for(var key in css) {
+//            registerXVarsCircle.css(key, css[key]);
+//        }
     },
     
     addInputPort : function(portId, semT, synT) {

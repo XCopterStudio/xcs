@@ -142,8 +142,11 @@ var DataFlowGraphView = Backbone.View.extend({
                     var idS = magnetS.getAttribute("port");
                     var idT = magnetT.getAttribute("port");
 
-                    var sameSemT = cellViewS.model.outPortsType[idS].semType == cellViewT.model.inPortsType[idT].semType;
-                    var sameSynT = cellViewS.model.outPortsType[idS].synType == cellViewT.model.inPortsType[idT].synType;
+                    var semTT = cellViewT.model.inPortsType[idT].semType;
+                    var synTT = cellViewT.model.inPortsType[idT].synType;
+                    
+                    var sameSemT = semTT == "*" || semTT == cellViewS.model.outPortsType[idS].semType;
+                    var sameSynT = synTT == "*" || synTT == cellViewS.model.outPortsType[idS].synType;
                     
                     var valid = sameSemT && sameSynT;
                     
@@ -238,9 +241,10 @@ var DataFlowGraphView = Backbone.View.extend({
         // get model
         var modelPrototype = this.dfgToolboxNodes[nodeId];
         
-        // get xvars and xinput ports
+        // get xvars and xinput ports and register xvar methods
         var xvars = modelPrototype.get("xvar");
         var xinputPorts = modelPrototype.get("xinputPort");
+        var registerXVars = modelPrototype.get("registerXVar");
         
         //get name
         var prototypeName;            
@@ -278,6 +282,17 @@ var DataFlowGraphView = Backbone.View.extend({
                 var xinputPortSynType = xvar.get("synType");
                 var xinputPortSemType = xvar.get("semType");
                 m.addInputPort(xinputPortName, xinputPortSemType, xinputPortSynType);
+            });
+        }
+        
+        // get all register xvar methods
+        if(registerXVars) {
+            registerXVars.forEach(function(reg) {
+                var registerName = reg.get("name");
+//                var registerSynType = "*";
+//                var registerSemType = "*";
+//                m.addInputPort(registerName, registerSemType, registerSynType);
+                m.addRegisterXVar(registerName);
             });
         }
         
@@ -690,7 +705,8 @@ var DataFlowGraphView = Backbone.View.extend({
             // prepare object 4 dfg info
             var dfg = {
                 prototype: [],
-                link: []
+                link: [],
+                registerXVar: []
             };
                 
             for(var i = 0; i < jsonDfg.cells.length; ++i) {
@@ -720,17 +736,40 @@ var DataFlowGraphView = Backbone.View.extend({
                 
                 // links
                 else if(cell.source && cell.target && cell.source.id && cell.target.id && cell.type && cell.type == "link") {
-                    // prepare links info 4 sending
-                    dfg.link.push({
-                        source: {
-                            id: cell.source.id,
-                            port: cell.source.port,
-                        },
-                        target: {
-                            id: cell.target.id,
-                            port: cell.target.port,
-                        },
-                    });
+                    // load prototypes info
+                    var prototypeId = cell.target.id;
+                    var modelPrototype = this.dfgToolboxNodes[prototypeId];
+                    if(!modelPrototype) {
+                        app.Flash.flashError("Error when try to create nodes: " + prototypeId + " is not loaded!");
+                        return;
+                    }
+                    
+                    //TODO: rename port to xvar/xinputPort/registerXVar
+                    if(modelPrototype.get("registerXVar").findWhere({"name": cell.target.port})) {
+                        dfg.registerXVar.push({
+                            source: {
+                                id: cell.source.id,
+                                port: cell.source.port,
+                            },
+                            target: {
+                                id: cell.target.id,
+                                port: cell.target.port,
+                            },
+                        });
+                    }
+                    else {
+                        // prepare links info 4 sending
+                        dfg.link.push({
+                            source: {
+                                id: cell.source.id,
+                                port: cell.source.port,
+                            },
+                            target: {
+                                id: cell.target.id,
+                                port: cell.target.port,
+                            },
+                        });
+                    }
                 }
             }
             
