@@ -44,15 +44,15 @@ inline void fillTypeCategories(SyntacticCategoryMap &categoryMap) {
         return;
     }
 
-#define FILTER(Type) categoryMap.emplace(#Type, CATEGORY_SCALAR);
+#define FILTER(Type) categoryMap.emplace(#Type, CATEGORY_SCALAR); categoryMap.emplace(typeid(Type).name(), CATEGORY_SCALAR);
     LIBPORT_LIST_APPLY(FILTER, XCS_SCALAR_TYPES);
 #undef FILTER
 
-#define FILTER(Type) categoryMap.emplace(#Type, CATEGORY_VECTOR);
+#define FILTER(Type) categoryMap.emplace(#Type, CATEGORY_VECTOR); categoryMap.emplace(typeid(Type).name(), CATEGORY_VECTOR);
     LIBPORT_LIST_APPLY(FILTER, XCS_VECTOR_TYPES);
 #undef FILTER
 
-#define FILTER(Type) categoryMap.emplace(#Type, CATEGORY_VIDEO);
+#define FILTER(Type) categoryMap.emplace(#Type, CATEGORY_VIDEO); categoryMap.emplace(typeid(Type).name(), CATEGORY_VIDEO);
     LIBPORT_LIST_APPLY(FILTER, XCS_VIDEO_TYPES);
 #undef FILTER
 }
