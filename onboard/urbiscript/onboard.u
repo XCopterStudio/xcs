@@ -139,8 +139,6 @@ class Onboard {
                 echo("receive request: " + id + " (data: " + requestData + ")");
             };
 
-            //sleep(2s);
-
             try {
                 switch(id) {
                     case "DFG_LOAD":
@@ -166,7 +164,7 @@ class Onboard {
                 };
             }
             catch(var ex) {
-                //TODOoo: what to do with errors? send to client? + send current state (all created/started/stopped nodes)
+                //TODO: what to do with errors? send to client? + send current state (all created/started/stopped nodes)
                 echo("ERROR(" + id + "): " + ex.asString());
                 responseData = ex.message;
                 responseType = "Error";
@@ -296,6 +294,32 @@ class Onboard {
 
                     if(source.hasLocalSlot(sourcePort) && target.hasLocalSlot(targetPort)) {
                         source.getLocalSlot(sourcePort) >>  target.getLocalSlot(targetPort);
+                    };
+                };
+            };
+
+            // register xvars
+            for(var r: requestData["registerXVar"]) {
+                var sourceId = r["source"]["id"];
+                var sourcePort = r["source"]["port"];
+                var targetId = r["target"]["id"];
+                var targetPort = r["target"]["port"];
+
+                if(this.dfgLobby_.hasLocalSlot(sourceId) && this.dfgLobby_.hasLocalSlot(targetId)) {
+                    var source = this.dfgLobby_.getLocalSlot(sourceId).value();
+                    var target = this.dfgLobby_.getLocalSlot(targetId).value();
+
+                    if(source.hasLocalSlot(sourcePort) && target.hasLocalSlot(targetPort)) {
+                        // get source/target slot names
+                        var sourceSlot = source.getLocalSlot(sourcePort); 
+                        var targetSlot = target.getLocalSlot(targetPort);
+
+                        // get data types
+                        var synT = source.getSynType(sourcePort);
+                        var semT = source.getSemType(sourcePort);
+
+                        // execute register xvar method
+                        targetSlot.value(sourcePort, semT, synT, sourceSlot);
                     };
                 };
             };
@@ -438,16 +462,21 @@ class Onboard {
         var pData = [ => ];
 
         try {
-            //var key = p.first().asString();
             echo("...sending info about loaded xobject: " + key);
 
             // determine if we have enough information about current key
             if(this.xobjectInfo_.has(key)) {
                 var name = this.xobjectInfo_[key].name;
 
-                // get info about xvars and inout ports
+                // get info about xvars and input ports
                 var xvars = System.eval(name + ".getXVars()");
                 var xinputPorts = System.eval(name + ".getXInputPorts()");
+                
+                // get info and prepare data about registerXVar functions
+                var registerXVars = [];
+                if(System.eval(name + ".hasSlot(\"registerXVar\");")) {
+                    registerXVars << "registerXVar";
+                };
 
                 // prepare data about xvars
                 var varList = [];
@@ -472,6 +501,7 @@ class Onboard {
                 pData["name"] = key;
                 pData["var"] = varList;
                 pData["inputPort"] = portList;
+                pData["registerXVar"] = registerXVars;
             }
             else {
                 echo("...there is no info for: " + key);
@@ -932,8 +962,6 @@ class Onboard {
     };
 
     function getUserDfgPaths_(file = nil, checkExists = false) {
-        //TODO: return valide path 4 user dfg
-
         var type = "DFG/";
         if(!file.isNil()) {
             type += file;
@@ -954,25 +982,18 @@ class Onboard {
         };
         
         return paths;
-
-        //return getUserDataPaths_() / Path.new("DFG/");
     };
 
     function getUserDataPaths_(type, isDir, checkExists) {
-        //TODO: return valide user data path
-        
         var basePaths = this.getBasePaths_(Path.new("xsetting/userdata/") / Path.new(type));
         var dirPaths = [];
         for(var p: basePaths) {
             if(!checkExists || (p.exists() && ((isDir && p.isDir()) || (!isDir && p.isReg())))) {
-            //if((!checkExists || p.exists()) && ((isDir && p.isDir()) || (!isDir && p.isReg()))) {
                 dirPaths << p;
             };
         };
 
         return dirPaths;
-        
-        //return Path.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/xsetting/userdata");
     };
 }|;
 
