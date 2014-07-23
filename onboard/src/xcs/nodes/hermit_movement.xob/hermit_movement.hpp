@@ -22,7 +22,7 @@ namespace hermit{
         static const double EPSILON;
         static const double MAX_SPEED;
 
-        xcs::Checkpoint targetCheckpoint;
+        xcs::Checkpoint targetCheckpoint_;
         CheckpointQueue checkpointQueue_;
 
         xcs::CartesianVector dronePosition_;

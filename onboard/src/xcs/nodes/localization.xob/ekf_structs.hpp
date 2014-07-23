@@ -17,7 +17,11 @@ struct DroneState {
 
     unsigned int updateMeasurementID;
 
-    DroneState() : angularRotationPsi(0), updateMeasurementID(0) {
+    inline DroneState(xcs::CartesianVector position = xcs::CartesianVector(), xcs::CartesianVector velocity = xcs::CartesianVector(),
+        xcs::EulerianVector angles = xcs::EulerianVector(), double angularRotationPsi = 0,
+        unsigned int updateMeasurementID = 0) : position(position), velocity(velocity),
+        angles(angles), angularRotationPsi(angularRotationPsi), 
+        updateMeasurementID(updateMeasurementID) {
     };
 
     inline DroneState(const arma::mat &mat) :

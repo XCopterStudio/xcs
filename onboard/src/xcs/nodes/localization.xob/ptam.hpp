@@ -34,7 +34,13 @@ namespace nodes {
 namespace localization {
 
 enum PtamStatusType {
-    PTAM_IDLE = 0, PTAM_INITIALIZING = 1, PTAM_LOST = 2, PTAM_GOOD = 3, PTAM_BEST = 4, PTAM_TOOKKF = 5, PTAM_FALSEPOSITIVE = 6
+    PTAM_IDLE = 0,
+    PTAM_INITIALIZING = 1,
+    PTAM_LOST = 2,
+    PTAM_GOOD = 3,
+    PTAM_BEST = 4,
+    PTAM_TOOKKF = 5,
+    PTAM_FALSEPOSITIVE = 6
 };
 
 class Ptam : public MouseKeyHandler {
@@ -56,25 +62,27 @@ public:
     void measurementImu(const DroneStateMeasurement measurement, const double timestamp);
 
     void cameraParameters(const CameraParameters& values);
-    
+
     void parameters(const Parameters& values);
-    
-    inline localization::PtamStatusType ptamStatus() { return ptamStatus_; }
-    
+
+    inline localization::PtamStatusType ptamStatus() {
+        return ptamStatus_;
+    }
+
     /*
      * Control functions
      */
     void takeInitKF();
-    
+
     void takeKF();
-    
+
     /*!
      * \note handleFrame must be called to take effect of the reset, i.e. PTAM won't
      * be reset until PTAM is enabled (in XLocalization).
      */
     void reset();
 
-    
+
 private:
     typedef std::unique_ptr<Tracker> TrackerPtr;
     typedef std::unique_ptr<ATANCamera> ATANCameraPtr;
@@ -144,7 +152,7 @@ private:
     TooN::Vector<3> evalNavQue(xcs::Timestamp from, xcs::Timestamp to, bool* zCorrupted, bool* allCorrupted);
 
     void resetPtam();
-    
+
     void createPtam();
 
 };

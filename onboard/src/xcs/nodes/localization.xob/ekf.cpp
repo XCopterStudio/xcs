@@ -69,17 +69,24 @@ int Ekf::findMeasurementIndex(const int &ID) {
 DroneStateDistributionChronologic Ekf::predict(const DroneStateDistributionChronologic& state, const double &endTime) {
     DroneStateDistributionChronologic newState = state;
     double flyControlTime = state.second;
+    XCS_LOG_INFO("Predict up to time %f" << flyControlTime);
     int controlIndex = findNearest(flyControls_, flyControlTime);
 
     do { // predict state up to the measurement time
         double nextControlTime = 0;
-        if (controlIndex < (flyControls_.size() - 1)) {
+        if (controlIndex < (flyControls_.size() - 1) && controlIndex != -1) {
             nextControlTime = flyControls_[controlIndex + 1].second;
         } else {
             nextControlTime = std::numeric_limits<double>::max();
         }
+ 
         double delta = std::min(nextControlTime, endTime) - flyControlTime;
-        newState.first = predict(newState.first, flyControls_[controlIndex].first, delta);
+        if (controlIndex >= 0){
+            newState.first = predict(newState.first, flyControls_[controlIndex].first, delta);
+        }
+        else{
+            newState.first = predict(newState.first, xcs::FlyControl(), delta);
+        }
 
 
         flyControlTime = nextControlTime;
@@ -574,4 +581,23 @@ DroneState Ekf::computeState(const double time) {
     int index = findNearest(droneStates_, time);
     DroneStateDistributionChronologic state = droneStates_[index];
     return predict(state, time).first.first;
+}
+
+void Ekf::reset(){
+    unique_lock<shared_mutex> lock(bigSharedMtx_);
+    double altitude = droneStates_.back().first.first.position.z;
+
+    // clear all deques
+    flyControls_.clear();
+    imuMeasurements_.clear();
+    droneStates_.clear();
+
+    // add default element in all queue
+    flyControls_.push_back(FlyControlChronologic(FlyControl(), 0));
+    imuMeasurements_.push_back(ImuMeasurementChronologic(DroneStateMeasurement(), 0));
+    droneStates_.push_back(DroneStateDistributionChronologic(
+        DroneStateDistribution(DroneState(xcs::CartesianVector(0,0,altitude)), arma::mat(10, 10, fill::eye)),
+        0));
+
+    IDCounter_ = 1;
 }

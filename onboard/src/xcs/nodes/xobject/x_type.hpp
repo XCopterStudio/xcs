@@ -34,7 +34,6 @@ struct XOBJECT_EXPORT XType {
     XType(const std::string& synT, const std::string& semT, const DataFlowType dataFlowT);
     XType(const std::type_info& synType, const SemanticTypeInfo& semT, const DataFlowType dataFlowT);
     bool operator==(const XType&) const;
-    const std::string toString() const;
 };
 
 typedef XType::SemanticTypeInfo SemanticTypeInfo;

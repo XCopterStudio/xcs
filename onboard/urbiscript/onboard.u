@@ -2,6 +2,22 @@ System.system("start cmd.exe /k \"node d:/skola/MFF/Mgr/swProjekt/quadricopter/r
 sleep(2s);
 
 class Onboard {
+    
+    class XcsPaths {
+        var scripts = {if("XCS_SCRIPTS_PATH" in System.env) System.env["XCS_SCRIPTS_PATH"] else Path.cwd / "urbiscript"};
+        var settings = {if("XCS_SETTINGS_PATH" in System.env) System.env["XCS_SETTINGS_PATH"] else Path.cwd / "xsettings"};
+
+        function getScript(filename) {
+            echo("/////////////////////" + scripts);
+
+            scripts / filename;
+        }|;
+
+        function getSettings(filename) {
+            settings / filename;
+        }|; 
+    }|;
+    
     var xobjects4load_ = [ => ];            // list of pairs (xobjects, which are yet not loaded; path)
     var loadedXObjects_ = [ => ];           // list of pairs (loaded xobjects; copies)
     var loadedPrivateObjects_ = [ => ];     // list of pairs (loaded uobjects; copies)
@@ -17,8 +33,6 @@ class Onboard {
     var xobjectStates_ = [ "STATE_CREATED" => 0, "STATE_STARTED" => 1, "STATE_STOPED" => 2];
 
     function init() {
-        echo("init...");
-
         this.dfgLobby_ = Lobby.create();
 
         loadSettings_();
@@ -51,76 +65,6 @@ class Onboard {
 
         // load ddfg from settings
         loadDdfg_();
-
-        ///
-        /// DEBUG: SETTINGS
-        ///
-
-        //var this.settings = XSettings.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/projects/onboard/lib/Release/onboard.xs");
-        //echo(">>>" + this.settings.getOrDefault("test1", "aaaaaaa"));
-        //echo(">>>" + this.settings.getOrDefault("section1.test2", "bbbbbb"));
-        //echo(">>>" + this.settings.getOrDefault("test3", "cccccc"));
-        //echo(">>>" + this.settings.getOrDefault("test4", "ddddddd"));
-        ////echo(">>>" + this.settings.get("test5"));
-        ////this.settings.setAndSave("test5", "tramtadaaaaaaaaaaa");
-        //echo(">>>" + this.settings.get("test5"));
-
-        //var settings = XSettings.new("d:/skola/MFF/Mgr/swProjekt/quadricopter/repository/xcs/onboard/xsetting/xobjects.xs");
-        //echo(">>>" + settings.getOrDefault("onboard", "???"));
-        //echo(">>>" + settings.getOrDefault("onboarddddd", "???"));
-        //echo(">>>" + settings.contains("onboard"));
-        //echo(">>>" + settings.contains("onboarddddd"));
-        //echo(">>>" + settings.contains("onboard.name"));
-        //echo(">>>" + settings.contains("onboard.init"));
-        //echo(">>>" + settings.getOrDefault("onboard.name", "XXX"));
-        //echo(">>>" + settings.getOrDefault("onboard.init", "XXX"));
-
-        //echo(">>>" + this.xobjectsSettings_.getOrDefault("onboard", "???"));
-        //echo(">>>" + this.xobjectsSettings_.getOrDefault("onboarddddd", "???"));
-        //echo(">>>" + this.xobjectsSettings_.contains("onboard"));
-        //echo(">>>" + this.xobjectsSettings_.contains("onboarddddd"));
-
-        ///
-        /// Debug: create new clone by settings
-        ///
-
-        //var initText =
-        //    this.xobjectsSettings_.getOrDefault("onboard.name", "onboard") +
-        //    ".new(" +
-        //        this.xobjectsSettings_.getOrDefault("onboard.init", "") +
-        //    ");";
-        //echo(">>>" + initText);
-
-        //echo(">>>" + this.xobjectsSettings_.contains("onboard.name"));
-        //echo(">>>" + this.xobjectsSettings_.contains("onboard.init"));
-
-
-        ///
-        /// read multiple init settings
-        ///
-
-        //var m = this.xobjectsSettings_.getMap("xxci.init");
-        ////var m = this.xobjectsSettings_.getMap("oonboard.init");
-        //echo("........................");
-        //for(var i: m) {
-        //    echo(i.first + " => " + i.second);
-        //};
-        //echo("........................");
-
-
-        //var l = ["onboard", "xxci", "xsettings"];
-        //echo(".......................................................");
-        //for(var xo: l){
-        //    var m = this.xobjectsSettings_.getXObjectSettings(xo);
-        //    for(var kvp: m) {
-        //        echo("... " + kvp.first);
-        //        echo("...... name = " + kvp.second.name);
-        //        echo("...... filename = " + kvp.second.filename);
-        //        echo("...... init param = " + kvp.second.initParam);
-        //    };
-        //};
-        //echo(".......................................................");
-
     };
 
     function doRequest_(request) {
@@ -132,10 +76,9 @@ class Onboard {
             var responseType = "Done";
 
             //debug
-            if(requestData == ""){
+            if(requestData == "") {
                 echo("receive request: " + id);
-            }
-            else {
+            } else {
                 echo("receive request: " + id + " (data: " + requestData + ")");
             };
 
@@ -261,7 +204,7 @@ class Onboard {
     function doDfgCreate_(requestData) {
         var created = false;
 
-        try {            
+        try {
             // prototypes
             for(var p: requestData["prototype"]) {
                 var id = p["id"];
@@ -565,18 +508,9 @@ class Onboard {
 
     function loadScript_(script) {
         try {
-            echo("loading script: " + script + "...");
-
-            var p = Path.new(script);
-            if(!p.absolute()) {
-                var foundedScript = this.getScriptPaths_(script);
-                if(!foundedScript.isNil()) {
-                    script = foundedScript;
-                }
-            };
-
-            load(script);
-            echo("...script loaded");
+            var path = XcsPaths.getScript(script);
+            load(path);
+            echo("loaded script " + script);
         }
         catch(var ex){
             echo("...script cannot be load: " + ex.asString());
@@ -767,8 +701,7 @@ class Onboard {
             this.stopDfgCommunication();
 
             // find all xobjects
-            var xobjectPaths = this.getXObjectPaths_();      
-            for(var dirPath: xobjectPaths) {
+            for(var dirPath: UObject.searchPath) {
                 var dir = Directory.new(dirPath);
                 for(var path: dir.asList()) {
                 
@@ -829,7 +762,7 @@ class Onboard {
     };
 
     function loadDdfg_() {
-        var ddfgPath = getDdfgPath_();
+        var ddfgPath = XcsPaths.getSettings("ddfg.xs");
 
         if(!ddfgPath.isNil()) {
             var setting = XSettings.new(ddfgPath.asString(), false);
@@ -840,125 +773,27 @@ class Onboard {
     function loadCore_() {
        // module names to be loaded
         var moduleList = [
-            //"xcs",
-            //"datalogger",
-            //"xobject",
-            //"xci_dodo",
             "xjson",
             "ujson",
-            //"onboard",
-            //"xxci",
-
-            //"xci_parrot",
         ];
 
         // load listed modules
         loadXObjects_(moduleList);
 
         // bootstrap urbiscripts
-        //load("boot/boot.u");
         var uscriptList = [
-            //"boot/boot.u",
             "boot/adapter.u"
         ];
 
         loadScripts_(uscriptList);
     };
 
-    function getBasePaths_(customPath = nil) {
-        //var dirPath = System.env["URBI_UOBJECT_PATH"];
-        var dirPaths = UObject.searchPath|;
-        if(dirPaths.isNil() || dirPaths.size() == 0) {
-            echo("ERROR: search path for xobjects is not set");
-            dirPaths = []|;
-        };
-        
-        if(!customPath.isNil()) {
-            var customPaths = [];
-
-            if(!customPath.isA(List)) {
-                customPath = [customPath];
-            };
-            
-            for(var i = 0; i < customPath.size(); ++i) {
-                if(customPath[i].isA(String)) {
-                    customPath[i] = Path.new(customPath[i]);
-                };
-            };
-            
-            for(var i = 0; i < dirPaths.size(); ++i) {
-                for(var j = 0; j < customPath.size(); ++j) {
-                    if(customPath[j].isA(Path)) {
-                        customPaths << dirPaths[i] / customPath[j];
-                    };
-                };
-            }; 
-
-            return customPaths;
-        };
-
-        return dirPaths;
-    };
-
-    function getXObjectPaths_() {
-        return this.getBasePaths_();
-    };
-
-    function getScriptPaths_(script = nil) {
-        if(script.isNil()) {
-            var basePaths = this.getBasePaths_("urbiscript/");
-
-            var dirPaths = [];
-            for(var p: basePaths) {
-                if(p.exists() && p.isDir()) {
-                    dirPaths << p;
-                };
-            };
-
-            return dirPaths;
-        }
-        else {
-            var basePaths = this.getBasePaths_(Path.new("urbiscript/") / Path.new(script));
-
-            for(var p: basePaths) {
-                if(p.exists() && p.isReg()) {
-                    return p;
-                };
-            };
-
-            return nil;
-        };
-    };
-
     function getXObjectSettingFilePaths_(xobjectsPrivate = false) {
-        var basePaths = "";
         if(xobjectsPrivate) {
-            basePaths = this.getBasePaths_("xsetting/xobjectsPrivate.xs");
-        }
-        else {
-            basePaths = this.getBasePaths_("xsetting/xobjects.xs");
-        };
-        
-        var filePaths = [];
-        for(var p: basePaths) {
-            if(p.exists() && p.isReg()) {
-                filePaths  << p;
-            };
-        };
-
-        return filePaths;
-    };
-
-    function getDdfgPath_() {
-        var basePaths = this.getBasePaths_("xsetting/ddfg.xs");
-        
-        for(var p: basePaths) {
-            if(p.exists() && p.isReg()) {
-                return p;
-            };
-        };
-
-        return nil;
+            /*return*/ [XcsPaths.getSettings("xobjectsPrivate.xs")];
+        } else {
+            /*return*/ [XcsPaths.getSettings("xobjects.xs")];
+        };        
     };
 
     function getUserDfgPaths_(file = nil, checkExists = false) {
@@ -985,7 +820,8 @@ class Onboard {
     };
 
     function getUserDataPaths_(type, isDir, checkExists) {
-        var basePaths = this.getBasePaths_(Path.new("xsetting/userdata/") / Path.new(type));
+        var basePaths = [XcsPaths.getSettings("userdata") / Path.new(type)];
+
         var dirPaths = [];
         for(var p: basePaths) {
             if(!checkExists || (p.exists() && ((isDir && p.isDir()) || (!isDir && p.isReg())))) {
@@ -999,55 +835,3 @@ class Onboard {
 
 
 var onboard = Onboard.new() |;
-
-
-//class Global.C {
-//    var p = "";
-//    function init(p) {
-//        this.p = p;
-//    };
-//};
-
-//var l = Lobby.create()|;
-//do(l) {
-//    var p = Global.C.new("test.smazat");
-//    var p2 = Global.C.new("test2.smazat");
-//}|;
-
-//l.p.p;
-//l.p2.p;
-
-//var source = "p.&p"|;
-//var target = "p2.&p"|;
-////System.eval("l." + source + " >> l." + target + ";");
-////l.locateSlot("l." + source).isNil;
-//l.getLocalSlot("p").value().getLocalSlot("p") >> l.getLocalSlot("p2").value().getLocalSlot("p");
-
-//l.p.p = "zmena";
-
-//l.p.p;
-//l.p2.p;
-
-
-//function killLobby(l) {
-//    for(var slot: l.localSlotNames()) {
-//        l.getLocalSlot(slot).value = nil;
-//        l.removeLocalSlot(slot);
-//    };
-//};
-
-//System.loadModule("xsettings");
-
-//var l = Lobby.create();
-//do(l) {
-//    var s = XSettings.new("");
-//    loa
-//  d("settings_collection.u");
-//};
-
-//l.localSlotNames();
-
-//killLobby(l);
-//this.removeLocalSlot("l");
-
-//l.localSlotNames();

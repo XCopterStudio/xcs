@@ -73,7 +73,7 @@ xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
     }
 
     if (newCheckpoint_){
-        empty_ = !(checkpointQueue_.tryPop(targetCheckpoint));
+        empty_ = !(checkpointQueue_.tryPop(targetCheckpoint_));
         newCheckpoint_ = empty_;
     }
 
@@ -82,7 +82,7 @@ xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
             reachedCallback_(false);
         }
 
-        double distance = computeDistance(targetCheckpoint, dronePosition_);
+        double distance = computeDistance(targetCheckpoint_, dronePosition_);
         double step = 1.0 / (distance * POINTS_ON_METER);
         double boundSpeed = valueInRange(speed, 0.0, MAX_SPEED);
 
@@ -94,8 +94,8 @@ xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
         Checkpoint interCheckpoint;
         double step_temp = step;
 
-        do{ // find point distant EPSILON from drone actual position
-            interCheckpoint = computeHermitPoint(droneCheckpoint, targetCheckpoint, step_temp);
+        do { // find point distant EPSILON from drone actual position
+            interCheckpoint = computeHermitPoint(droneCheckpoint, targetCheckpoint_, step_temp);
             step_temp += step;
         } while (distance > EPSILON && computeDistance(interCheckpoint, dronePosition_) < EPSILON);
 
@@ -111,7 +111,7 @@ xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
         
 
         if (distance < EPSILON){
-            printf("Drone achieved destination: [%f,%f,%f] \n", targetCheckpoint.x, targetCheckpoint.y, targetCheckpoint.z);
+            printf("Drone achieved destination: [%f,%f,%f] \n", targetCheckpoint_.x, targetCheckpoint_.y, targetCheckpoint_.z);
             printf("Hermit: New checkpoint \n");
             newCheckpoint_ = true;
             if (!reachedCallback_){
