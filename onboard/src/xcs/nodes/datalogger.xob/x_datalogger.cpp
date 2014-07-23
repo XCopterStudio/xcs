@@ -32,6 +32,7 @@ XDatalogger::XDatalogger(const std::string& name) :
     XBindFunction(XDatalogger, start);
     XBindFunction(XDatalogger, registerData);
     XBindFunction(XDatalogger, registerVideo);
+    XBindFunction(XDatalogger, registerXVar);
 }
 
 XDatalogger::~XDatalogger() {
@@ -52,6 +53,19 @@ void XDatalogger::init(const std::string &file) {
     }
     filename_ = file;
     inited_ = true;
+}
+
+void XDatalogger::registerXVar(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar) {
+    SyntacticCategoryType syntacticCategory = syntacticCategoryMap_.at(syntacticType);
+    switch(syntacticCategory) {
+        case CATEGORY_VIDEO:
+            // TODO: set default video size
+            registerVideo(640, 360, name, semanticType, syntacticType, uvar);
+            break;
+        default: 
+            registerData(name, semanticType, syntacticType, uvar);
+            break;
+    }
 }
 
 void XDatalogger::registerData(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar) {
