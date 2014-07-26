@@ -8,13 +8,12 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     registerXVars: [],
     
     markup: '<g class="rotatable"><g class="scalable"><rect></rect></g><text class="label"></text><g class="inPorts"></g><g class="outPorts"></g></g>',
-    portMarkup: '<g class="port<%= id %>"><circle></circle><text></text></g>',
-    
+    portMarkup: '<g class="port<%= id %>"><circle class="port"></circle><text></text></g>',
+        
     defaults: joint.util.deepSupplement({
-        type: "dfg.DataFlowGraphDefaultModel", //"devs.Model.DataFlowGraphDefaultModel",        
+        type: "dfg.DataFlowGraphDefaultModel",
         id: "id",
         origId: "origId",
-        //position: { x: 50, y: 50 },
         inPorts: [],
         outPorts: [],
         size: { width: 120, height: 90 },
@@ -39,33 +38,27 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
             '.outPorts text':{ 
                 'x': 15, 
                 'dy': 4 },
-            
             rect: {  
                 width: 120, 
                 height: 90,
                 stroke: 'black',
             },
-            
             circle: {
                 r: 10,
                 stroke: 'black',
                 magnet: true,
             },
-            '.inPorts circle': { 
+            '.inPorts circle.port': { 
                 fill: '#E74C3C',
-                //stroke: '#E74C3C',
                 type: 'in',
-                customType: 'port',
             },
-            '.inPorts circle[customType="registerXVar"]': { 
-                fill: 'black',
-                stroke: 'yellow',
+            // this attrs is not use in standard way - it is use in addRegisterXVar method
+            '.inPorts circle.registerXVar': { 
+                fill: '#A01507',
             },
             '.outPorts circle': { 
                 fill: '#16A085', 
-                //stroke: '#16A085',
                 type: 'out',
-                customType: 'port',
             }
         },
     }, joint.shapes.basic.Generic.prototype.defaults),
@@ -85,9 +78,6 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
             port: { 
                 id: portName || _.uniqueId(type), 
                 type: type,
-                
-                //del
-                //customType: (this.registerXVars.indexOf(portName) >= 0 ? 'registerXVar' : 'port')
             }
         };
         
@@ -122,7 +112,6 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
         }
 
         this.attr('rect/fill', color);
-        //this.attr('.inPorts circle/fill', color)
     },
     
     setId : function(newId) {
@@ -164,20 +153,22 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     },
     
     addRegisterXVar : function(portId) {
+        // mark portid like registerXVar method
         if(this.registerXVars.indexOf(portId) < 0) {
             this.registerXVars.push(portId);
         }
         
+        // add classic input port
         this.addInputPort(portId, "*", "*");
         
-        this.attr('circle[port="' + portId + '"]/customType', "registerXVar");
-        
-        //del
-//        var registerXVarsCircle = $('.inPorts circle[customType="registerXVar"]');
-//        var css = this.attr('.inPorts circle[port="' + portId + '"]');
-//        for(var key in css) {
-//            registerXVarsCircle.css(key, css[key]);
-//        }
+        // add registerXVar class to input port
+        this.attr('circle[port="' + portId + '"]/class', "registerXVar");
+
+        // set special style 
+        var css = this.attr('.inPorts circle.registerXVar');
+        for(var key in css) {
+            this.attr('circle[port="' + portId + '"]/' + key, css[key]);
+        }
     },
     
     addInputPort : function(portId, semT, synT) {
@@ -195,5 +186,4 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     },
 }));
 
-//joint.shapes.devs.ModelView
 joint.shapes.dfg.DataFlowGraphDefaultModelView = joint.dia.ElementView.extend(joint.shapes.basic.PortsViewInterface);
