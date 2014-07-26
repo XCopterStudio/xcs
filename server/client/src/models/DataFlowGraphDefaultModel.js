@@ -44,7 +44,7 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
                 stroke: 'black',
             },
             circle: {
-                r: 10,
+                r: 8,
                 stroke: 'black',
                 magnet: true,
             },
@@ -127,8 +127,8 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     },
     
     setAutoSize : function(maxCount, minCount) {
-        // default value 4 
-        maxCount = typeof maxCount !== 'undefined' ? maxCount : 5;
+        // default value
+        maxCount = typeof maxCount !== 'undefined' ? maxCount : 10;
         minCount = typeof minCount !== 'undefined' ? minCount : 1;
         
         var inCount = this.get('inPorts').length;
