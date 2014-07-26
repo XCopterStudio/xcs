@@ -17,8 +17,8 @@ class Onboard {
     }|;
     
     var xobjects4load_ = [ => ];            // list of pairs (xobjects, which are yet not loaded; path)
-    var loadedXObjects_ = [ => ];           // list of pairs (loaded xobjects; copies)
-    var loadedPrivateObjects_ = [ => ];     // list of pairs (loaded uobjects; copies)
+    var loadedXObjects_ = [ => ];           // list of pairs (loaded xobjects; cached data)
+    var loadedPrivateObjects_ = [ => ];     // list of pairs (loaded uobjects; cached data)
     var privateObjects_ = [];               // objects, which are not visible for user
     var ddfg_ = "";                         // data flow graph
     var dfgCommStarted_ = false;            // data flow graph communication started
@@ -27,11 +27,13 @@ class Onboard {
     var xobjectsSettings_;
     var xobjectInfo_ = [ => ];
     var dfgLobby_;
+    var tmpLobby_;
     var json_;
     var xobjectStates_ = [ "STATE_CREATED" => 0, "STATE_STARTED" => 1, "STATE_STOPED" => 2];
 
     function init() {
         this.dfgLobby_ = Lobby.create();
+        this.tmpLobby_ = Lobby.create();
 
         loadSettings_();
 
@@ -281,12 +283,10 @@ class Onboard {
     function doDfgLoad_() {
         var prototypeData = getNodesPrototypesInfo_();
         var prototypePrivateData = getNodesPrototypesInfo_(true);
-        //var cloneData = getNodesCloneInfo_();
         var ddfgData;
 
         var data = [ => ];
         data["prototype"] = prototypeData;
-        //data["clone"] = cloneData;
         data["prototypePrivate"] = prototypePrivateData;
         data["ddfg"] = this.ddfg_;
 
@@ -387,12 +387,54 @@ class Onboard {
         // prepare data for loaded xobjects
         if(prototypePrivate) {
             for(var l: this.loadedPrivateObjects_) {
-                prototypeData << getNodeData_(l.first().asString());
+                var pData;
+                
+                // determine if data are already cached
+                if(l.second().size() == 0) {
+                    //debug
+                    echo("...............load data");
+
+                    // laod data from object
+                    pData = getNodeData_(l.first().asString());
+                    
+                    // cache loaded data
+                    this.loadedPrivateObjects_[l.first()] = pData;
+                }
+                else {
+                    //debug
+                    echo("...............cached data");
+
+                    // use data from cache
+                    pData = l.second();
+                };
+                
+                prototypeData << pData;
             };
         }
         else {
             for(var l: this.loadedXObjects_) {
-                prototypeData << getNodeData_(l.first().asString());
+                var pData;
+
+                // determine if data are already cached
+                if(l.second().size() == 0) {
+                    //debug
+                    echo("...............load data");
+
+                    // laod data from object
+                    pData = getNodeData_(l.first().asString());
+                    
+                    // cache loaded data
+                    this.loadedXObjects_[l.first()] = pData;
+                }
+                else {
+                    //debug
+                    echo("...............cached data");
+
+                    // use data from cache
+                    pData = l.second();
+                };
+                
+                prototypeData << pData;
             };
         };
 
@@ -407,15 +449,31 @@ class Onboard {
 
             // determine if we have enough information about current key
             if(this.xobjectInfo_.has(key)) {
-                var name = this.xobjectInfo_[key].name;
+                var xo;
+                try {
+                    var name = "tmp" + this.xobjectInfo_[key].name;
+                    var createPart = this.xobjectInfo_[key].name + ".new(" + this.xobjectInfo_[key].initParam + ")";
+                    this.tmpLobby_.setSlot(name, System.eval(createPart + ";"));
 
-                // get info about xvars and input ports
-                var xvars = System.eval(name + ".getXVars()");
-                var xinputPorts = System.eval(name + ".getXInputPorts()");
+                    xo = this.tmpLobby_.getLocalSlot(name).value();
+                }
+                catch(var ex) {
+                    // dont load public nodes, which can not be created
+                    if(prototypePrivate) {
+                        xo = System.eval(this.xobjectInfo_[key].name);
+                    }
+                    else {
+                        throw ex;
+                    };
+                };
+                
+                // load xvars and xinputports
+                var xvars = xo.getLocalSlot("getXVars").value();
+                var xinputPorts = xo.getLocalSlot("getXInputPorts").value();
                 
                 // get info and prepare data about registerXVar functions
                 var registerXVars = [];
-                if(System.eval(name + ".hasSlot(\"registerXVar\");")) {
+                if(xo.hasSlot("registerXVar")) {
                     registerXVars << "registerXVar";
                 };
 
@@ -424,8 +482,8 @@ class Onboard {
                 for(var xv: xvars) {
                     var pVar = [ => ];
                     pVar["name"] = xv;
-                    pVar["synType"] = System.eval(name + ".getSynType(\"" + xv + "\")");
-                    pVar["semType"] = System.eval(name + ".getSemType(\"" + xv + "\")");
+                    pVar["synType"] = xo.getLocalSlot("getSynType").value(xv);
+                    pVar["semType"] = xo.getLocalSlot("getSemType").value(xv);
                     varList << pVar;
                 };
 
@@ -434,9 +492,9 @@ class Onboard {
                 for(var xip: xinputPorts) {
                     var pPort = [ => ];
                     pPort["name"] = xip;
-                    pPort["synType"] = System.eval(name + ".getSynType(\"" + xip + "\")");
-                    pPort["semType"] = System.eval(name + ".getSemType(\"" + xip + "\")");
-                    portList  << pPort;
+                    pPort["synType"] = xo.getLocalSlot("getSynType").value(xip);
+                    pPort["semType"] = xo.getLocalSlot("getSemType").value(xip);
+                    portList << pPort;
                 };
 
                 pData["name"] = key;
@@ -446,12 +504,9 @@ class Onboard {
             }
             else {
                 echo("...there is no info for: " + key);
-                //TODO: move object to loadedPrivateObjects and erase it from loadedXObject (we are in foreach loop...)
-                //if(!this.loadedPrivateObjects_.has(key)) {
-                //    this.loadedPrivateObjects_[p.first()] = p.second()
-                //}
 
                 //TODO: not tested
+
                 // dont send info about private/not private objects
                 var end = this.privateObjects_.has(key);
                 if(prototypePrivate) {
@@ -475,6 +530,20 @@ class Onboard {
                         pData.clear();
                     };
                 };
+            };
+        }
+        catch(var ex) {
+            echo("ERROR: " + ex.asString());
+        };
+
+        //delete all temp xobjects - should call destructors
+        try {
+            for(var slot: this.tmpLobby_.localSlotNames()) {
+                //debug
+                echo("REMOVING TEMP SLOT: " + slot);
+                this.tmpLobby_.getLocalSlot(slot).value = nil;
+                this.tmpLobby_.removeLocalSlot(slot);
+                echo("..DONE");
             };
         }
         catch(var ex) {
@@ -624,14 +693,13 @@ class Onboard {
                             };
 
                             if(this.privateObjects_.has(xon) || !this.isXObject_(name)) {
-                                this.loadedPrivateObjects_[xon] = List.new();
+                                this.loadedPrivateObjects_[xon] = [ => ];
                                 echo("...xobject is private (" + this.privateObjects_.has(xon) + ") (" + !this.isXObject_(xon) + ")");
                             }
                             else {
-                                this.loadedXObjects_[xon] = List.new();
+                                this.loadedXObjects_[xon] = [ => ];
                                 added = true;
                             };
-                            //echo("...xobject loaded");
                         };
                     }
                     finally {
