@@ -72,6 +72,10 @@ body { background-image: url("../image/first_aid_kit.png"); }
     height: 540px;
 }
 
+#flow-graph-toolbox .drag_ {
+    cursor: move;
+}
+
 /*** DROPDOWN SUBMENU ***/
 .dropdown-menu .sub-menu-left {
     right: 100%;
