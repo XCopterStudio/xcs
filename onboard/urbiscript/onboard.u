@@ -109,7 +109,7 @@ class Onboard {
             catch(var ex) {
                 //TODO: what to do with errors? send to client? + send current state (all created/started/stopped nodes)
                 echo("ERROR(" + id + "): " + ex.asString());
-                responseData = ex.message;
+                responseData = ex.message();
                 responseType = "Error";
             };
 
@@ -203,12 +203,16 @@ class Onboard {
     // reset old dfg and create new one
     function doDfgCreate_(requestData) {
         var created = false;
+        var createdNodes = [];
+        var errorMessage = "";
 
         try {
             // prototypes
             for(var p: requestData["prototype"]) {
                 var id = p["id"];
                 var name = p["name"];
+
+                errorMessage = id;
 
                 if(!this.dfgLobby_.hasLocalSlot(id)) {
                     var createPart = "";
@@ -220,8 +224,11 @@ class Onboard {
                     };
 
                     this.dfgLobby_.setSlot(id, System.eval(createPart + ";"));
+                    createdNodes << id;
                     created = true;
                 };
+
+                errorMessage = "";
             };
 
             // links
@@ -231,6 +238,8 @@ class Onboard {
                 var targetId = l["target"]["id"];
                 var targetPort = l["target"]["port"];
 
+                errorMessage = sourceId + "." + sourcePort + " >> " + targetId + "." + targetPort;
+
                 if(this.dfgLobby_.hasLocalSlot(sourceId) && this.dfgLobby_.hasLocalSlot(targetId)) {
                     var source = this.dfgLobby_.getLocalSlot(sourceId).value();
                     var target = this.dfgLobby_.getLocalSlot(targetId).value();
@@ -239,6 +248,8 @@ class Onboard {
                         source.getLocalSlot(sourcePort) >>  target.getLocalSlot(targetPort);
                     };
                 };
+
+                errorMessage = "";
             };
 
             // register xvars
@@ -247,6 +258,8 @@ class Onboard {
                 var sourcePort = r["source"]["port"];
                 var targetId = r["target"]["id"];
                 var targetPort = r["target"]["port"];
+
+                errorMessage = sourceId + "." + sourcePort + " register to " + targetId + "." + targetPort;
 
                 if(this.dfgLobby_.hasLocalSlot(sourceId) && this.dfgLobby_.hasLocalSlot(targetId)) {
                     var source = this.dfgLobby_.getLocalSlot(sourceId).value();
@@ -265,11 +278,21 @@ class Onboard {
                         targetSlot.value(sourcePort, semT, synT, sourceSlot);
                     };
                 };
+
+                errorMessage = "";
             };
         }
         catch(var ex) {
-            doDfgReset_(false);
-            throw ex;
+            for(var node: createdNodes) {
+                doDfgReset_(false, node);
+            };
+
+            if(errorMessage == "") {
+                throw ex;
+            }
+            else {
+                throw Exception.new(errorMessage + ": " + ex.message());
+            };            
         };
 
         if(!created) {
@@ -391,9 +414,6 @@ class Onboard {
                 
                 // determine if data are already cached
                 if(l.second().size() == 0) {
-                    //debug
-                    echo("...............load data");
-
                     // laod data from object
                     pData = getNodeData_(l.first().asString());
                     
@@ -401,9 +421,6 @@ class Onboard {
                     this.loadedPrivateObjects_[l.first()] = pData;
                 }
                 else {
-                    //debug
-                    echo("...............cached data");
-
                     // use data from cache
                     pData = l.second();
                 };
@@ -417,9 +434,6 @@ class Onboard {
 
                 // determine if data are already cached
                 if(l.second().size() == 0) {
-                    //debug
-                    echo("...............load data");
-
                     // laod data from object
                     pData = getNodeData_(l.first().asString());
                     
@@ -427,9 +441,6 @@ class Onboard {
                     this.loadedXObjects_[l.first()] = pData;
                 }
                 else {
-                    //debug
-                    echo("...............cached data");
-
                     // use data from cache
                     pData = l.second();
                 };
@@ -463,7 +474,7 @@ class Onboard {
                         xo = System.eval(this.xobjectInfo_[key].name);
                     }
                     else {
-                        throw ex;
+                       throw ex;
                     };
                 };
                 
@@ -539,11 +550,8 @@ class Onboard {
         //delete all temp xobjects - should call destructors
         try {
             for(var slot: this.tmpLobby_.localSlotNames()) {
-                //debug
-                echo("REMOVING TEMP SLOT: " + slot);
                 this.tmpLobby_.getLocalSlot(slot).value = nil;
                 this.tmpLobby_.removeLocalSlot(slot);
-                echo("..DONE");
             };
         }
         catch(var ex) {
