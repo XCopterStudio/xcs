@@ -35,15 +35,17 @@ var FlashMessagesView = Backbone.View.extend({
     flashMessage : function(message, type, head) {
         // create flash div
         var flash = 
-            '<div class="alert alert-' + type + ' alert-dismissible fade in" role="alert">  \
-                <button type="button" class="close" data-dismiss="alert">                   \
-                    <span aria-hidden="true">&times;</span>                                 \
-                    <span class="sr-only">Close flash</span></button>                       \
+            '<div class="alert alert-' + type + ' alert-dismissible fade in flash-message" role="alert">  \                                                             \
                 <strong>' + head + '</strong> ' + message + '                               \
             </div>';
         
         // show flash
         var elem = $(flash).appendTo("#flash-messages");
+        
+        // close flash on click
+        elem.click(function() {
+            elem.alert('close');
+        });
         
         // close flash after 5s
         window.setTimeout(function() {
