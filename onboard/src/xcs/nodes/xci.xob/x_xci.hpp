@@ -20,13 +20,14 @@ namespace nodes {
 class XXci : public xcs::nodes::XObject {
 public:
     xcs::nodes::XVar<int> flyControlPersistence;
+    xcs::nodes::XInputPort<int> setFlyControlPersistence;
 
     xcs::nodes::XInputPort<double> roll;
     xcs::nodes::XInputPort<double> pitch;
     xcs::nodes::XInputPort<double> yaw;
     xcs::nodes::XInputPort<double> gaz;
 
-    xcs::nodes::XVar<xcs::FlyControl> flyControl;
+    xcs::nodes::XInputPort<xcs::FlyControl> flyControl;
 
     xcs::nodes::XInputPort<std::string> command;
 
@@ -84,7 +85,7 @@ private:
      * \note It may take up to 'previous value' time until the new persistence
      * is set.
      */
-    void setFlyControlPersistence(unsigned int value);
+    void onChangeFlyControlPersistence(unsigned int value);
 
     /*!
      * Enables/disables persistence (waking/suspending the thread).

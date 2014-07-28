@@ -87,7 +87,7 @@ public:
     XInputPort<xcs::FlyControl> flyControl;
     // PTAM control
     XInputPort<std::string> control;
-    XVar<bool> ptamEnabled;
+    XInputPort<bool> ptamEnabled;
 
     // computed ekf output
     XVar<xcs::CartesianVector> position;

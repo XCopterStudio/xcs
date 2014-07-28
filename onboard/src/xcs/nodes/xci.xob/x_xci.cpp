@@ -23,6 +23,7 @@ using namespace std;
 XXci::XXci(const std::string& name) :
   xcs::nodes::XObject(name),
   flyControlPersistence("FLY_CONTROL_PERSISTENCE"),
+  setFlyControlPersistence("FLY_CONTROL_PERSISTENCE"),
   roll("ROLL"),
   pitch("PITCH"),
   yaw("YAW"),
@@ -42,7 +43,8 @@ XXci::XXci(const std::string& name) :
     XBindFunction(XXci, dumpConfiguration);
     XBindFunction(XXci, setConfiguration);
 
-    XBindVarF(flyControlPersistence, &XXci::setFlyControlPersistence);
+    XBindVarF(setFlyControlPersistence, &XXci::onChangeFlyControlPersistence);
+    XBindVar(flyControlPersistence);
 
     XBindVarF(flyControl, &XXci::onChangeFly);
 
@@ -83,7 +85,7 @@ void XXci::xciStart() {
         if (controlPersistence == "") {
             XCS_LOG_FATAL("We cannot obtain XCI_PARAM_FP_PERSISTENCE from xci.");
         }
-        setFlyControlPersistence(stoi(controlPersistence));
+        onChangeFlyControlPersistence(stoi(controlPersistence));
         flyControlAlive_ = true;
         flyControlThread_ = move(thread(&XXci::keepFlyControl, this));
         xciInited_ = true; // TODO check this variable in all commands to the drone
@@ -170,8 +172,9 @@ void XXci::stopFlyControlsThread() {
     }
 }
 
-void XXci::setFlyControlPersistence(unsigned int value) {
-    flyControlPersistence_ = value;
+void XXci::onChangeFlyControlPersistence(unsigned int value) {
+    flyControlPersistence = flyControlPersistence_ = value;
+
     setFlyControlActive(flyControlActive_); // notifies
 }
 

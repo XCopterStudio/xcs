@@ -19,7 +19,7 @@ const double XLocalization::CAM_DELAY = 0.100; //
 
 const std::string XLocalization::CTRL_INIT_KF = "init";
 const std::string XLocalization::CTRL_TAKE_KF = "keyframe";
-const std::string XLocalization::CTRL_RESET_PTAM = "resetPtam"; 
+const std::string XLocalization::CTRL_RESET_PTAM = "resetPtam";
 const std::string XLocalization::CTRL_RESET_EKF = "resetEkf";
 
 void XLocalization::onChangeVelocity(xcs::CartesianVector measuredVelocity) {
@@ -80,6 +80,7 @@ void XLocalization::onChangeVideo(urbi::UImage image) {
 
 void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
     if (!ptamEnabled_) {
+        ptamStatus = static_cast<int> (PTAM_DISABLED);
         return;
     }
     double ekfTime = internalTime - imuTimeShift_;
@@ -119,7 +120,7 @@ void XLocalization::onChangeControl(const std::string &control) {
         ptam_->takeKF();
     } else if (control == CTRL_RESET_PTAM) {
         ptam_->reset();
-    } else if (control == CTRL_RESET_EKF){
+    } else if (control == CTRL_RESET_EKF) {
         ekf_.reset();
     } else {
         XCS_LOG_WARN("Unknown PTAM control '" << control << "'." << endl);

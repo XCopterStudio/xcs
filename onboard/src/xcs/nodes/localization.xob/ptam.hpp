@@ -40,7 +40,8 @@ enum PtamStatusType {
     PTAM_GOOD = 3,
     PTAM_BEST = 4,
     PTAM_TOOKKF = 5,
-    PTAM_FALSEPOSITIVE = 6
+    PTAM_FALSEPOSITIVE = 6,
+    PTAM_DISABLED = 7
 };
 
 class Ptam : public MouseKeyHandler {
