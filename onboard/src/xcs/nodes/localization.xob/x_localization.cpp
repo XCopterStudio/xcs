@@ -60,8 +60,10 @@ void XLocalization::onChangeTimeImu(double internalTime) {
 
         //printf("Measurement time %f actual time %f \n", actualTime, timeFromStart());
 
+        // update future position of drone
+        DroneState state = ekf_.computeState(timeFromStart() + 0.06);
         // update actual position of drone
-        DroneState state = ekf_.computeState(timeFromStart());
+        //DroneState state = ekf_.computeState(timeFromStart());
         position = state.position;
         velocity = state.velocity;
         rotation = state.angles;

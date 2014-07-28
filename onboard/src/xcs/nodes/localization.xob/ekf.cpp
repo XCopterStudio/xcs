@@ -340,7 +340,7 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     // update deviation
     newState.second = (mat(10, 10).eye() - gain*measurementJacobian) * state.second;
 
-    mat error = (newStateMean - static_cast<mat>(state.first))*(newStateMean - static_cast<mat>(state.first)).t();
+    /*mat error = (newStateMean - static_cast<mat>(state.first))*(newStateMean - static_cast<mat>(state.first)).t();
     printf("error %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e \n", 
         error.at(0, 0),
         error.at(1, 1),
@@ -351,7 +351,7 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
         error.at(6, 6),
         error.at(7, 7),
         error.at(8, 8),
-        error.at(9, 9));
+        error.at(9, 9));*/
 
     //M: printf("EKF: Computed drone updatedState [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
     //        newState.first.position.x, newState.first.position.y, newState.first.position.z,
