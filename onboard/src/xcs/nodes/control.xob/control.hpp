@@ -29,7 +29,7 @@ namespace control{
         xcs::EulerianVector rotation_;
 
         // Drone desire speed
-        xcs::SpeedControl desireSpeed_;
+        xcs::SpeedControl desireVelocity_;
         
     public:
         Control();
@@ -37,7 +37,7 @@ namespace control{
         void velocity(const xcs::CartesianVector &velocity);
         void rotation(const xcs::EulerianVector &rotation);
 
-        void desireSpeed(const xcs::SpeedControl &speedControl);
+        void desireVelocity(const xcs::SpeedControl &speedControl);
 
         xcs::FlyControl computeControl();
 

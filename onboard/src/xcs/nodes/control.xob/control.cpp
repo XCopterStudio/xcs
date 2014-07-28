@@ -23,16 +23,16 @@ void Control::rotation(const EulerianVector &rotation){
     rotation_ = rotation;
 }
 
-void Control::desireSpeed(const xcs::SpeedControl &speedControl){
-    desireSpeed_ = speedControl;
-    desireSpeed_.psi = xcs::normAngle(desireSpeed_.psi);
+void Control::desireVelocity(const xcs::SpeedControl &speedControl){
+    desireVelocity_ = speedControl;
+    desireVelocity_.psi = xcs::normAngle(desireVelocity_.psi);
 }
 
 xcs::FlyControl Control::computeControl(){
 
-    double vx = vxPID_.getCorrection(velocity_.x, desireSpeed_.vx);
-    double vy = vyPID_.getCorrection(velocity_.y, desireSpeed_.vy);
-    double angleError = xcs::normAngle(desireSpeed_.psi - rotation_.psi);
+    double vx = vxPID_.getCorrection(velocity_.x, desireVelocity_.vx);
+    double vy = vyPID_.getCorrection(velocity_.y, desireVelocity_.vy);
+    double angleError = xcs::normAngle(desireVelocity_.psi - rotation_.psi);
 
     //printf("Control: actual speed [%f,%f,%f,%f] \n", velocity_.x, velocity_.y, velocity_.z, rotation_.psi);
     //printf("Control: Control error vx: %f vy: %f vz: %f \n", vx,vy,velocity_.z);
@@ -41,7 +41,7 @@ xcs::FlyControl Control::computeControl(){
     flyControl.roll =  valueInRange<double>(cos(rotation_.psi)*vx + sin(rotation_.psi)*vy, MAX_VALUE);
     flyControl.pitch = -valueInRange<double>(-sin(rotation_.psi)*vx + cos(rotation_.psi)*vy, MAX_VALUE);
     flyControl.yaw = valueInRange<double>(psiPID_.getCorrection(angleError), MAX_VALUE);
-    flyControl.gaz = valueInRange<double>(vzPID_.getCorrection(velocity_.z, desireSpeed_.vz), MAX_VALUE);
+    flyControl.gaz = valueInRange<double>(vzPID_.getCorrection(velocity_.z, desireVelocity_.vz), MAX_VALUE);
 
     return flyControl;
 }

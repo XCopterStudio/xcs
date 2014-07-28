@@ -25,14 +25,14 @@ namespace control{
 
         void onChangeVelocity(xcs::CartesianVector velocity);
         void onChangeRotation(xcs::EulerianVector rotation);
-        void onChangeDesireSpeed(xcs::SpeedControl desireSpeed);
+        void onChangeDesireVelocity(xcs::SpeedControl desireVelocity);
 
         void loadParameters(const std::string &file);
     public:
         // Incoming data
         xcs::nodes::XInputPort<xcs::CartesianVector> velocity;
         xcs::nodes::XInputPort<xcs::EulerianVector> rotation;
-        xcs::nodes::XInputPort<xcs::SpeedControl> desireSpeed;
+        xcs::nodes::XInputPort<xcs::SpeedControl> desireVelocity;
         // Output data
         xcs::nodes::XVar<xcs::FlyControl> flyControl;
 
