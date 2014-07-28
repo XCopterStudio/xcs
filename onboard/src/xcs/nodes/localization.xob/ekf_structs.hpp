@@ -13,14 +13,14 @@ struct DroneState {
     xcs::CartesianVector position;
     xcs::CartesianVector velocity;
     xcs::EulerianVector angles;
-    double angularRotationPsi;
+    double velocityPsi;
 
     unsigned int updateMeasurementID;
 
     inline DroneState(xcs::CartesianVector position = xcs::CartesianVector(), xcs::CartesianVector velocity = xcs::CartesianVector(),
-        xcs::EulerianVector angles = xcs::EulerianVector(), double angularRotationPsi = 0,
+        xcs::EulerianVector angles = xcs::EulerianVector(), double velocityPsi = 0,
         unsigned int updateMeasurementID = 0) : position(position), velocity(velocity),
-        angles(angles), angularRotationPsi(angularRotationPsi), 
+        angles(angles), velocityPsi(velocityPsi), 
         updateMeasurementID(updateMeasurementID) {
     };
 
@@ -28,7 +28,7 @@ struct DroneState {
       position(mat.at(0, 0), mat.at(1, 0), mat.at(2, 0)),
       velocity(mat.at(3, 0), mat.at(4, 0), mat.at(5, 0)),
       angles(mat.at(6, 0), mat.at(7, 0), mat.at(8, 0)),
-      angularRotationPsi(mat.at(9, 0)),
+      velocityPsi(mat.at(9, 0)),
       updateMeasurementID(0) {
     }
 
@@ -43,12 +43,12 @@ struct DroneState {
                 << angles.phi << arma::endr
                 << angles.theta << arma::endr
                 << angles.psi << arma::endr
-                << angularRotationPsi << arma::endr;
+                << velocityPsi << arma::endr;
         return matrix;
     }
 
     inline operator TooN::Vector<10> () const {
-        return TooN::makeVector(position.x, position.y, position.z, angles.phi, angles.theta, angles.psi, velocity.x, velocity.y, velocity.z, angularRotationPsi);
+        return TooN::makeVector(position.x, position.y, position.z, angles.phi, angles.theta, angles.psi, velocity.x, velocity.y, velocity.z, velocityPsi);
     }
 
 };
@@ -57,11 +57,11 @@ struct DroneStateMeasurement {
     xcs::CartesianVector velocity;
     xcs::EulerianVector angles;
     double altitude;
-    double angularRotationPsi;
+    double velocityPsi;
 
     unsigned int measurementID;
 
-    DroneStateMeasurement() : altitude(0), angularRotationPsi(0), measurementID(0) {
+    DroneStateMeasurement() : altitude(0), velocityPsi(0), measurementID(0) {
     };
 
     inline operator arma::mat() const {
@@ -72,7 +72,7 @@ struct DroneStateMeasurement {
                 << velocity.z << arma::endr
                 << angles.phi << arma::endr
                 << angles.theta << arma::endr
-                << angularRotationPsi << arma::endr;
+                << velocityPsi << arma::endr;
         return measurement;
     }
 };

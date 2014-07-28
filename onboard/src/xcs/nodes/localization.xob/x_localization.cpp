@@ -28,7 +28,7 @@ void XLocalization::onChangeVelocity(xcs::CartesianVector measuredVelocity) {
 }
 
 void XLocalization::onChangeRotation(xcs::EulerianVector measuredAnglesRotation) {
-    lastMeasurement_.angularRotationPsi = measuredAnglesRotation.psi - lastMeasurement_.angles.psi;
+    lastMeasurement_.velocityPsi = measuredAnglesRotation.psi - lastMeasurement_.angles.psi;
     lastMeasurement_.angles = measuredAnglesRotation;
 }
 
@@ -44,13 +44,14 @@ void XLocalization::onChangeTimeImu(double internalTime) {
 
     double ekfTime = internalTime - imuTimeShift_;
     if (std::abs(ekfTime - lastMeasurementTime_) > 1e-10) {
+        if (std::abs(lastMeasurement_.velocityPsi) > M_PI_4) { // discard bigger change than M_PI_4
+            lastMeasurement_.velocityPsi = 0;
+        }
 
         lastMeasurement_.velocity.z /= std::abs(ekfTime - lastMeasurementTime_);
-        lastMeasurement_.angularRotationPsi /= std::abs(ekfTime - lastMeasurementTime_);
-
-        if (std::abs(lastMeasurement_.angularRotationPsi) > M_PI_4) { // discard bigger change than M_PI_4
-            lastMeasurement_.angularRotationPsi = 0;
-        }
+        lastMeasurement_.velocityPsi /= std::abs(ekfTime - lastMeasurementTime_);
+   
+        //printf("%f psiVelocity %f\n", ekfTime, lastMeasurement_.velocityPsi);
 
         lastMeasurementTime_ = ekfTime;
         // TODO: compute measurement time delay
@@ -64,7 +65,7 @@ void XLocalization::onChangeTimeImu(double internalTime) {
         position = state.position;
         velocity = state.velocity;
         rotation = state.angles;
-        velocityPsi = state.angularRotationPsi;
+        velocityPsi = state.velocityPsi;
     }
 }
 
@@ -109,7 +110,12 @@ void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
 
 void XLocalization::onChangeFlyControl(const xcs::FlyControl flyControl) {
     //printf("FlyControl time %f\n", timeFromStart());
-    ekf_.flyControl(flyControl, timeFromStart() + FLY_CONTROL_SEND_TIME);
+    xcs::FlyControl boundedControl;
+    boundedControl.roll = xcs::valueInRange(flyControl.roll, 0.0, 0.5);
+    boundedControl.pitch = xcs::valueInRange(flyControl.pitch, 0.0, 0.5);
+    boundedControl.yaw = xcs::valueInRange(flyControl.yaw, 0.0, 1.0);
+    boundedControl.gaz = xcs::valueInRange(flyControl.gaz, 0.0, 1.0);
+    ekf_.flyControl(boundedControl, timeFromStart() + FLY_CONTROL_SEND_TIME);
 }
 
 void XLocalization::onChangeControl(const std::string &control) {
