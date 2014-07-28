@@ -19,8 +19,8 @@ public:
     typedef std::list<std::string> StringList;
     XObject(const std::string& name);
     virtual ~XObject();
-    void startXO();
-    void stopXO();
+    void start();
+    void stop();
     const std::string getSynType(const std::string& xVarName) const;
     const std::string getSemType(const std::string& xVarName) const;
     StringList getXVars() const;

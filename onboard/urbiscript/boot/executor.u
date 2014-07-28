@@ -34,11 +34,11 @@ class XObject {
         }
     }|;
     
-    function startXO() {
+    function start() {
         
     }|;
     
-    function stopXO() {
+    function stop() {
         
     }|;
 }|;

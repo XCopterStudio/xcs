@@ -161,9 +161,9 @@ class Onboard {
 
         for(var slot: this.dfgLobby_.localSlotNames()) {
             var xo = this.dfgLobby_.getLocalSlot(slot).value();
-            if(xo.hasSlot("stopXO") && xo.hasSlot("getState") && xo.getState() == this.xobjectStates_["STATE_STARTED"]) {
+            if(xo.hasSlot("stop") && xo.hasSlot("getState") && xo.getState() == this.xobjectStates_["STATE_STARTED"]) {
                 if(requestData.isNil() || requestData == "" || requestData == slot) {
-                    xo.stopXO();
+                    xo.stop();
                     stopped = true;
                     stoppedXo << slot;
                 };
@@ -184,9 +184,9 @@ class Onboard {
 
         for(var slot: this.dfgLobby_.localSlotNames()) {
             var xo = this.dfgLobby_.getLocalSlot(slot).value();
-            if(xo.hasSlot("startXO") && xo.hasSlot("getState") && xo.getState() != this.xobjectStates_["STATE_STARTED"]) {
+            if(xo.hasSlot("start") && xo.hasSlot("getState") && xo.getState() != this.xobjectStates_["STATE_STARTED"]) {
                 if(requestData.isNil() || requestData == "" || requestData == slot) {
-                    xo.startXO();
+                    xo.start();
                     started = true;
                     startedXo << slot;
                 };
