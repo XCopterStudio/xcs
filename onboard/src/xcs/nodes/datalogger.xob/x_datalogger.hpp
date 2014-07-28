@@ -31,6 +31,7 @@ class XDatalogger : public xcs::nodes::XObject {
     VideoWriterList videoWriterList_;
 
     bool inited_;
+    bool headerClosed_;
 
     datalogger::LoggerContext context_;
     std::string filename_;
@@ -40,7 +41,10 @@ class XDatalogger : public xcs::nodes::XObject {
     }
 
     inline void closeHeader() {
-        context_.file << std::endl;
+        if(!headerClosed_) {
+            context_.file << std::endl;
+            headerClosed_ = true;
+        }        
     }
 
     inline bool validRegister() {
@@ -49,13 +53,13 @@ class XDatalogger : public xcs::nodes::XObject {
         }
         return !context_.enabled;
     }
-
+protected:
+    virtual void stateChanged(XObject::State state);
 public:
     XDatalogger(const std::string& name);
     virtual ~XDatalogger();
 
     void init(const std::string &file);
-    void start();
     void registerData(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);
     void registerVideo(int width, int height, const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);
     void registerXVar(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);

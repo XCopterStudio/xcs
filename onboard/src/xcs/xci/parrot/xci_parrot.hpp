@@ -44,6 +44,9 @@ class XciParrot : public virtual Xci {
     // queue for at commands
     AtCommandQueue atCommandQueue_;
 
+    //! Resources (thread, connections) initialized
+    std::atomic<bool> inited_;
+
     // actual state of ar.drone 2.0
     ArdroneState state_;
 
@@ -53,18 +56,19 @@ class XciParrot : public virtual Xci {
     // threads
     std::thread threadSendingATCmd_;
     std::thread threadReceiveNavData_;
-	std::thread threadReadVideoReceiver_;
+    std::thread threadReadVideoReceiver_;
     std::thread threadReadVideoData_;
     std::thread threadConfiguration_;
 
     // end all thread
-    volatile std::atomic<bool> endAll_;
+    std::atomic<bool> endAll_;
+
 
     InformationMap configuration_;
 
     boost::asio::io_service io_serviceCMD_;
     boost::asio::io_service io_serviceNavdata_;
-	boost::asio::io_service io_serviceVideo_;
+    boost::asio::io_service io_serviceVideo_;
     boost::asio::io_service io_serviceConfiguration_;
 
     AtCommandSender atCommandSender_;
@@ -75,7 +79,7 @@ class XciParrot : public virtual Xci {
     void initNetwork();
     void processVideoData();
 
-  
+
     bool setConfirmedConfigure(AtCommand *command);
     bool setDefaultConfiguration();
 
@@ -86,6 +90,8 @@ public:
 
     //! Initialize Xci for use
     void init();
+    //! Stop producing data
+    void stop();
     //! Return name of x-copter Xci
     std::string name();
     //!Return list of available sensor on x-copter

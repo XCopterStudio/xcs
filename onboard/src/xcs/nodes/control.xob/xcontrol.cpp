@@ -7,13 +7,13 @@ using namespace xcs;
 using namespace xcs::nodes::control;
 
 void XControl::onChangeVelocity(xcs::CartesianVector velocity){
-    if (!stoped){
+    if (!stopped_){
         control_.velocity(velocity);
     }
 }
 
 void XControl::onChangeRotation(xcs::EulerianVector rotation){
-    if (!stoped){
+    if (!stopped_){
         control_.rotation(rotation);
         flyControl = control_.computeControl();
     }
@@ -37,6 +37,18 @@ void XControl::loadParameters(const std::string &file){
     }
 }
 
+void XControl::stateChanged(XObject::State state) {
+    switch(state) {
+        case XObject::STATE_STARTED:
+            stopped_ = false;
+            break;
+        case XObject::STATE_STOPPED:
+            stopped_ = true;
+            break;            
+    }
+}
+
+
 // ================= public functions =====================
 XControl::XControl(const std::string& name) : XObject(name),
 velocity("VELOCITY_ABS"),
@@ -44,7 +56,7 @@ rotation("ROTATION"),
 desireSpeed("SPEED_CONTROL_ABS"),
 flyControl("FLY_CONTROL")
 {
-    stoped = true;
+    stopped_ = true;
 
     XBindVarF(velocity,&XControl::onChangeVelocity);
     XBindVarF(rotation, &XControl::onChangeRotation);
@@ -53,8 +65,6 @@ flyControl("FLY_CONTROL")
     XBindVar(flyControl);
 
     XBindFunction(XControl, loadParameters);
-    XBindFunction(XControl, start);
-    XBindFunction(XControl, stop);
     XBindFunction(XControl, init);
 }
 

@@ -29,7 +29,6 @@ XDatalogger::XDatalogger(const std::string& name) :
     fillTypeCategories(syntacticCategoryMap_);
 
     XBindFunction(XDatalogger, init);
-    XBindFunction(XDatalogger, start);
     XBindFunction(XDatalogger, registerData);
     XBindFunction(XDatalogger, registerVideo);
     XBindFunction(XDatalogger, registerXVar);
@@ -39,9 +38,17 @@ XDatalogger::~XDatalogger() {
     context_.file.close();
 }
 
-void XDatalogger::start() {
-    closeHeader();
-    context_.enabled = true;
+void XDatalogger::stateChanged(XObject::State state) {
+    switch (state) {
+        case XObject::STATE_STARTED:
+            closeHeader();
+            context_.enabled = true;
+            break;
+        case XObject::STATE_STOPPED:
+            context_.file.flush();
+            context_.enabled = false;
+            break;
+    }
 }
 
 void XDatalogger::init(const std::string &file) {
@@ -53,16 +60,17 @@ void XDatalogger::init(const std::string &file) {
     }
     filename_ = file;
     inited_ = true;
+    headerClosed_ = false;
 }
 
 void XDatalogger::registerXVar(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar) {
     SyntacticCategoryType syntacticCategory = syntacticCategoryMap_.at(syntacticType);
-    switch(syntacticCategory) {
+    switch (syntacticCategory) {
         case CATEGORY_VIDEO:
             // TODO: set default video size
             registerVideo(640, 360, name, semanticType, syntacticType, uvar);
             break;
-        default: 
+        default:
             registerData(name, semanticType, syntacticType, uvar);
             break;
     }
@@ -111,7 +119,7 @@ void XDatalogger::registerVideo(int width, int height, const std::string &name, 
     if (!inited_ || !validRegister()) {
         return;
     }
-    
+
     if (!XDataplayer::isChannelNameValid(name)) {
         XCS_LOG_WARN("Invalid channel name '" << name << "'.");
         return;

@@ -5,6 +5,7 @@
 #include <memory>
 #include <iostream>
 #include <mutex>
+#include <atomic>
 
 #include <urbi/uobject.hh>
 
@@ -35,18 +36,30 @@ private:
         return *(it->second);
     }
 
+    std::atomic<bool> enabled_;
 
 
 public:
 
-    DataReceiver() {
+    DataReceiver() : enabled_(false) {
     }
 
     ~DataReceiver() {
     }
 
+    void enabled(const bool value) {
+        enabled_ = value;
+    }
+
+    bool enabled() const {
+        return enabled_;
+    }
+
     template<typename T>
     void notify(const std::string& sensorName, T value) {
+        if (!enabled_) {
+            return;
+        }
         nodes::SimpleXVar &xvar = getSensorXVar(sensorName);
         xvar = value;
     }
@@ -55,6 +68,9 @@ public:
      * This specialization is needed because of special memory managment.
      */
     void notify(const std::string& sensorName, xcs::BitmapType value) {
+        if (!enabled_) {
+            return;
+        }
         nodes::SimpleXVar &xvar = getSensorXVar(sensorName);
 
         // Prepare the binary

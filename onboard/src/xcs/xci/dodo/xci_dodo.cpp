@@ -62,6 +62,7 @@ XciDodo::~XciDodo() {
 }
 
 void XciDodo::init() {
+    dataReceiver_.enabled(true);
     if (inited_) {
         return;
     }
@@ -78,6 +79,10 @@ void XciDodo::init() {
     sensorThread_ = move(thread(&XciDodo::sensorGenerator, this));
     videoThread_ = move(thread(&XciDodo::videoPlayer, this));
 
+}
+
+void XciDodo::stop() {
+    dataReceiver_.enabled(false);
 }
 
 std::string XciDodo::name() {

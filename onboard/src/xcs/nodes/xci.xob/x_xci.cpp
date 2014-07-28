@@ -29,7 +29,7 @@ XXci::XXci(const std::string& name) :
   gaz("GAZ"),
   flyControl("FLY_CONTROL"),
   command("COMMAND"),
-  inited_(false),
+  xciInited_(false),
   roll_(0),
   pitch_(0),
   yaw_(0),
@@ -38,7 +38,6 @@ XXci::XXci(const std::string& name) :
   flyControlAlive_(false),
   flyControlPersistence_(0) {
     XBindFunction(XXci, init);
-    XBindFunction(XXci, xciInit);
     XBindFunction(XXci, getConfiguration);
     XBindFunction(XXci, dumpConfiguration);
     XBindFunction(XXci, setConfiguration);
@@ -65,19 +64,38 @@ void XXci::init(const std::string& driver) {
     initOutputs();
 }
 
-void XXci::xciInit() {
-    if (!inited_) {
-        xci_->init();
+void XXci::stateChanged(XObject::State state) {
+    switch (state) {
+        case XObject::STATE_STARTED:
+            xciStart();
+            break;
+        case XObject::STATE_STOPPED:
+            xciStop();
+            break;
+    }
+}
+
+void XXci::xciStart() {
+    xci_->init();
+
+    if (!xciInited_) {
         std::string controlPersistence = xci_->configuration("XCI_PARAM_FP_PERSISTENCE");
-        if (controlPersistence == ""){
+        if (controlPersistence == "") {
             XCS_LOG_FATAL("We cannot obtain XCI_PARAM_FP_PERSISTENCE from xci.");
         }
         setFlyControlPersistence(stoi(controlPersistence));
         flyControlAlive_ = true;
         flyControlThread_ = move(thread(&XXci::keepFlyControl, this));
-        inited_ = true; // TODO check this variable in all commands to the drone
+        xciInited_ = true; // TODO check this variable in all commands to the drone
+    }
+}
+
+void XXci::xciStop() {
+    if (xciInited_) {
+        XCS_LOG_WARN("[XXci] not initialized.");
     } else {
-        XCS_LOG_WARN("[XXci] already called init.");
+        setFlyControlActive(false); // NOTE: after re-starting flyControl persistence won't be deliberately active
+        xci_->stop();
     }
 }
 
@@ -138,7 +156,7 @@ void XXci::onChangeCommand(const std::string& command) {
 
 void XXci::initOutputs() {
     for (auto sensor : xci_->sensorList()) {
-        SimpleXVar &xvar = dataReceiver_.registerOutput(sensor.name, XType(typeid(void), sensor.semanticType, XType::DATAFLOWTYPE_XVAR));
+        SimpleXVar &xvar = dataReceiver_.registerOutput(sensor.name, XType(typeid (void), sensor.semanticType, XType::DATAFLOWTYPE_XVAR));
         XBindVarRename(xvar, sensor.name);
         XCS_LOG_INFO("Registered sensor " << sensor.name << ".");
     }

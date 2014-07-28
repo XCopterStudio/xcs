@@ -7,9 +7,6 @@ void XHermitMovement::onChangeCommand(std::string command){
     if (command == "ClearCheckpoint"){
         hermitMovement_.deleteCheckpoints();
     }
-    else{
-        
-    }
 }
 
 void XHermitMovement::onChangeAddCheckpoint(xcs::Checkpoint checkpoint){

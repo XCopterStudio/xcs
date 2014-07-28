@@ -26,7 +26,7 @@ void XObject::startXO() {
 }
 
 void XObject::stopXO() {
-    setState(XObject::STATE_STOPED);
+    setState(XObject::STATE_STOPPED);
 }
 
 bool XObject::registerXVar(const string& xVarName, const XType& type) {

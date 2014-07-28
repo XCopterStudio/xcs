@@ -14,7 +14,7 @@ namespace nodes {
 class XOBJECT_EXPORT XObject : public urbi::UObject {
 public:
     enum State {
-        STATE_CREATED = 0, STATE_STARTED = 1, STATE_STOPED = 2,
+        STATE_CREATED = 0, STATE_STARTED = 1, STATE_STOPPED = 2,
     };
     typedef std::list<std::string> StringList;
     XObject(const std::string& name);

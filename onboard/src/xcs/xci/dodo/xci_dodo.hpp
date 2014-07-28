@@ -67,6 +67,8 @@ public:
 
     //! A pure virtual member initializing Xci for use
     virtual void init();
+    
+    virtual void stop();
 private:
 
     enum VideoStatus {

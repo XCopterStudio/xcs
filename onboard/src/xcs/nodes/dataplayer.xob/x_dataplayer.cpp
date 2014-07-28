@@ -15,11 +15,8 @@ using namespace xcs;
 using namespace xcs::nodes;
 using namespace xcs::nodes::dataplayer;
 
-const std::string XDataplayer::CMD_PLAY = "Play";
-const std::string XDataplayer::CMD_PAUSE = "Pause";
-
 const size_t XDataplayer::PRELOAD_OFFSET;
-const size_t XDataplayer::IDLE_SLEEP;
+const size_t XDataplayer::IDLE_SLEEP = 100;
 
 xcs::SyntacticCategoryMap XDataplayer::syntacticCategoryMap_;
 
@@ -58,6 +55,17 @@ void XDataplayer::init(const std::string &filename) {
     dataLoopThread_ = move(thread(&XDataplayer::loop, this));
     videoDecodeThread_ = move(thread(&XDataplayer::videoDecoder, this));
 
+}
+
+void XDataplayer::stateChanged(XObject::State state) {
+    switch (state) {
+        case XObject::STATE_STARTED:
+            play();
+            break;
+        case XObject::STATE_STOPPED:
+            pause();
+            break;
+    }
 }
 
 void XDataplayer::loadHeader() {
@@ -193,19 +201,23 @@ void XDataplayer::videoDecoder() {
 }
 
 void XDataplayer::onCommand(const std::string &command) {
-    if (command == CMD_PLAY) {
-        if (!paused) {
-            startTime_ = Clock::now();
-        } else {
-            startTime_ += (Clock::now() - pausedTime_);
-            paused = false;
-        }
-        isPlaying_ = true;
-    } else if (command == CMD_PAUSE) {
-        isPlaying_ = false;
-        pausedTime_ = Clock::now();
-        paused = true;
+    XCS_LOG_WARN("No dataplayer commands implemented."); // NOTE: possible reset of the player
+}
+
+void XDataplayer::play() {
+    if (!paused) {
+        startTime_ = Clock::now();
+    } else {
+        startTime_ += (Clock::now() - pausedTime_);
+        paused = false;
     }
+    isPlaying_ = true;
+}
+
+void XDataplayer::pause() {
+    isPlaying_ = false;
+    pausedTime_ = Clock::now();
+    paused = true;
 }
 
 XStart(XDataplayer);
