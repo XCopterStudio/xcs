@@ -18,6 +18,8 @@ namespace nodes {
     class XHermitMovement : public xcs::nodes::XObject{
         xcs::nodes::hermit::HermitMovement hermitMovement_;
 
+        std::atomic<bool> stoped;
+
         void onChangeCommand(std::string command);
         // Programmer have to ensure calling next three function in proper order (position,velocity,rotation) and together!!!
         void onChangeAddCheckpoint(xcs::Checkpoint checkpoint);
@@ -35,6 +37,8 @@ namespace nodes {
         xcs::nodes::XVar<bool> reachedCheckpoint;
 
         void callbackHermit(bool reached);
+        void start();
+        void stop();
 
         XHermitMovement(const std::string& name);
     };

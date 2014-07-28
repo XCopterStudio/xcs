@@ -19,8 +19,8 @@ void XControl::onChangeRotation(xcs::EulerianVector rotation){
     }
 }
 
-void XControl::onChangeDesireSpeed(xcs::SpeedControl desireSpeed){
-    control_.desireSpeed(desireSpeed);
+void XControl::onChangeDesireVelocity(xcs::SpeedControl desireVelocity){
+    control_.desireVelocity(desireVelocity);
 }
 
 void XControl::loadParameters(const std::string &file){
@@ -53,14 +53,14 @@ void XControl::stateChanged(XObject::State state) {
 XControl::XControl(const std::string& name) : XObject(name),
 velocity("VELOCITY_ABS"),
 rotation("ROTATION"),
-desireSpeed("SPEED_CONTROL_ABS"),
+desireVelocity("SPEED_CONTROL_ABS"),
 flyControl("FLY_CONTROL")
 {
     stopped_ = true;
 
     XBindVarF(velocity,&XControl::onChangeVelocity);
     XBindVarF(rotation, &XControl::onChangeRotation);
-    XBindVarF(desireSpeed, &XControl::onChangeDesireSpeed);
+    XBindVarF(desireVelocity, &XControl::onChangeDesireVelocity);
     
     XBindVar(flyControl);
 
