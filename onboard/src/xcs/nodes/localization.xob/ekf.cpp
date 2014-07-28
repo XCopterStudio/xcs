@@ -586,6 +586,7 @@ DroneState Ekf::computeState(const double time) {
 void Ekf::reset(){
     unique_lock<shared_mutex> lock(bigSharedMtx_);
     double altitude = droneStates_.back().first.first.position.z;
+    double yaw = droneStates_.back().first.first.angles.psi;
 
     // clear all deques
     flyControls_.clear();
@@ -596,8 +597,12 @@ void Ekf::reset(){
     flyControls_.push_back(FlyControlChronologic(FlyControl(), 0));
     imuMeasurements_.push_back(ImuMeasurementChronologic(DroneStateMeasurement(), 0));
     droneStates_.push_back(DroneStateDistributionChronologic(
-        DroneStateDistribution(DroneState(xcs::CartesianVector(0,0,altitude)), arma::mat(10, 10, fill::eye)),
-        0));
+        DroneStateDistribution(DroneState(xcs::CartesianVector(0, 0, altitude),
+            xcs::CartesianVector(), 
+            xcs::EulerianVector(0, 0, yaw)), 
+            arma::mat(10, 10, fill::eye)),
+            0)
+        );
 
     IDCounter_ = 1;
 }

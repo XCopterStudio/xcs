@@ -30,7 +30,7 @@ Ekf {
     velocityZ   0.01
     phi         0.0003
     theta       0.0003
-    velocityPsi 0.0003
+    velocityPsi 0.0001
   }
 
   PtamVariance

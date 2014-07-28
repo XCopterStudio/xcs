@@ -78,7 +78,7 @@ xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
     }
 
     if (!newCheckpoint_){
-        if (!reachedCallback_){
+        if (reachedCallback_ != nullptr){
             reachedCallback_(false);
         }
 
@@ -111,7 +111,7 @@ xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
             printf("Drone achieved destination: [%f,%f,%f] \n", targetCheckpoint_.x, targetCheckpoint_.y, targetCheckpoint_.z);
             printf("Hermit: New checkpoint \n");
             newCheckpoint_ = true;
-            if (!reachedCallback_){
+            if (reachedCallback_ != nullptr){
                 reachedCallback_(true);
             }
         }
