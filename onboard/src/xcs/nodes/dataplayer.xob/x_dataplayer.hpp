@@ -52,7 +52,7 @@ protected:
 private:
     typedef std::map<std::string, std::string> SyntacticMap;
     typedef std::map<std::string, std::unique_ptr<dataplayer::VideoPlayer >> VideoPlayerMap;
-    typedef std::pair<std::string, size_t> VideoJob;
+    typedef std::pair<std::string, size_t> VideoJob; //! video channel name, frame no.
     typedef xcs::Tsqueue<VideoJob> VideoJobsQueue;
     typedef xcs::Tsqueue<xcs::BitmapType> VideoResultQueue;
     typedef std::map<std::string, std::unique_ptr<VideoResultQueue >> VideoResultQueueMap;
@@ -74,7 +74,8 @@ private:
      */
     const static size_t IDLE_SLEEP;
     
-    
+    //! Name of video channel for creating dummy video jobs.
+    const static std::string DUMMY_VIDEO_CHANNEL;
 
     static xcs::SyntacticCategoryMap syntacticCategoryMap_;
 

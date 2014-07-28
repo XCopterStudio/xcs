@@ -18,6 +18,8 @@ using namespace xcs::nodes::dataplayer;
 const size_t XDataplayer::PRELOAD_OFFSET;
 const size_t XDataplayer::IDLE_SLEEP = 100;
 
+const std::string XDataplayer::DUMMY_VIDEO_CHANNEL = ".dummy";
+
 xcs::SyntacticCategoryMap XDataplayer::syntacticCategoryMap_;
 
 XDataplayer::XDataplayer(const std::string& name) :
@@ -38,7 +40,15 @@ XDataplayer::XDataplayer(const std::string& name) :
 
 XDataplayer::~XDataplayer() {
     endAll_ = true;
+    videoJobs_.push(VideoJob(DUMMY_VIDEO_CHANNEL, 0)); // this will unblock the decoder thread if its queue is empty
     file_.close();
+
+    if (dataLoopThread_.joinable()) {
+        dataLoopThread_.join();
+    }
+    if (videoDecodeThread_.joinable()) {
+        videoDecodeThread_.join();
+    }
 }
 
 void XDataplayer::init(const std::string &filename) {
@@ -194,6 +204,9 @@ void XDataplayer::videoDecoder() {
     while (!endAll_) {
         auto job = videoJobs_.pop();
         auto channel = job.first;
+        if (channel == DUMMY_VIDEO_CHANNEL) {
+            break;
+        }
         // Frame number is provisionally ignored, until seeking is needed. 
         //auto frameNumber = job.second; // frame
         videoResults_.at(channel)->push(videoPlayers_.at(channel)->getFrame());
