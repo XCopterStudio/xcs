@@ -144,7 +144,7 @@ void XLocalization::onChangePtamEnabled(const bool ptamEnabled) {
 
 XLocalization::XLocalization(const std::string &name) :
   XObject(name),
-  measuredVelocity("VELOCITY"),
+  measuredVelocity("VELOCITY_LOC"),
   measuredAnglesRotation("ROTATION"),
   measuredAltitude("ALTITUDE"),
   timeImu("TIME_LOC"),

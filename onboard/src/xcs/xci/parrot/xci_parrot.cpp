@@ -160,7 +160,7 @@ SensorList XciParrot::sensorList() {
     SensorList sensorList;
 
     sensorList.push_back(Sensor("rotation", "ROTATION"));
-    sensorList.push_back(Sensor("velocity", "VELOCITY"));
+    sensorList.push_back(Sensor("velocity", "VELOCITY_LOC"));
 
     sensorList.push_back(Sensor("altitudeAll", "ALTITUDE_ALL"));
     sensorList.push_back(Sensor("altitudeV", "ALTITUDE_V"));
