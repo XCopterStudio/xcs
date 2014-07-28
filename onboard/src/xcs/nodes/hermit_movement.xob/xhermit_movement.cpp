@@ -47,6 +47,7 @@ reachedCheckpoint("BOOL")
     XBindFunction(XHermitMovement,stop);
 
     stoped = true;
+    reachedCheckpoint = false;
 }
 
 void XHermitMovement::callbackHermit(bool reached){
