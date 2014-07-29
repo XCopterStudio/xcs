@@ -16,7 +16,8 @@ namespace control{
     typedef xcs::PID<PID_TYPE, RETURN_TYPE> PID;
 
     class Control{
-        static const double MAX_VALUE;
+        static const double MAX_VALUE_ROLL_PITCH;
+        static const double MAX_VALUE_YAW_GAZ;
 
         // PID
         PID vxPID_;

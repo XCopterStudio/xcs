@@ -5,7 +5,8 @@
 using namespace xcs;
 using namespace xcs::nodes::control;
 
-const double Control::MAX_VALUE = 1.0;
+const double Control::MAX_VALUE_ROLL_PITCH = 0.5;
+const double Control::MAX_VALUE_YAW_GAZ = 1.0;
 
 // ================ public functions ===============
 Control::Control() : 
@@ -38,10 +39,10 @@ xcs::FlyControl Control::computeControl(){
     //printf("Control: Control error vx: %f vy: %f vz: %f \n", vx,vy,velocity_.z);
 
     xcs::FlyControl flyControl;
-    flyControl.roll =  valueInRange<double>(cos(rotation_.psi)*vx + sin(rotation_.psi)*vy, MAX_VALUE);
-    flyControl.pitch = -valueInRange<double>(-sin(rotation_.psi)*vx + cos(rotation_.psi)*vy, MAX_VALUE);
-    flyControl.yaw = valueInRange<double>(psiPID_.getCorrection(angleError), MAX_VALUE);
-    flyControl.gaz = valueInRange<double>(vzPID_.getCorrection(velocity_.z, desireVelocity_.vz), MAX_VALUE);
+    flyControl.roll =  valueInRange<double>(cos(rotation_.psi)*vx + sin(rotation_.psi)*vy, MAX_VALUE_ROLL_PITCH);
+    flyControl.pitch = -valueInRange<double>(-sin(rotation_.psi)*vx + cos(rotation_.psi)*vy, MAX_VALUE_ROLL_PITCH);
+    flyControl.yaw = valueInRange<double>(psiPID_.getCorrection(angleError), MAX_VALUE_YAW_GAZ);
+    flyControl.gaz = valueInRange<double>(vzPID_.getCorrection(velocity_.z, desireVelocity_.vz), MAX_VALUE_YAW_GAZ);
 
     return flyControl;
 }
