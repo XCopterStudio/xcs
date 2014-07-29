@@ -10,27 +10,35 @@ var router = Backbone.Router.extend({
     },
 
     manual : function () {
-	var view = new ManualControl({model: null});
+	   var view = new ManualControl({model: null});
     }
 });
 
 $(function () {
     'use strict';
 
+    //create app
     app = new AppView();
-    app.Wait = new WaitView();
+    
+    //set models 
     app.Onboard = new OnboardModel();
+    
+    //set standard views
+    app.Wait = new WaitView();
     app.Flash = new FlashMessagesView();
-    app.Navdata = new AbstractNavdataView();
+    
+    //set dfg view
     app.DataFlowGraph = new DataFlowGraphView();
-    
-//    app.DataViews = {};
-//    app.DataViews.test = new RawDataView();
-    
-    //del
-//    app.Navdata.onDataChange({ type: "data", data: { altitude: "2.3" }});
-//    app.Navdata.onDataChange({ type: "data", data: { phi: "4.3" }});
-//    app.Navdata.onDataChange({ type: "data", data: { psi: "1.3" }});
-//    app.Navdata.onDataChange({ type: "data", data: { theta: "0.3" }});
-//    app.Navdata.onDataChange({ type: "data", data: { theta: "6.2" }});
+
+    //set gridster param
+    $(".gridster > ul").gridster({
+        widget_margins : [ 10, 10 ],
+        widget_base_dimensions : [ 270, 150 ]
+    });
+    app.DataViews = {};
+    app.DataViews.battery = new RawDataView("battery", {name: "Battery"});
+    app.DataViews.altitude = new RawDataView("altitude", {name: "Altitude"});
+    app.DataViews.phi = new RawDataView("phi", {name: "Phi"});
+    app.DataViews.psi = new RawDataView("psi", {name: "Psi"});
+    app.DataViews.theta = new RawDataView("theta", {name: "Theta"});
 });
