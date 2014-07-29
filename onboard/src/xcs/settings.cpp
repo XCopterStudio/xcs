@@ -73,26 +73,3 @@ bool Settings::contains(const string& key) const {
         return false;
     }
 }
-
-list<string> Settings::getSettingsFiles(string foldername, const string& key) {
-    list<string> result;
-
-    boost::filesystem::path p(foldername);
-    if (boost::filesystem::exists(p) && boost::filesystem::is_directory(p)) {
-        boost::filesystem::directory_iterator end_it;
-        for (boost::filesystem::directory_iterator it(p); it != end_it; ++it) {
-            if (boost::filesystem::is_regular_file(it->status())) {
-                try {
-                    Settings s(it->path().string());
-                    if (key == "" || s.contains(key)) {
-                        result.push_back(it->path().filename().string());
-                    }
-                }
-                catch(...) {
-                }
-            }
-        }
-    }
-
-    return result;
-}

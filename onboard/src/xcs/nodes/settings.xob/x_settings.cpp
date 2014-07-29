@@ -14,7 +14,6 @@ XSettings::XSettings(const std::string &name) :
     XBindFunction(XSettings, setAndSave);
     XBindFunction(XSettings, save);
     XBindFunction(XSettings, contains);
-    XBindFunction(XSettings, getSettingsFiles);
 }
 
 void XSettings::init(const string& filepath, bool create) {
@@ -57,10 +56,6 @@ bool XSettings::save() {
 
 bool XSettings::contains(const string& key) {
     return settings_.contains(key);
-}
-
-list<string> XSettings::getSettingsFiles(string foldername, const string& key) {
-    return Settings::getSettingsFiles(foldername, key);
 }
 
 XStart(XSettings);

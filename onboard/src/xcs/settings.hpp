@@ -40,7 +40,6 @@ public:
     
     bool contains(const std::string& key) const;
 
-    static std::list<std::string> getSettingsFiles(std::string foldername, const std::string& key = "");
 private:
     boost::property_tree::ptree settings_;
     std::string filename_;

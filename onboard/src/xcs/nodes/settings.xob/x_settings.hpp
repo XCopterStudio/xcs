@@ -23,7 +23,6 @@ public:
     void setAndSave(const std::string& key, const std::string& value);
     bool save();
     bool contains(const std::string& key);
-    std::list<std::string> getSettingsFiles(std::string foldername, const std::string& key);
 private:
     xcs::Settings settings_;
 };
