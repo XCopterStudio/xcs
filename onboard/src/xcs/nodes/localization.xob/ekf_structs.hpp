@@ -66,8 +66,7 @@ struct DroneStateMeasurement {
 
     inline operator arma::mat() const {
         arma::mat measurement;
-        measurement << altitude << arma::endr
-                << velocity.x << arma::endr
+        measurement << velocity.x << arma::endr
                 << velocity.y << arma::endr
                 << velocity.z << arma::endr
                 << angles.phi << arma::endr
