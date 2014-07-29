@@ -165,9 +165,12 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
         this.attr('circle[port="' + portId + '"]/class', "registerXVar");
 
         // set special style 
+        console.log("................set css for port: " + portId);
         var css = this.attr('.inPorts circle.registerXVar');
         for(var key in css) {
+            console.log('................set css:"' + 'circle[port="' + portId + '"]/' + key + '" = "' + css[key] +'" for port: ' + portId);
             this.attr('circle[port="' + portId + '"]/' + key, css[key]);
+            //this.attr('circle.registerXVar/' + key, css[key]);
         }
     },
     

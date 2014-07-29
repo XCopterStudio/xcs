@@ -4,7 +4,8 @@ var DataFlowGraphNodeIO = Backbone.Model.extend({
     defaults : {
         "name" : "",
         "synType" : "",
-        "semType" : ""
+        "semType" : "",
+        "realName" : ""
     }
 });
 
@@ -87,7 +88,8 @@ var DataFlowGraph = Backbone.Model.extend({
         "savedDfg" : "",
         "ddfg" : "",
         "xprototype" : new Backbone.Collection([], { model : DataFlowGraphNode }),
-        "xprototypePrivate" : new Backbone.Collection([], { model : DataFlowGraphNode })
+        "xprototypePrivate" : new Backbone.Collection([], { model : DataFlowGraphNode }),
+        "xprototypeSpecial" : new Backbone.Collection([], { model : DataFlowGraphNode })
     },
     
     initialize : function() { 
@@ -161,6 +163,33 @@ var DataFlowGraph = Backbone.Model.extend({
     setPrototypePrivate: function(prototype) {
         this.setPrototype(prototype, "xprototypePrivate");
     },
+        
+    setPrototypeSpecial: function(prototype) {
+        for(var j = 0; j < prototype.length; ++j) { 
+            var p = prototype[j];
+
+            if(p.name) { 
+                switch(p.name) {
+                    case "GUI":
+                        if(p.registerXVar && p.registerXVar.length == 1) {
+                            var registerXVar = p.registerXVar.pop();
+                            
+                            //TODO: set real widgets
+                            var ports = ["raw", "plot", "default"];
+                            for(var i = 0; i < ports.length; ++i) {
+                                p.registerXVar.push({
+                                    name : ports[i],
+                                    realName : registerXVar
+                                });
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+        
+        this.setPrototype(prototype, "xprototypeSpecial");
+    },
     
     setPrototype: function(prototype, prototypeName) {
         // default value 4 prototypeName is "xprototype"
@@ -219,11 +248,21 @@ var DataFlowGraph = Backbone.Model.extend({
                     for(var i = 0; i < p.registerXVar.length; ++i) {
                         var oldRegister = prot.get("registerXVar").findWhere({"name": p.registerXVar[i]});
                         if(!oldRegister) {
-                            prot.get("registerXVar").add(new DataFlowGraphNodeIO({
-                                name : p.registerXVar[i],
-                                synType : "",
-                                semType : ""
-                            }));
+                            if(p.registerXVar[i].name && p.registerXVar[i].realName) {
+                                prot.get("registerXVar").add(new DataFlowGraphNodeIO({
+                                    name : p.registerXVar[i].name,
+                                    synType : "",
+                                    semType : "",
+                                    realName : p.registerXVar[i].realName
+                                }));
+                            }
+                            else {
+                                prot.get("registerXVar").add(new DataFlowGraphNodeIO({
+                                    name : p.registerXVar[i],
+                                    synType : "",
+                                    semType : ""
+                                }));
+                            }
                         }
                     }
                 }
@@ -251,7 +290,12 @@ var DataFlowGraph = Backbone.Model.extend({
     },
     
     reset: function() {
-        // remove clones
+        // remove special prototypes
+        while(this.get("xprototypeSpecial").length > 0) {
+            this.get("xprototypeSpecial").pop();
+        }
+        
+        // remove private prototypes
         while(this.get("xprototypePrivate").length > 0) {
             this.get("xprototypePrivate").pop();
         }
@@ -289,7 +333,7 @@ var DataFlowGraph = Backbone.Model.extend({
         rewrite = typeof rewrite !== 'undefined' ? rewrite : false;
         
         var data = {
-            DFG : dfg, //JSON.stringify(dfg),
+            DFG : dfg,
             filename : filename,
             rewrite : rewrite
         };

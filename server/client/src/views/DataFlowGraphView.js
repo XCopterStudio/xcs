@@ -4,6 +4,12 @@ var DfgState = ENUM(
     //"DFG_STATE_USER_DFG_LOADED", "DFG_STATE_DEFAULT_DFG_LOADED", "DFG_STATE_NODE_DFG_LOADED"    // LOADED DFG TYPE
     );
 
+var NODE_TYPE = ENUM(
+    "PUBLIC",
+    "PRIVATE",
+    "SPECIAL"
+);
+
 var DataFlowGraphView = Backbone.View.extend({
     id : 'data-flow-graph',
     
@@ -63,8 +69,10 @@ var DataFlowGraphView = Backbone.View.extend({
         this.listenTo(this.model, "change:ddfg", this.onDdfgChange);
         this.listenTo(this.model.get("xprototype"), "add", this.onPrototypeAdd);
         this.listenTo(this.model.get("xprototypePrivate"), "add", this.onPrototypePrivateAdd);
+        this.listenTo(this.model.get("xprototypeSpecial"), "add", this.onPrototypeSpecialAdd);
         this.listenTo(this.model.get("xprototype"), "remove", this.onPrototypeRemove);
         this.listenTo(this.model.get("xprototypePrivate"), "remove", this.onPrototypePrivateRemove);
+        this.listenTo(this.model.get("xprototypeSpecial"), "remove", this.onPrototypeSpecialRemove);
 
         this.listenTo(this.model, "change:savedDfg", this.onSavedDfgChange);
         this.listenTo(this.model, "change:dfgDef", this.onDfgDefChange);
@@ -173,7 +181,6 @@ var DataFlowGraphView = Backbone.View.extend({
             title = id;
         }
         
-        //var toolbox = $('#xnodes-list');
         var toolbox = $('#' + toolboxItemId);
         toolbox.append('\
             <div class="panel-body drag_init" id="' + id + '">  \
@@ -188,17 +195,24 @@ var DataFlowGraphView = Backbone.View.extend({
         this.initializeDfgToolbox4Drag();
     },
     
-    removeNodeFromDfgToolbox : function(id, privatePrototype) {
+    removeNodeFromDfgToolbox : function(id, nodeType) {
         var node = $('#' + id);
         node.remove();
         
         //set number of nodes
-        if(privatePrototype) {
-            var counter = $('#xnodes-private-list-count');
-            counter.html(parseInt(counter.html()) - 1);
+        var counter = "";
+        switch(nodeType) {
+            case NODE_TYPE.PUBLIC:
+                counter = $('#xnodes-list-count');
+                break;
+            case NODE_TYPE.PRIVATE:
+                counter = $('#xnodes-private-list-count');
+                break;
+            case NODE_TYPE.SPECIAL:
+                counter = $('#xnodes-special-list-count');
+                break;
         }
-        else {
-            var counter = $('#xnodes-list-count');
+        if(counter != "") {
             counter.html(parseInt(counter.html()) - 1);
         }
     },
@@ -474,12 +488,28 @@ var DataFlowGraphView = Backbone.View.extend({
         }
     },
     
-    onPrototypeAdd : function(modelPrototype, privatePrototype) {
-        // default value 4 privatePrototype is false
-        privatePrototype = privatePrototype != true ? false : true;
-        
-        //DEBUG
-        //console.log((privatePrototype ? "onPrototypePrivateAdd: " : "onPrototypeAdd: ") + JSON.stringify(modelPrototype.toJSON()));
+    onPrototypeAdd : function(modelPrototype, nodeType) {
+        // default value nodeType is public
+        nodeType = typeof NODE_TYPE.getName(nodeType) !== 'undefined' ? nodeType : NODE_TYPE.PUBLIC;
+
+        var responseMethod;
+        var nodeListName;
+        switch(nodeType) {
+            case NODE_TYPE.PUBLIC:
+                responseMethod = this.onPrototypeChange;
+                nodeListName = "xnodes-list";
+                break;
+            case NODE_TYPE.PRIVATE:
+                responseMethod = this.onPrototypePrivateChange;
+                nodeListName = "xnodes-private-list";
+                break;
+            case NODE_TYPE.SPECIAL:
+                responseMethod = this.onPrototypeSpecialChange;
+                nodeListName = "xnodes-special-list";
+                break;
+            default:
+                return;
+        }
         
         // get prototype name
         var prototypeName = modelPrototype.get("name");
@@ -491,32 +521,25 @@ var DataFlowGraphView = Backbone.View.extend({
         }
         
         // add 2 toolbox - show to user
-        this.addNode2DfgToolbox(prototypeId, prototypeName, (privatePrototype ? 'xnodes-private-list' : 'xnodes-list'));
+        this.addNode2DfgToolbox(prototypeId, prototypeName, nodeListName);
         this.dfgToolboxNodes[prototypeId] = modelPrototype;
         
-        //DEBUG
-        //console.log("added: " + prototypeName + " = " + this.dfgToolboxNodes[prototypeName].get("name"));
-        
         //watch 4 changes
-        if(privatePrototype) {
-            this.listenTo(modelPrototype, "change", this.onPrototypePrivateChange);
-        }
-        else {
-            this.listenTo(modelPrototype, "change", this.onPrototypeChange);
-        }
+        this.listenTo(modelPrototype, "change", responseMethod);
     },
     
     onPrototypePrivateAdd : function(modelPrototype) {
-        this.onPrototypeAdd(modelPrototype, true);
+        this.onPrototypeAdd(modelPrototype, NODE_TYPE.PRIVATE);
     },
     
-    onPrototypeRemove : function(modelPrototype, privatePrototype) {
-        // default value 4 privatePrototype is false
-        privatePrototype = privatePrototype != true ? false : true;
-
-        //DEBUG
-        //console.log((privatePrototype ? "onPrototypePrivateRemove: " : "onPrototypeRemove: ") + JSON.stringify(modelPrototype.toJSON()));
-
+    onPrototypeSpecialAdd : function(modelPrototype) {
+        this.onPrototypeAdd(modelPrototype, NODE_TYPE.SPECIAL);
+    },
+    
+    onPrototypeRemove : function(modelPrototype, nodeType) {
+        // default value nodeType is public
+        nodeType = typeof NODE_TYPE.getName(nodeType) !== 'undefined' ? nodeType : NODE_TYPE.PUBLIC;
+        
         // get prototype name
         var prototypeName = modelPrototype.get("name");
         var prototypeId = this.trimId(prototypeName);
@@ -534,23 +557,24 @@ var DataFlowGraphView = Backbone.View.extend({
         this.stopListening(this.dfgToolboxNodes[prototypeId]);
         
         //delete from GUI
-        this.removeNodeFromDfgToolbox(prototypeId, privatePrototype);
+        this.removeNodeFromDfgToolbox(prototypeId, nodeType);
         
         // delete old model
         delete this.dfgToolboxNodes[prototypeId];
     },
     
     onPrototypePrivateRemove : function(modelPrototype) {
-        this.onPrototypeRemove(modelPrototype, true);
+        this.onPrototypeRemove(modelPrototype, NODE_TYPE.PRIVATE);
     },
     
-    onPrototypeChange : function(modelPrototype, privatePrototype) {
-        // default value 4 privatePrototype is false
-        privatePrototype = privatePrototype != true ? false : true;
+    onPrototypeSpecialRemove : function(modelPrototype) {
+        this.onPrototypeRemove(modelPrototype, NODE_TYPE.SPECIAL);
+    },
+    
+    onPrototypeChange : function(modelPrototype, nodeType) {
+        // default value nodeType is public
+        nodeType = typeof NODE_TYPE.getName(nodeType) !== 'undefined' ? nodeType : NODE_TYPE.PUBLIC;
         
-        //DEBUG
-        //console.log((privatePrototype ? "onPrototypePrivateChange: " : "onPrototypeChange: ") + JSON.stringify(modelPrototype.toJSON()));
-
         // get prototype name
         var prototypeName = modelPrototype.get("name");
         var prototypeId = this.trimId(prototypeName);
@@ -571,11 +595,18 @@ var DataFlowGraphView = Backbone.View.extend({
         this.dfgToolboxNodes[prototypeId] = modelPrototype;
         
         //watch 4 changes
-        if(privatePrototype) {
-            this.listenTo(modelPrototype, "change", this.onPrototypePrivateChange);
-        }
-        else {
-            this.listenTo(modelPrototype, "change", this.onPrototypeChange);
+        switch(nodeType) {
+            case NODE_TYPE.PUBLIC:
+                this.listenTo(modelPrototype, "change", this.onPrototypeChange);
+                break;
+            case NODE_TYPE.PRIVATE:
+                this.listenTo(modelPrototype, "change", this.onPrototypePrivateChange);
+                break;
+            case NODE_TYPE.SPECIAL:
+                this.listenTo(modelPrototype, "change", this.onPrototypeSpecialChange);
+                break;
+            default:
+                return;
         }
     },
     
@@ -583,70 +614,13 @@ var DataFlowGraphView = Backbone.View.extend({
         this.onPrototypeChange(modelPrototype, true);
     },
     
+    onPrototypeSpecialChange : function(modelPrototype) {
+        this.onPrototypeChange(modelPrototype, true);
+    },
+    
     onInputChange : function(xcState) {
         var data = xcState.get("onboard");
         this.model.setData(data);
-                
-        //console.log("incoming!!!!!!!!!!!!!!!!!!!!!!!!!");
-//        var test = {
-//            "type" : "onboard",
-//            "data" : {
-//                "ddfg" : '<xml><block type="connect" id="2" x="148" y="385"><field name="XOB1">subject</field><field name="XVAR1">out</field><field name="XOB2">observer</field><field name="XVAR2">in</field></block></xml>',
-//                "prototype" : [{
-//                    "name" : "XXci",
-//                    "var" : [{
-//                        "name" : "fly",
-//                        "synType" : "xcs::nodes::xci::FlyParam",
-//                        "semType" : "FLY_PARAM"
-//                    }],
-//                    "inputPort" : [{
-//                        "name" : "command",
-//                        "synType" : "std::string",
-//                        "semType" : "COMMAND"
-//                    }]
-//                }],
-//                "prototypePrivate" : [{
-//                    "name" : "XXci",
-//                    "var" : [{
-//                        "name" : "fly",
-//                        "synType" : "xcs::nodes::xci::FlyParam",
-//                        "semType" : "FLY_PARAM"
-//                    }],
-//                    "inputPort" : [{
-//                        "name" : "command",
-//                        "synType" : "std::string",
-//                        "semType" : "COMMAND"
-//                    }]
-//                }],
-//                "clone" : [{
-//                    "name" : "Dodo",
-//                    "prototype" : "XXci",
-//                    "var" : [{
-//                        "name" : "fly",
-//                        "synType" : "xcs::nodes::xci::FlyParam",
-//                        "semType" : "FLY_PARAM"
-//                    }],
-//                    "inputPort" : [{
-//                        "name" : "command",
-//                        "synType" : "std::string",
-//                        "semType" : "COMMAND"
-//                    }]
-//                }, {
-//                    "name" : "Parrot",
-//                    "prototype" : "XXci",
-//                    "var" : [{
-//                        "name" : "fly",
-//                        "synType" : "xcs::nodes::xci::FlyParam",
-//                        "semType" : "FLY_PARAM"
-//                    }],
-//                    "inputPort" : [{
-//                        "name" : "command",
-//                        "synType" : "std::string",
-//                        "semType" : "COMMAND"
-//                    }]
-//                }]
-//            }
-//        };
     },
 
     dfgLoad : function(response) {
@@ -669,6 +643,9 @@ var DataFlowGraphView = Backbone.View.extend({
                 }
                 if(responseData.prototypePrivate) {
                     self.model.setPrototypePrivate(responseData.prototypePrivate);
+                }
+                if(responseData.prototypeSpecial) {
+                    self.model.setPrototypeSpecial(responseData.prototypeSpecial);
                 }
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
@@ -745,7 +722,13 @@ var DataFlowGraphView = Backbone.View.extend({
                     }
                     
                     //TODO: rename port to xvar/xinputPort/registerXVar
-                    if(modelPrototype.get("registerXVar").findWhere({"name": cell.target.port})) {
+                    var model = modelPrototype.get("registerXVar").findWhere({"name": cell.target.port});
+                    if(model) {
+                        var targetPort = cell.target.port;
+                        if(model.get("realName") != "") {
+                            targetPort = model.get("realName");
+                        }
+                        
                         dfg.registerXVar.push({
                             source: {
                                 id: cell.source.id,
@@ -753,7 +736,7 @@ var DataFlowGraphView = Backbone.View.extend({
                             },
                             target: {
                                 id: cell.target.id,
-                                port: cell.target.port,
+                                port: targetPort,
                             },
                         });
                     }
@@ -909,6 +892,9 @@ var DataFlowGraphView = Backbone.View.extend({
                     }
                     if(responseData.prototypePrivate) {
                         self.model.setPrototypePrivate(responseData.prototypePrivate);
+                    }
+                    if(responseData.prototypeSpecial) {
+                        self.model.setPrototypeSpecial(responseData.prototypeSpecial);
                     }
                     if(responseData.savedDfg) {
                         self.model.setSavedDfg(responseData.savedDfg);
