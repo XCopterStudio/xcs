@@ -54,6 +54,6 @@ xlocalization
     name "XLocalization"
     init 
     {
-        "XLocalization" "\"xsetting/xlocalization.xs\""
+        "XLocalization" "\"xsettings/xlocalization.xs\""
     }
 }

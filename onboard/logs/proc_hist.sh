@@ -22,7 +22,7 @@ set x2label "Difference [ms]"
 
 binwidth=1;
 bin(x,width)=width*floor(x/width);
-plot "$TMP2" using (bin(1/\$3,binwidth)):(1.0) smooth freq with boxes t "$2 (f)", "$TMP2" using (bin(\$3*1000,binwidth)):(1.0) axes x2y1 smooth freq with boxes t "$2 (diff)"
+plot "$TMP2" using (bin(1/\$3,binwidth)):(1.0) smooth freq with boxes t "$2 (f)", "$TMP2" using (bin(\$3*1000,binwidth)):(1.0) axes x2y1 smooth freq with boxes t "$2 (diff)";pause -1
 EOD
 
 #gnuplot -p -e "binwidth=1;bin(x,width)=width*floor(x/width);plot \"$TMP2\" using (bin(1000/\$3,binwidth)):(1.0) smooth freq with boxes t \"frequency [Hz]\", \"$TMP2\" using (bin(\$3,binwidth)):(1.0) smooth freq with boxes t \"difference [ms]\""

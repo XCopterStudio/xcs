@@ -20,13 +20,14 @@ namespace nodes {
 class XXci : public xcs::nodes::XObject {
 public:
     xcs::nodes::XVar<int> flyControlPersistence;
+    xcs::nodes::XInputPort<int> setFlyControlPersistence;
 
     xcs::nodes::XInputPort<double> roll;
     xcs::nodes::XInputPort<double> pitch;
     xcs::nodes::XInputPort<double> yaw;
     xcs::nodes::XInputPort<double> gaz;
 
-    xcs::nodes::XVar<xcs::FlyControl> flyControl;
+    xcs::nodes::XInputPort<xcs::FlyControl> flyControl;
 
     xcs::nodes::XInputPort<std::string> command;
 
@@ -37,7 +38,6 @@ public:
      */
     void init(const std::string& driver);
 
-    void xciInit();
 
     std::string getConfiguration(const std::string& key);
     xcs::xci::InformationMap dumpConfiguration();
@@ -45,13 +45,18 @@ public:
     void setConfiguration(const std::string& key, const std::string& value);
 
     virtual ~XXci();
+protected:
+    virtual void stateChanged(XObject::State state);
 private:
     xcs::xci::Xci* xci_;
 
     xcs::xci::DataReceiver dataReceiver_;
 
-    //! Guard to prevent double initialization.
-    bool inited_;
+    //! Guard to prevent double initialization (threads etc.).
+    bool xciInited_;
+
+    void xciStart();
+    void xciStop();
 
     void onChangeFly(xcs::FlyControl fp);
 
@@ -80,7 +85,7 @@ private:
      * \note It may take up to 'previous value' time until the new persistence
      * is set.
      */
-    void setFlyControlPersistence(unsigned int value);
+    void onChangeFlyControlPersistence(unsigned int value);
 
     /*!
      * Enables/disables persistence (waking/suspending the thread).

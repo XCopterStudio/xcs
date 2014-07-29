@@ -7,9 +7,6 @@ void XHermitMovement::onChangeCommand(std::string command){
     if (command == "ClearCheckpoint"){
         hermitMovement_.deleteCheckpoints();
     }
-    else{
-        
-    }
 }
 
 void XHermitMovement::onChangeAddCheckpoint(xcs::Checkpoint checkpoint){
@@ -22,7 +19,9 @@ void XHermitMovement::onChangeDronePosition(xcs::CartesianVector position){
 
 void XHermitMovement::onChangeDroneRotation(xcs::EulerianVector rotation){
     hermitMovement_.droneRotation(rotation);
-    speedControl = hermitMovement_.flyOnCheckpoint();
+    if (!stoped){
+        speedControl = hermitMovement_.flyOnCheckpoint();
+    }
 }
 
 //==================== public functions =============
@@ -41,10 +40,22 @@ reachedCheckpoint("BOOL")
     XBindVarF(droneRotation, &XHermitMovement::onChangeDroneRotation);
     XBindVar(speedControl);
     XBindVar(reachedCheckpoint);
+    XBindFunction(XHermitMovement,start);
+    XBindFunction(XHermitMovement,stop);
+
+    stoped = true;
+    reachedCheckpoint = false;
 }
 
 void XHermitMovement::callbackHermit(bool reached){
     reachedCheckpoint = reached;
 }
 
+void XHermitMovement::start(){
+    stoped = false;
+}
+
+void XHermitMovement::stop(){
+    stoped = true;
+}
 XStart(XHermitMovement);

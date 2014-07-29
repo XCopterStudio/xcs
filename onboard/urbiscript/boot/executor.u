@@ -34,13 +34,17 @@ class XObject {
         }
     }|;
     
-    function startXO() {
-        
+    function start() {
+        state_ = 1; // TODO enum/centralization
     }|;
     
-    function stopXO() {
-        
+    function stop() {
+        state_ = 2; // TODO enum/centralizatoin
     }|;
+    
+    function getState() {
+        return state_;
+    }
 }|;
 
 
@@ -51,6 +55,7 @@ class Executor : XObject {
     ];
     var outputs_ = [
     ];
+    var state_ = 0; // NOTE: this is necessary to do in every clone of the XObject prototype
     
     var code;
     

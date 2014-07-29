@@ -27,46 +27,45 @@ const std::string XciParrot::NAME = "Parrot AR Drone 2.0 Xci";
 // ----------------- Private function --------------- //
 
 void XciParrot::initNetwork() {
-	// connect to video port
+    // connect to video port
     atCommandSender_.connect();
     videoReceiver_.connect();
     navdataReceiver_.connect();
     configurationReceiver_.connect();
 
     threadSendingATCmd_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceCMD_)));
-	threadReadVideoReceiver_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceVideo_)));
-	threadReceiveNavData_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceNavdata_)));
+    threadReadVideoReceiver_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceVideo_)));
+    threadReceiveNavData_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceNavdata_)));
     threadConfiguration_ = std::move(std::thread(boost::bind(&boost::asio::io_service::run, &io_serviceConfiguration_)));
 }
 
-void XciParrot::processVideoData(){
-    while (!endAll_){
+void XciParrot::processVideoData() {
+    while (!endAll_) {
         VideoFramePtr frame = nullptr;
-        if (videoReceiver_.tryGetVideoFrame(frame)){
+        if (videoReceiver_.tryGetVideoFrame(frame)) {
             AVPacket avPacket;
             avPacket.data = &frame->data[frame->payload_offset];
             avPacket.size = frame->payload_size - frame->payload_offset;
-            if (videoDecoder_.decodeVideo(&avPacket)){
+            if (videoDecoder_.decodeVideo(&avPacket)) {
                 AVFrame* avFrame = videoDecoder_.decodedFrame();
                 BitmapType bitmap(avFrame->width, avFrame->height, avFrame->data[0]);
-                dataReceiver_.notify("video",bitmap);
+                dataReceiver_.notify("video", bitmap);
                 dataReceiver_.notify("internalTimeVideo", frame->timestamp);
             }
-        }
-        else{
+        } else {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     }
 }
 
-bool XciParrot::setConfirmedConfigure(AtCommand *command){
+bool XciParrot::setConfirmedConfigure(AtCommand *command) {
 
     unsigned int count = 0;
-    do{
+    do {
         atCommandQueue_.push(new AtCommandCONFIG_IDS("0a1b2c3d", "0a1b2c3d", "0a1b2c3d"));
         atCommandQueue_.push(command->clone());
         this_thread::sleep_for(std::chrono::milliseconds(20));
-        if (++count > 20){
+        if (++count > 20) {
             XCS_LOG_WARN("Cannot receive ack.");
             delete command;
             return false;
@@ -75,11 +74,11 @@ bool XciParrot::setConfirmedConfigure(AtCommand *command){
     delete command;
 
     count = 0;
-    do{
+    do {
         atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
         this_thread::sleep_for(std::chrono::milliseconds(20));
 
-        if (++count >= 20){
+        if (++count >= 20) {
             XCS_LOG_WARN("Cannot receive clear ack.");
             return false;
         }
@@ -88,8 +87,8 @@ bool XciParrot::setConfirmedConfigure(AtCommand *command){
     return true;
 }
 
-bool XciParrot::setDefaultConfiguration(){
-    setConfirmedConfigure(new AtCommandCONFIG("custom:application_id","0a1b2c3d"));
+bool XciParrot::setDefaultConfiguration() {
+    setConfirmedConfigure(new AtCommandCONFIG("custom:application_id", "0a1b2c3d"));
     setConfirmedConfigure(new AtCommandCONFIG("custom:profile_id", "0a1b2c3d"));
     setConfirmedConfigure(new AtCommandCONFIG("custom:session_id", "0a1b2c3d"));
 
@@ -105,16 +104,16 @@ bool XciParrot::setDefaultConfiguration(){
     setConfirmedConfigure(new AtCommandCONFIG("general:navdata_demo", "FALSE"));
     // set which data will be send
     unsigned int ndOptions = ((1 << NAVDATA_DEMO_TAG) |
-        (1 << NAVDATA_ALTITUDE_TAG) |
-        (1 << NAVDATA_RAW_MEASURES_TAG) |
-        (1 << NAVDATA_MAGNETO_TAG) |
-        (1 << NAVDATA_TIME_TAG));
+            (1 << NAVDATA_ALTITUDE_TAG) |
+            (1 << NAVDATA_RAW_MEASURES_TAG) |
+            (1 << NAVDATA_MAGNETO_TAG) |
+            (1 << NAVDATA_TIME_TAG));
 
     stringstream ndOptionsString;
     ndOptionsString << ndOptions;
     setConfirmedConfigure(new AtCommandCONFIG("general:navdata_options", ndOptionsString.str()));
     // disable visual detection
-    setConfirmedConfigure(new AtCommandCONFIG("detect:detect_type","3"));
+    setConfirmedConfigure(new AtCommandCONFIG("detect:detect_type", "3"));
 
     return true;
 }
@@ -122,16 +121,21 @@ bool XciParrot::setDefaultConfiguration(){
 // ----------------- Public function ---------------- //
 
 XciParrot::XciParrot(DataReceiver &dataReceiver, std::string ipAddress)
-    : Xci(dataReceiver),
-    atCommandSender_(atCommandQueue_, io_serviceCMD_, ipAddress),
-    videoReceiver_(io_serviceVideo_, ipAddress),
-    navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceNavdata_, ipAddress),
-    configurationReceiver_(atCommandQueue_,configuration_,io_serviceConfiguration_,ipAddress)
-{
+  : Xci(dataReceiver),
+  inited_(false),
+  atCommandSender_(atCommandQueue_, io_serviceCMD_, ipAddress),
+  videoReceiver_(io_serviceVideo_, ipAddress),
+  navdataReceiver_(dataReceiver, atCommandQueue_, state_, io_serviceNavdata_, ipAddress),
+  configurationReceiver_(atCommandQueue_, configuration_, io_serviceConfiguration_, ipAddress) {
     configuration_["XCI_PARAM_FP_PERSISTENCE"] = "50";
 };
 
-void XciParrot::init(){
+void XciParrot::init() {
+    dataReceiver_.enabled(true);
+    if (inited_) {
+        return;
+    }
+    inited_ = true;
     endAll_ = false;
 
     initNetwork();
@@ -144,6 +148,10 @@ void XciParrot::init(){
     configurationReceiver_.update();
 }
 
+void XciParrot::stop() {
+    dataReceiver_.enabled(false);
+}
+
 std::string XciParrot::name() {
     return NAME;
 }
@@ -152,7 +160,7 @@ SensorList XciParrot::sensorList() {
     SensorList sensorList;
 
     sensorList.push_back(Sensor("rotation", "ROTATION"));
-    sensorList.push_back(Sensor("velocity", "VELOCITY"));
+    sensorList.push_back(Sensor("velocity", "VELOCITY_LOC"));
 
     sensorList.push_back(Sensor("altitudeAll", "ALTITUDE_ALL"));
     sensorList.push_back(Sensor("altitudeV", "ALTITUDE_V"));
@@ -172,10 +180,9 @@ SensorList XciParrot::sensorList() {
 }
 
 std::string XciParrot::configuration(const std::string &key) {
-    if (configuration_.count(key) > 0){
+    if (configuration_.count(key) > 0) {
         return configuration_[key];
-    }
-    else{
+    } else {
         return "";
     }
 }

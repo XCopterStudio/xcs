@@ -18,7 +18,7 @@ Ekf {
   {
     roll  1
     pitch 1
-    yaw   80
+    yaw   9
     gaz   1
   }
   
@@ -30,7 +30,7 @@ Ekf {
     velocityZ   0.01
     phi         0.0003
     theta       0.0003
-    velocityPsi 0.0012
+    velocityPsi 0.0001
   }
 
   PtamVariance
@@ -60,7 +60,7 @@ Ptam {
     frameHeight      360
 
     ; display OpenGL window (debug, Linux only)
-    showWindow       1
+    showWindow       0
 
     ; minimum keyframe distance (meters)
     minKFDist        0.2

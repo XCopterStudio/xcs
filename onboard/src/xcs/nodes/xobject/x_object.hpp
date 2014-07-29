@@ -14,13 +14,13 @@ namespace nodes {
 class XOBJECT_EXPORT XObject : public urbi::UObject {
 public:
     enum State {
-        STATE_CREATED = 0, STATE_STARTED = 1, STATE_STOPED = 2,
+        STATE_CREATED = 0, STATE_STARTED = 1, STATE_STOPPED = 2,
     };
     typedef std::list<std::string> StringList;
     XObject(const std::string& name);
     virtual ~XObject();
-    void startXO();
-    void stopXO();
+    void start();
+    void stop();
     const std::string getSynType(const std::string& xVarName) const;
     const std::string getSemType(const std::string& xVarName) const;
     StringList getXVars() const;

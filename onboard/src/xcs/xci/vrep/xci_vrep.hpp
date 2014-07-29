@@ -20,6 +20,7 @@ namespace vrep{
     class XciVrep : public virtual Xci {
         static const float POS_MULTI;
 
+        std::atomic<bool> inited_;
         int clientID_;
         std::string droneName_;
         std::string frontCameraName_;
@@ -75,6 +76,8 @@ namespace vrep{
         void flyControl(float roll, float pitch, float yaw, float gaz) override;
 
         void init() override;
+        
+        void stop() override;
     };
 
 }}}

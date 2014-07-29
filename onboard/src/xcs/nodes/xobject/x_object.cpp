@@ -11,8 +11,8 @@ XObject::XObject(const std::string& name) : UObject(name) {
     XBindFunction(XObject, getSemType);
     XBindFunction(XObject, getXVars);
     XBindFunction(XObject, getXInputPorts);
-    XBindFunction(XObject, startXO);
-    XBindFunction(XObject, stopXO);
+    XBindFunction(XObject, start);
+    XBindFunction(XObject, stop);
     XBindFunction(XObject, getState);
 
     setState(XObject::STATE_CREATED);
@@ -21,12 +21,12 @@ XObject::XObject(const std::string& name) : UObject(name) {
 XObject::~XObject() {
 }
 
-void XObject::startXO() {
+void XObject::start() {
     setState(XObject::STATE_STARTED);
 }
 
-void XObject::stopXO() {
-    setState(XObject::STATE_STOPED);
+void XObject::stop() {
+    setState(XObject::STATE_STOPPED);
 }
 
 bool XObject::registerXVar(const string& xVarName, const XType& type) {

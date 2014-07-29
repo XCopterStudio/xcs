@@ -162,7 +162,7 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     angularRotation.phi = modelPar_[4] * flyControl.roll - modelPar_[5] * anglesOld.phi;
     angularRotation.theta = modelPar_[4] * flyControl.pitch - modelPar_[5] * anglesOld.theta;
     // angular acceleration
-    angularRotation.psi = modelPar_[6] * flyControl.yaw - modelPar_[7] * state.first.angularRotationPsi;
+    angularRotation.psi = modelPar_[6] * flyControl.yaw - modelPar_[7] * state.first.velocityPsi;
     ////M: printf("EKF: Rotation [%f,%f,%f] \n", angularRotation.phi, angularRotation.theta, angularRotation.psi);
 
     // =========== predict new state ============
@@ -177,9 +177,9 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     EulerianVector &angles = newState.first.angles;
     angles.phi = xcs::normAngle(angles.phi + angularRotation.phi * delta);
     angles.theta = xcs::normAngle(angles.theta + angularRotation.theta * delta);
-    angles.psi = xcs::normAngle(angles.psi + state.first.angularRotationPsi * delta);
+    angles.psi = xcs::normAngle(angles.psi + state.first.velocityPsi * delta);
     // angular rotation psi
-    newState.first.angularRotationPsi += angularRotation.psi*delta;
+    newState.first.velocityPsi += angularRotation.psi*delta;
     // =========== end predict new state ========
 
     // create jacobian matrix
@@ -264,7 +264,7 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     //        newState.first.position.x, newState.first.position.y, newState.first.position.z,
     //        newState.first.velocity.x, newState.first.velocity.y, newState.first.velocity.z,
     //        newState.first.angles.phi, newState.first.angles.theta, newState.first.angles.psi,
-    //        newState.first.angularRotationPsi);
+    //        newState.first.velocityPsi);
     //////M: printf("EKF: Deviation drone predictedState (%f,%f,%f,%f,%f,%f,%f,%f,%f,%f)\n",
     //    newState.second(0, 0), newState.second(1, 1), newState.second(2, 2),
     //    newState.second(3, 3), newState.second(4, 4), newState.second(5, 5),
@@ -321,7 +321,7 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     predictedMeasurement(3, 0) = state.first.velocity.z;
     predictedMeasurement(4, 0) = state.first.angles.phi;
     predictedMeasurement(5, 0) = state.first.angles.theta;
-    predictedMeasurement(6, 0) = state.first.angularRotationPsi;
+    predictedMeasurement(6, 0) = state.first.velocityPsi;
 
     // update state
     mat newStateMean = static_cast<mat> (state.first) + gain * (static_cast<mat> (imuMeasurement) - predictedMeasurement);
@@ -357,7 +357,7 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     //        newState.first.position.x, newState.first.position.y, newState.first.position.z,
     //        newState.first.velocity.x, newState.first.velocity.y, newState.first.velocity.z,
     //        newState.first.angles.phi, newState.first.angles.theta, newState.first.angles.psi,
-    //        newState.first.angularRotationPsi);
+    //        newState.first.velocityPsi);
 
     return newState;
 }
@@ -405,7 +405,7 @@ DroneStateDistribution Ekf::updateCam(const DroneStateDistribution &state, const
     //        newState.first.position.x, newState.first.position.y, newState.first.position.z,
     //        newState.first.velocity.x, newState.first.velocity.y, newState.first.velocity.z,
     //        newState.first.angles.phi, newState.first.angles.theta, newState.first.angles.psi,
-    //        newState.first.angularRotationPsi);
+    //        newState.first.velocityPsi);
 
     return newState;
 }
@@ -586,6 +586,7 @@ DroneState Ekf::computeState(const double time) {
 void Ekf::reset(){
     unique_lock<shared_mutex> lock(bigSharedMtx_);
     double altitude = droneStates_.back().first.first.position.z;
+    double yaw = droneStates_.back().first.first.angles.psi;
 
     // clear all deques
     flyControls_.clear();
@@ -596,8 +597,12 @@ void Ekf::reset(){
     flyControls_.push_back(FlyControlChronologic(FlyControl(), 0));
     imuMeasurements_.push_back(ImuMeasurementChronologic(DroneStateMeasurement(), 0));
     droneStates_.push_back(DroneStateDistributionChronologic(
-        DroneStateDistribution(DroneState(xcs::CartesianVector(0,0,altitude)), arma::mat(10, 10, fill::eye)),
-        0));
+        DroneStateDistribution(DroneState(xcs::CartesianVector(0, 0, altitude),
+            xcs::CartesianVector(), 
+            xcs::EulerianVector(0, 0, yaw)), 
+            arma::mat(10, 10, fill::eye)),
+            0)
+        );
 
     IDCounter_ = 1;
 }

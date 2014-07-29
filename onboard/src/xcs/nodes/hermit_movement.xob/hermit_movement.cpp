@@ -78,7 +78,7 @@ xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
     }
 
     if (!newCheckpoint_){
-        if (!reachedCallback_){
+        if (reachedCallback_ != nullptr){
             reachedCallback_(false);
         }
 
@@ -86,52 +86,52 @@ xcs::SpeedControl HermitMovement::flyOnCheckpoint(const double &speed){
         double step = 1.0 / (distance * POINTS_ON_METER);
         double boundSpeed = valueInRange(speed, 0.0, MAX_SPEED);
 
-        Checkpoint droneCheckpoint(dronePosition_.x, dronePosition_.y, dronePosition_.z,
-            valueInRange(droneVelocity_.x*distance,droneVelocity_.x), 
-            valueInRange(droneVelocity_.y*distance, droneVelocity_.y), 
-            valueInRange(droneVelocity_.z*distance, droneVelocity_.z));
+        //Checkpoint droneCheckpoint(dronePosition_.x, dronePosition_.y, dronePosition_.z,
+        //    valueInRange(droneVelocity_.x*distance,droneVelocity_.x), 
+        //    valueInRange(droneVelocity_.y*distance, droneVelocity_.y), 
+        //    valueInRange(droneVelocity_.z*distance, droneVelocity_.z));
 
-        Checkpoint interCheckpoint;
-        double step_temp = step;
+        //Checkpoint interCheckpoint;
+        //double step_temp = step;
 
-        do { // find point distant EPSILON from drone actual position
-            interCheckpoint = computeHermitPoint(droneCheckpoint, targetCheckpoint_, step_temp);
-            step_temp += step;
-        } while (distance > EPSILON && computeDistance(interCheckpoint, dronePosition_) < EPSILON);
+        //do { // find point distant EPSILON from drone actual position
+        //    interCheckpoint = computeHermitPoint(droneCheckpoint, targetCheckpoint_, step_temp);
+        //    step_temp += step;
+        //} while (distance > EPSILON && computeDistance(interCheckpoint, dronePosition_) < EPSILON);
 
-        double deltaX = interCheckpoint.x - dronePosition_.x;
-        double deltaY = interCheckpoint.y - dronePosition_.y;
-        double deltaZ = interCheckpoint.z - dronePosition_.z;
+        //double deltaX = interCheckpoint.x - dronePosition_.x;
+        //double deltaY = interCheckpoint.y - dronePosition_.y;
+        //double deltaZ = interCheckpoint.z - dronePosition_.z;
 
-        /*double deltaX = targetCheckpoint.x - dronePosition_.x;
-        double deltaY = targetCheckpoint.y - dronePosition_.y;
-        double deltaZ = targetCheckpoint.z - dronePosition_.z;*/
-
-        //double norm = 2;
-        
+        double deltaX = targetCheckpoint_.x - dronePosition_.x;
+        double deltaY = targetCheckpoint_.y - dronePosition_.y;
+        double deltaZ = targetCheckpoint_.z - dronePosition_.z;        
 
         if (distance < EPSILON){
             printf("Drone achieved destination: [%f,%f,%f] \n", targetCheckpoint_.x, targetCheckpoint_.y, targetCheckpoint_.z);
             printf("Hermit: New checkpoint \n");
             newCheckpoint_ = true;
-            if (!reachedCallback_){
+            if (reachedCallback_ != nullptr){
                 reachedCallback_(true);
             }
         }
         else{
-            double norm = boundSpeed / std::max(std::abs(deltaX), std::max(std::abs(deltaY), std::abs(deltaZ)));
-            return SpeedControl(norm*deltaX, norm*deltaY, norm*deltaZ, 0);
+            //double norm = boundSpeed / std::max(std::abs(deltaX), std::max(std::abs(deltaY), std::abs(deltaZ)));
+            //return SpeedControl(norm*deltaX, norm*deltaY, norm*deltaZ, 0);
+
+            double norm = 4;
+            return SpeedControl(valueInRange(norm*deltaX*boundSpeed, -boundSpeed, boundSpeed),
+            valueInRange(norm*deltaY*boundSpeed, -boundSpeed, boundSpeed),
+            valueInRange(norm*deltaZ*boundSpeed, -boundSpeed, boundSpeed),
+            0
+            );
         }
 
         printf("Drone state: [%f,%f,%f,%f] \n", dronePosition_.x, dronePosition_.y, dronePosition_.z,droneRotation_.psi);
         //TODO: use yaw difference
         //printf("Hermit: Control speed [%f,%f,%f,%f] \n", norm*deltaX*boundSpeed, norm*deltaY*boundSpeed, norm*deltaZ*boundSpeed, 0);
         
-        /*return SpeedControl(valueInRange(norm*deltaX*boundSpeed, -boundSpeed, boundSpeed),
-            valueInRange(norm*deltaY*boundSpeed, -boundSpeed, boundSpeed),
-            valueInRange(norm*deltaZ*boundSpeed, -boundSpeed, boundSpeed),
-            0
-            );*/
+        
     }
     
     return SpeedControl();

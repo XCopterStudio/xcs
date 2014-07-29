@@ -47,33 +47,35 @@ public:
 
         return boost::regex_match(name, VALID_NAME);
     }
+protected:
+    virtual void stateChanged(XObject::State state);
 private:
     typedef std::map<std::string, std::string> SyntacticMap;
     typedef std::map<std::string, std::unique_ptr<dataplayer::VideoPlayer >> VideoPlayerMap;
-    typedef std::pair<std::string, size_t> VideoJob;
+    typedef std::pair<std::string, size_t> VideoJob; //! video channel name, frame no.
     typedef xcs::Tsqueue<VideoJob> VideoJobsQueue;
     typedef xcs::Tsqueue<xcs::BitmapType> VideoResultQueue;
     typedef std::map<std::string, std::unique_ptr<VideoResultQueue >> VideoResultQueueMap;
     typedef std::chrono::high_resolution_clock Clock;
     typedef std::chrono::time_point<Clock> TimePoint;
 
-    const static std::string CMD_PLAY;
-    const static std::string CMD_PAUSE;
-
     /*!
      * Number of video frames that are preloaded in advance (per channel).
      * Currently only 1 is supported because there are no buffers and only 
      * internal buffer of video player is exploited (it's being overwritten
      * with each new frame).for 
+     * 
+     * \note Defined in the header because of template function that uses it.
      */
     const static size_t PRELOAD_OFFSET = 1;
 
     /*!
      * Period (ms) of iteration of the main loop when player is paused.
      */
-    const static size_t IDLE_SLEEP = 100;
+    const static size_t IDLE_SLEEP;
     
-    
+    //! Name of video channel for creating dummy video jobs.
+    const static std::string DUMMY_VIDEO_CHANNEL;
 
     static xcs::SyntacticCategoryMap syntacticCategoryMap_;
 
@@ -128,7 +130,11 @@ private:
     void videoDecoder();
 
     void onCommand(const std::string &command);
-
+    
+    void play();
+    
+    void pause();
+    
     /*!
      * Obtain ready frame from correct queue, notify it and prepare another job.
      * Templating is legacy from BitmapTypeChronologic.

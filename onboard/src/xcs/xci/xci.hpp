@@ -51,6 +51,7 @@ typedef class Xci* (XciFactoryFunction) (DataReceiver &dataReceiver);
 
 //! Virtual class for unified x-copter interface
 //! Every drone have to set XCI_PARAM_FP_PERSISTENCE configuration parameter 
+
 class Xci {
 protected:
     DataReceiver& dataReceiver_;
@@ -92,8 +93,11 @@ public:
     //! A pure virtual member taking four fly controls and send it to the x-copter
     virtual void flyControl(float roll, float pitch, float yaw, float gaz) = 0;
 
-    //! A pure virtual member initializing Xci for use
+    //! Initializing XCI for use. Function must be idempotent.
     virtual void init() = 0;
+
+    //! Stopping production of any data from sensors (resources may be kept).
+    virtual void stop() = 0;
 };
 }
 }

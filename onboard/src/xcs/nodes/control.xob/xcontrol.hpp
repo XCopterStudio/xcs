@@ -21,25 +21,25 @@ namespace control{
     class XControl : public XObject{
         Control control_;
 
-        std::atomic<bool> stoped;
+        std::atomic<bool> stopped_;
 
         void onChangeVelocity(xcs::CartesianVector velocity);
         void onChangeRotation(xcs::EulerianVector rotation);
-        void onChangeDesireSpeed(xcs::SpeedControl desireSpeed);
+        void onChangeDesireVelocity(xcs::SpeedControl desireVelocity);
 
         void loadParameters(const std::string &file);
+    protected:
+        virtual void stateChanged(XObject::State state);
     public:
         // Incoming data
         xcs::nodes::XInputPort<xcs::CartesianVector> velocity;
         xcs::nodes::XInputPort<xcs::EulerianVector> rotation;
-        xcs::nodes::XInputPort<xcs::SpeedControl> desireSpeed;
+        xcs::nodes::XInputPort<xcs::SpeedControl> desireVelocity;
         // Output data
         xcs::nodes::XVar<xcs::FlyControl> flyControl;
 
         XControl(const std::string& name);
         void init(const std::string &file);
-        inline void start(){ stoped = false; };
-        inline void stop(){ stoped = true; };
     };
 
 }}}

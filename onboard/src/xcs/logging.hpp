@@ -16,7 +16,7 @@
         BOOST_LOG_TRIVIAL(fatal) << msg
 
 #ifdef NDEBUG
-#define XCS_LOG_INFO(msg) /* empty */
+    #define XCS_LOG_INFO(msg) /* empty */
 #endif
 
 #endif
