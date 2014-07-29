@@ -276,52 +276,48 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
 
 DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const DroneStateMeasurement &imuMeasurement) {
     // create jacobian from measurement function
-    mat measurementJacobian(7, 10, fill::zeros);
-    // altitude
-    measurementJacobian(0, 2) = 1;
+    mat measurementJacobian(6, 10, fill::zeros);
     // acceleration x
-    measurementJacobian(1, 3) = cos(state.first.angles.psi);
-    measurementJacobian(1, 4) = sin(state.first.angles.psi);
-    measurementJacobian(1, 8) = -state.first.velocity.x * sin(state.first.angles.psi)
+    measurementJacobian(0, 3) = cos(state.first.angles.psi);
+    measurementJacobian(0, 4) = sin(state.first.angles.psi);
+    measurementJacobian(0, 8) = -state.first.velocity.x * sin(state.first.angles.psi)
             + state.first.velocity.y * cos(state.first.angles.psi);
     // acceleration y
-    measurementJacobian(2, 3) = -sin(state.first.angles.psi);
-    measurementJacobian(2, 4) = cos(state.first.angles.psi);
-    measurementJacobian(2, 8) = -state.first.velocity.x * cos(state.first.angles.psi)
+    measurementJacobian(1, 3) = -sin(state.first.angles.psi);
+    measurementJacobian(1, 4) = cos(state.first.angles.psi);
+    measurementJacobian(1, 8) = -state.first.velocity.x * cos(state.first.angles.psi)
             - state.first.velocity.y * sin(state.first.angles.psi);
     // acceleration z
-    measurementJacobian(3, 5) = 1;
+    measurementJacobian(2, 5) = 1;
     // phi
-    measurementJacobian(4, 6) = 1;
+    measurementJacobian(3, 6) = 1;
     // theta
-    measurementJacobian(5, 7) = 1;
+    measurementJacobian(4, 7) = 1;
     // psi
-    measurementJacobian(6, 9) = 1;
+    measurementJacobian(5, 9) = 1;
 
     // additional noise // TODO: compute better values
-    mat noise(7, 7, fill::zeros);
-    noise(0, 0) = imuVariance_[0]; // altitude variance 
-    noise(1, 1) = imuVariance_[1]; // velocity x
-    noise(2, 2) = imuVariance_[2]; // velocity y
-    noise(3, 3) = imuVariance_[3]; // velocity z
-    noise(4, 4) = imuVariance_[4]; // phi 
-    noise(5, 5) = imuVariance_[5]; // theta
-    noise(6, 6) = imuVariance_[6]; // angular velocity psi
+    mat noise(6, 6, fill::zeros);
+    noise(0, 0) = imuVariance_[1]; // velocity x
+    noise(1, 1) = imuVariance_[2]; // velocity y
+    noise(2, 2) = imuVariance_[3]; // velocity z
+    noise(3, 3) = imuVariance_[4]; // phi 
+    noise(4, 4) = imuVariance_[5]; // theta
+    noise(5, 5) = imuVariance_[6]; // angular velocity psi
 
     // compute kalman gain
     mat gain = state.second * measurementJacobian.t() * (measurementJacobian * state.second * measurementJacobian.t() + noise).i();
 
     // compute predicted measurement 
-    mat predictedMeasurement(7, 1);
-    predictedMeasurement(0, 0) = state.first.position.z;
-    predictedMeasurement(1, 0) = state.first.velocity.x * cos(state.first.angles.psi)
+    mat predictedMeasurement(6, 1);
+    predictedMeasurement(0, 0) = state.first.velocity.x * cos(state.first.angles.psi)
             + state.first.velocity.y * sin(state.first.angles.psi);
-    predictedMeasurement(2, 0) = -state.first.velocity.x * sin(state.first.angles.psi)
+    predictedMeasurement(1, 0) = -state.first.velocity.x * sin(state.first.angles.psi)
             + state.first.velocity.y * cos(state.first.angles.psi);
-    predictedMeasurement(3, 0) = state.first.velocity.z;
-    predictedMeasurement(4, 0) = state.first.angles.phi;
-    predictedMeasurement(5, 0) = state.first.angles.theta;
-    predictedMeasurement(6, 0) = state.first.velocityPsi;
+    predictedMeasurement(2, 0) = state.first.velocity.z;
+    predictedMeasurement(3, 0) = state.first.angles.phi;
+    predictedMeasurement(4, 0) = state.first.angles.theta;
+    predictedMeasurement(5, 0) = state.first.velocityPsi;
 
     // update state
     mat newStateMean = static_cast<mat> (state.first) + gain * (static_cast<mat> (imuMeasurement) - predictedMeasurement);
@@ -340,7 +336,7 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
     // update deviation
     newState.second = (mat(10, 10).eye() - gain*measurementJacobian) * state.second;
 
-    /*mat error = (newStateMean - static_cast<mat>(state.first))*(newStateMean - static_cast<mat>(state.first)).t();
+    mat error = (newStateMean - static_cast<mat>(state.first))*(newStateMean - static_cast<mat>(state.first)).t();
     printf("error %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e %.10e \n", 
         error.at(0, 0),
         error.at(1, 1),
@@ -351,7 +347,7 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
         error.at(6, 6),
         error.at(7, 7),
         error.at(8, 8),
-        error.at(9, 9));*/
+        error.at(9, 9));
 
     //M: printf("EKF: Computed drone updatedState [%f,%f,%f,%f,%f,%f,%f,%f,%f,%f]\n",
     //        newState.first.position.x, newState.first.position.y, newState.first.position.z,

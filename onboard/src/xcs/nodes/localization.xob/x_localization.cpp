@@ -118,7 +118,13 @@ void XLocalization::onChangeFlyControl(const xcs::FlyControl flyControl) {
     boundedControl.pitch = xcs::valueInRange(flyControl.pitch, 0.0, 0.5);
     boundedControl.yaw = xcs::valueInRange(flyControl.yaw, 0.0, 1.0);
     boundedControl.gaz = xcs::valueInRange(flyControl.gaz, 0.0, 1.0);
-    ekf_.flyControl(boundedControl, timeFromStart() + FLY_CONTROL_SEND_TIME);
+    ekf_.flyControl(boundedControl, timeFromStart() + flyControlSendTime_);
+}
+
+void XLocalization::onChangeFlyControlSendTime(const double flyControlSendTime){
+    if (flyControlSendTime >= 0){
+        flyControlSendTime_ = flyControlSendTime;
+    }
 }
 
 void XLocalization::onChangeControl(const std::string &control) {
@@ -151,6 +157,7 @@ XLocalization::XLocalization(const std::string &name) :
   video("FRONT_CAMERA"),
   videoTime("TIME_LOC"),
   flyControl("FLY_CONTROL"),
+  flyControlSendTime("TIME"),
   control("CONTROL"),
   ptamEnabled("ENABLED"),
   position("POSITION_ABS"),
@@ -160,6 +167,7 @@ XLocalization::XLocalization(const std::string &name) :
   ptamStatus("PTAM_STATUS") {
     startTime_ = clock_.now();
     lastMeasurementTime_ = 0;
+    flyControlSendTime_ = FLY_CONTROL_SEND_TIME;
     imuTimeShift_ = std::numeric_limits<double>::max();
     ptamEnabled_ = true;
 
@@ -173,6 +181,7 @@ XLocalization::XLocalization(const std::string &name) :
     UNotifyThreadedChange(videoTime.Data(), &XLocalization::onChangeVideoTime, urbi::LOCK_FUNCTION_DROP);
 
     XBindVarF(flyControl, &XLocalization::onChangeFlyControl);
+    XBindVarF(flyControlSendTime, &XLocalization::onChangeFlyControlSendTime);
     XBindVarF(control, &XLocalization::onChangeControl);
     XBindVarF(ptamEnabled, &XLocalization::onChangePtamEnabled);
 

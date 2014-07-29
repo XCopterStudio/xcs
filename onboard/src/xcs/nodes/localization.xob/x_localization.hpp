@@ -46,6 +46,7 @@ class XLocalization : public XObject {
     Clock clock_;
     TimePoint startTime_;
     double imuTimeShift_;
+    double flyControlSendTime_;
     ::urbi::UImage lastFrame_;
     std::mutex lastFrameMtx_;
     TimePoint lastFrameTime_;
@@ -62,6 +63,7 @@ class XLocalization : public XObject {
     void onChangeVideoTime(xcs::Timestamp internalTime); // TODE deprecated use onChanheTimeCam or vice versa
 
     void onChangeFlyControl(const xcs::FlyControl flyControl);
+    void onChangeFlyControlSendTime(const double flyControlSendTime);
 
     void onChangeControl(const std::string &control);
     
@@ -85,6 +87,7 @@ public:
     XInputPort<double> videoTime;
     // drone fly control
     XInputPort<xcs::FlyControl> flyControl;
+    XInputPort<double> flyControlSendTime;
     // PTAM control
     XInputPort<std::string> control;
     XInputPort<bool> ptamEnabled;
