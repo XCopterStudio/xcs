@@ -174,8 +174,8 @@ var DataFlowGraph = Backbone.Model.extend({
                         if(p.registerXVar && p.registerXVar.length == 1) {
                             var registerXVar = p.registerXVar.pop();
                             
-                            //TODO: set real widgets
-                            var ports = ["raw", "plot", "default"];
+                            // set widgets
+                            var ports = app.DataView.getViewNames();
                             for(var i = 0; i < ports.length; ++i) {
                                 p.registerXVar.push({
                                     name : ports[i],

@@ -27,14 +27,9 @@ $(function () {
     app.Wait = new WaitView();
     app.Flash = new FlashMessagesView();
     
-    //set dfg view
-    app.DataFlowGraph = new DataFlowGraphView();
-
     //set view for widgets
     app.DataView = new DataView();
-    app.DataView.addView("raw", "battery");
-    app.DataView.addView("raw", "altitude");
-    app.DataView.addView("raw", "phi");
-    app.DataView.addView("raw", "psi");
-    app.DataView.addView("raw", "theta");
+    
+    //set dfg view
+    app.DataFlowGraph = new DataFlowGraphView();
 });

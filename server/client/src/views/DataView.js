@@ -4,10 +4,16 @@ var DataView = Backbone.View.extend({
     
     views: {
         raw: {
-            name: "Raw data",
+            name: "raw data",
             ctor: function(dataId) {
-                var dataName = dataId.charAt(0).toUpperCase() + dataId.slice(1);;
-                return new RawDataView(dataId, { name: dataName });
+                //var dataName = dataId.charAt(0).toUpperCase() + dataId.slice(1);;
+                var words = dataId.split("_");
+                if(words.length == 2) {
+                    var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
+                    var portName = words[1];
+                    
+                    return new RawDataView(dataId, { name: nodeName + " " + portName });
+                 }
             }
         }
     },
@@ -24,8 +30,8 @@ var DataView = Backbone.View.extend({
         var views = [];
         
         for(var view in this.views) {
-            if (this.views.hasOwnProperty(view) && view.name && view.ctor) {
-                views.push(view.name);
+            if (this.views.hasOwnProperty(view) && this.views[view].name && this.views[view].ctor) {
+                views.push(this.views[view].name);
             }
         }
         
