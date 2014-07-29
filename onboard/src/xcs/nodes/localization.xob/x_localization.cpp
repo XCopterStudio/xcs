@@ -13,8 +13,8 @@ using namespace xcs;
 using namespace xcs::nodes;
 using namespace xcs::nodes::localization;
 
-const double XLocalization::IMU_DELAY = 0.040; // 40ms
-const double XLocalization::FLY_CONTROL_SEND_TIME = 0.075; // 75ms
+const double XLocalization::IMU_DELAY = 0.030; // 40ms
+const double XLocalization::FLY_CONTROL_SEND_TIME = 0.030; // 75ms
 const double XLocalization::CAM_DELAY = 0.100; // 
 
 const std::string XLocalization::CTRL_INIT_KF = "init";
@@ -39,7 +39,7 @@ void XLocalization::onChangeAltitude(double altitude) {
 
 void XLocalization::onChangeTimeImu(double internalTime) {
     if (imuTimeShift_ == std::numeric_limits<double>::max()) {
-        imuTimeShift_ = internalTime - timeFromStart() + IMU_DELAY;
+        imuTimeShift_ = internalTime + IMU_DELAY - timeFromStart();
     }
 
     double ekfTime = internalTime - imuTimeShift_;
@@ -61,7 +61,7 @@ void XLocalization::onChangeTimeImu(double internalTime) {
         //printf("Measurement time %f actual time %f \n", actualTime, timeFromStart());
 
         // update future position of drone
-        DroneState state = ekf_.computeState(timeFromStart() + 0.06);
+        DroneState state = ekf_.computeState(timeFromStart() + flyControlSendTime_);
         // update actual position of drone
         //DroneState state = ekf_.computeState(timeFromStart());
         position = state.position;
@@ -105,7 +105,7 @@ void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
     ptamStatus = static_cast<int> (ptam_->ptamStatus());
 
     // update current state of drone
-    DroneState state = ekf_.computeState(timeFromStart());
+    DroneState state = ekf_.computeState(timeFromStart() + flyControlSendTime_);
     position = state.position;
     velocity = state.velocity;
     rotation = state.angles;
@@ -118,7 +118,7 @@ void XLocalization::onChangeFlyControl(const xcs::FlyControl flyControl) {
     boundedControl.pitch = xcs::valueInRange(flyControl.pitch, 0.0, 0.5);
     boundedControl.yaw = xcs::valueInRange(flyControl.yaw, 0.0, 1.0);
     boundedControl.gaz = xcs::valueInRange(flyControl.gaz, 0.0, 1.0);
-    ekf_.flyControl(boundedControl, timeFromStart() + flyControlSendTime_);
+    ekf_.flyControl(boundedControl, timeFromStart() + FLY_CONTROL_SEND_TIME);
 }
 
 void XLocalization::onChangeFlyControlSendTime(const double flyControlSendTime){
@@ -220,14 +220,13 @@ void XLocalization::loadParameters(const Settings& settings) {
         modelVar[3] = settings.get<double>("Ekf.ModelVariance.gaz");
         ekf_.modelVariances(modelVar);
 
-        Variances imuVar(7, 0);
-        imuVar[0] = settings.get<double>("Ekf.ImuVariance.z");
-        imuVar[1] = settings.get<double>("Ekf.ImuVariance.velocityX");
-        imuVar[2] = settings.get<double>("Ekf.ImuVariance.velocityY");
-        imuVar[3] = settings.get<double>("Ekf.ImuVariance.velocityZ");
-        imuVar[4] = settings.get<double>("Ekf.ImuVariance.phi");
-        imuVar[5] = settings.get<double>("Ekf.ImuVariance.theta");
-        imuVar[6] = settings.get<double>("Ekf.ImuVariance.velocityPsi");
+        Variances imuVar(6, 0);
+        imuVar[0] = settings.get<double>("Ekf.ImuVariance.velocityX");
+        imuVar[1] = settings.get<double>("Ekf.ImuVariance.velocityY");
+        imuVar[2] = settings.get<double>("Ekf.ImuVariance.velocityZ");
+        imuVar[3] = settings.get<double>("Ekf.ImuVariance.phi");
+        imuVar[4] = settings.get<double>("Ekf.ImuVariance.theta");
+        imuVar[5] = settings.get<double>("Ekf.ImuVariance.velocityPsi");
         ekf_.imuVariances(imuVar);
 
         Variances ptamVar(6, 0);

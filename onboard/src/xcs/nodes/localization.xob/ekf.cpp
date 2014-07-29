@@ -154,15 +154,15 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     CartesianVector acceleration;
     acceleration.x = (cos(anglesOld.psi) * forceX + sin(anglesOld.psi) * forceY) - dragX;
     acceleration.y = (-sin(anglesOld.psi) * forceX + cos(anglesOld.psi) * forceY) - dragY;
-    acceleration.z = modelPar_[8] * flyControl.gaz - modelPar_[9] * velocityOld.z;
+    acceleration.z = modelPar_[8] * (modelPar_[9] * flyControl.gaz - velocityOld.z);
     ////M: printf("EKF: Acceleration [%f,%f,%f] \n", acceleration.x, acceleration.y, acceleration.z);
 
     // angular rotation speed
     EulerianVector angularRotation;
-    angularRotation.phi = modelPar_[4] * flyControl.roll - modelPar_[5] * anglesOld.phi;
-    angularRotation.theta = modelPar_[4] * flyControl.pitch - modelPar_[5] * anglesOld.theta;
+    angularRotation.phi = modelPar_[4] * (modelPar_[5] * flyControl.roll - anglesOld.phi);
+    angularRotation.theta = modelPar_[4] * (modelPar_[5] * flyControl.pitch - anglesOld.theta);
     // angular acceleration
-    angularRotation.psi = modelPar_[6] * flyControl.yaw - modelPar_[7] * state.first.velocityPsi;
+    angularRotation.psi = modelPar_[6] * (modelPar_[7] * flyControl.yaw - state.first.velocityPsi);
     ////M: printf("EKF: Rotation [%f,%f,%f] \n", angularRotation.phi, angularRotation.theta, angularRotation.psi);
 
     // =========== predict new state ============
@@ -220,25 +220,25 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
             + cos(anglesOld.phi) * sin(anglesOld.theta) * sin(anglesOld.psi)
             );
     // velocity z
-    jacobian(5, 5) = 1 - delta * modelPar_[9];
+    jacobian(5, 5) = 1 - delta * modelPar_[8];
     // angle phi
-    jacobian(6, 6) = 1 - delta * modelPar_[5];
+    jacobian(6, 6) = 1 - delta * modelPar_[4];
     // angle theta
-    jacobian(7, 7) = 1 - delta * modelPar_[5];
+    jacobian(7, 7) = 1 - delta * modelPar_[4];
     // angle psi
     jacobian(8, 8) = 1;
     jacobian(8, 9) = delta;
     // rotation speed psi
-    jacobian(9, 9) = 1 - delta * modelPar_[7];
+    jacobian(9, 9) = 1 - delta * modelPar_[6];
 
     // normal noise
     mat noiseTransf(10, 4, fill::zeros);
     // phi
-    noiseTransf(6, 0) = delta * modelPar_[4];
+    noiseTransf(6, 0) = delta * modelPar_[4] * modelPar_[5];
     // theta
-    noiseTransf(7, 1) = delta * modelPar_[4];
+    noiseTransf(7, 1) = delta * modelPar_[4] * modelPar_[5];
     // rotation speed psi
-    noiseTransf(9, 2) = delta * modelPar_[6];
+    noiseTransf(9, 2) = delta * modelPar_[6] * modelPar_[7];
     // gaz
     noiseTransf(3, 3) = delta * modelPar_[0] * modelPar_[1] * (
             sin(anglesOld.phi) * cos(anglesOld.psi)
@@ -246,10 +246,10 @@ DroneStateDistribution Ekf::predict(const DroneStateDistribution &state, const F
     noiseTransf(4, 3) = delta * modelPar_[0] * modelPar_[1] * (
             -sin(anglesOld.phi) * sin(anglesOld.psi)
             - cos(anglesOld.phi) * sin(anglesOld.theta) * cos(anglesOld.psi));
-    noiseTransf(5, 3) = delta * modelPar_[8];
+    noiseTransf(5, 3) = delta * modelPar_[8] * modelPar_[9];
 
     // ======= predict state deviation ===========
-    mat noise(4, 4, fill::zeros); // TODO: compute better noise
+    mat noise(4, 4, fill::zeros); 
     noise(0, 0) = modelVariance_[0];
     noise(1, 1) = modelVariance_[1];
     noise(2, 2) = modelVariance_[2];
@@ -298,12 +298,12 @@ DroneStateDistribution Ekf::updateIMU(const DroneStateDistribution &state, const
 
     // additional noise // TODO: compute better values
     mat noise(6, 6, fill::zeros);
-    noise(0, 0) = imuVariance_[1]; // velocity x
-    noise(1, 1) = imuVariance_[2]; // velocity y
-    noise(2, 2) = imuVariance_[3]; // velocity z
-    noise(3, 3) = imuVariance_[4]; // phi 
-    noise(4, 4) = imuVariance_[5]; // theta
-    noise(5, 5) = imuVariance_[6]; // angular velocity psi
+    noise(0, 0) = imuVariance_[0]; // velocity x
+    noise(1, 1) = imuVariance_[1]; // velocity y
+    noise(2, 2) = imuVariance_[2]; // velocity z
+    noise(3, 3) = imuVariance_[3]; // phi 
+    noise(4, 4) = imuVariance_[4]; // theta
+    noise(5, 5) = imuVariance_[5]; // angular velocity psi
 
     // compute kalman gain
     mat gain = state.second * measurementJacobian.t() * (measurementJacobian * state.second * measurementJacobian.t() + noise).i();
@@ -435,13 +435,12 @@ Ekf::Ekf() {
     modelVariance_[2] = 9;
     modelVariance_[3] = 1;
 
-    imuVariance_[0] = 0.0004;
+    imuVariance_[0] = 0.000025;
     imuVariance_[1] = 0.000025;
-    imuVariance_[2] = 0.000025;
-    imuVariance_[3] = 0.01;
+    imuVariance_[2] = 0.01;
+    imuVariance_[3] = 0.0003;
     imuVariance_[4] = 0.0003;
-    imuVariance_[5] = 0.0003;
-    imuVariance_[6] = 0.001;
+    imuVariance_[5] = 0.001;
 
     ptamVariance_[0] = 0.01;
     ptamVariance_[1] = 0.01;
@@ -463,7 +462,7 @@ Ekf::Ekf(Parameters parameters, Variances model, Variances imu, Variances ptam) 
             0));
 
 
-    if (parameters.size() != 10 || model.size() != 4 || imu.size() != 7 || ptam.size() != 6) {
+    if (parameters.size() != 10 || model.size() != 4 || imu.size() != 6 || ptam.size() != 6) {
         XCS_LOG_ERROR("Incorrect parameters or variances array size. Should be parameters 10, model 4, imu 7, ptam 6.");
     } else {
         // set model parameters
@@ -475,7 +474,7 @@ Ekf::Ekf(Parameters parameters, Variances model, Variances imu, Variances ptam) 
             modelVariance_[i] = model[i];
         }
         // set imu variances
-        for (unsigned int i = 0; i < 7; ++i) {
+        for (unsigned int i = 0; i < 6; ++i) {
             imuVariance_[i] = imu[i];
         }
         // set ptam variances
@@ -506,12 +505,12 @@ void Ekf::modelVariances(Variances model) {
 }
 
 void Ekf::imuVariances(Variances imu) {
-    if (imu.size() == 7) {
-        for (unsigned int i = 0; i < 7; ++i) {
+    if (imu.size() == 6) {
+        for (unsigned int i = 0; i < 6; ++i) {
             imuVariance_[i] = imu[i];
         }
     } else {
-        XCS_LOG_WARN("Incorrect imu variances count. Should be 7.");
+        XCS_LOG_WARN("Incorrect imu variances count. Should be 6.");
     }
 }
 
@@ -581,7 +580,7 @@ DroneState Ekf::computeState(const double time) {
 
 void Ekf::reset(){
     unique_lock<shared_mutex> lock(bigSharedMtx_);
-    double altitude = droneStates_.back().first.first.position.z;
+    double altitude = imuMeasurements_.back().first.altitude;
     double yaw = droneStates_.back().first.first.angles.psi;
 
     // clear all deques
