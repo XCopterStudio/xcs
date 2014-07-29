@@ -19,8 +19,19 @@ void XHermitMovement::onChangeDronePosition(xcs::CartesianVector position){
 
 void XHermitMovement::onChangeDroneRotation(xcs::EulerianVector rotation){
     hermitMovement_.droneRotation(rotation);
-    if (!stoped){
+    if (!stopped_){
         speedControl = hermitMovement_.flyOnCheckpoint();
+    }
+}
+
+void XHermitMovement::stateChanged(XObject::State state) {
+    switch (state) {
+        case XObject::STATE_STARTED:
+            stopped_ = false;
+            break;
+        case XObject::STATE_STOPPED:
+            stopped_ = true;
+            break;
     }
 }
 
@@ -43,7 +54,7 @@ reachedCheckpoint("BOOL")
     XBindFunction(XHermitMovement,start);
     XBindFunction(XHermitMovement,stop);
 
-    stoped = true;
+    stopped_ = true;
     reachedCheckpoint = false;
 }
 
@@ -52,10 +63,10 @@ void XHermitMovement::callbackHermit(bool reached){
 }
 
 void XHermitMovement::start(){
-    stoped = false;
+    stopped_ = false;
 }
 
 void XHermitMovement::stop(){
-    stoped = true;
+    stopped_ = true;
 }
 XStart(XHermitMovement);
