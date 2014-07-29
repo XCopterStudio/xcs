@@ -38,21 +38,30 @@ class FlashSender {
 
 class SemanticSender {
     function init(adapter, inputs, UJson, refreshFrequency) {
-        var that = this;
         var this._inputs = [ => ];
         var this.adapter = adapter;
         var this.period = 1 / refreshFrequency;
 
         for(var input: inputs) {
-            setSlot(input.first, nil); // slot for outer "writers"
-            _inputs[input.first] = nil; // last stored value
-            var slot = getSlot(input.first);
-            slot.notifyChange(function() {
-                that._inputs[input.first] = that.getSlotValue(input.first);
-            });
+            registerXVar(input.first);
         };
     }|;
     
+    function registerXVar(name, semanticType = nil, syntacticType = nil, uvar = nil) {
+        var that = this;
+        setSlot(name, nil); // slot for outer "writers"
+        _inputs[name] = nil; // last stored value
+        var slot = getSlot(name);
+
+        if(!uvar.isNil) {
+            uvar >> slot;
+        };
+
+        slot.notifyChange(function() {
+            that._inputs[name] = that.getSlotValue(name);
+        });
+    }|;
+
     function start() {
         every(this.period) {
                 var dataToSend = [ => ];

@@ -3,6 +3,12 @@
 
 class Onboard {
     
+    enum NODE_TYPE {
+        PUBLIC,
+        PRIVATE,
+        SPECIAL,
+    };
+
     class XcsPaths {
         var scripts = { if("XCS_SCRIPTS_PATH" in System.env) Path.new(System.env["XCS_SCRIPTS_PATH"]) else Path.cwd / "urbiscript" };
         var settings = { if("XCS_SETTINGS_PATH" in System.env) Path.new(System.env["XCS_SETTINGS_PATH"]) else Path.cwd / "xsettings" };
@@ -18,7 +24,8 @@ class Onboard {
     
     var xobjects4load_ = [ => ];            // list of pairs (xobjects, which are yet not loaded; path)
     var loadedXObjects_ = [ => ];           // list of pairs (loaded xobjects; cached data)
-    var loadedPrivateObjects_ = [ => ];     // list of pairs (loaded uobjects; cached data)
+    var loadedPrivateObjects_ = [ => ];     // list of pairs (loaded private objects; cached data)
+    var loadedSpecialObjects_ = [ => ];     // list of pairs (loaded special objects; cached data)
     var privateObjects_ = [];               // objects, which are not visible for user
     var ddfg_ = "";                         // data flow graph
     var dfgCommStarted_ = false;            // data flow graph communication started
@@ -65,6 +72,8 @@ class Onboard {
 
         // load ddfg from settings
         loadDdfg_();
+
+        loadSpecialObjects_();
     };
 
     function doRequest_(request) {
@@ -223,7 +232,8 @@ class Onboard {
                         createPart = id + ".()";
                     };
 
-                    this.dfgLobby_.setSlot(id, System.eval(createPart + ";"));
+                    this.dfgLobby_.setSlot(id, System.eval(createPart + ";", this));
+
                     createdNodes << id;
                     created = true;
                 };
@@ -304,13 +314,15 @@ class Onboard {
 
     // start dfg communication and send info about loaded xobjects and default dfg
     function doDfgLoad_() {
-        var prototypeData = getNodesPrototypesInfo_();
-        var prototypePrivateData = getNodesPrototypesInfo_(true);
+        var prototypeData = getNodesPrototypesInfo_(NODE_TYPE.PUBLIC);
+        var prototypePrivateData = getNodesPrototypesInfo_(NODE_TYPE.PRIVATE);
+        var prototypeSpecialData = getNodesPrototypesInfo_(NODE_TYPE.SPECIAL);
         var ddfgData;
 
         var data = [ => ];
         data["prototype"] = prototypeData;
         data["prototypePrivate"] = prototypePrivateData;
+        data["prototypeSpecial"] = prototypeSpecialData;
         data["ddfg"] = this.ddfg_;
 
         return data;
@@ -387,66 +399,54 @@ class Onboard {
         this.onboardSender_.sendPrototypeClone(prototypesData, clonesData);
     };
 
-    function getNodesPrototypesInfo_(prototypePrivate = false) {
+    function getNodesPrototypesInfo_(nodeType = NODE_TYPE.PUBLIC) {
         var prototypeData = [];
 
         //debug
-        if(prototypePrivate) {
-            echo(".sending info about PRIVATE xobject:");
-        }
-        else {
-            echo(".sending info about PUBLIC xobject:");
+        var nodes = nil;
+        switch(nodeType) {
+            case NODE_TYPE.PUBLIC:
+                echo(".sending info about PUBLIC xobject:");
+                
+                nodes = this.loadedXObjects_;
+
+                // prepare data for yet not loaded xobjects
+                for(var kvpXO: this.xobjects4load_) {
+                    var pData = getNodeData_(kvpXO.first().asString(), prototypePrivate);
+                    if(!pData.empty()) {
+                        prototypeData << pData;
+                    };
+                }; 
+            case NODE_TYPE.PRIVATE:
+                nodes = this.loadedPrivateObjects_;
+                echo(".sending info about PRIVATE xobject:");
+            case NODE_TYPE.SPECIAL:
+                nodes = this.loadedSpecialObjects_;
+                echo(".sending info about SPECIAL xobject:");
         };
 
-        // prepare data for yet not loaded xobjects
-        for(var kvpXO: this.xobjects4load_) {
-            var pData = getNodeData_(kvpXO.first().asString(), prototypePrivate);
-            
-            if(!pData.empty()) {
-                prototypeData << pData;
-            };
+        if(nodes.isNil) {
+            return;
         };
 
         // prepare data for loaded xobjects
-        if(prototypePrivate) {
-            for(var l: this.loadedPrivateObjects_) {
-                var pData;
+        for(var l: nodes) {
+            var pData;
                 
-                // determine if data are already cached
-                if(l.second().size() == 0) {
-                    // laod data from object
-                    pData = getNodeData_(l.first().asString());
+            // determine if data are already cached
+            if(l.second().size() == 0) {
+                // laod data from object
+                pData = getNodeData_(l.first().asString());
                     
-                    // cache loaded data
-                    this.loadedPrivateObjects_[l.first()] = pData;
-                }
-                else {
-                    // use data from cache
-                    pData = l.second();
-                };
-                
-                prototypeData << pData;
+                // cache loaded data
+                nodes[l.first()] = pData;
+            }
+            else {
+                // use data from cache
+                pData = l.second();
             };
-        }
-        else {
-            for(var l: this.loadedXObjects_) {
-                var pData;
-
-                // determine if data are already cached
-                if(l.second().size() == 0) {
-                    // laod data from object
-                    pData = getNodeData_(l.first().asString());
-                    
-                    // cache loaded data
-                    this.loadedXObjects_[l.first()] = pData;
-                }
-                else {
-                    // use data from cache
-                    pData = l.second();
-                };
                 
-                prototypeData << pData;
-            };
+            prototypeData << pData;
         };
 
         return prototypeData;
@@ -578,6 +578,25 @@ class Onboard {
     function loadScripts_(uscriptList) {
         for(var script: uscriptList) {
             this.loadScript_(script);
+        };
+    };
+
+    function loadSpecialObjects_() {
+        this.loadedSpecialObjects_.clear();
+
+        //TODO: set name
+        var name = "GUI";
+
+        // set info about GUI node
+        if(!this.xobjectInfo_.has(name)) {
+            this.xobjectInfo_[name] = Global.XObjectSettings.new("", "SemanticSender", "adapter, [ => ], UJson.new(), 8");
+
+            this.loadedSpecialObjects_[name] = [
+                "name" => name,
+                "var" => [],
+                "inputPort" => [],
+                "registerXVar" => ["registerXVar"],
+            ];
         };
     };
 
