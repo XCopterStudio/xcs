@@ -36,6 +36,7 @@ XDataplayer::XDataplayer(const std::string& name) :
     XBindVar(finished);
 
     finished = false;
+    dataReceiver_.enabled(true);
 }
 
 XDataplayer::~XDataplayer() {
