@@ -1,6 +1,6 @@
 /* global gSocket */
 
-var XcopterState = Backbone.Model.extend({
+var OnboardModel = Backbone.Model.extend({
 
     defaults : {
         "connection" : "Disconnected",
@@ -12,7 +12,6 @@ var XcopterState = Backbone.Model.extend({
     initialize : function() {
         var model = this;
         gSocket.on('data', function(json) {
-            //console.log(json);
             if (json.type == "flash") {
                 console.log('>>> Setting flash data');
                 model.set('flash', json.data);

@@ -19,10 +19,15 @@ $(function () {
 
     app = new AppView();
     app.Wait = new WaitView();
-    app.XcopterState = new XcopterState();
+    app.Onboard = new OnboardModel();
     app.Flash = new FlashMessagesView();
     app.Navdata = new AbstractNavdataView();
     app.DataFlowGraph = new DataFlowGraphView();
+    
+//    app.DataViews = {};
+//    app.DataViews.test = new RawDataView();
+    
+    //del
 //    app.Navdata.onDataChange({ type: "data", data: { altitude: "2.3" }});
 //    app.Navdata.onDataChange({ type: "data", data: { phi: "4.3" }});
 //    app.Navdata.onDataChange({ type: "data", data: { psi: "1.3" }});

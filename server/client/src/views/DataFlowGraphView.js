@@ -63,8 +63,8 @@ var DataFlowGraphView = Backbone.View.extend({
     initialize : function() {
         this.model = new DataFlowGraph();
         
-        this.onInputChange(app.XcopterState);      
-        this.listenTo(app.XcopterState, "change:onboard", this.onInputChange);
+        this.onInputChange(app.Onboard);      
+        this.listenTo(app.Onboard, "change:onboard", this.onInputChange);
         
         this.listenTo(this.model, "change:ddfg", this.onDdfgChange);
         this.listenTo(this.model.get("xprototype"), "add", this.onPrototypeAdd);

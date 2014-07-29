@@ -38,10 +38,10 @@ var KeyboardControllerView = Backbone.View.extend({
 
     keydown : function(e) {
         if (e.which == 32 && e.ctrlKey) { // ctrl+space
-            app.XcopterState.setMode("free_flight");
+            app.Onboard.setMode("free_flight");
         }
         if (e.which == 13 && e.ctrlKey) { // ctrl+enter
-            app.XcopterState.setMode("scripting");
+            app.Onboard.setMode("scripting");
         }
 
         if (this.keyMap[e.which] === undefined) {
