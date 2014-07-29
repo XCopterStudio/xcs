@@ -46,7 +46,7 @@ class Ekf {
 
     double modelPar_[10];
     double modelVariance_[4];
-    double imuVariance_[7];
+    double imuVariance_[6];
     double ptamVariance_[6];
     unsigned int IDCounter_;
 
