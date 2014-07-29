@@ -41,6 +41,7 @@
 <script type="text/javascript" src="src/views/KeyboardControllerView.js"></script>
 <script type="text/javascript" src="src/views/MobileControllerView.js"></script>
 <script type="text/javascript" src="src/views/FlashMessagesView.js"></script>
+<script type="text/javascript" src="src/views/DataView.js"></script>
 <script type="text/javascript" src="src/views/AbstractDataView.js"></script>
 <script type="text/javascript" src="src/views/RawDataView.js"></script>
 <script type="text/javascript" src="src/views/AppView.js"></script>

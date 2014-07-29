@@ -30,15 +30,11 @@ $(function () {
     //set dfg view
     app.DataFlowGraph = new DataFlowGraphView();
 
-    //set gridster param
-    $(".gridster > ul").gridster({
-        widget_margins : [ 10, 10 ],
-        widget_base_dimensions : [ 270, 150 ]
-    });
-    app.DataViews = {};
-    app.DataViews.battery = new RawDataView("battery", {name: "Battery"});
-    app.DataViews.altitude = new RawDataView("altitude", {name: "Altitude"});
-    app.DataViews.phi = new RawDataView("phi", {name: "Phi"});
-    app.DataViews.psi = new RawDataView("psi", {name: "Psi"});
-    app.DataViews.theta = new RawDataView("theta", {name: "Theta"});
+    //set view for widgets
+    app.DataView = new DataView();
+    app.DataView.addView("raw", "battery");
+    app.DataView.addView("raw", "altitude");
+    app.DataView.addView("raw", "phi");
+    app.DataView.addView("raw", "psi");
+    app.DataView.addView("raw", "theta");
 });
