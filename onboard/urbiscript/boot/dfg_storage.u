@@ -1,0 +1,12 @@
+class DfgStorage {
+    function getGraphs() {
+        // TODO imlement loading filename form a directory with DFGs
+//            var filePaths = getUserDfgPaths_();
+//            var dfgs = [];
+//            for(var path: filePaths) {
+//                dfgs += XSettings.getSettingsFiles(path.asString(), "DFG");
+//            };
+        return [];
+    };
+};
+

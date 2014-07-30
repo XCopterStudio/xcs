@@ -1,0 +1,35 @@
+class Executor : XObject {
+    var inputs_ = [
+        "code" => Pair.new(Global.SyntacticTypes.STRING, "URBISCRIPT"),
+        "control" => Pair.new(Global.SyntacticTypes.STRING, "CONTROL"),
+    ];
+    var outputs_ = [
+    ];
+    var state_ = 0; // NOTE: this is necessary to do in every clone of the XObject prototype
+    
+    var code;
+    
+    function init(lobby) {
+        var this.lobby_ = lobby;
+        var this.control = "";
+        var this.tag = Tag.new();
+        var this.job;
+        var that = this;
+
+        &control.notifyChange(function() {
+            echo("Changed: " + that.control);
+            if(that.control == "run") {
+                //that.tag: System.eval(that.code, that.lobby_),; // run in background (which doesn't work well with >>)
+                that.job = disown({that.tag: System.eval(that.code, that.lobby_)}); // run in background
+            } else if(that.control == "freeze") {
+                that.tag.freeze();
+            } else if(that.control == "unfreeze") {
+                that.tag.unfreeze();
+            } else if(that.control == "stop") {
+                that.tag.stop();
+                that.job.terminate();
+            }
+        });
+    }|;
+    
+}|;
