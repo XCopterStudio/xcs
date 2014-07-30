@@ -1,12 +1,8 @@
 class Onboard {
 
     class XcsPaths {
-        var scripts = { if("XCS_SCRIPTS_PATH" in System.env) Path.new(System.env["XCS_SCRIPTS_PATH"]) else Path.cwd / "urbiscript" };
         var settings = { if("XCS_SETTINGS_PATH" in System.env) Path.new(System.env["XCS_SETTINGS_PATH"]) else Path.cwd / "xsettings" };
-
-        function getScript(filename) {
-            scripts / filename;
-        }|;
+        var dfgs = { if("XCS_DFGS_PATH" in System.env) Path.new(System.env["XCS_DFGS_PATH"]) else Path.cwd / "dfgs" };
 
         function getSettings(filename) {
             settings / filename;
@@ -15,6 +11,7 @@ class Onboard {
     
     var nodeContainer_;
     var onboardSettings_;
+    var dfgStorage_;
     
     var sender_;
     var receiver_;
@@ -38,6 +35,10 @@ class Onboard {
         // load nodes settings
         var settingsCollection = SettingsCollection.new([XcsPaths.getSettings("xobjects.xs")]);
         nodeContainer_ = NodeContainer.new(settingsCollection);
+        
+        // prepare storage
+        dfgStorage_ = DfgStorage.new(XcsPaths.dfgs);
+        loadDdfg_();
         
         // start communication
         var adapter = Adapter.new();
@@ -119,6 +120,10 @@ class Onboard {
 
         return data;
     };
+    
+    /*
+     * DFG nodes manipulation
+     */
     
     // reset old dfg and create new one
     function doDfgCreate_(requestData) {
@@ -215,13 +220,40 @@ class Onboard {
 
         return data;
     };
+    
+    /*
+     * DFG load and save
+     */
+    function doDfgSave_(requestData) {
+        var filename = requestData["filename"];
+        var rewrite = requestData["rewrite"];
+        var dfg = requestData["DFG"];
+        
+        dfgStorage_.save(dfg, filename, rewrite);
+
+        //resend info about saved dfg
+        return doSavedDfg_();
+    };
+
+
+    function doLoadDfg_(filename) {
+        var dfg = [ => ]; 
+        dfg["filename"] = filename;
+        dfg["DFG"] = dfgStorage_.load(filename);
+        
+        return dfg;
+    };
 
 
     function doSavedDfg_() {
         var data = [ => ];
-        data["savedDfg"] = DfgStorage.getGraphs();
+        data["savedDfg"] = dfgStorage_.getGraphs();
 
         return data;
+    };
+    
+    function loadDdfg_() {
+        this.ddfg_ = dfgStorage_.load(onboardSettings_.get("defaultDfg"));
     };
 
     

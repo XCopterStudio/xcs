@@ -1,12 +1,27 @@
 class DfgStorage {
-    function getGraphs() {
-        // TODO imlement loading filename form a directory with DFGs
-//            var filePaths = getUserDfgPaths_();
-//            var dfgs = [];
-//            for(var path: filePaths) {
-//                dfgs += XSettings.getSettingsFiles(path.asString(), "DFG");
-//            };
-        return [];
+    var baseDir_;
+    
+    function init(baseDir) {
+        baseDir_ = baseDir;
     };
+    
+    function getGraphs() {
+        /* return */ Directory.new(baseDir_).asList().map(function(it) {
+            it.basename;
+        });
+    };
+    
+    function save(dfg, filename, rewrite) {
+        var path = baseDir_ / filename;
+        var setting = XSettings.new(path.asString(), rewrite); // TODO implement or remove rewrite
+        setting.setAndSave("DFG", dfg);
+    };
+    
+    function load(filename) {        
+        var path = baseDir_ / filename;
+        var settings = XSettings.new(path.asString(), false);
+        /* return */ settings.get("DFG");
+    };
+    
 };
 
