@@ -51,8 +51,6 @@ reachedCheckpoint("BOOL")
     XBindVarF(droneRotation, &XHermitMovement::onChangeDroneRotation);
     XBindVar(speedControl);
     XBindVar(reachedCheckpoint);
-    XBindFunction(XHermitMovement,start);
-    XBindFunction(XHermitMovement,stop);
 
     stopped_ = true;
     reachedCheckpoint = false;
@@ -62,11 +60,4 @@ void XHermitMovement::callbackHermit(bool reached){
     reachedCheckpoint = reached;
 }
 
-void XHermitMovement::start(){
-    stopped_ = false;
-}
-
-void XHermitMovement::stop(){
-    stopped_ = true;
-}
 XStart(XHermitMovement);

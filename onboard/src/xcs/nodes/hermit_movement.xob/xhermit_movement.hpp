@@ -39,8 +39,6 @@ public:
     xcs::nodes::XVar<bool> reachedCheckpoint;
 
     void callbackHermit(bool reached);
-    void start();
-    void stop();
 
     XHermitMovement(const std::string& name);
 };
