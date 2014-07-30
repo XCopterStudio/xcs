@@ -1,46 +1,44 @@
 Ekf {
   ModelParameters 
   {
-    c0  10.32
+    c0  10.324
     c1  0
     c2  0.58
     c3  0
-    c4  6.108
-    c5  0.175
-    c6  4.363 
-    c7  0.175
-    ;c7  0.000875
+    c4  10
+    c5  0.6
+    c6  10 
+    c7  1.65
     c8  1.4
-    c9  1.4
+    c9  1
   }
   
   ModelVariance
   {
-    roll  1
-    pitch 1
-    yaw   9
-    gaz   1
+    roll  0.2
+    pitch 0.2
+    yaw   0.52
+    gaz   0.1
   }
   
   ImuVariance
   {
-    z           0.0004
     velocityX   0.0002
     velocityY   0.0002
     velocityZ   0.01
     phi         0.0003
     theta       0.0003
-    velocityPsi 0.0001
+    velocityPsi 0.0076
   }
 
   PtamVariance
   {
-    x     0.0001
-    y     0.0001
-    z     0.0001
-    phi   0.0003
-    theta 0.0003
-    psi   0.0003
+    x     0.0009
+    y     0.0009
+    z     0.0064
+    phi   0.0027
+    theta 0.0027
+    psi   0.0027
   }
 }
 
