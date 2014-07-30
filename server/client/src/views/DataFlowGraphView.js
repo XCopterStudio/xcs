@@ -685,6 +685,8 @@ var DataFlowGraphView = Backbone.View.extend({
                 link: [],
                 registerXVar: []
             };
+            
+            var viewNames = [];
                 
             for(var i = 0; i < jsonDfg.cells.length; ++i) {
                 var cell = jsonDfg.cells[i];
@@ -739,6 +741,13 @@ var DataFlowGraphView = Backbone.View.extend({
                                 port: targetPort,
                             },
                         });
+                        
+                        if(cell.target.id == "GUI") {
+                            viewNames.push({
+                                viewName: cell.target.port,
+                                dataId: cell.source.id + "_" + cell.source.port
+                            });
+                        }
                     }
                     else {
                         // prepare links info 4 sending
@@ -773,6 +782,13 @@ var DataFlowGraphView = Backbone.View.extend({
                         if(model) {
                             model.setState(NodeState.CREATED);
                             ++successCount;
+                            
+                            // create widgets
+                            if(model.get("origId") == "GUI") {
+                                for(var j = 0; j < viewNames.length; ++j) {
+                                    app.DataView.addViewByName(viewNames[j].viewName, viewNames[j].dataId);
+                                }
+                            }
                         }
                     }
                     
