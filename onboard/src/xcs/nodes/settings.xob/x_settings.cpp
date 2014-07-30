@@ -10,6 +10,7 @@ XSettings::XSettings(const std::string &name) :
     XBindFunction(XSettings, get);
     XBindFunction(XSettings, getOrDefault);
     XBindFunction(XSettings, getMap);
+    XBindFunction(XSettings, getKeys);
     XBindFunction(XSettings, set);
     XBindFunction(XSettings, setAndSave);
     XBindFunction(XSettings, save);
@@ -40,6 +41,20 @@ boost::unordered_map<string, string> XSettings::getMap(const string& key) const 
 
     return um;
 }
+
+vector<string> XSettings::getKeys(const string& key) const {
+    // get map
+    map<string, string> m = settings_.getMap(key);
+    
+    // extract keys only
+    vector<string> result;
+    for (const auto& kvp : m) {
+        result.push_back(kvp.first);
+    }
+
+    return result;
+}
+
 
 void XSettings::set(const std::string& key, const std::string& value) {
     settings_.set(key, value);
