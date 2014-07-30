@@ -307,9 +307,8 @@ var DataFlowGraph = Backbone.Model.extend({
     },
     
     requestLoad: function(response) {
-        //TODO: rename DFG_LOAD
         this.sendRequest("SAVED_DFG", "", response);
-        this.sendRequest("DFG_LOAD", "", response);
+        this.sendRequest("DFG_LOAD_METADATA", "", response);
     },
     
     requestCreate: function(dfg, response) {
@@ -342,8 +341,7 @@ var DataFlowGraph = Backbone.Model.extend({
     },
     
     requestLoadDfg: function(dfgFilename, response) {
-        //TODO: rename to DFG_LOAD
-        this.sendRequest("LOAD_DFG", dfgFilename, response);
+        this.sendRequest("DFG_LOAD", dfgFilename, response);
     },
     
     sendRequest: function(request, data, response) {

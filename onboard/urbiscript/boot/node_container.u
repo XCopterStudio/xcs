@@ -6,9 +6,16 @@ class NodeContainer {
         NOTFOUND
     };
     
+    class XObjectStates {
+        var STATE_CREATED = 0;
+        var STATE_STARTED = 1;
+        var STATE_STOPPED = 2;                
+    };
+    
     var settingsCollection_; // settings aggregator, configuration name => init info
     var loadedXObjects_ = [ => ]; // prototypeName => SourceFiles)
     var prototypeInfo_ = []; // item is a dictionary with info
+    var createdNodes_ = []; // item is a node name
     
     var lobby_;
 
@@ -24,10 +31,36 @@ class NodeContainer {
     };
     
     function createNode(configurationName, cloneName) {
-        var configuration = settingsCollection[configurationName];
+        if(cloneName in createdNodes_) {
+            return false;
+        };
+        var configuration = settingsCollection_[configurationName];
         var createCode = configuration["prototype"] + ".new(" + configuration["args"] + ")";
         var node = System.eval(createCode, lobby_);
         lobby_.setSlot(cloneName, node);
+        createdNodes_ << cloneName;
+        /* return */ true;
+    };
+    
+    function destroyNodes(cloneName = nil) {
+        var changed = [];
+        for(var cloneNameIt: getNodeNames()) {
+            if(!cloneName || cloneNameIt == cloneName) {
+                lobby_.getLocalSlot(cloneNameIt).value = nil;
+                lobby_.removeLocalSlot(cloneNameIt);
+                createdNodes_.remove(cloneNameIt);
+                changed << cloneNameIt;
+            };
+        };
+        /* return */ changed;
+    };
+    
+    function getNode(cloneName) {
+        /* return */ lobby_.getSlot(cloneName).value();
+    };
+    
+    function getNodeNames() {
+        /* return */ createdNodes_;
     };
     
     function connectNodes(srcName, srcPort, dstName, dstPort) {
@@ -36,6 +69,34 @@ class NodeContainer {
         
         // TODO here should be checked function connect
         srcNode.getLocalSlot(srcPort) >>  dstNode.getLocalSlot(targetPort);
+    };
+    
+    function startNodes(cloneName = nil) {
+        var changed = [];
+        for(var cloneNameIt: getNodeNames()) {
+            var node = lobby_.getLocalSlot(cloneNameIt).value();
+            if(node.getState() != XObjectStates.STATE_STARTED) {
+                if(!cloneName || cloneNameIt == cloneName) {
+                    node.start();
+                    changed << cloneNameIt;
+                };
+            };
+        };
+        /* return */ changed;
+    };
+    
+    function stopNodes(cloneName = nil) {
+        var changed = [];
+        for(var cloneNameIt: getNodeNames()) {
+            var node = lobby_.getLocalSlot(cloneNameIt).value();
+            if(node.getState() != XObjectStates.STATE_STOPPED) {
+                if(!cloneName || cloneNameIt == cloneName) {
+                    node.stop();
+                    changed << cloneNameIt;
+                };
+            };
+        };
+        /* return */ changed;
     };
     
     function checkAndLoad_() {
@@ -61,7 +122,7 @@ class NodeContainer {
             } catch(var e) {
                 try {
                     XCS_LOG_INFO("Loading URBISCRIPT " + kvp.second);
-                    load(kvp.second); // TODO context in which load executes
+                    load(kvp.second); // NOTE: we're loading it in the context of this (the container)
                     loadedXObjects_[kvp.first] = SourceFiles.URBISCRIPT;
                 } catch(var e) {
                      XCS_LOG_ERROR("Cannot load '" + kvp.second + "'.\nCause:\n" + e + "\n");

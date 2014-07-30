@@ -13,7 +13,7 @@ class Onboard {
         }|; 
     };
     
-    var nodeRepository_;
+    var nodeContainer_;
     var onboardSettings_;
     
     var sender_;
@@ -26,8 +26,7 @@ class Onboard {
         load("boot/logging.u");
         load("boot/adapter.u");
         load("boot/dfg_storage.u");
-        load("boot/dfg_builder.u");
-        load("boot/node_repository.u");
+        load("boot/node_container.u");
         load("settings_collection.u");
         
         System.loadModule("xsettings");
@@ -38,7 +37,7 @@ class Onboard {
         
         // load nodes settings
         var settingsCollection = SettingsCollection.new([XcsPaths.getSettings("xobjects.xs")]);
-        nodeRepository_ = NodeRepository.new(settingsCollection);
+        nodeContainer_ = NodeContainer.new(settingsCollection);
         
         // start communication
         var adapter = Adapter.new();
@@ -74,17 +73,10 @@ class Onboard {
         var responseData = "";
         var responseType = "Done";
 
-        //debug //TODO remove
-        if(requestData == "") {
-            echo("receive request: " + id);
-        } else {
-            echo("receive request: " + id + " (data: " + requestData + ")");
-        };
-
         try {
             switch(id) {
-                case "DFG_LOAD":
-                    responseData = doDfgLoad_();
+                case "DFG_LOAD_METADATA":
+                    responseData = doDfgLoadMetadata_();
                 case "DFG_CREATE":
                     responseData = doDfgCreate_(requestData);
                 case "DFG_START":
@@ -97,7 +89,7 @@ class Onboard {
                     responseData = doDfgSave_(requestData);
                 case "SAVED_DFG":
                     responseData = doSavedDfg_();
-                case "LOAD_DFG":
+                case "DFG_LOAD":
                     responseData = doLoadDfg_(requestData);
                 default:
                     echo("...unknown request");
@@ -119,14 +111,111 @@ class Onboard {
     };
     
   
-    // start dfg communication and send info about loaded xobjects and default dfg
-    function doDfgLoad_() {
+    // send info about loaded xobjects and default dfg
+    function doDfgLoadMetadata_() {
         var data = [ => ];
-        data["prototype"] = nodeRepository_.getPrototypesInfo();
+        data["prototype"] = nodeContainer_.getPrototypesInfo();
         data["ddfg"] = this.ddfg_;
 
         return data;
     };
+    
+    // reset old dfg and create new one
+    function doDfgCreate_(requestData) {
+        var createdNodes = [];
+
+        try {
+            // prototypes
+            for(var p: requestData["prototype"]) {
+                var id = p["id"];
+                var name = p["name"];
+                
+                if(nodeContainer_.createNode(name, id)) {
+                    createdNodes << id;
+                };
+            };
+
+            // connections
+            for(var l: requestData["link"]) {
+                var sourceId = l["source"]["id"];
+                var sourcePort = l["source"]["port"];
+                var targetId = l["target"]["id"];
+                var targetPort = l["target"]["port"];
+                
+                nodeContainer_.connectNodes(sourceId, sourcePort, targetId, targetPort);
+            };
+
+            // register xvars
+            for(var r: requestData["registerXVar"]) {
+                var sourceId = r["source"]["id"];
+                var sourcePort = r["source"]["port"];
+                var targetId = r["target"]["id"];
+                var targetPort = r["target"]["port"];
+
+                var source = nodeContainer_.getNode(sourceId);
+                var target = nodeContainer_.getNode(targetId);
+
+                var sourceSlot = source.getLocalSlot(sourcePort); 
+                var targetSlot = target.getLocalSlot(targetPort);
+
+                // get data types
+                var synT = source.getSynType(sourcePort);
+                var semT = source.getSemType(sourcePort);
+
+                // execute register xvar method
+                targetSlot.value(sourcePort, semT, synT, sourceSlot);
+            };
+        } catch(var ex) {
+            for(var node: createdNodes) {
+                doDfgReset_(false, node);
+            };            
+            throw ex;
+        };
+
+        if(!createdNodes) {
+            throw Exception.new("nothing to create");
+        }; 
+        
+        /* return */ nodeContainer_.getNodeNames();
+    };
+
+    function doDfgStart_(cloneName = nil) {
+        var changed = nodeContainer_.startNodes(cloneName);
+        
+        if(!changed) {
+            throw Exception.new("nothing to start");
+        };
+
+        return changed;
+    };
+
+    function doDfgStop_(checkStopped, cloneName = nil) {
+        var changed = nodeContainer_.stopNodes(cloneName);
+        
+        if(checkStopped && !changed) {
+            throw Exception.new("nothing to stop");
+        };
+
+        return changed;
+    };
+    
+    // stop all xobjects and delete them and optionally resend info about loaded xobjects
+    function doDfgReset_(resend, cloneName = nil) {
+        doDfgStop_(false, cloneName);
+
+        var destroyed = nodeContainer_.destroyNodes(cloneName);
+
+        // send info about loaded xobjects
+        var data = [ => ];
+        if(resend && !cloneName) {
+            data = doDfgLoadMetadata_();
+        };
+
+        data["destroyed"] = destroyed;
+
+        return data;
+    };
+
 
     function doSavedDfg_() {
         var data = [ => ];
