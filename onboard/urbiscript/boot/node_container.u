@@ -155,7 +155,7 @@ class NodeContainer {
                 var pPort = [ => ];
                 pPort["name"] = xip;
                 pPort["synType"] = dummyNode.getSynType(xip);
-                pPort["semType"] = dummyNode.getSynType(xip);
+                pPort["semType"] = dummyNode.getSemType(xip);
                 portList << pPort;
             };
             
