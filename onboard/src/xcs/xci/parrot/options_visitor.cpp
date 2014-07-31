@@ -33,25 +33,22 @@ void OptionVisitor::visit(NavdataTime* time){
 }
 
 void OptionVisitor::visit(NavdataRawMeasures* rawMeasures){
-    CartesianVectorChronologic acceleration(rawMeasures->raw_accs[1],
+    CartesianVector acceleration(rawMeasures->raw_accs[1],
         rawMeasures->raw_accs[0],
-        rawMeasures->raw_accs[2],
-        0);
+        rawMeasures->raw_accs[2]);
     dataReceiver_.notify("acceleration", acceleration);
-    CartesianVectorChronologic gyro(rawMeasures->raw_gyros[0],
+    CartesianVector gyro(rawMeasures->raw_gyros[0],
         rawMeasures->raw_gyros[1],
-        rawMeasures->raw_gyros[2],
-        0);
+        rawMeasures->raw_gyros[2]);
     dataReceiver_.notify("gyro", gyro);
 }
 
 void OptionVisitor::visit(NavdataPressureRaw* pressureRaw){}
 
 void OptionVisitor::visit(NavdataMagneto* magneto){
-    CartesianVectorChronologic acceleration(magneto->my,
+    CartesianVector acceleration(magneto->my,
         magneto->mx,
-        magneto->mz,
-        0);
+        magneto->mz);
     dataReceiver_.notify("magneto", magneto);
 }
 
@@ -76,10 +73,9 @@ void OptionVisitor::visit(NavdataRcReferences* rcReferences){}
 void OptionVisitor::visit(NavdataPwm* pwm){}
 
 void OptionVisitor::visit(NavdataAltitude* altitude){
-    CartesianVectorChronologic altitudeAll(altitude->altitude_vision,
+    CartesianVector altitudeAll(altitude->altitude_vision,
         altitude->altitude_ref,
-        altitude->altitude_raw,
-        0);
+        altitude->altitude_raw);
     dataReceiver_.notify("altitudeAll", altitudeAll);
     dataReceiver_.notify("altitudeV", altitude->altitude_vz);
 }

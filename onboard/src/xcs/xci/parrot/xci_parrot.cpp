@@ -159,22 +159,22 @@ std::string XciParrot::name() {
 SensorList XciParrot::sensorList() {
     SensorList sensorList;
 
-    sensorList.push_back(Sensor("rotation", "ROTATION"));
-    sensorList.push_back(Sensor("velocity", "VELOCITY_LOC"));
+    sensorList.push_back(Sensor("rotation", "ROTATION", "xcs::EulerianVector"));
+    sensorList.push_back(Sensor("velocity", "VELOCITY_LOC", "xcs::CartesianVector"));
 
-    sensorList.push_back(Sensor("altitudeAll", "ALTITUDE_ALL"));
-    sensorList.push_back(Sensor("altitudeV", "ALTITUDE_V"));
-    sensorList.push_back(Sensor("acceleration", "ACCELERATION"));
-    sensorList.push_back(Sensor("gyro", "GYRO_RAW"));
-    sensorList.push_back(Sensor("magneto", "MAGNETO_RAW"));
-    sensorList.push_back(Sensor("internalTimeImu", "TIME_LOC"));
+    sensorList.push_back(Sensor("altitudeAll", "ALTITUDE_ALL", "xcs::CartesianVector"));
+    sensorList.push_back(Sensor("altitudeV", "ALTITUDE_V", "double"));
+    sensorList.push_back(Sensor("acceleration", "ACCELERATION", "xcs::CartesianVector"));
+    sensorList.push_back(Sensor("gyro", "GYRO_RAW", "xcs::CartesianVector"));
+    sensorList.push_back(Sensor("magneto", "MAGNETO_RAW", "xcs::CartesianVector"));
+    sensorList.push_back(Sensor("internalTimeImu", "TIME_LOC", "double"));
 
-    sensorList.push_back(Sensor("altitude", "ALTITUDE"));
-    sensorList.push_back(Sensor("battery", "BATTERY"));
-    sensorList.push_back(Sensor("video", "VIDEO"));
-    sensorList.push_back(Sensor("internalTimeVideo", "TIME_LOC"));
+    sensorList.push_back(Sensor("altitude", "ALTITUDE", "double"));
+    sensorList.push_back(Sensor("battery", "BATTERY", "double"));
+    sensorList.push_back(Sensor("video", "VIDEO", "xcs::BitmapType"));
+    sensorList.push_back(Sensor("internalTimeVideo", "TIME_LOC", "double"));
 
-    sensorList.push_back(Sensor("alive", "ALIVE"));
+    sensorList.push_back(Sensor("alive", "ALIVE", "int"));
 
     return sensorList;
 }
