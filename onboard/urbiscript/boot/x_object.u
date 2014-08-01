@@ -2,7 +2,7 @@ class Global.SyntacticTypes {
     var STRING = "Ss";
 }|;
 
-class XObject {
+class XObject : Finalizable {
     var inputs_ = [ => ];
     var outputs_ = [ => ];
     
@@ -44,5 +44,9 @@ class XObject {
     
     function getState() {
         return state_;
-    }
+    }|;
+
+    function finalize() {
+        // NOTE: can be overriden in clones
+    }|;
 }|;
