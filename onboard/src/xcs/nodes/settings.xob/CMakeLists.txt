@@ -3,7 +3,7 @@ project(${PROJECT_NAME})
 
 file(GLOB SOURCES *.cpp)
 file(GLOB HEADERS *.hpp)
-file(GLOB XSETTINGS ../../../../xsetting/*.xs)
+file(GLOB XSETTINGS ../../../../xsettings/*.xs)
 
 add_x_object(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${XSETTINGS})
 
