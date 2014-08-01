@@ -624,188 +624,211 @@ var DataFlowGraphView = Backbone.View.extend({
     },
 
     dfgLoad : function(response) {
-        var self = this;
-        
-        self.model.reset();
-        self.model.requestLoad(function(id, responseType, responseData) {
-            //show error
-            if(responseType == ResponseType.Error) {
-                app.Flash.flashError("Error when try to load nodes: " + responseData + ".");
-            }
-            
-            if(responseType == ResponseType.Done) {
-                if(responseData.prototype) {
-                    self.model.setPrototype(responseData.prototype);
-                    
-                    // show result
-                    var successCount = self.model.get("xprototype").length;
-                    app.Flash.flashSuccess("" + successCount + " " + (successCount == 1 ? "node is" : "nodes are") + " loaded.");
-                }
-                if(responseData.prototypePrivate) {
-                    self.model.setPrototypePrivate(responseData.prototypePrivate);
-                }
-                if(responseData.prototypeSpecial) {
-                    self.model.setPrototypeSpecial(responseData.prototypeSpecial);
-                }
-                if(responseData.savedDfg) {
-                    self.model.setSavedDfg(responseData.savedDfg);
-                }
-                if(responseData.ddfg) {
-                    if(self.dfgModels.count() == 0) {
-                        self.model.setDdfg("");
-                        self.model.setDdfg(responseData.ddfg);
-                    }
-                    //debug
-                    else {
-                        console.log("!!! DDFG will not be loaded - DFG contains " + self.dfgModels.count() + " nodes!");
-                    }
-                }
-            }
-            
-            // response
-            if(response) {
-                response();
-            }
-            
-            // set state - must be at the end
-            if(responseType == ResponseType.Done) {
-                self.setDfgState(DfgState.DFG_STATE_NODES_LOADED);
-            }
-        });
-    },
-    
-    dfgCreate : function(response, modelId) {
-        // load dfg 2 json object
-        var jsonDfg = this.dfgGraph.toJSON()
-        
-        if(jsonDfg.cells) {
-            // prepare object 4 dfg info
-            var dfg = {
-                prototype: [],
-                link: [],
-                registerXVar: []
-            };
-            
-            var viewNames = [];
-                
-            for(var i = 0; i < jsonDfg.cells.length; ++i) {
-                var cell = jsonDfg.cells[i];
-                
-                // nodes
-                if(cell.inPorts && cell.outPorts && cell.id && cell.origId) {
-                    // load prototypes info
-                    var prototypeId = cell.origId;
-                    var cloneId = cell.id;
-                    var modelPrototype = this.dfgToolboxNodes[prototypeId];
-                    if(!modelPrototype) {
-                        app.Flash.flashError("Error when try to create nodes: " + prototypeId + " is not loaded!");
-                        return;
-                    }
-                    
-                    if(modelId && modelId != cloneId) {
-                        continue;
-                    }
-                    
-                    // prepate loaded prototypes info 4 sending
-                    dfg.prototype.push({
-                        id: cloneId,
-                        name: modelPrototype.get("name"),
-                    });
-                }
-                
-                // links
-                else if(cell.source && cell.target && cell.source.id && cell.target.id && cell.type && cell.type == "link") {
-                    // load prototypes info
-                    var prototypeId = cell.target.id;
-                    var modelPrototype = this.dfgToolboxNodes[prototypeId];
-                    if(!modelPrototype) {
-                        app.Flash.flashError("Error when try to create nodes: " + prototypeId + " is not loaded!");
-                        return;
-                    }
-                    
-                    //TODO: rename port to xvar/xinputPort/registerXVar
-                    var model = modelPrototype.get("registerXVar").findWhere({"name": cell.target.port});
-                    if(model) {
-                        var targetPort = cell.target.port;
-                        if(model.get("realName") != "") {
-                            targetPort = model.get("realName");
-                        }
-                        
-                        dfg.registerXVar.push({
-                            source: {
-                                id: cell.source.id,
-                                port: cell.source.port,
-                            },
-                            target: {
-                                id: cell.target.id,
-                                port: targetPort,
-                            },
-                        });
-                        
-                        if(cell.target.id == "GUI") {
-                            viewNames.push({
-                                viewName: cell.target.port,
-                                dataId: cell.source.id + "_" + cell.source.port
-                            });
-                        }
-                    }
-                    else {
-                        // prepare links info 4 sending
-                        dfg.link.push({
-                            source: {
-                                id: cell.source.id,
-                                port: cell.source.port,
-                            },
-                            target: {
-                                id: cell.target.id,
-                                port: cell.target.port,
-                            },
-                        });
-                    }
-                }
-            }
-            
-            // send request
+        try {
             var self = this;
-            self.model.requestCreate(dfg, function(id, responseType, responseData) {
+            
+            self.model.reset();
+            self.model.requestLoad(function(id, responseType, responseData) {
                 //show error
                 if(responseType == ResponseType.Error) {
-                    app.Flash.flashError("Error when try to create nodes: " + responseData + ".");
+                    app.Flash.flashError("Error when try to load nodes: " + responseData + ".");
                 }
                 
-                // set nodes states
-                else if(responseData) {
-                    var successCount = 0;
-                    
-                    for(var i = 0; i < responseData.length; ++i) {
-                        var model = self.dfgModels[responseData[i]];
-                        if(model) {
-                            model.setState(NodeState.CREATED);
-                            ++successCount;
-                            
-                            // create widgets
-                            if(model.get("origId") == "GUI") {
-                                for(var j = 0; j < viewNames.length; ++j) {
-                                    app.DataView.addViewByName(viewNames[j].viewName, viewNames[j].dataId);
-                                }
-                            }
+                if(responseType == ResponseType.Done) {
+                    if(responseData.prototype) {
+                        self.model.setPrototype(responseData.prototype);
+                        
+                        // show result
+                        var successCount = self.model.get("xprototype").length;
+                        app.Flash.flashSuccess("" + successCount + " " + (successCount == 1 ? "node is" : "nodes are") + " loaded.");
+                    }
+                    if(responseData.prototypePrivate) {
+                        self.model.setPrototypePrivate(responseData.prototypePrivate);
+                    }
+                    if(responseData.prototypeSpecial) {
+                        self.model.setPrototypeSpecial(responseData.prototypeSpecial);
+                    }
+                    if(responseData.savedDfg) {
+                        self.model.setSavedDfg(responseData.savedDfg);
+                    }
+                    if(responseData.ddfg) {
+                        if(self.dfgModels.count() == 0) {
+                            self.model.setDdfg("");
+                            self.model.setDdfg(responseData.ddfg);
+                        }
+                        //debug
+                        else {
+                            console.log("!!! DDFG will not be loaded - DFG contains " + self.dfgModels.count() + " nodes!");
                         }
                     }
-                    
-                    // show result
-                    app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " created.");
                 }
                 
-                //response action
+                // response
                 if(response) {
                     response();
                 }
                 
                 // set state - must be at the end
-                if(responseType == ResponseType.Done && !modelId) {
-                    self.setDfgState(DfgState.DFG_STATE_CREATED);
+                if(responseType == ResponseType.Done) {
+                    self.setDfgState(DfgState.DFG_STATE_NODES_LOADED);
                 }
             });
+        }
+        catch(ex) {
+            //response action
+            if(response) {
+                response();
+            }
+            
+            // show error
+            app.Flash.flashError("Error when try to load nodes: " + ex + "!");
+        }
+    },
+    
+    dfgCreate : function(response, modelId) {
+        try {
+            // load dfg 2 json object
+            var jsonDfg = this.dfgGraph.toJSON()
+            
+            if(jsonDfg.cells) {
+                // prepare object 4 dfg info
+                var dfg = {
+                    prototype: [],
+                    link: [],
+                    registerXVar: []
+                };
+                
+                var viewNames = [];
+                    
+                for(var i = 0; i < jsonDfg.cells.length; ++i) {
+                    var cell = jsonDfg.cells[i];
+                    
+                    // nodes
+                    if(cell.inPorts && cell.outPorts && cell.id && cell.origId) {
+                        // load prototypes info
+                        var prototypeId = cell.origId;
+                        var cloneId = cell.id;
+                        console.log("----------- prototypeId: " + prototypeId + " | cloneId: " + cloneId);
+                        var modelPrototype = this.dfgToolboxNodes[prototypeId];
+                        if(!modelPrototype) {                            
+                            throw prototypeId + " is not loaded";
+                            return;
+                        }
+                        
+                        if(modelId && modelId != cloneId) {
+                            continue;
+                        }
+                        
+                        // prepate loaded prototypes info 4 sending
+                        dfg.prototype.push({
+                            id: cloneId,
+                            name: modelPrototype.get("name"),
+                        });
+                    }
+                    
+                    // links
+                    else if(cell.source && cell.target && cell.source.id && cell.target.id && cell.type && cell.type == "link") {
+                        // load prototypes info
+                        var prototypeId = cell.target.id;
+                        var modelPrototype = this.dfgToolboxNodes[prototypeId];
+                        if(!modelPrototype) {
+                            throw prototypeId + " is not loaded";
+                            return;
+                        }
+                        
+                        //TODO: rename port to xvar/xinputPort/registerXVar
+                        var model = modelPrototype.get("registerXVar").findWhere({"name": cell.target.port});
+                        if(model) {
+                            var targetPort = cell.target.port;
+                            if(model.get("realName") != "") {
+                                targetPort = model.get("realName");
+                            }
+                            
+                            dfg.registerXVar.push({
+                                source: {
+                                    id: cell.source.id,
+                                    port: cell.source.port,
+                                },
+                                target: {
+                                    id: cell.target.id,
+                                    port: targetPort,
+                                },
+                            });
+                            
+                            if(cell.target.id == "GUI") {
+                                viewNames.push({
+                                    viewName: cell.target.port,
+                                    dataId: cell.source.id + "_" + cell.source.port
+                                });
+                            }
+                        }
+                        else {
+                            // prepare links info 4 sending
+                            dfg.link.push({
+                                source: {
+                                    id: cell.source.id,
+                                    port: cell.source.port,
+                                },
+                                target: {
+                                    id: cell.target.id,
+                                    port: cell.target.port,
+                                },
+                            });
+                        }
+                    }
+                }
+                
+                // send request
+                var self = this;
+                self.model.requestCreate(dfg, function(id, responseType, responseData) {
+                    //show error
+                    if(responseType == ResponseType.Error) {
+                        app.Flash.flashError("Error when try to create nodes: " + responseData + "!");
+                    }
+                    
+                    // set nodes states
+                    else if(responseData) {
+                        var successCount = 0;
+                        
+                        for(var i = 0; i < responseData.length; ++i) {
+                            var model = self.dfgModels[responseData[i]];
+                            if(model) {
+                                model.setState(NodeState.CREATED);
+                                ++successCount;
+                                
+                                // create widgets
+                                if(model.get("origId") == "GUI") {
+                                    for(var j = 0; j < viewNames.length; ++j) {
+                                        app.DataView.addViewByName(viewNames[j].viewName, viewNames[j].dataId);
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // show result
+                        app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " created.");
+                    }
+                    
+                    //response action
+                    if(response) {
+                        response();
+                    }
+                    
+                    // set state - must be at the end
+                    if(responseType == ResponseType.Done && !modelId) {
+                        self.setDfgState(DfgState.DFG_STATE_CREATED);
+                    }
+                });
+            }
+        }
+        catch(ex) {
+            // show error
+            app.Flash.flashError("Error when try to create nodes: " + ex + "!");
+            
+            //response action
+            if(response) {
+                response();
+            }
         }
     },
     
@@ -881,77 +904,88 @@ var DataFlowGraphView = Backbone.View.extend({
     },
     
     dfgDestroy: function(response, modelId, reset, checkDestroyed) {
-        // default value
-        reset = typeof reset !== 'undefined' ? reset : false;
-        checkDestroyed = typeof checkDestroyed !== 'undefined' ? checkDestroyed : true;
-        
-        var self = this;
-        
-        if(reset) {
-            self.model.reset();
-        }
-        
-        self.model.requestReset(modelId, function(id, responseType, responseData) {
-            //show error
-            if(responseType == ResponseType.Error) {
-                app.Flash.flashError("Error when try to destroy nodes: " + responseData + ".");
+        try {
+            // default value
+            reset = typeof reset !== 'undefined' ? reset : false;
+            checkDestroyed = typeof checkDestroyed !== 'undefined' ? checkDestroyed : true;
+            
+            var self = this;
+            
+            if(reset) {
+                self.model.reset();
             }
             
-            else if(responseType == ResponseType.Done) {
-                if(reset) {
-                    if(responseData.prototype) {
-                        self.model.setPrototype(responseData.prototype);
-                        
-                        // show result
-                        var successCount = self.model.get("xprototype").length;
-                        app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " loaded.");
-                    }
-                    if(responseData.prototypePrivate) {
-                        self.model.setPrototypePrivate(responseData.prototypePrivate);
-                    }
-                    if(responseData.prototypeSpecial) {
-                        self.model.setPrototypeSpecial(responseData.prototypeSpecial);
-                    }
-                    if(responseData.savedDfg) {
-                        self.model.setSavedDfg(responseData.savedDfg);
-                    }
-                    if(responseData.ddfg) {
-                        self.model.setDdfg("");
-                        self.model.setDdfg(responseData.ddfg);
-                    }
+            self.model.requestReset(modelId, function(id, responseType, responseData) {
+                //show error
+                if(responseType == ResponseType.Error) {
+                    app.Flash.flashError("Error when try to destroy nodes: " + responseData + ".");
                 }
                 
-                // set nodes states
-                if(responseData.destroyed) {
-                    var successCount = 0;
-                    
-                    for(var i = 0; i < responseData.destroyed.length; ++i) {
-                        var model = self.dfgModels[responseData.destroyed[i]];
-                        if(model) {
-                            model.setState(NodeState.NOTCREATED);
-                            ++successCount;
+                else if(responseType == ResponseType.Done) {
+                    if(reset) {
+                        if(responseData.prototype) {
+                            self.model.setPrototype(responseData.prototype);
+                            
+                            // show result
+                            var successCount = self.model.get("xprototype").length;
+                            app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " loaded.");
+                        }
+                        if(responseData.prototypePrivate) {
+                            self.model.setPrototypePrivate(responseData.prototypePrivate);
+                        }
+                        if(responseData.prototypeSpecial) {
+                            self.model.setPrototypeSpecial(responseData.prototypeSpecial);
+                        }
+                        if(responseData.savedDfg) {
+                            self.model.setSavedDfg(responseData.savedDfg);
+                        }
+                        if(responseData.ddfg) {
+                            self.model.setDdfg("");
+                            self.model.setDdfg(responseData.ddfg);
                         }
                     }
                     
-                    // show result
-                    if(successCount > 0) {
-                        app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " destroyed.");
-                    }
-                    else if(checkDestroyed) {
-                        app.Flash.flashError("Error when try to destroy nodes: nothing to destroy.");
+                    // set nodes states
+                    if(responseData.destroyed) {
+                        var successCount = 0;
+                        
+                        for(var i = 0; i < responseData.destroyed.length; ++i) {
+                            var model = self.dfgModels[responseData.destroyed[i]];
+                            if(model) {
+                                model.setState(NodeState.NOTCREATED);
+                                ++successCount;
+                            }
+                        }
+                        
+                        // show result
+                        if(successCount > 0) {
+                            app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " destroyed.");
+                        }
+                        else if(checkDestroyed) {
+                            app.Flash.flashError("Error when try to destroy nodes: nothing to destroy.");
+                        }
                     }
                 }
-            }
-            
+                
+                if(response) {
+                    response();
+                }
+                
+                // set state - must be at the end
+                if(responseType == ResponseType.Done && !modelId) {
+                    self.setDfgState(DfgState.DFG_STATE_NOTCREATED);
+                }
+            });
+        }
+        catch(ex) {
+            //response action
             if(response) {
                 response();
             }
             
-            // set state - must be at the end
-            if(responseType == ResponseType.Done && !modelId) {
-                self.setDfgState(DfgState.DFG_STATE_NOTCREATED);
-            }
-        });
+            // show error
+            app.Flash.flashError("Error when try to destroy nodes: " + ex + "!");
+        }
     },
     
     dfgReset : function(all, response) {
