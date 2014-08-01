@@ -728,8 +728,16 @@ var DataFlowGraphView = Backbone.View.extend({
                     
                     // links
                     else if(cell.source && cell.target && cell.source.id && cell.target.id && cell.type && cell.type == "link") {
+                        // load clone info
+                        var cloneId = cell.target.id;
+                        var cloneModel = this.dfgModels[cloneId];
+                        if(!cloneModel) {
+                            throw cloneId + " is not loaded";
+                            return;
+                        }
+                        
                         // load prototypes info
-                        var prototypeId = cell.target.id;
+                        var prototypeId = cloneModel.get("origId");
                         var modelPrototype = this.dfgToolboxNodes[prototypeId];
                         if(!modelPrototype) {
                             throw prototypeId + " is not loaded";
