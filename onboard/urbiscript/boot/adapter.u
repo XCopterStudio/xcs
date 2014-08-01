@@ -36,36 +36,28 @@ class FlashSender {
     }|;
 }|;
 
-class SemanticSender {
-    function init(adapter, inputs, UJson, refreshFrequency) {
+class SemanticSender : XObject {
+    var tag = Tag.new();
+    var job;
+    
+    function init(adapter, inputs, UJson, refreshFrequency) {        
         var this._inputs = [ => ];
         var this.adapter = adapter;
         var this.period = 1 / refreshFrequency;
 
+        var this.state_ = 0;
+        this.adapter = adapter;
+        this.period = 1 / refreshFrequency;
+
         for(var input: inputs) {
             registerXVar(input.first);
         };
-    }|;
-    
-    function registerXVar(name, semanticType = nil, syntacticType = nil, uvar = nil) {
-        var that = this;
-        setSlot(name, nil); // slot for outer "writers"
-        _inputs[name] = nil; // last stored value
-        var slot = getSlot(name);
 
-        if(!uvar.isNil) {
-            uvar >> slot;
-        };
-
-        slot.notifyChange(function() {
-            that._inputs[name] = that.getSlotValue(name);
-        });
-    }|;
-
-    function start() {
-        every(this.period) {
+        // run in background
+        this.job = disown({this.tag: {
+            every(this.period) {
                 var dataToSend = [ => ];
-                for(var input: _inputs) {
+                for(var input: this._inputs) {
                     if(!this._inputs[input.first].isNil) {
                         dataToSend[input.first] = this.getSlotValue(input.first);
                     }
@@ -77,8 +69,45 @@ class SemanticSender {
                     ]);
 
                     this.adapter.send(serialized + "\n");                    
-                }
+                };
+            };
+        }});
+        
+        at(this.state_->changed?) {
+            switch(this.state_) {
+                case 0:
+                    this.tag.freeze();
+                case 1:
+                    this.tag.unfreeze();
+                case 2:
+                    this.tag.freeze();
+            };
         };
+
+        state_ = 0;
+    }|;
+    
+    function registerXVar(name, semanticType = nil, syntacticType = nil, uvar = nil) {
+        try {
+            var that = this;
+            setSlot(name, nil); // slot for outer "writers"
+            this._inputs[name] = nil; // last stored value
+            var slot = getSlot(name);
+
+            if(!uvar.isNil) {
+                uvar >> slot;
+            };
+
+            slot.notifyChange(function() {
+                that._inputs[name] = that.getSlotValue(name);
+            });
+        }
+        catch(var ex) { echo(ex.asString()); throw ex; }
+    }|;
+
+    function finalize() {
+        this.tag.stop();
+        this.job.terminate();
     }|;
 }|;
 
