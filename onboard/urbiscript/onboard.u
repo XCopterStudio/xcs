@@ -271,21 +271,22 @@ class Onboard {
 
                 errorMessage = sourceId + "." + sourcePort + " register to " + targetId + "." + targetPort;
 
-                if(this.dfgLobby_.hasLocalSlot(sourceId) && this.dfgLobby_.hasLocalSlot(targetId)) {
-                    var source = this.dfgLobby_.getLocalSlot(sourceId).value();
-                    var target = this.dfgLobby_.getLocalSlot(targetId).value();
+                if(this.dfgLobby_.hasSlot(sourceId) && this.dfgLobby_.hasSlot(targetId)) {
+                    var source = this.dfgLobby_.getSlot(sourceId).value();
+                    var target = this.dfgLobby_.getSlot(targetId).value();
 
-                    if(source.hasLocalSlot(sourcePort) && target.hasLocalSlot(targetPort)) {
+                    if(source.hasSlot(sourcePort) && target.hasSlot(targetPort)) {         
                         // get source/target slot names
-                        var sourceSlot = source.getLocalSlot(sourcePort); 
-                        var targetSlot = target.getLocalSlot(targetPort);
+                        var sourceSlot = source.getSlot(sourcePort); 
+                        //var targetSlot = target.getSlot(targetPort);
 
                         // get data types
                         var synT = source.getSynType(sourcePort);
                         var semT = source.getSemType(sourcePort);
 
                         // execute register xvar method
-                        targetSlot.value(sourcePort, semT, synT, sourceSlot);
+                        //targetSlot.value(sourcePort, semT, synT, sourceSlot);
+                        callMethod(target, targetPort, sourcePort, semT, synT, sourceSlot);
                     };
                 };
 
@@ -310,6 +311,20 @@ class Onboard {
         }; 
 
         return this.dfgLobby_.localSlotNames();
+    };
+
+    //at least need 2 args: target, method name, args
+    function callMethod {
+        call.target = call.evalArgAt(0);
+        call.message = call.evalArgAt(1);
+    
+        var args = [];
+        for(var i = 2; i < call.argsCount; ++i) {
+            args << call.args[i];
+        };
+        call.args = args;
+
+        call.target.callMessage(call);
     };
 
     // start dfg communication and send info about loaded xobjects and default dfg
@@ -412,7 +427,7 @@ class Onboard {
 
                 // prepare data for yet not loaded xobjects
                 for(var kvpXO: this.xobjects4load_) {
-                    var pData = getNodeData_(kvpXO.first().asString(), prototypePrivate);
+                    var pData = getNodeData_(kvpXO.first().asString(), nodeType);
                     if(!pData.empty()) {
                         prototypeData << pData;
                     };
@@ -436,7 +451,7 @@ class Onboard {
             // determine if data are already cached
             if(l.second().size() == 0) {
                 // laod data from object
-                pData = getNodeData_(l.first().asString());
+                pData = getNodeData_(l.first().asString(), nodeType);
                     
                 // cache loaded data
                 nodes[l.first()] = pData;
@@ -452,7 +467,7 @@ class Onboard {
         return prototypeData;
     };
 
-    function getNodeData_(key, prototypePrivate = false) {
+    function getNodeData_(key, nodeType = NODE_TYPE.PUBLIC) {
         var pData = [ => ];
 
         try {
@@ -470,7 +485,7 @@ class Onboard {
                 }
                 catch(var ex) {
                     // dont load public nodes, which can not be created
-                    if(prototypePrivate) {
+                    if(nodeType == NODE_TYPE.PRIVATE) {
                         xo = System.eval(this.xobjectInfo_[key].name);
                     }
                     else {
@@ -520,12 +535,12 @@ class Onboard {
 
                 // dont send info about private/not private objects
                 var end = this.privateObjects_.has(key);
-                if(prototypePrivate) {
+                if(nodeType == NODE_TYPE.PRIVATE) {
                     end != end;
                 };
 
                 if(end) {
-                    if(prototypePrivate) {
+                    if(nodeType == NODE_TYPE.PRIVATE) {
                         echo("... " + key + " is NOT private object - doesnt send info.");
                     }
                     else {
@@ -875,7 +890,8 @@ class Onboard {
 
         // bootstrap urbiscripts
         var uscriptList = [
-            "boot/adapter.u"
+            "boot/x_object.u",
+            "boot/adapter.u",
         ];
 
         loadScripts_(uscriptList);
