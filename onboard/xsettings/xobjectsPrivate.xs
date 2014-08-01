@@ -11,7 +11,7 @@ xsettings
     name "XSettings"
     init 
     {
-        "XSettings" "\"./xobjects.xs\", false"    ;TODO: change file name
+        "XSettings" "\"./xsettings/xobjects.xs\", false"    ;TODO: change file name
     }
 }
 ;xlinedrawer
