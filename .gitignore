@@ -6,9 +6,6 @@
 # sheel scripts
 *.bat
 
-# urbiscripts
-*.u
-
 # text files
 *.txt
 

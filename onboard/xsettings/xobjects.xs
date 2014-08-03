@@ -1,60 +1,43 @@
-xdatalogger
-{
-    name "XDatalogger"
-    init 
-    {
-        "XDatalogger" "\"./logs/sample3-out.txt\""   ;TODO: change file name - or file name like xinputport
-        ;"XDatalogger" "\"logs/\" + Date.now().asString().replace(\" \", \"_\") + \".txt\""
-    }
+XDatalogger { ; this is configuration name
+    ;prototype XDatalogger                  ; (default is configuration name)
+    ;file xdatalogger.u                     ; (default lowecased name of the prototype)
+    args "\"experiments/sample3-out.txt\""  ; these are init's arguments (default none)
 }
-xdataplayer
-{
-    name "XDataplayer"
-    init 
-    {
-        "XDataplayer" "\"./logs/sample3.txt\""   ;TODO: change file name - or file name like xinputport
-    }
+
+XDataplayer {
+    args "\"experiments/sample3.txt\""   ;TODO: change file name - or file name like xinputport
 }
-xonboard
-{
-    name "XOnboard"
-    init 
-    {
-        "XOnboard" ""
-    }
+
+XOnboard { }    ; TODO remove
+
+XciDodo {
+    prototype XXci
+    args "\"xci_dodo\""
 }
-xxci
-{
-    name "XXci"
-    init
-    {
-        "Xci Dodo" "\"xci_dodo\""
-        "Xci Parrot" "\"xci_parrot\""
-        "Xci Vrep" "\"xci_vrep\""
-    }
+
+XciParrot {
+    prototype XXci
+    args "\"xci_parrot\""
 }
-xcontrol
-{
-    name "XControl"
-    init 
-    {
-	;"XControl" ""
-        "XControl" "\"./xsettings/xcontrol.xs\""
-    }
+
+XciVrep {
+    prototype XXci
+    args "\"xci_vrep\""
 }
-xhermit_movement
-{
-    name "XHermitMovement"
-    init 
-    {
-        "XHermitMovement" ""
-    }
+
+XControl {
+    args "\"xsettings/xcontrol.xs\""
 }
-xlocalization
-{
-    name "XLocalization"
-    init 
-    {
-        "XLocalization" "\"./xsettings/xlocalization.xs\""
-    }
+
+XHermitMovement {
+    file xhermit_movement
+}
+
+XLocalization {
+    args "\"xsettings/xlocalization.xs\""
+}
+
+Executor {
+    file nodes/executor.u     ; TODO to what is it relative
+    args "this"               ; this is the current lobby
 }

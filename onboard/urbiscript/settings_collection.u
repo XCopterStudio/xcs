@@ -1,106 +1,42 @@
-class Global.XObjectSettings {
-    var filename;
-    var name;
-    var initParam;
 
-    function init(fn, n, ip) {
-        this.filename = fn;
-        this.name = n;
-        this.initParam = ip;
-    };
-};
-
+// Behaves like dictionary: configuration name => parameters
 class SettingsCollection {
-    var xobjectsSettings_ = [];
-
+    var collection_ = [ => ];
+    
     function init(settingPaths) {
-        load(settingPaths);
-    };
-
-    // read config 4 all xobjects
-    function load(settingPaths) {
-        // empty old settings
-        xobjectsSettings_.clear();
-
-        // read new settings
         for(var path: settingPaths) {
-            //echo("read settings file: " + path.asString());
-            xobjectsSettings_ << XSettings.new(path.asString(), false);
-        };
-    };
-
-    function containsPath(path) {
-        var key = path.basename().split(".").front();
-        return contains(key);
-    };
-
-    function contains(key) {
-        for(var setting: xobjectsSettings_) {
-            if(setting.contains(key)) {
-                return true;
-            };
-        };      
-        return false;
-    };
-
-    function getOrDefault(key, defaultValue) {
-        for(var setting: xobjectsSettings_) {
-            if(setting.contains(key)) {
-                return setting.get(key);
-            };
-        };
-
-        return defaultValue;
-    };
-
-    function getMap(key = "") {
-        var map = [ => ];
-        for(var setting: xobjectsSettings_) {
-            var m = setting.getMap(key);
-            if(!m.isNil) {
-                for(var child: m) {
-                    map[child.first] = child.second;
+            var settings = XSettings.new(path.asString(), false);
+            for(var key: settings.getKeys("")) {
+                if(key in collection_) {
+                    XCS_LOG_WARN("Ingored configuration name '" + key + "'.");
+                    continue;
                 };
+                collection_[key] = processConfiguration_(settings, key);
             };
         };
-        return map;
     };
-
-    function getXObjectSettingsFromPath(path) {
-        var key = path.basename().split(".").front();
-        return getXObjectSettings(key);
+    
+    function getCollection() {
+        /* return */ collection_;
     };
-
-    function getXObjectSettings(key) {
-        var map = [ => ];
-        for(var setting: this.xobjectsSettings_) {
-            if(setting.contains(key)) {
-                try {
-                    var name = setting.get(key + ".name");
-                    var initParam = setting.get(key + ".init");
-                    var hasInit = false;
-
-                    if(initParam.isNil || initParam == "") {
-                        var mInit = setting.getMap(key + ".init");
-                        if(!mInit.isNil) {
-                            for(var i: mInit) {
-                                hasInit = true;
-                                map[i.first] = Global.XObjectSettings.new(key, name, i.second);
-                            };
-                        };
-                    };
-
-                    if(!hasInit) {
-                        map[key] = Global.XObjectSettings.new(key, name, initParam);
-                    };
-
-                }
-                catch(var ex) {
-                    echo("............ERROR - getXObjectSettings: " + ex.asString());
-                };
-            };
+             
+    function processConfiguration_(settings, configurationName) {
+        var result = settings.getMap(configurationName);
+        
+        if(!("prototype" in result)) {
+            result["prototype"] = configurationName;
         };
-
-        return map;
+        
+        if(!("file" in result)) {
+            result["file"] = result["prototype"].toLower();
+        };
+        
+        if(!("args" in result)) {
+            result["args"] = "";
+        };
+        
+        /* return */ result;
     };
+
+
 } |;

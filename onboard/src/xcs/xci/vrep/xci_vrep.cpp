@@ -97,12 +97,12 @@ std::string XciVrep::name() {
 SensorList XciVrep::sensorList() {
     SensorList sensorList;
 
-    sensorList.push_back(Sensor("position", "POSITION_ABS"));
-    sensorList.push_back(Sensor("velocity", "VELOCITY_ABS"));
-    sensorList.push_back(Sensor("rotation", "ROTATION"));
+    sensorList.push_back(Sensor("position", "POSITION_ABS", "xcs::CartesianVector"));
+    sensorList.push_back(Sensor("velocity", "VELOCITY_ABS", "xcs::CartesianVector"));
+    sensorList.push_back(Sensor("rotation", "ROTATION", "xcs::EulerianVector"));
 
-    sensorList.push_back(Sensor("video_front", "VIDEO"));
-    sensorList.push_back(Sensor("video_bottom", "VIDEO"));
+    sensorList.push_back(Sensor("video_front", "CAMERA", "xcs::BitmapType"));
+    sensorList.push_back(Sensor("video_bottom", "CAMERA", "xcs::BitmapType"));
 
     return sensorList;
 }

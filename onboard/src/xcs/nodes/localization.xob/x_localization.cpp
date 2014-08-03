@@ -154,7 +154,7 @@ XLocalization::XLocalization(const std::string &name) :
   measuredAnglesRotation("ROTATION"),
   measuredAltitude("ALTITUDE"),
   timeImu("TIME_LOC"),
-  video("FRONT_CAMERA"),
+  video("CAMERA"),
   videoTime("TIME_LOC"),
   flyControl("FLY_CONTROL"),
   flyControlSendTime("TIME"),

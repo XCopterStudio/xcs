@@ -2,7 +2,7 @@
 #define X_SETTINGS_HPP
 
 #include <string>
-#include <list>
+#include <vector>
 #include <boost/unordered_map.hpp>
 #include <xcs/settings.hpp>
 #include <xcs/nodes/xobject/x_object.hpp>
@@ -19,11 +19,11 @@ public:
     std::string get(const std::string& key);
     std::string getOrDefault(const std::string& key, const std::string& defaultValue);
     boost::unordered_map<std::string, std::string> getMap(const std::string& key) const;
+    std::vector<std::string> getKeys(const std::string& key) const;
     void set(const std::string& key, const std::string& value);
     void setAndSave(const std::string& key, const std::string& value);
     bool save();
     bool contains(const std::string& key);
-    std::list<std::string> getSettingsFiles(std::string foldername, const std::string& key);
 private:
     xcs::Settings settings_;
 };

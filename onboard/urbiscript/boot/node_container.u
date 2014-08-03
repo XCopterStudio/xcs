@@ -1,0 +1,182 @@
+class NodeContainer {
+    
+    enum SourceFiles {
+        CPP,
+        URBISCRIPT,
+        NOTFOUND
+    };
+    
+    class XObjectStates {
+        var STATE_CREATED = 0;
+        var STATE_STARTED = 1;
+        var STATE_STOPPED = 2;                
+    };
+    
+    var settingsCollection_; // settings aggregator, configuration name => init info
+    var loadedXObjects_ = [ => ]; // prototypeName => SourceFiles)
+    var prototypeInfo_ = []; // item is a dictionary with info
+    var createdNodes_ = []; // item is a node name
+    
+    var lobby_;
+
+    function init(settingsCollection) {
+        settingsCollection_ = settingsCollection.getCollection(); // NOTE: workaroud since SettingsCollection cannot inherit Dictionary
+        checkAndLoad_();
+        fillPrototypeInfo_();
+        lobby_ = Lobby.create();
+    };
+    
+    function getPrototypesInfo() {
+        /* return */ prototypeInfo_;
+    };
+    
+    function createNode(configurationName, cloneName) {
+        if(cloneName in createdNodes_) {
+            return false;
+        };
+        var configuration = settingsCollection_[configurationName];
+        var createCode = configuration["prototype"] + ".new(" + configuration["args"] + ")";
+        var node = System.eval(createCode, lobby_);
+        lobby_.setSlot(cloneName, node);
+        createdNodes_ << cloneName;
+        /* return */ true;
+    };
+    
+    function destroyNodes(cloneName = nil) {
+        var changed = [];
+        for(var cloneNameIt: getNodeNames()) {
+            if(!cloneName || cloneNameIt == cloneName) {
+                lobby_.getLocalSlot(cloneNameIt).value = nil;
+                lobby_.removeLocalSlot(cloneNameIt);
+                createdNodes_.remove(cloneNameIt);
+                changed << cloneNameIt;
+            };
+        };
+        /* return */ changed;
+    };
+    
+    function getNode(cloneName) {
+        /* return */ lobby_.getSlot(cloneName).value();
+    };
+    
+    function getNodeNames() {
+        /* return */ createdNodes_;
+    };
+    
+    function connectNodes(srcName, srcPort, dstName, dstPort) {
+        var srcNode = lobby_.getLocalSlot(srcName).value();
+        var dstNode = lobby_.getLocalSlot(dstName).value();
+        
+        // TODO here should be checked function connect
+        srcNode.getLocalSlot(srcPort) >>  dstNode.getLocalSlot(targetPort);
+    };
+    
+    function startNodes(cloneName = nil) {
+        var changed = [];
+        for(var cloneNameIt: getNodeNames()) {
+            var node = lobby_.getLocalSlot(cloneNameIt).value();
+            if(node.getState() != XObjectStates.STATE_STARTED) {
+                if(!cloneName || cloneNameIt == cloneName) {
+                    node.start();
+                    changed << cloneNameIt;
+                };
+            };
+        };
+        /* return */ changed;
+    };
+    
+    function stopNodes(cloneName = nil) {
+        var changed = [];
+        for(var cloneNameIt: getNodeNames()) {
+            var node = lobby_.getLocalSlot(cloneNameIt).value();
+            if(node.getState() != XObjectStates.STATE_STOPPED) {
+                if(!cloneName || cloneNameIt == cloneName) {
+                    node.stop();
+                    changed << cloneNameIt;
+                };
+            };
+        };
+        /* return */ changed;
+    };
+    
+    function checkAndLoad_() {
+        // check definitions
+        var xObjectFiles = [ => ];
+        for(var kvp: settingsCollection_) {
+            var configurationName = kvp.first;
+            var configuration = kvp.second;
+            
+            if(configuration["prototype"] in xObjectFiles && xObjectFiles[configuration["prototype"]] != configuration["file"]) {
+                XCS_LOG_ERROR("Ambiguous file for prototype '" + configuration["prototype"] + "'");
+            };
+            xObjectFiles[configuration["prototype"]] = configuration["file"];
+        };
+        
+        // load resources
+        load("nodes/xobject.u");
+        for(var kvp: xObjectFiles) {
+            try {
+                XCS_LOG_INFO("Loading CPP " + kvp.second);
+                System.loadModule(kvp.second);
+                loadedXObjects_[kvp.first] = SourceFiles.CPP;
+            } catch(var e) {
+                try {
+                    XCS_LOG_INFO("Loading URBISCRIPT " + kvp.second);
+                    load(kvp.second); // NOTE: we're loading it in the context of this (the container)
+                    loadedXObjects_[kvp.first] = SourceFiles.URBISCRIPT;
+                } catch(var e) {
+                     XCS_LOG_ERROR("Cannot load '" + kvp.second + "'.\nCause:\n" + e + "\n");
+                };
+            };
+        };        
+    };
+    
+    function fillPrototypeInfo_() {
+        for(var kvp: settingsCollection_) {
+            var configurationName = kvp.first;
+            var configuration = kvp.second;
+            
+            var createCode = configuration["prototype"] + ".new(" + configuration["args"] + ")";
+            var dummyNode = System.eval(createCode, this); // TODO think about this
+                
+            // prepare data about xvars
+            var varList = [];
+            for(var xv: dummyNode.getXVars()) {
+                var pVar = [ => ];
+                pVar["name"] = xv;
+                pVar["synType"] = dummyNode.getSynType(xv);
+                pVar["semType"] = dummyNode.getSemType(xv);
+                varList << pVar;
+            };
+
+            // prepare data about input ports
+            var portList = [];
+            for(var xip: dummyNode.getXInputPorts()) {
+                var pPort = [ => ];
+                pPort["name"] = xip;
+                pPort["synType"] = dummyNode.getSynType(xip);
+                pPort["semType"] = dummyNode.getSemType(xip);
+                portList << pPort;
+            };
+            
+            
+            // get info and prepare data about registerXVar functions
+            var registerXVars = [];
+            if(dummyNode.hasSlot("registerXVar")) {
+                registerXVars << "registerXVar";
+            };
+            
+            prototypeInfo_ << [
+                "name" => configurationName,
+                "var" => varList,
+                "inputPort" => portList,
+                "registerXVar" => registerXVars,
+            ];
+            
+            // force GC
+            dummyNode = nil;
+        };
+    };
+    
+};
+
