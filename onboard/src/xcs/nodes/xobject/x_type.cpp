@@ -49,7 +49,7 @@ std::string XType::demangle(const char* name) {
 // see: http://stackoverflow.com/questions/13777681/demangling-in-msvc
 
 // does nothing if not g++
-std::string demangle(const char* name) {
+std::string XType::demangle(const char* name) {
     return name;
 }
 
