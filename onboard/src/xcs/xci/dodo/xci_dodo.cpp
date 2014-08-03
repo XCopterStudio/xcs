@@ -92,7 +92,7 @@ std::string XciDodo::name() {
 SensorList XciDodo::sensorList() {
     SensorList result;
     result.push_back(Sensor("alive", "ALIVE", "int"));
-    result.push_back(Sensor("video", "CAMERA_FRONT", "xcs::BitmapType"));
+    result.push_back(Sensor("video", "CAMERA", "xcs::BitmapType"));
     result.push_back(Sensor("altitude", "ALTITUDE", "double"));
     result.push_back(Sensor("rotation", "ROTATION", "xcs::EulerianVector"));
     result.push_back(Sensor("velocity", "VELOCITY_LOC", "xcs::CartesianVector"));

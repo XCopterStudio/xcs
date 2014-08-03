@@ -171,7 +171,7 @@ SensorList XciParrot::sensorList() {
 
     sensorList.push_back(Sensor("altitude", "ALTITUDE", "double"));
     sensorList.push_back(Sensor("battery", "BATTERY", "double"));
-    sensorList.push_back(Sensor("video", "VIDEO", "xcs::BitmapType"));
+    sensorList.push_back(Sensor("video", "CAMERA", "xcs::BitmapType"));
     sensorList.push_back(Sensor("internalTimeVideo", "TIME_LOC", "double"));
 
     sensorList.push_back(Sensor("alive", "ALIVE", "int"));

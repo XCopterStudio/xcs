@@ -1,5 +1,6 @@
 node_modules
 .project
+nbproject
 
 # Qt Creator project files
 xcs-server.config

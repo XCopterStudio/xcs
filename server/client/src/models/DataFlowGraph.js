@@ -65,6 +65,18 @@ var DataFlowGraphNode = Backbone.Model.extend({
 var ResponseType = ENUM("Done", "Error");
 
 var DataFlowGraph = Backbone.Model.extend({    
+    /*
+     * destination type => list of source types
+     */
+    syntacticCompatibility_: {
+        "urbi::UImage": ['xcs::BitmapType']
+    },
+    /*
+     * destination type => list of source types
+     */
+    semanticCompatibility_: {
+        
+    },
     requestId_ : 1,
     
     maxRequestId_ : 1000,
@@ -93,6 +105,16 @@ var DataFlowGraph = Backbone.Model.extend({
     },
     
     initialize : function() { 
+    },
+
+    isConnectable: function (srcSyn, srcSem, dstSyn, dstSem) {
+        var sameSyn = (dstSyn === '*') || (srcSyn === dstSyn);
+        var sameSem = (dstSem === '*') || (srcSem === dstSem);
+        
+        sameSyn = sameSyn || (this.syntacticCompatibility_[dstSyn] !== undefined && this.syntacticCompatibility_[dstSyn].indexOf(srcSyn) !== -1);
+        sameSem = sameSem || (this.semanticCompatibility_[dstSem] !== undefined && this.semanticCompatibility_[dstSem].indexOf(srcSem) !== -1);
+        
+        return sameSyn && sameSem;
     },
 
     setData: function(data) {
