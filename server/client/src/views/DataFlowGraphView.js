@@ -123,6 +123,8 @@ var DataFlowGraphView = Backbone.View.extend({
         this.listenTo(this.dfgGraph, 'change:target', this.setLink);
         this.listenTo(this.dfgGraph, 'change:source', this.setLink);
 
+        this.listenTo(this.dfgGraph, 'remove', this.removeNode);
+        
         //debug
 //        var flowGraphConsole = $('#flow-graph-console');
 //        flowGraphConsole.append('<textarea id="flow-graph-txt" rows="15" cols="150"></textarea>');
@@ -168,8 +170,25 @@ var DataFlowGraphView = Backbone.View.extend({
             },
             snapLinks: { radius: 45 },
         });
+    },
+    
+    removeNode : function(model) {
+        // create widgets
+        var prototypeId = model.get("origId");
+        var cloneId = model.get("id");
         
-        //this.model.requestLoad();
+        if(prototypeId && cloneId) {
+            switch(prototypeId) {
+                case "GUI":
+                    // for each registerXVar call remove on DataView
+                    var viewIds = model.viewIds;
+                    for(var k = 0; k < viewIds.length; ++k) {
+                        var viewId = viewIds[k];
+                        app.DataView.removeView(viewId);
+                    }
+                    break;
+            }
+        }
     },
     
     trimId : function(id) {
@@ -708,7 +727,7 @@ var DataFlowGraphView = Backbone.View.extend({
                         // load prototypes info
                         var prototypeId = cell.origId;
                         var cloneId = cell.id;
-                        console.log("----------- prototypeId: " + prototypeId + " | cloneId: " + cloneId);
+                        
                         var modelPrototype = this.dfgToolboxNodes[prototypeId];
                         if(!modelPrototype) {                            
                             throw prototypeId + " is not loaded";
@@ -763,10 +782,11 @@ var DataFlowGraphView = Backbone.View.extend({
                                 },
                             });
                             
-                            if(cell.target.id == "GUI") {
+                            if(cloneModel.get("origId") == "GUI") {
                                 viewNames.push({
                                     viewName: cell.target.port,
-                                    dataId: cell.source.id + "_" + cell.source.port
+                                    dataId: cell.source.id + "_" + cell.source.port,
+                                    model: cloneModel
                                 });
                             }
                         }
@@ -807,7 +827,7 @@ var DataFlowGraphView = Backbone.View.extend({
                                 // create widgets
                                 if(model.get("origId") == "GUI") {
                                     for(var j = 0; j < viewNames.length; ++j) {
-                                        app.DataView.addViewByName(viewNames[j].viewName, viewNames[j].dataId);
+                                        viewNames[j].model.viewIds.push(app.DataView.addViewByName(viewNames[j].viewName, viewNames[j].dataId));
                                     }
                                 }
                             }
@@ -916,7 +936,7 @@ var DataFlowGraphView = Backbone.View.extend({
             // default value
             reset = typeof reset !== 'undefined' ? reset : false;
             checkDestroyed = typeof checkDestroyed !== 'undefined' ? checkDestroyed : true;
-            
+        
             var self = this;
             
             if(reset) {
@@ -962,6 +982,9 @@ var DataFlowGraphView = Backbone.View.extend({
                             if(model) {
                                 model.setState(NodeState.NOTCREATED);
                                 ++successCount;
+                                
+                                // create widgets
+                                self.removeNode(model);
                             }
                         }
                         

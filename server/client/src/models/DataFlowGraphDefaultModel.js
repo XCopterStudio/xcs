@@ -6,6 +6,7 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     inPortsType: {},
     outPortsType: {},
     registerXVars: [],
+    viewIds: [],
     
     markup: '<g class="rotatable"><g class="scalable"><rect></rect></g><text class="label"></text><g class="inPorts"></g><g class="outPorts"></g></g>',
     portMarkup: '<g class="port<%= id %>"><circle class="port"></circle><text></text></g>',
@@ -164,13 +165,10 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
         // add registerXVar class to input port
         this.attr('circle[port="' + portId + '"]/class', "registerXVar");
 
-        // set special style 
-        console.log("................set css for port: " + portId);
+        // set special style
         var css = this.attr('.inPorts circle.registerXVar');
         for(var key in css) {
-            console.log('................set css:"' + 'circle[port="' + portId + '"]/' + key + '" = "' + css[key] +'" for port: ' + portId);
             this.attr('circle[port="' + portId + '"]/' + key, css[key]);
-            //this.attr('circle.registerXVar/' + key, css[key]);
         }
     },
     

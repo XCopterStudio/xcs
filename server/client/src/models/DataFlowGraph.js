@@ -5,7 +5,7 @@ var DataFlowGraphNodeIO = Backbone.Model.extend({
         "name" : "",
         "synType" : "",
         "semType" : "",
-        "realName" : ""
+        "realName" : "",
     }
 });
 
@@ -100,7 +100,8 @@ var DataFlowGraph = Backbone.Model.extend({
         //console.log("setData: " + JSON.stringify(data));
 
         if(data.response) {         
-            console.log("RESPONSE: " + JSON.stringify(data.response));
+            //debug
+            //console.log("RESPONSE: " + JSON.stringify(data.response));
             
             if(data.response.id && data.response.respondType && (data.response.respondData || data.response.respondData == "") && data.response.requestId) {
                 var id = data.response.id 
@@ -179,9 +180,15 @@ var DataFlowGraph = Backbone.Model.extend({
                             for(var i = 0; i < ports.length; ++i) {
                                 p.registerXVar.push({
                                     name : ports[i],
-                                    realName : registerXVar
+                                    realName : registerXVar,
                                 });
                             }
+                           
+                            // default port
+                            p.registerXVar.push({
+                                name : "default",
+                                realName : registerXVar
+                            });
                         }
                         break;
                 }
@@ -221,9 +228,9 @@ var DataFlowGraph = Backbone.Model.extend({
                         var oldXVar = prot.get("xvar").findWhere({"name": p.var[i].name});
                         if(!oldXVar) {
                             prot.get("xvar").add(new DataFlowGraphNodeIO({
-                                name : p.var[i].name,
-                                synType : p.var[i].synType,
-                                semType : p.var[i].semType
+                                name: p.var[i].name,
+                                synType: p.var[i].synType,
+                                semType: p.var[i].semType
                             }));
                         }
                     }
@@ -235,9 +242,9 @@ var DataFlowGraph = Backbone.Model.extend({
                         var oldXIPort = prot.get("xinputPort").findWhere({"name": p.inputPort[i].name});
                         if(!oldXIPort) {
                             prot.get("xinputPort").add(new DataFlowGraphNodeIO({
-                                name : p.inputPort[i].name,
-                                synType : p.inputPort[i].synType,
-                                semType : p.inputPort[i].semType
+                                name: p.inputPort[i].name,
+                                synType: p.inputPort[i].synType,
+                                semType: p.inputPort[i].semType
                             }));
                         }
                     }
@@ -250,17 +257,17 @@ var DataFlowGraph = Backbone.Model.extend({
                         if(!oldRegister) {
                             if(p.registerXVar[i].name && p.registerXVar[i].realName) {
                                 prot.get("registerXVar").add(new DataFlowGraphNodeIO({
-                                    name : p.registerXVar[i].name,
-                                    synType : "",
-                                    semType : "",
-                                    realName : p.registerXVar[i].realName
+                                    name: p.registerXVar[i].name,
+                                    synType: "",
+                                    semType: "",
+                                    realName: p.registerXVar[i].realName,
                                 }));
                             }
                             else {
                                 prot.get("registerXVar").add(new DataFlowGraphNodeIO({
-                                    name : p.registerXVar[i],
-                                    synType : "",
-                                    semType : ""
+                                    name: p.registerXVar[i],
+                                    synType: "",
+                                    semType: ""
                                 }));
                             }
                         }
@@ -376,7 +383,8 @@ var DataFlowGraph = Backbone.Model.extend({
         
         // try send request
         try {
-            console.log("REQUEST: " + JSON.stringify(requestData));
+            //debug
+            //console.log("REQUEST: " + JSON.stringify(requestData));
             
             gSocket.emit('resend', JSON.stringify(requestData));
         }
