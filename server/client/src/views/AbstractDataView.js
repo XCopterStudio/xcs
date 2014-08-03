@@ -1,3 +1,5 @@
+var abstractDataViewFreeId = -1;
+
 var AbstractDataView = Backbone.View.extend({
 
     id: 'data-from-onboard',
@@ -13,6 +15,8 @@ var AbstractDataView = Backbone.View.extend({
     attrs: {
         dataId: '',
     },
+    
+    widgetId: -1,
     
     initialize: function(dataId, attrs) {
         this.model = app.Onboard;
@@ -31,11 +35,19 @@ var AbstractDataView = Backbone.View.extend({
             }
         }
         
+        //set unique widget id 
+        this.widgetId = ++abstractDataViewFreeId;
+        
         if(this.markup != '' && this.sizeX > 0 && this.sizeY > 0) {
             var gridster = $(".gridster > ul").gridster().data('gridster');
             var compiledTemplate = _.template(this.template);
-            gridster.add_widget(compiledTemplate(this.attrs), this.sizeX, this.siezY);
+            gridster.add_widget('<div id="widget' + this.widgetId + '">' + compiledTemplate(this.attrs) + '</div>', this.sizeX, this.siezY);
         }
+    },
+    
+    remove: function() {
+        var gridster = $(".gridster > ul").gridster().data('gridster');
+        gridster.remove_widget($("#widget" + this.widgetId));
     },
 
     onDataChange: function(model) {

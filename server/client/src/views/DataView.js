@@ -18,6 +18,8 @@ var DataView = Backbone.View.extend({
         }
     },
     
+    createdViews: {},
+    
     initialize: function() {
         //set gridster param
         $(".gridster > ul").gridster({
@@ -41,23 +43,36 @@ var DataView = Backbone.View.extend({
     addViewByName: function(viewName, dataId, attrs) {
         for(var view in this.views) {
             if (this.views.hasOwnProperty(view) && this.views[view].name && this.views[view].ctor && this.views[view].name == viewName) {
-                this.views[view].ctor(dataId, attrs);
-                return true;
+                var createdView = this.views[view].ctor(dataId, attrs);
+                if(createdView) {
+                    this.createdViews[createdView.widgetId] = createdView;
+                    return createdView.widgetId;
+                }
             }
         }
         
-        return false;
+        return -1;
     },
     
     addView: function(viewId, dataId, attrs) {
         console.log("ADD VIEW: " + viewId);
         for(var view in this.views) {
             if (this.views.hasOwnProperty(view) && this.views[view].name && this.views[view].ctor && view == viewId) {
-                this.views[view].ctor(dataId, attrs);
-                return true;
+                var createdView = this.views[view].ctor(dataId, attrs);
+                if(createdView) {
+                    this.createdViews[createdView.widgetId] = createdView;
+                    return createdView.widgetId;
+                }
             }
         }
         
-        return false;
+        return -1;
+    },
+    
+    removeView: function(widgetId) {
+        if(this.createdViews[widgetId]) {
+            this.createdViews[widgetId].remove();
+            delete this.createdViews[widgetId];
+        }
     },
 });
