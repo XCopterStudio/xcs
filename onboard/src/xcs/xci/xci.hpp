@@ -34,9 +34,14 @@ class DataReceiver;
 struct Sensor {
     std::string name; /*!< Unique name in Xci for sensor. */
     std::string semanticType; /*!< Type of sensor (ACCELEROMETR, CAMERA etc.). */
+    std::string syntacticType; /*! Fully qualified name of type of data (e.g. std::string) */
     InformationMap additionalInformation; /*!< Additional information about sensor in plain text. Example: "Resolution:1280x720,FPS:20" */
 
-    Sensor(std::string name = "", std::string semanticType = "", InformationMap additionalInformation = InformationMap()) : name(name), semanticType(semanticType), additionalInformation(additionalInformation) {
+    Sensor(const std::string& name, const std::string& semanticType, const std::string& syntacticType, InformationMap additionalInformation = InformationMap()) :
+      name(name),
+      semanticType(semanticType),
+      syntacticType(syntacticType),
+      additionalInformation(additionalInformation) {
     };
 };
 

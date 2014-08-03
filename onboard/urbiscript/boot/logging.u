@@ -1,0 +1,21 @@
+class Logging {
+    function XCS_LOG_FATAL(message) {
+        cerr << "Fatal error!";
+        cerr << message;
+        System.shutdown();
+    };
+    function XCS_LOG_ERROR(message) {
+        throw Exception.new(message);
+    };
+    function XCS_LOG_WARN(message) {
+        cerr << "Warning";
+        cerr << message;
+    };
+    function XCS_LOG_INFO(message) {
+        clog << message;
+    };
+};
+
+// this hack makes logging functions accessible everywhere
+// reason: Global doesn't work properly with our version of Urbi
+Object.addProto(Logging);

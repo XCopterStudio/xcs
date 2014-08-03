@@ -155,12 +155,7 @@ var DataFlowGraphView = Backbone.View.extend({
                     var semTT = cellViewT.model.inPortsType[idT].semType;
                     var synTT = cellViewT.model.inPortsType[idT].synType;
                     
-                    var sameSemT = semTT == "*" || semTT == cellViewS.model.outPortsType[idS].semType;
-                    var sameSynT = synTT == "*" || synTT == cellViewS.model.outPortsType[idS].synType;
-                    
-                    var valid = sameSemT && sameSynT;
-                    
-                    return valid;
+                    return self.model.isConnectable(cellViewS.model.outPortsType[idS].synType, cellViewS.model.outPortsType[idS].semType, synTT, semTT);
                 }
                 
                 return false;

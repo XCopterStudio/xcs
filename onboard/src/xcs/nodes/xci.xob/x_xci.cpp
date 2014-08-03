@@ -158,7 +158,7 @@ void XXci::onChangeCommand(const std::string& command) {
 
 void XXci::initOutputs() {
     for (auto sensor : xci_->sensorList()) {
-        SimpleXVar &xvar = dataReceiver_.registerOutput(sensor.name, XType(typeid (void), sensor.semanticType, XType::DATAFLOWTYPE_XVAR));
+        SimpleXVar &xvar = dataReceiver_.registerOutput(sensor.name, XType(sensor.syntacticType, sensor.semanticType, XType::DATAFLOWTYPE_XVAR));
         XBindVarRename(xvar, sensor.name);
         XCS_LOG_INFO("Registered sensor " << sensor.name << ".");
     }
