@@ -28,28 +28,31 @@ class Onboard {
         
         System.loadModule("xsettings");
         System.loadModule("xjson");
+        System.loadModule("ujson");
         
         // load onboard settings
         onboardSettings_ = XSettings.new(XcsPaths.getSettings("onboard.xs").asString(), false);
         
+        var context = Object.new();
+        var context.adapter = Adapter.new();
+        
         // load nodes settings
         var settingsCollection = SettingsCollection.new([XcsPaths.getSettings("xobjects.xs")]);
-        nodeContainer_ = NodeContainer.new(settingsCollection);
+        nodeContainer_ = NodeContainer.new(settingsCollection, context);
         
         // prepare storage
         dfgStorage_ = DfgStorage.new(XcsPaths.dfgs);
         loadDdfg_();
         
         // start communication
-        var adapter = Adapter.new();
-        adapter.start(onboardSettings_.get("serverHost"), onboardSettings_.get("serverPort"));
+        context.adapter.start(onboardSettings_.get("serverHost"), onboardSettings_.get("serverPort"));
         
         var json = XJson.new(); // TODO use "singleton"
-        sender_ = OnboardSender.new(adapter, json);
+        sender_ = OnboardSender.new(context.adapter, json);
 
         
         // initialize onboard receiver 4 communication with server
-        receiver_ = OnboardReceiver.new(adapter,  json);
+        receiver_ = OnboardReceiver.new(context.adapter,  json);
         at(receiver_.&request.changed?) {
             this.doRequest_(receiver_.request);
         };
