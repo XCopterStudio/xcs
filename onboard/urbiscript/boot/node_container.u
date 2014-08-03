@@ -68,7 +68,7 @@ class NodeContainer {
         var dstNode = lobby_.getLocalSlot(dstName).value();
         
         // TODO here should be checked function connect
-        srcNode.getLocalSlot(srcPort) >>  dstNode.getLocalSlot(targetPort);
+        srcNode.getLocalSlot(srcPort) >> dstNode.getLocalSlot(dstPort);
     };
     
     function startNodes(cloneName = nil) {

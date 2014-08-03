@@ -168,7 +168,7 @@ class Onboard {
                 var semT = source.getSemType(sourcePort);
 
                 // execute register xvar method
-                targetSlot.value(sourcePort, semT, synT, sourceSlot);
+                callMethod(target, targetPort, sourcePort, semT, synT, sourceSlot);
             };
         } catch(var ex) {
             for(var node: createdNodes) {
@@ -254,6 +254,20 @@ class Onboard {
     
     function loadDdfg_() {
         this.ddfg_ = dfgStorage_.load(onboardSettings_.get("defaultDfg"));
+    };
+    
+    //at least need 2 args: target, method name, args
+    function callMethod {
+        call.target = call.evalArgAt(0);
+        call.message = call.evalArgAt(1);
+    
+        var args = [];
+        for(var i = 2; i < call.argsCount; ++i) {
+            args << call.args[i];
+        };
+        call.args = args;
+
+        call.target.callMessage(call);
     };
 
     
