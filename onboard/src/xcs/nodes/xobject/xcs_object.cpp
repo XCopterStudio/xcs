@@ -10,7 +10,7 @@ using namespace xcs::nodes;
 map< string, vector<string>* > XcsObject::structHolder_;
 
 XcsObject::XcsObject(const string& name) :
-    XObject(name) {
+XObject(name) {
     // binding
     XBindFunction(XcsObject, init);
     XBindFunction(XcsObject, getStructs4Reg);
@@ -32,27 +32,19 @@ string XcsObject::getStructs4Reg() {
         structs << "class " << it->first << ": UValueSerializable {" << endl;
 
         // struct properties
-        for (string p: *(it->second)) {
+        for (string p : *(it->second)) {
             structs << "var " << p << ";" << endl;
         }
 
-        // ctors
-        //structs << "function init(";
-        //bool first = true;
-        //for (string p : *(it->second)) {
-        //    if (first) {
-        //        structs << "var " << p;
-        //        first = false;
-        //    }
-        //    else {
-        //        structs << ", var " << p;
-        //    }
-        //}
-        //structs << ") {" << endl;
-        //for (string p : *(it->second)) {
-        //    structs << "this." << p << " = " << p << ";" << endl;
-        //}
-        //structs << "};" << endl;
+        // ctor
+        structs << "function init(values = nil){" << endl;
+        structs << "if(values){" << endl;
+        for (string p : *(it->second)) {
+            structs << "if(\"" << p << "\" in values) {" << endl;
+            structs << "this." << p << " = values[\"" << p << "\"];};" << endl;
+        }
+        structs << "};"; 
+        structs << "};"; // end of ctor
 
 
         // struct end
@@ -61,12 +53,10 @@ string XcsObject::getStructs4Reg() {
 
         delete it->second;
     }
-    
+
     structHolder_.clear();
     return structs.str();
 }
-
-
 
 int XcsObject::registerStructProperty(string structName, string structProperty) {
     if (structHolder_.count(structName) == 0) {

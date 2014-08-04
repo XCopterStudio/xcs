@@ -47,3 +47,12 @@ GUI {
     args "adapter, [], UJson, 8"
     special true
 }
+
+SemanticReceiver {
+    file nodes/semantic_receiver.u
+    args "jsonReceiver, ["\
+        "\"flyControl\" => Pair.new(FlyControl, \"FLY_CONTROL\"),"\
+        "\"execUrbiscript\" => Pair.new(String, \"URBISCRIPT\"),"\
+        "\"execControl\" => Pair.new(String, \"CONTROL\")"\
+    "]"
+}

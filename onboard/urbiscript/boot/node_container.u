@@ -133,8 +133,10 @@ class NodeContainer {
             xObjectFiles[configuration["prototype"]] = configuration["file"];
         };
         
-        // load resources
+        // load common resources
         load("nodes/x_object.u", lobby_);
+        System.eval(XCS.getStructs4Reg(), lobby_);
+        
         for(var kvp: xObjectFiles) {
             try {
                 XCS_LOG_INFO("Loading CPP " + kvp.second);
