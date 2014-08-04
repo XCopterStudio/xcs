@@ -1,15 +1,13 @@
 class Logging {
     function XCS_LOG_FATAL(message) {
-        cerr << "Fatal error!";
-        cerr << message;
+        cerr << "Fatal error: " + message;
         System.shutdown();
     };
     function XCS_LOG_ERROR(message) {
-        throw Exception.new(message);
+        cerr << "Error: " + message;
     };
     function XCS_LOG_WARN(message) {
-        cerr << "Warning";
-        cerr << message;
+        cerr << "Warning: " + message;
     };
     function XCS_LOG_INFO(message) {
         clog << message;

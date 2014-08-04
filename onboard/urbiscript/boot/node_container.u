@@ -114,6 +114,7 @@ class NodeContainer {
             
             if(configuration["prototype"] in xObjectFiles && xObjectFiles[configuration["prototype"]] != configuration["file"]) {
                 XCS_LOG_ERROR("Ambiguous file for prototype '" + configuration["prototype"] + "'");
+                continue;
             };
             xObjectFiles[configuration["prototype"]] = configuration["file"];
         };
@@ -132,6 +133,7 @@ class NodeContainer {
                     loadedXObjects_[kvp.first] = SourceFiles.URBISCRIPT;
                 } catch(var e) {
                      XCS_LOG_ERROR("Cannot load '" + kvp.second + "'.\nCause:\n" + e + "\n");
+                     continue;
                 };
             };
         };        
@@ -186,7 +188,7 @@ class NodeContainer {
                 dummyNode = nil;
             }
             catch(var ex) {
-                XCS_LOG_ERROR("Cannot load info about node \"" + configurationName + "\": " + ex.message + "!");
+                XCS_LOG_ERROR("Cannot load info about node \"" + configurationName + "\": " + ex.message() + "!");
             }
         };
     };
