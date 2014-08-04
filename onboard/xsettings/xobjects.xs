@@ -51,7 +51,7 @@ Gui {
 SemanticReceiver {
     file nodes/semantic_receiver.u
     args "jsonReceiver, ["\
-        "\"flyControl\" => Pair.new(FlyControl, \"FLY_CONTROL\"),"\
+        "\"flyControl\" => Pair.new('xcs::FlyControl', \"FLY_CONTROL\"),"\
         "\"execUrbiscript\" => Pair.new(String, \"URBISCRIPT\"),"\
         "\"execControl\" => Pair.new(String, \"CONTROL\")"\
     "]"

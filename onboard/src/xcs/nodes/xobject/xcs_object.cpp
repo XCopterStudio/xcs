@@ -29,7 +29,7 @@ string XcsObject::getStructs4Reg() {
 
     for (map<string, vector<string>*>::iterator it = structHolder_.begin(); it != structHolder_.end(); ++it) {
         // struct name
-        structs << "class " << it->first << ": UValueSerializable {" << endl;
+        structs << "class '" << it->first << "': UValueSerializable {" << endl;
 
         // struct properties
         for (string p : *(it->second)) {
@@ -49,7 +49,7 @@ string XcsObject::getStructs4Reg() {
 
         // struct end
         structs << "}|;" << endl;
-        structs << "var Serializables." << it->first << " = " << it->first << "|;" << endl;
+        structs << "var Serializables.'" << it->first << "' = '" << it->first << "'|;" << endl;
 
         delete it->second;
     }

@@ -6,10 +6,10 @@ class XObject : Finalizable {
                     "std::string"
                 case "Float":
                     "double"
-                case "FlyControl":
+                case "xcs::FlyControl":
                     "xcs::FlyControl"
                 default:
-                    throw Exception.new("Object of unknown type '" + object.type + "'.");
+                    throw Exception.new("Object of unknown syntactic type '" + object.type + "'.");
             };
         };
         
@@ -19,7 +19,7 @@ class XObject : Finalizable {
                     data;
                 case "Float":
                     data.asFloat();
-                case "FlyControl":
+                case "xcs::FlyControl":
                     object.new(data)
                 default:
                     throw Exception.new("Object of unknown type '" + object.type + "'.");
