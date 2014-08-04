@@ -134,7 +134,7 @@ class NodeContainer {
         };
         
         // load resources
-        load("nodes/xobject.u", lobby_);
+        load("nodes/x_object.u", lobby_);
         for(var kvp: xObjectFiles) {
             try {
                 XCS_LOG_INFO("Loading CPP " + kvp.second);

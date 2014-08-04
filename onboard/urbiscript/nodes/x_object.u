@@ -1,8 +1,18 @@
-class Global.SyntacticTypes {
-    var STRING = "Ss";
-}|;
-
 class XObject : Finalizable {
+    class SyntacticTypes {
+        var STRING = "std::string";
+        function getSynType(object) {
+            switch(object.type) {
+                case "String":
+                    "std::string"
+                case "Float":
+                    "double"
+                default:
+                    throw Exception.new("Object of unknown type '" + object.type + "'.");
+            };
+        };
+    }|;
+
     var inputs_ = [ => ];
     var outputs_ = [ => ];
     
@@ -16,9 +26,9 @@ class XObject : Finalizable {
     
     function getSynType(channel) {
         if(channel in inputs_) {
-            inputs_[channel].first;
+            SyntacticTypes.getSynType(inputs_[channel].first);
         } else if (channel in outputs_) {
-            outputs_[channel].first;
+            SyntacticTypes.getSynType(outputs_[channel].first);
         } else {
             throw Exception.new("Unknown channel '" + channel + "'.");
         }
@@ -44,9 +54,9 @@ class XObject : Finalizable {
     
     function getState() {
         return state_;
-    }|;
+    };
 
     function finalize() {
         // NOTE: can be overriden in clones
-    }|;
+    };
 }|;
