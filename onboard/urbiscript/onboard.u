@@ -118,7 +118,8 @@ class Onboard {
     // send info about loaded xobjects and default dfg
     function doDfgLoadMetadata_() {
         var data = [ => ];
-        data["prototype"] = nodeContainer_.getPrototypesInfo();
+        data["prototype"] = nodeContainer_.getPrototypesInfo([], [SettingsCollection.XObjectFlags.SPECIAL]);
+        data["prototypeSpecial"] = nodeContainer_.getPrototypesInfo([SettingsCollection.XObjectFlags.SPECIAL]);
         data["ddfg"] = this.ddfg_;
 
         return data;
