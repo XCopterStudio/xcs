@@ -87,8 +87,6 @@ var DataFlowGraphView = Backbone.View.extend({
     ** DATA FLOW GRAPH SECTION **
     ****************************/
     initializeDfg : function() {
-        //this.onStateChanged();
-        
         var self = this;
         
         var loadAction = new WaitAction("#dfgLoad", WaitActionType.Click)
@@ -275,23 +273,25 @@ var DataFlowGraphView = Backbone.View.extend({
         var registerXVars = modelPrototype.get("registerXVar");
         
         //get name
-        var prototypeName;            
+        var cloneName;            
         var modelId;
         if(this.dfgCounter[nodeId] == 1) {
-            prototypeName = modelPrototype.get("name");
+            cloneName = modelPrototype.get("name");
             modelId = nodeId;   
         }
         else {
-            prototypeName = modelPrototype.get("name") + " " + this.dfgCounter[nodeId];
+            cloneName = modelPrototype.get("name") + " " + this.dfgCounter[nodeId];
             modelId = nodeId + this.dfgCounter[nodeId];
         }
+        cloneName = cloneName.charAt(0).toLowerCase() + cloneName.slice(1);
+        modelId = modelId.charAt(0).toLowerCase() + modelId.slice(1);
         
         var m = new (joint.shapes.dfg.DataFlowGraphDefaultModel)({
             position: { x: x, y: y },
         });
         m.setId(modelId);
         m.setOrigId(nodeId);
-        m.setLabel(prototypeName);
+        m.setLabel(cloneName);
         
         // get all xvars
         if(xvars) {
