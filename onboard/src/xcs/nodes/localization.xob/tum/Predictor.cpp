@@ -41,9 +41,9 @@ Predictor::~Predictor(void) {
 
 void Predictor::predictOneStep(const ImuMeasurementChronologic &imuMeasurement) {
     // angles
-    roll = imuMeasurement.first.angles.phi;
-    pitch = imuMeasurement.first.angles.theta;
-    yaw = imuMeasurement.first.angles.psi;
+    roll = imuMeasurement.first.rotation.phi;
+    pitch = imuMeasurement.first.rotation.theta;
+    yaw = imuMeasurement.first.rotation.psi;
 
     double timespan = imuMeasurement.second - lastAddedDronetime; // in seconds
     lastAddedDronetime = imuMeasurement.second;
@@ -56,7 +56,7 @@ void Predictor::predictOneStep(const ImuMeasurementChronologic &imuMeasurement) 
     double dxDrone = imuMeasurement.first.velocity.x * timespan; // in meters
     double dyDrone = imuMeasurement.first.velocity.y * timespan; // in meters
 
-    yaw = imuMeasurement.first.angles.psi;
+    yaw = imuMeasurement.first.rotation.psi;
     x += cos(yaw) * dxDrone + sin(yaw) * dyDrone;
     y += -sin(yaw) * dxDrone + cos(yaw) * dyDrone;
 

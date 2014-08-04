@@ -28,8 +28,8 @@ void XLocalization::onChangeVelocity(xcs::CartesianVector measuredVelocity) {
 }
 
 void XLocalization::onChangeRotation(xcs::EulerianVector measuredAnglesRotation) {
-    lastMeasurement_.velocityPsi = measuredAnglesRotation.psi - lastMeasurement_.angles.psi;
-    lastMeasurement_.angles = measuredAnglesRotation;
+    lastMeasurement_.velocityPsi = measuredAnglesRotation.psi - lastMeasurement_.rotation.psi;
+    lastMeasurement_.rotation = measuredAnglesRotation;
 }
 
 void XLocalization::onChangeAltitude(double altitude) {
@@ -66,7 +66,7 @@ void XLocalization::onChangeTimeImu(double internalTime) {
         //DroneState state = ekf_.computeState(timeFromStart());
         position = state.position;
         velocity = state.velocity;
-        rotation = state.angles;
+        rotation = state.rotation;
         velocityPsi = state.velocityPsi;
     }
 }
@@ -108,7 +108,7 @@ void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
     DroneState state = ekf_.computeState(timeFromStart() + flyControlSendTime_);
     position = state.position;
     velocity = state.velocity;
-    rotation = state.angles;
+    rotation = state.rotation;
 }
 
 void XLocalization::onChangeFlyControl(const xcs::FlyControl flyControl) {
