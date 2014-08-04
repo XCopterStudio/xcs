@@ -578,6 +578,40 @@ DroneState Ekf::computeState(const double time) {
     return predict(state, time).first.first;
 }
 
+void Ekf::setPosition(const xcs::CartesianVector position, const double timestamp){
+    unique_lock<shared_mutex> lock(bigSharedMtx_);
+
+    DroneStateDistributionChronologic droneState = droneStates_.back();
+    droneState.first.first.position = position;
+    droneState.first.second.at(0, 0) = 0;
+    droneState.first.second.at(1, 1) = 0;
+    droneState.first.second.at(2, 2) = 0;
+    droneState.second = timestamp;
+
+    flyControls_.clear();
+    imuMeasurements_.clear();
+    droneStates_.clear();
+
+    droneStates_.push_back(droneState);
+}
+
+void Ekf::setRotation(const xcs::EulerianVector rotation, const double timestamp){
+    unique_lock<shared_mutex> lock(bigSharedMtx_);
+    
+    DroneStateDistributionChronologic droneState = droneStates_.back();
+    droneState.first.first.angles = rotation;
+    droneState.first.second.at(3, 3) = 0;
+    droneState.first.second.at(4, 4) = 0;
+    droneState.first.second.at(5, 5) = 0;
+    droneState.second = timestamp;
+
+    flyControls_.clear();
+    imuMeasurements_.clear();
+    droneStates_.clear();
+
+    droneStates_.push_back(droneState);
+}
+
 void Ekf::reset(){
     unique_lock<shared_mutex> lock(bigSharedMtx_);
     double altitude = imuMeasurements_.back().first.altitude;

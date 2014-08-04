@@ -146,6 +146,15 @@ void XLocalization::onChangePtamEnabled(const bool ptamEnabled) {
     ptamEnabled_ = ptamEnabled;
 }
 
+//TODO: implement
+void XLocalization::onChangeSetPosition(xcs::CartesianVector position){
+    ekf_.setPosition(position, timeFromStart());
+}
+
+void XLocalization::onChangeSetRotation(xcs::EulerianVector rotation){
+    ekf_.setRotation(rotation, timeFromStart());
+}
+
 //================ public functions ==================
 
 XLocalization::XLocalization(const std::string &name) :
@@ -160,6 +169,8 @@ XLocalization::XLocalization(const std::string &name) :
   flyControlSendTime("TIME"),
   control("CONTROL"),
   ptamEnabled("ENABLED"),
+  setPosition("POSITION_ABS"),
+  setRotation("ROTATION"),
   position("POSITION_ABS"),
   velocity("VELOCITY_ABS"),
   rotation("ROTATION"),
@@ -184,6 +195,9 @@ XLocalization::XLocalization(const std::string &name) :
     XBindVarF(flyControlSendTime, &XLocalization::onChangeFlyControlSendTime);
     XBindVarF(control, &XLocalization::onChangeControl);
     XBindVarF(ptamEnabled, &XLocalization::onChangePtamEnabled);
+
+    XBindVarF(setPosition, &XLocalization::onChangeSetPosition);
+    XBindVarF(setRotation, &XLocalization::onChangeSetRotation);
 
     XBindVar(position);
     XBindVar(velocity);
