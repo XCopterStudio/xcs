@@ -24,9 +24,14 @@ class NodeContainer {
         lobby_ = Lobby.create();
         lobby_.addProto(context);
         checkAndLoad_();
-        fillPrototypeInfo_();        
+        fillPrototypeInfo_();  
     };
     
+    function reset() {
+        prototypeInfo_.clear();
+        fillPrototypeInfo_();  
+    };
+
     function getPrototypesInfo() {
         /* return */ prototypeInfo_;
     };
@@ -134,48 +139,55 @@ class NodeContainer {
     
     function fillPrototypeInfo_() {
         for(var kvp: settingsCollection_) {
-            var configurationName = kvp.first;
-            var configuration = kvp.second;
-            
-            var createCode = configuration["prototype"] + ".new(" + configuration["args"] + ")";
-            var dummyNode = System.eval(createCode, lobby_);
-                
-            // prepare data about xvars
-            var varList = [];
-            for(var xv: dummyNode.getXVars()) {
-                var pVar = [ => ];
-                pVar["name"] = xv;
-                pVar["synType"] = dummyNode.getSynType(xv);
-                pVar["semType"] = dummyNode.getSemType(xv);
-                varList << pVar;
-            };
+            var configurationName = "?";
 
-            // prepare data about input ports
-            var portList = [];
-            for(var xip: dummyNode.getXInputPorts()) {
-                var pPort = [ => ];
-                pPort["name"] = xip;
-                pPort["synType"] = dummyNode.getSynType(xip);
-                pPort["semType"] = dummyNode.getSemType(xip);
-                portList << pPort;
-            };
+            try {
+                configurationName = kvp.first;
+                var configuration = kvp.second;
+            
+                var createCode = configuration["prototype"] + ".new(" + configuration["args"] + ")";
+                var dummyNode = System.eval(createCode, lobby_);
+                
+                // prepare data about xvars
+                var varList = [];
+                for(var xv: dummyNode.getXVars()) {
+                    var pVar = [ => ];
+                    pVar["name"] = xv;
+                    pVar["synType"] = dummyNode.getSynType(xv);
+                    pVar["semType"] = dummyNode.getSemType(xv);
+                    varList << pVar;
+                };
+
+                // prepare data about input ports
+                var portList = [];
+                for(var xip: dummyNode.getXInputPorts()) {
+                    var pPort = [ => ];
+                    pPort["name"] = xip;
+                    pPort["synType"] = dummyNode.getSynType(xip);
+                    pPort["semType"] = dummyNode.getSemType(xip);
+                    portList << pPort;
+                };
             
             
-            // get info and prepare data about registerXVar functions
-            var registerXVars = [];
-            if(dummyNode.hasSlot("registerXVar")) {
-                registerXVars << "registerXVar";
-            };
+                // get info and prepare data about registerXVar functions
+                var registerXVars = [];
+                if(dummyNode.hasSlot("registerXVar")) {
+                    registerXVars << "registerXVar";
+                };
             
-            prototypeInfo_ << [
-                "name" => configurationName,
-                "var" => varList,
-                "inputPort" => portList,
-                "registerXVar" => registerXVars,
-            ];
+                prototypeInfo_ << [
+                    "name" => configurationName,
+                    "var" => varList,
+                    "inputPort" => portList,
+                    "registerXVar" => registerXVars,
+                ];
             
-            // force GC
-            dummyNode = nil;
+                // force GC
+                dummyNode = nil;
+            }
+            catch(var ex) {
+                XCS_LOG_ERROR("Cannot load info about node \"" + configurationName + "\": " + ex.message + "!");
+            }
         };
     };
     
