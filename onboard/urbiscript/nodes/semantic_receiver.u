@@ -1,8 +1,8 @@
 class SemanticReceiver : XObject {
-    var state_ = 0;
     
     function init(jsonReceiver, outputs) {
         this.outputs_ = outputs;
+        var this.state_ = 0; // TODO find out why behaves weird
         jsonReceiver.addReceiver("data", this);
         for(var kvp: outputs_) {
             setSlot(kvp.first, nil);

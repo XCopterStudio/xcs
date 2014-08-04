@@ -208,8 +208,7 @@ class NodeContainer {
             
                 // force GC
                 dummyNode = nil;
-            }
-            catch(var ex) {
+            } catch(var ex) {
                 XCS_LOG_ERROR("Cannot load info about node \"" + configurationName + "\": " + ex.message() + "!");
             }
         };

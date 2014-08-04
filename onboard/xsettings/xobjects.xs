@@ -44,7 +44,7 @@ Executor {
 Gui {
     prototype SemanticSender
     file nodes/semantic_sender.u 
-    args "adapter, [], UJson, 8"
+    args "adapter, XJson, 8"
     special true
 }
 

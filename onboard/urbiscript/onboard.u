@@ -188,7 +188,7 @@ class Onboard {
                 var semT = source.getSemType(sourcePort);
 
                 // execute register xvar method
-                callMethod(target, targetPort, sourcePort, semT, synT, sourceSlot);
+                callMethod(target, targetPort, createChannelName(sourceId, sourcePort), semT, synT, sourceSlot);
 
                 errorMessage = "";
             };
@@ -284,6 +284,10 @@ class Onboard {
         this.ddfg_ = dfgStorage_.load(onboardSettings_.get("defaultDfg"));
     };
     
+    /*
+     * Utility functions
+     */
+    
     //at least need 2 args: target, method name, args
     function callMethod {
         call.target = call.evalArgAt(0);
@@ -296,6 +300,10 @@ class Onboard {
         call.args = args;
 
         call.target.callMessage(call);
+    };
+    
+    function createChannelName(nodeName, portName) {
+        nodeName + "_" + portName;
     };
 
     
