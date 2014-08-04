@@ -559,7 +559,7 @@ var DataFlowGraphView = Backbone.View.extend({
         var prototypeId = this.trimId(prototypeName);
         
         //DEBUG
-        //console.log("onPrototypeRemove " + prototypeName);
+        console.log("onPrototypeRemove " + prototypeName);
         
         //validation
         if(!this.dfgToolboxNodes[prototypeId]) {
@@ -594,7 +594,7 @@ var DataFlowGraphView = Backbone.View.extend({
         var prototypeId = this.trimId(prototypeName);
         
         //DEBUG
-        //console.log("onPrototypeChange: " + prototypeName);
+        console.log("onPrototypeChange: " + prototypeName);
         
         // add 2 toolbox - show to user
         if(!this.dfgToolboxNodes[prototypeId]) {
@@ -641,7 +641,7 @@ var DataFlowGraphView = Backbone.View.extend({
         try {
             var self = this;
             
-            self.model.reset();
+            //self.model.reset();
             self.model.requestLoad(function(id, responseType, responseData) {
                 //show error
                 if(responseType == ResponseType.Error) {
