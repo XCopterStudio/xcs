@@ -154,6 +154,9 @@ unique_ptr<Value> XJson::fromUValue(const ::urbi::UValue & uvalue, rapidjson::Do
                 (*result).AddMember(Value().SetString(pair.first.c_str(), pair.first.size(), allocator), *mappedItemPtr, allocator);
             }
             break;
+        case ::urbi::DATA_VOID:
+            (*result).SetNull();
+            break;
         default:
             throw runtime_error("Unsupported type of UValue for JSON serialization.");
             break;
