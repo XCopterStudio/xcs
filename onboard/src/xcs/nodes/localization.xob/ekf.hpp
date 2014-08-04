@@ -96,6 +96,8 @@ public:
      */
     DroneState computeState(const double time); // compute prediction state up to this time 
 
+    void setPosition(const xcs::CartesianVector position, const double timestamp);
+    void setRotation(const xcs::EulerianVector rotation, const double timestamp);
     void reset();
 };
 

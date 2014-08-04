@@ -69,6 +69,9 @@ class XLocalization : public XObject {
     
     void onChangePtamEnabled(const bool ptamEnabled);
 
+    void onChangeSetPosition(xcs::CartesianVector position);
+    void onChangeSetRotation(xcs::EulerianVector rotation);
+
     inline double timeFromStart() {
         return std::chrono::duration_cast<std::chrono::milliseconds>(
                 clock_.now() - startTime_).count() / 1000.0;
@@ -88,9 +91,12 @@ public:
     // drone fly control
     XInputPort<xcs::FlyControl> flyControl;
     XInputPort<double> flyControlSendTime;
-    // PTAM control
+    // PTAM and EKF control
     XInputPort<std::string> control;
     XInputPort<bool> ptamEnabled;
+    // Set EKF position
+    XInputPort<xcs::CartesianVector> setPosition;
+    XInputPort<xcs::EulerianVector> setRotation;
 
     // computed ekf output
     XVar<xcs::CartesianVector> position;

@@ -28,8 +28,8 @@ void XLocalization::onChangeVelocity(xcs::CartesianVector measuredVelocity) {
 }
 
 void XLocalization::onChangeRotation(xcs::EulerianVector measuredAnglesRotation) {
-    lastMeasurement_.velocityPsi = measuredAnglesRotation.psi - lastMeasurement_.angles.psi;
-    lastMeasurement_.angles = measuredAnglesRotation;
+    lastMeasurement_.velocityPsi = measuredAnglesRotation.psi - lastMeasurement_.rotation.psi;
+    lastMeasurement_.rotation = measuredAnglesRotation;
 }
 
 void XLocalization::onChangeAltitude(double altitude) {
@@ -66,7 +66,7 @@ void XLocalization::onChangeTimeImu(double internalTime) {
         //DroneState state = ekf_.computeState(timeFromStart());
         position = state.position;
         velocity = state.velocity;
-        rotation = state.angles;
+        rotation = state.rotation;
         velocityPsi = state.velocityPsi;
     }
 }
@@ -108,7 +108,7 @@ void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
     DroneState state = ekf_.computeState(timeFromStart() + flyControlSendTime_);
     position = state.position;
     velocity = state.velocity;
-    rotation = state.angles;
+    rotation = state.rotation;
 }
 
 void XLocalization::onChangeFlyControl(const xcs::FlyControl flyControl) {
@@ -146,6 +146,15 @@ void XLocalization::onChangePtamEnabled(const bool ptamEnabled) {
     ptamEnabled_ = ptamEnabled;
 }
 
+//TODO: implement
+void XLocalization::onChangeSetPosition(xcs::CartesianVector position){
+    ekf_.setPosition(position, timeFromStart());
+}
+
+void XLocalization::onChangeSetRotation(xcs::EulerianVector rotation){
+    ekf_.setRotation(rotation, timeFromStart());
+}
+
 //================ public functions ==================
 
 XLocalization::XLocalization(const std::string &name) :
@@ -160,6 +169,8 @@ XLocalization::XLocalization(const std::string &name) :
   flyControlSendTime("TIME"),
   control("CONTROL"),
   ptamEnabled("ENABLED"),
+  setPosition("POSITION_ABS"),
+  setRotation("ROTATION"),
   position("POSITION_ABS"),
   velocity("VELOCITY_ABS"),
   rotation("ROTATION"),
@@ -184,6 +195,9 @@ XLocalization::XLocalization(const std::string &name) :
     XBindVarF(flyControlSendTime, &XLocalization::onChangeFlyControlSendTime);
     XBindVarF(control, &XLocalization::onChangeControl);
     XBindVarF(ptamEnabled, &XLocalization::onChangePtamEnabled);
+
+    XBindVarF(setPosition, &XLocalization::onChangeSetPosition);
+    XBindVarF(setRotation, &XLocalization::onChangeSetRotation);
 
     XBindVar(position);
     XBindVar(velocity);
