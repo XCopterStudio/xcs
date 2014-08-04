@@ -120,7 +120,8 @@ class Onboard {
         nodeContainer_.reset();
 
         var data = [ => ];
-        data["prototype"] = nodeContainer_.getPrototypesInfo();
+        data["prototype"] = nodeContainer_.getPrototypesInfo([], [SettingsCollection.XObjectFlags.SPECIAL]);
+        data["prototypeSpecial"] = nodeContainer_.getPrototypesInfo([SettingsCollection.XObjectFlags.SPECIAL]);
         data["ddfg"] = this.ddfg_;
 
         return data;

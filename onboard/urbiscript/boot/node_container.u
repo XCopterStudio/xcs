@@ -32,8 +32,28 @@ class NodeContainer {
         fillPrototypeInfo_();  
     };
 
-    function getPrototypesInfo() {
-        /* return */ prototypeInfo_;
+    function getPrototypesInfo(flags = [], notFlags = []) {
+        var result = [];
+        for(var info: prototypeInfo_){
+            var prototypeFlags = settingsCollection_[info["name"]]["flags"];
+            var include = true;
+            for(var flag: flags) {
+                if(!(flag in prototypeFlags)) {
+                    include = false;
+                    break;
+                };
+            };
+            for(var flag: prototypeFlags) {                
+                if(flag in notFlags) {
+                    include = false;
+                    break;
+                };
+            };
+            if(include) {
+                result << info;
+            };
+        };
+        /* return */ result;
     };
     
     function createNode(configurationName, cloneName) {

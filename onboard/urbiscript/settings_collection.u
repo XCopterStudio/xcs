@@ -1,6 +1,15 @@
 
-// Behaves like dictionary: configuration name => parameters
+// Contains dictionary: configuration name => parameters
 class SettingsCollection {
+    
+    enum XObjectFlags {
+        SPECIAL,
+    };
+    
+    var configToFlag_ = [
+        "special" => XObjectFlags.SPECIAL
+    ];
+    
     var collection_ = [ => ];
     
     function init(settingPaths) {
@@ -33,6 +42,13 @@ class SettingsCollection {
         
         if(!("args" in result)) {
             result["args"] = "";
+        };
+     
+        result["flags"] = [];
+        for(var kvp: configToFlag_) {
+            if(kvp.first in result && result[kvp.first]) {
+                result["flags"] << kvp.second;
+            };
         };
         
         /* return */ result;
