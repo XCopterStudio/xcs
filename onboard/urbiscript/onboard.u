@@ -16,7 +16,7 @@ class Onboard {
     var sender_;
     var receiver_;
     
-    var ddfg_ = ""; // TODO load
+    var ddfg_ = "";
     
     function init() {
         // load core deps // TODO better onboard paths
@@ -117,6 +117,8 @@ class Onboard {
   
     // send info about loaded xobjects and default dfg
     function doDfgLoadMetadata_() {
+        nodeContainer_.reset();
+
         var data = [ => ];
         data["prototype"] = nodeContainer_.getPrototypesInfo();
         data["ddfg"] = this.ddfg_;
