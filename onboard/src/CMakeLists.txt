@@ -31,8 +31,7 @@ add_subdirectory(xcs/xci/dodo)
 add_subdirectory(xcs/xci/vrep)
 
 # Subprojects (UObjects)
-add_subdirectory(xcs/urbi/json.uob)
-
+# empty?
 
 # Subprojects (nodes)
 add_subdirectory(xcs/nodes/control.xob)
