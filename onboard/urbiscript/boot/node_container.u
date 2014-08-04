@@ -141,7 +141,7 @@ class NodeContainer {
         
         // load common resources
         load("nodes/x_object.u", lobby_);
-        System.eval(XCS.getStructs4Reg(), lobby_);
+        System.eval(XCS.getStructs4RegCode(), lobby_);
         
         for(var kvp: xObjectFiles) {
             try {

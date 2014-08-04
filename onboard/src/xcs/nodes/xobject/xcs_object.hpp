@@ -16,9 +16,11 @@ class XOBJECT_EXPORT XcsObject : public XObject {
         XcsObject(const std::string& name);
         virtual ~XcsObject();
         int init();
-        std::string getStructs4Reg();
+        std::vector<std::string> getStructs4Reg();
+        std::string getStructs4RegCode();
     private: /*static*/
-        static std::map< std::string, std::vector<std::string>* > structHolder_;
+        typedef std::map< std::string, std::vector<std::string> > HolderType;
+        static HolderType structHolder_;
     public: /*static*/
         static int registerStructProperty(std::string structName, std::string structProperty);        
 };

@@ -1,14 +1,17 @@
 class XObject : Finalizable {
     class SyntacticTypes {
+        var structures = XCS.getStructs4Reg();
+        
         function getSynType(object) {
             switch(object.type) {
                 case "String":
                     "std::string"
                 case "Float":
-                    "double"
-                case "xcs::FlyControl":
-                    "xcs::FlyControl"
+                    "double"                
                 default:
+                    if(object.type in structures) { // NOTE: this may not be effective
+                        return object.type;
+                    };
                     throw Exception.new("Object of unknown syntactic type '" + object.type + "'.");
             };
         };
@@ -19,9 +22,10 @@ class XObject : Finalizable {
                     data;
                 case "Float":
                     data.asFloat();
-                case "xcs::FlyControl":
-                    object.new(data)
                 default:
+                    if(object.type in structures) { // NOTE: this may not be effective
+                        return object.new(data);
+                    };
                     throw Exception.new("Object of unknown type '" + object.type + "'.");
             };            
         };
