@@ -172,7 +172,7 @@ var DataFlowGraphView = Backbone.View.extend({
         
         if(prototypeId && cloneId) {
             switch(prototypeId) {
-                case "GUI":
+                case "Gui":
                     // for each registerXVar call remove on DataView
                     var viewIds = model.viewIds;
                     for(var k = 0; k < viewIds.length; ++k) {
@@ -559,7 +559,7 @@ var DataFlowGraphView = Backbone.View.extend({
         var prototypeId = this.trimId(prototypeName);
         
         //DEBUG
-        //console.log("onPrototypeRemove " + prototypeName);
+        console.log("onPrototypeRemove " + prototypeName);
         
         //validation
         if(!this.dfgToolboxNodes[prototypeId]) {
@@ -570,7 +570,7 @@ var DataFlowGraphView = Backbone.View.extend({
         // stop listening to old model
         this.stopListening(this.dfgToolboxNodes[prototypeId]);
         
-        //delete from GUI
+        //delete from Gui
         this.removeNodeFromDfgToolbox(prototypeId, nodeType);
         
         // delete old model
@@ -594,7 +594,7 @@ var DataFlowGraphView = Backbone.View.extend({
         var prototypeId = this.trimId(prototypeName);
         
         //DEBUG
-        //console.log("onPrototypeChange: " + prototypeName);
+        console.log("onPrototypeChange: " + prototypeName);
         
         // add 2 toolbox - show to user
         if(!this.dfgToolboxNodes[prototypeId]) {
@@ -641,7 +641,7 @@ var DataFlowGraphView = Backbone.View.extend({
         try {
             var self = this;
             
-            self.model.reset();
+            //self.model.reset();
             self.model.requestLoad(function(id, responseType, responseData) {
                 //show error
                 if(responseType == ResponseType.Error) {
@@ -777,7 +777,7 @@ var DataFlowGraphView = Backbone.View.extend({
                                 },
                             });
                             
-                            if(cloneModel.get("origId") == "GUI") {
+                            if(cloneModel.get("origId") == "Gui") {
                                 viewNames.push({
                                     viewName: cell.target.port,
                                     dataId: cell.source.id + "_" + cell.source.port,
@@ -820,7 +820,7 @@ var DataFlowGraphView = Backbone.View.extend({
                                 ++successCount;
                                 
                                 // create widgets
-                                if(model.get("origId") == "GUI") {
+                                if(model.get("origId") == "Gui") {
                                     for(var j = 0; j < viewNames.length; ++j) {
                                         viewNames[j].model.viewIds.push(app.DataView.addViewByName(viewNames[j].viewName, viewNames[j].dataId));
                                     }

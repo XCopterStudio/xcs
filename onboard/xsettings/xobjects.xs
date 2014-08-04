@@ -41,7 +41,7 @@ Executor {
     file nodes/executor.u     ; TODO to what is it relative
     args "this"               ; this is the current lobby
 }
-GUI {
+Gui {
     prototype SemanticSender
     file nodes/semantic_sender.u 
     args "adapter, [], UJson, 8"

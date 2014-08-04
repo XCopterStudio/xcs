@@ -40,23 +40,26 @@ var DataFlowGraphNode = Backbone.Model.extend({
             this.set("registerXVar", new Backbone.Collection([], { model : DataFlowGraphNodeIO }));
         }
         
-        // propagate add on xvar and xinputPort like change
-        this.listenTo(this.get("xvar"), "add", this.onXvarAdd);
-        this.listenTo(this.get("xinputPort"), "add", this.onXinputPortAdd);
-        this.listenTo(this.get("registerXVar"), "add", this.onRegisterXVarAdd);
+        // propagate add/remove on xvar and xinputPort like change
+        this.listenTo(this.get("xvar"), "add", this.onXvarChange);
+        this.listenTo(this.get("xinputPort"), "add", this.onXinputPortChange);
+        this.listenTo(this.get("registerXVar"), "add", this.onRegisterXVarChange);
+        this.listenTo(this.get("xvar"), "remove", this.onXvarChange);
+        this.listenTo(this.get("xinputPort"), "remove", this.onXinputPortChange);
+        this.listenTo(this.get("registerXVar"), "remove", this.onRegisterXVarChange);
     },
     
-    onXvarAdd : function() {
+    onXvarChange : function() {
         this.trigger("change", this);
         this.trigger("change:xvar", this);
     },
     
-    onXinputPortAdd : function() {
+    onXinputPortChange : function() {
         this.trigger("change", this);
         this.trigger("change:xinputPort", this);
     },
     
-    onRegisterXVarAdd : function() {
+    onRegisterXVarChange : function() {
         this.trigger("change", this);
         this.trigger("change:registerXVar", this);
     },
@@ -193,7 +196,7 @@ var DataFlowGraph = Backbone.Model.extend({
 
             if(p.name) { 
                 switch(p.name) {
-                    case "GUI":
+                    case "Gui":
                         if(p.registerXVar && p.registerXVar.length == 1) {
                             var registerXVar = p.registerXVar.pop();
                             
@@ -244,7 +247,7 @@ var DataFlowGraph = Backbone.Model.extend({
                     this.get(prototypeName).add(prot);
                 }
                 
-                //read vars
+                // create new vars
                 if(p.var) {
                     for(var i = 0; i < p.var.length; ++i) {
                         var oldXVar = prot.get("xvar").findWhere({"name": p.var[i].name});
@@ -258,7 +261,7 @@ var DataFlowGraph = Backbone.Model.extend({
                     }
                 }
                 
-                // read inputports
+                // create new inputports
                 if(p.inputPort) {
                     for(var i = 0; i < p.inputPort.length; ++i) {
                         var oldXIPort = prot.get("xinputPort").findWhere({"name": p.inputPort[i].name});
@@ -272,7 +275,33 @@ var DataFlowGraph = Backbone.Model.extend({
                     }
                 }
                 
-                // read registerXVars
+                // remove old vars
+                var xvars = prot.get("xvar");
+                var xvarsToRemove = [];
+                for(var i = 0; i < xvars.length; ++i) {
+                    var newXVar = _.findWhere(p.var, {"name": xvars.at(i).get("name")});
+                    if(!newXVar) {
+                        xvarsToRemove.push(xvars.at(i));
+                    }
+                }
+                for(var i = 0; i < xvarsToRemove.length; ++i) {
+                    prot.get("xvar").remove(xvarsToRemove[i]);
+                }
+                
+                // remove old input ports
+                var xinputPorts = prot.get("xinputPort");
+                var xinputPortsToRemove = [];
+                for(var i = 0; i < xinputPorts.length; ++i) {
+                    var newXInputPort = _.findWhere(p.inputPort, {"name": xinputPorts.at(i).get("name")});
+                    if(!newXInputPort) {
+                        xinputPortsToRemove.push(xinputPorts.at(i));
+                    }
+                }
+                for(var i = 0; i < xinputPortsToRemove.length; ++i) {
+                    prot.get("xinputPort").remove(xinputPortsToRemove[i]);
+                }
+                
+                // create new  registerXVars
                 if(p.registerXVar) {
                     for(var i = 0; i < p.registerXVar.length; ++i) {
                         var oldRegister = prot.get("registerXVar").findWhere({"name": p.registerXVar[i]});
