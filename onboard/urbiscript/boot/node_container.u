@@ -90,7 +90,7 @@ class NodeContainer {
         var changed = [];
         for(var cloneNameIt: getNodeNames()) {
             var node = lobby_.getLocalSlot(cloneNameIt).value();
-            if(node.getState() != XObjectStates.STATE_STOPPED) {
+            if(node.getState() == XObjectStates.STATE_STARTED) {
                 if(!cloneName || cloneNameIt == cloneName) {
                     node.stop();
                     changed << cloneNameIt;

@@ -6,9 +6,10 @@ file(GLOB HEADERS *.hpp)
 file(GLOB CHEADERS *.h)
 file(GLOB SCRIPTS ../../../../urbiscript/*.u)
 file(GLOB BOOT_SCRIPTS ../../../../urbiscript/boot/*.u)
+file(GLOB NODE_SCRIPTS ../../../../urbiscript/nodes/*.u)
 file(GLOB BOOT_IGNORE ../../../../urbiscript/boot/.uignore)
 
-x_add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS} ${CHEADERS} ${SCRIPTS} ${BOOT_SCRIPTS} ${BOOT_IGNORE})
+x_add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS} ${CHEADERS} ${SCRIPTS} ${BOOT_SCRIPTS} ${NODE_SCRIPTS} ${BOOT_IGNORE})
 
 x_target_link_libraries(${PROJECT_NAME} xcs)
 

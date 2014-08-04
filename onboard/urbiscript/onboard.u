@@ -47,7 +47,7 @@ class Onboard {
         // start communication
         context.adapter.start(onboardSettings_.get("serverHost"), onboardSettings_.get("serverPort"));
         
-        var json = XJson.new(); // TODO use "singleton"
+        var json = XJson.new();
         sender_ = OnboardSender.new(context.adapter, json);
 
         
@@ -131,6 +131,7 @@ class Onboard {
     // reset old dfg and create new one
     function doDfgCreate_(requestData) {
         var createdNodes = [];
+        var errorMessage = "";
 
         try {
             // prototypes
@@ -138,9 +139,13 @@ class Onboard {
                 var id = p["id"];
                 var name = p["name"];
                 
+                errorMessage = id;
+
                 if(nodeContainer_.createNode(name, id)) {
                     createdNodes << id;
                 };
+
+                errorMessage = "";
             };
 
             // connections
@@ -150,7 +155,11 @@ class Onboard {
                 var targetId = l["target"]["id"];
                 var targetPort = l["target"]["port"];
                 
+                errorMessage = sourceId + "." + sourcePort + " >> " + targetId + "." + targetPort;
+
                 nodeContainer_.connectNodes(sourceId, sourcePort, targetId, targetPort);
+
+                errorMessage = "";
             };
 
             // register xvars
@@ -160,11 +169,13 @@ class Onboard {
                 var targetId = r["target"]["id"];
                 var targetPort = r["target"]["port"];
 
+                errorMessage = sourceId + "." + sourcePort + " register to " + targetId + "." + targetPort;
+
                 var source = nodeContainer_.getNode(sourceId);
                 var target = nodeContainer_.getNode(targetId);
 
-                var sourceSlot = source.getLocalSlot(sourcePort); 
-                var targetSlot = target.getLocalSlot(targetPort);
+                // get source slot
+                var sourceSlot = source.getSlot(sourcePort); 
 
                 // get data types
                 var synT = source.getSynType(sourcePort);
@@ -172,12 +183,20 @@ class Onboard {
 
                 // execute register xvar method
                 callMethod(target, targetPort, sourcePort, semT, synT, sourceSlot);
+
+                errorMessage = "";
             };
         } catch(var ex) {
             for(var node: createdNodes) {
                 doDfgReset_(false, node);
             };            
-            throw ex;
+           
+            if(errorMessage == "") {
+                throw ex;
+            }
+            else {
+                throw Exception.new(errorMessage + ": " + ex.message());
+            };
         };
 
         if(!createdNodes) {
