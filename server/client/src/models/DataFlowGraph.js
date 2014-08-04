@@ -196,7 +196,7 @@ var DataFlowGraph = Backbone.Model.extend({
 
             if(p.name) { 
                 switch(p.name) {
-                    case "GUI":
+                    case "Gui":
                         if(p.registerXVar && p.registerXVar.length == 1) {
                             var registerXVar = p.registerXVar.pop();
                             
