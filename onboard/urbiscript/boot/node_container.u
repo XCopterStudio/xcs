@@ -74,9 +74,39 @@ class NodeContainer {
         var changed = [];
         for(var cloneNameIt: getNodeNames()) {
             if(!cloneName || cloneNameIt == cloneName) {
+                // find connections to remove
+                var connToRemove = [];
+                for(var conn: createdConnections_) {
+                    if(conn.second["srcName"] == cloneNameIt || conn.second["dstName"] == cloneNameIt) {
+                        connToRemove << conn.first;
+                    };
+                };
+
+                // remove connections to remove
+                for(var connId in connToRemove) {
+                    createdConnections_[connId]["conn"].disconnect();
+                    createdConnections_.erase(connId);
+                };
+
+                // find registerxvar method to remove
+                var regToRemove = [];
+                for(var reg: registeredXVars_) {
+                    if(reg.second["srcName"] == cloneNameIt || reg.second["dstName"] == cloneNameIt) {
+                        regToRemove << reg.first();
+                    };
+                };
+
+                // remove registerxvar method to remove
+                for(var regName in regToRemove) { 
+                    this.callMessage(registeredXVars_[regName]["unregister"]);
+                    registeredXVars_.erase(regName);
+                };
+
+                // remove node
                 lobby_.getLocalSlot(cloneNameIt).value = nil;
                 lobby_.removeLocalSlot(cloneNameIt);
                 createdNodes_.remove(cloneNameIt);
+
                 changed << cloneNameIt;
             };
         };
@@ -101,7 +131,11 @@ class NodeContainer {
         
         if(connId not in createdConnections_) {
             var conn = srcPort >> dstPort;
-            createdConnections_[connId] = conn;
+            createdConnections_[connId] = [
+                "conn" => conn,
+                "srcName" => srcName,
+                "dstName" => dstName,
+            ];
             return true;
         };
 
@@ -131,7 +165,7 @@ class NodeContainer {
         };
 
         for(var connId in connToRemove) {
-            createdConnections_[connId].disconnect();
+            createdConnections_[connId]["conn"].disconnect();
             createdConnections_.erase(connId);
             disconnectedNodes << connId;
         };
@@ -159,7 +193,11 @@ class NodeContainer {
         if(channelName not in registeredXVars_) {
             callMethod(dst, dstPort, srcChannelName, semT, synT, srcSlot);
 
-            registeredXVars_[channelName] = getUnregisterXVarMethod(dst, dstPort, srcChannelName);
+            registeredXVars_[channelName] = [
+                "unregister" => getUnregisterXVarMethod(dst, dstPort, srcChannelName),
+                "srcName" => srcName,
+                "dstName" => dstName,
+            ];
 
             return true;
         };
@@ -187,7 +225,7 @@ class NodeContainer {
         };
 
         for(var regName in regToRemove) { 
-            this.callMessage(registeredXVars_[regName]);
+            this.callMessage(registeredXVars_[regName]["unregister"]);
             registeredXVars_.erase(regName);
             unregisterXVars << regName;
         };
