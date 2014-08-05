@@ -11,7 +11,7 @@
 #include <xcs/types/type_utils.hpp>
 
 #include "logger_context.hpp"
-#include "writers/general_writer.hpp"
+#include "writers/scalar_writer.hpp"
 #include "writers/video_writer.hpp"
 #include "writers/vector_writer.hpp"
 
@@ -21,7 +21,7 @@ namespace nodes {
 class XDatalogger : public xcs::nodes::XObject {
     typedef std::map<std::string, datalogger::AbstractWriter*> WriterMap;
     typedef std::map<std::string, std::string> XVarNameMap;
-    typedef std::list<std::unique_ptr<datalogger::GeneralWriter> > GeneralWriterList;
+    typedef std::list<std::unique_ptr<datalogger::ScalarWriter> > GeneralWriterList;
     typedef std::list<std::unique_ptr<datalogger::VectorWriter> > VectorWriterList;
     typedef std::list<std::unique_ptr<datalogger::VideoWriter> > VideoWriterList;
 

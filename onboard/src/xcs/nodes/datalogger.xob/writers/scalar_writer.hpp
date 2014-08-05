@@ -10,10 +10,9 @@ namespace xcs {
 namespace nodes {
 namespace datalogger {
 
-// TODO rename to ScalarWriter
-class GeneralWriter : public AbstractWriter {
+class ScalarWriter : public AbstractWriter {
 public:
-    GeneralWriter(const std::string &name);
+    ScalarWriter(const std::string &name);
     void init(const std::string &dataName, LoggerContext &context, ::urbi::UVar &uvar);
 
     void write(::urbi::UVar &uvar);

@@ -1,19 +1,19 @@
-#include "general_writer.hpp"
+#include "scalar_writer.hpp"
 
 using namespace std;
 using namespace std::chrono;
 using namespace xcs::nodes::datalogger;
 
-GeneralWriter::GeneralWriter(const std::string &name) :
+ScalarWriter::ScalarWriter(const std::string &name) :
   AbstractWriter(name) {
 }
 
-void GeneralWriter::init(const std::string &dataName, LoggerContext &context, ::urbi::UVar &uvar) {
+void ScalarWriter::init(const std::string &dataName, LoggerContext &context, ::urbi::UVar &uvar) {
     basicInit(dataName, context, uvar);
-    UNotifyChange(uvar, &GeneralWriter::write);
+    UNotifyChange(uvar, &ScalarWriter::write);
 }
 
-void GeneralWriter::write(urbi::UVar &uvar) {
+void ScalarWriter::write(urbi::UVar &uvar) {
     if (!context_->enabled || !enabled()) {
         return;
     }

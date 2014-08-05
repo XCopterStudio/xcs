@@ -114,9 +114,9 @@ void XDatalogger::registerData(const std::string &name, const std::string &seman
     AbstractWriter* writer = nullptr;
     switch (syntacticCategory) {
         case CATEGORY_SCALAR:
-            writer = new GeneralWriter(std::string());
-            dynamic_cast<GeneralWriter *> (writer)->init(name, context_, uvar);
-            generalWriterList_.push_back(std::unique_ptr<GeneralWriter>(dynamic_cast<GeneralWriter *> (writer)));
+            writer = new ScalarWriter(std::string());
+            dynamic_cast<ScalarWriter *> (writer)->init(name, context_, uvar);
+            generalWriterList_.push_back(std::unique_ptr<ScalarWriter>(dynamic_cast<ScalarWriter *> (writer)));
             break;
         case CATEGORY_VECTOR:
             writer = new VectorWriter(std::string());
