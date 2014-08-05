@@ -14,7 +14,7 @@ void GeneralWriter::init(const std::string &dataName, LoggerContext &context, ::
 }
 
 void GeneralWriter::write(urbi::UVar &uvar) {
-    if (!context_->enabled) {
+    if (!context_->enabled || !enabled()) {
         return;
     }
     

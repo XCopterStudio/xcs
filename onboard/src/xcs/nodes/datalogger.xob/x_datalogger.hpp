@@ -5,6 +5,7 @@
 #include <fstream>
 #include <mutex>
 #include <atomic>
+#include <map>
 
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/types/type_utils.hpp>
@@ -18,6 +19,8 @@ namespace xcs {
 namespace nodes {
 
 class XDatalogger : public xcs::nodes::XObject {
+    typedef std::map<std::string, datalogger::AbstractWriter*> WriterMap;
+    typedef std::map<std::string, std::string> XVarNameMap;
     typedef std::list<std::unique_ptr<datalogger::GeneralWriter> > GeneralWriterList;
     typedef std::list<std::unique_ptr<datalogger::VectorWriter> > VectorWriterList;
     typedef std::list<std::unique_ptr<datalogger::VideoWriter> > VideoWriterList;
@@ -26,6 +29,8 @@ class XDatalogger : public xcs::nodes::XObject {
 
     static xcs::SyntacticCategoryMap syntacticCategoryMap_;
 
+    WriterMap xVarToWriterMap_; //! port name => writer
+    XVarNameMap xVarToNameMap_; //! UVar name => port name
     GeneralWriterList generalWriterList_;
     VectorWriterList vectorWriterList_;
     VideoWriterList videoWriterList_;
@@ -49,10 +54,12 @@ class XDatalogger : public xcs::nodes::XObject {
 
     inline bool validRegister() {
         if (context_.enabled) {
-            send("throw \"Cannot register input in enabled logger.\";");
+            send("throw \"Cannot register input in enabled logger.\";"); // TODO use XCS_LOG_
         }
         return !context_.enabled;
     }
+    void registerData(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);
+    void registerVideo(int width, int height, const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);
 protected:
     virtual void stateChanged(XObject::State state);
 public:
@@ -60,9 +67,8 @@ public:
     virtual ~XDatalogger();
 
     void init(const std::string &file);
-    void registerData(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);
-    void registerVideo(int width, int height, const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);
     void registerXVar(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);
+    void unregisterXVar(const std::string &name);
 };
 
 }

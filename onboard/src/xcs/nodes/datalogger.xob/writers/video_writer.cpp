@@ -22,7 +22,7 @@ void VideoWriter::init(const std::string &videoFile, const unsigned int &width, 
 }
 
 void VideoWriter::write(urbi::UImage image) {
-    if (!context_->enabled) {
+    if (!context_->enabled || !enabled()) {
         return;
     }
 

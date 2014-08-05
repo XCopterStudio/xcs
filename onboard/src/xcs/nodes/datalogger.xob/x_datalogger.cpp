@@ -29,8 +29,6 @@ XDatalogger::XDatalogger(const std::string& name) :
     fillTypeCategories(syntacticCategoryMap_);
 
     XBindFunction(XDatalogger, init);
-    XBindFunction(XDatalogger, registerData);
-    XBindFunction(XDatalogger, registerVideo);
     XBindFunction(XDatalogger, registerXVar);
 }
 
@@ -64,6 +62,14 @@ void XDatalogger::init(const std::string &file) {
 }
 
 void XDatalogger::registerXVar(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar) {
+    if (xVarToWriterMap_.count(name)) {
+        if (xVarToNameMap_[uvar.get_name()] != name) {
+            XCS_LOG_WARN("The XVar is already registered with different name '" << xVarToNameMap_[uvar.get_name()] << "' instead of '" << name << "'.");
+        }
+        xVarToWriterMap_[name]->enabled(true);
+        return;
+    }
+
     SyntacticCategoryType syntacticCategory = syntacticCategoryMap_.at(syntacticType);
     switch (syntacticCategory) {
         case CATEGORY_VIDEO:
@@ -74,6 +80,14 @@ void XDatalogger::registerXVar(const std::string &name, const std::string &seman
             registerData(name, semanticType, syntacticType, uvar);
             break;
     }
+}
+
+void XDatalogger::unregisterXVar(const std::string& name) {
+    if (!xVarToWriterMap_.count(name)) {
+        XCS_LOG_ERROR("XVar '" << name << "' doesn't exist.");
+        return;
+    }
+    xVarToWriterMap_[name]->enabled(false);
 }
 
 void XDatalogger::registerData(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar) {
@@ -113,6 +127,9 @@ void XDatalogger::registerData(const std::string &name, const std::string &seman
             XCS_LOG_WARN("Category unhandled " << syntacticCategory);
             break;
     }
+
+    xVarToWriterMap_.emplace(uvar.get_name(), writer);
+    xVarToNameMap_.emplace(uvar.get_name(), name);
 }
 
 void XDatalogger::registerVideo(int width, int height, const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar) {
@@ -137,9 +154,12 @@ void XDatalogger::registerVideo(int width, int height, const std::string &name, 
     videoFile += ".avi";
 
     registerHeader(name, semanticType, syntacticType);
-    VideoWriter* function = new VideoWriter(std::string());
-    function->init(videoFile.string(), width, height, name, context_, uvar);
-    videoWriterList_.push_back(std::unique_ptr<VideoWriter>(function));
+    VideoWriter* writer = new VideoWriter(std::string());
+    writer->init(videoFile.string(), width, height, name, context_, uvar);
+    videoWriterList_.push_back(std::unique_ptr<VideoWriter>(writer));
+
+    xVarToWriterMap_.emplace(uvar.get_name(), writer);
+    xVarToNameMap_.emplace(uvar.get_name(), name);
 }
 
 XStart(XDatalogger);

@@ -18,7 +18,7 @@ public:
 
     template<typename T>
     void write(T value) {
-        if (!context_->enabled) {
+        if (!context_->enabled || !enabled()) {
             return;
         }
         

@@ -2,6 +2,7 @@
 #define	ABSTRACTWRITER_HPP
 
 #include <string>
+#include <atomic>
 #include <urbi/uobject.hh>
 
 #include "../logger_context.hpp"
@@ -12,6 +13,8 @@ namespace nodes {
 namespace datalogger {
 
 class AbstractWriter : public ::urbi::UObject {
+private:
+    std::atomic<bool> enabled_;
 protected:
     Clock highResolutionClock_;
     LoggerContext* context_;
@@ -25,6 +28,14 @@ public:
     }
 
     virtual ~AbstractWriter() {
+    }
+    
+    inline void enabled(bool value) {
+        enabled_ = value;
+    }
+    
+    inline bool enabled() const {
+        return enabled_;
     }
 };
 
