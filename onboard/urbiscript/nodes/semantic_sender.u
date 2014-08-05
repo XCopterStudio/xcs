@@ -4,6 +4,7 @@ class SemanticSender : XObject {
     
     var data_ = [ => ]; // last stored value
     var metadata_ = [ => ]; // metadata of stored values
+    var registerData_ = [ => ]; // data name => subscription
     
     var lastSendData_ = [ => ];
     var sendCount_ = 0;
@@ -58,13 +59,18 @@ class SemanticSender : XObject {
             this.data_[name] = nil; // last stored value
             this.metadata_[name] = semanticType;
 
-            uvar.notifyChange(function() {
+            this.registerData_[name] = uvar.notifyChange(function() {
                 that.data_[name] = uvar.value();
             });
         } catch(var ex) {
             echo(ex.asString()); throw ex;
         }
     }|;
+
+    function unregisterXVar(name) {
+        this.registerData_[name].disconnected = true;
+        this.registerData_.erase(name);
+    };
 
     function finalize() {
         this.tag.stop();
