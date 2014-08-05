@@ -30,6 +30,7 @@ XDatalogger::XDatalogger(const std::string& name) :
 
     XBindFunction(XDatalogger, init);
     XBindFunction(XDatalogger, registerXVar);
+    XBindFunction(XDatalogger, unregisterXVar);
 }
 
 XDatalogger::~XDatalogger() {
