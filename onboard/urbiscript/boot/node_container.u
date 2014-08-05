@@ -16,6 +16,7 @@ class NodeContainer {
     var loadedXObjects_ = [ => ]; // prototypeName => SourceFiles)
     var prototypeInfo_ = []; // item is a dictionary with info
     var createdNodes_ = []; // item is a node name
+    var createdConnections_ = [ => ]; // connection name => UConnection
     
     var lobby_;
 
@@ -93,10 +94,47 @@ class NodeContainer {
         var srcNode = lobby_.getLocalSlot(srcName).value();
         var dstNode = lobby_.getLocalSlot(dstName).value();
         
-        // TODO here should be checked function connect
-        srcNode.getLocalSlot(srcPort) >> dstNode.getLocalSlot(dstPort);
+        var srcPort = srcNode.getSlot(srcPort);
+        var dstPort = dstNode.getSlot(dstPort);
+        var connId =  srcPort.asString() + " >> " + dstPort.asString();
+        
+        if(connId not in createdConnections_) {
+            var conn = srcPort >> dstPort;
+            createdConnections_[connId] = conn;
+            return true;
+        };
+
+        /* return */ false;
     };
     
+    function disconnectNodesNotIn(list) {
+        var idList = [];
+        for(var conn: list) {
+            var srcNode = lobby_.getLocalSlot(conn[0]).value();
+            var dstNode = lobby_.getLocalSlot(conn[2]).value();
+
+            var srcPort = srcNode.getSlot(conn[1]);
+            var dstPort = dstNode.getSlot(conn[3]);
+            var connId =  srcPort.asString() + " >> " + dstPort.asString();
+
+            idList << connId;
+        };
+
+        var connToRemove = [];
+        for(var conn: createdConnections_) {
+            if(conn.first() not in idList) {
+                connToRemove << conn.first();
+            };
+        };
+
+        for(var connId in connToRemove) {
+            createdConnections_[connId].disconnect();
+            createdConnections_.erase(connId);
+        };
+
+        return connToRemove.size() > 0;
+    };
+
     function startNodes(cloneName = nil) {
         var changed = [];
         for(var cloneNameIt: getNodeNames()) {

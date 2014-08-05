@@ -134,6 +134,7 @@ class Onboard {
     // reset old dfg and create new one
     function doDfgCreate_(requestData) {
         var createdNodes = [];
+        var created = false;
         var errorMessage = "";
 
         try {
@@ -146,12 +147,14 @@ class Onboard {
 
                 if(nodeContainer_.createNode(name, id)) {
                     createdNodes << id;
+                    created = true;
                 };
 
                 errorMessage = "";
             };
 
             // connections
+            var connections = [];
             for(var l: requestData["link"]) {
                 var sourceId = l["source"]["id"];
                 var sourcePort = l["source"]["port"];
@@ -160,9 +163,20 @@ class Onboard {
                 
                 errorMessage = sourceId + "." + sourcePort + " >> " + targetId + "." + targetPort;
 
-                nodeContainer_.connectNodes(sourceId, sourcePort, targetId, targetPort);
+                var connected = nodeContainer_.connectNodes(sourceId, sourcePort, targetId, targetPort);
+
+                if(connected) {
+                    created = true;
+                };
+                
+                connections << (sourceId, sourcePort, targetId, targetPort);
 
                 errorMessage = "";
+            };
+
+            var disconnected = nodeContainer_.disconnectNodesNotIn(connections);
+            if(disconnected) {
+                created = true;
             };
 
             // register xvars
@@ -186,6 +200,7 @@ class Onboard {
 
                 // execute register xvar method
                 callMethod(target, targetPort, sourcePort, semT, synT, sourceSlot);
+                created = true;
 
                 errorMessage = "";
             };
@@ -202,7 +217,7 @@ class Onboard {
             };
         };
 
-        if(!createdNodes) {
+        if(!created) {
             throw Exception.new("nothing to create");
         }; 
         
