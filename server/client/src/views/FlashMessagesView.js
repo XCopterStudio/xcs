@@ -4,8 +4,6 @@ var FlashMessagesView = Backbone.View.extend({
 
     initialize : function() {
         this.listenTo(app.Onboard, "change:flash", this.flash);
-        //del
-        //console.log(this.$el);
     },
 
     render : function() {

@@ -329,10 +329,8 @@ var DataFlowGraph = Backbone.Model.extend({
         
         // check deleted protypes
         var p2Del = [];
-        //console.log("..." + this.get("xprototype").length);
         for(var j = 0; j < this.get(prototypeName).length; ++j) {
             var p = this.get(prototypeName).at(j);
-            //console.log("... " + p.get("name"));
             var prot = $.grep(prototype, function(item){ return item.name == p.get("name"); });
             
             // prototype was deleted

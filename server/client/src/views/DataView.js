@@ -6,7 +6,7 @@ var DataView = Backbone.View.extend({
         raw: {
             name: "raw data",
             ctor: function(dataId) {
-                //var dataName = dataId.charAt(0).toUpperCase() + dataId.slice(1);;
+                //var dataName = dataId.charAt(0).toUpperCase() + dataId.slice(1);
                 var words = dataId.split("_");
                 if(words.length == 2) {
                     var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;

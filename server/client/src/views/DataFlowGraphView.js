@@ -1,7 +1,6 @@
 var DfgState = ENUM(
     "DFG_STATE_NODES_LOADED", 
     "DFG_STATE_NOTCREATED", "DFG_STATE_CREATED", "DFG_STATE_STARTED", "DFG_STATE_STOPPED" //,    // DFG STATE
-    //"DFG_STATE_USER_DFG_LOADED", "DFG_STATE_DEFAULT_DFG_LOADED", "DFG_STATE_NODE_DFG_LOADED"    // LOADED DFG TYPE
     );
 
 var NODE_TYPE = ENUM(
@@ -120,20 +119,6 @@ var DataFlowGraphView = Backbone.View.extend({
         this.listenTo(this.dfgGraph, 'change:source', this.setLink);
 
         this.listenTo(this.dfgGraph, 'remove', this.removeNode);
-        
-        //debug
-//        var flowGraphConsole = $('#flow-graph-console');
-//        flowGraphConsole.append('<textarea id="flow-graph-txt" rows="15" cols="150"></textarea>');
-//        
-//        this.dfgGraph.on('change', function(model) {
-//            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
-//        });
-//        this.dfgGraph.on('add', function(cell) {
-//            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
-//        });
-//        this.dfgGraph.on('remove', function(cell) {
-//            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
-//        });
 
         this.initializeDfgToolbox4Drop();
            
@@ -315,9 +300,6 @@ var DataFlowGraphView = Backbone.View.extend({
         if(registerXVars) {
             registerXVars.forEach(function(reg) {
                 var registerName = reg.get("name");
-//                var registerSynType = "*";
-//                var registerSemType = "*";
-//                m.addInputPort(registerName, registerSemType, registerSynType);
                 m.addRegisterXVar(registerName);
             });
         }
@@ -392,7 +374,6 @@ var DataFlowGraphView = Backbone.View.extend({
     setBadLink : function(link) {
         link.attr({
             '.connection': { stroke: 'red' },
-            //'.marker-source': { fill: 'red', d: 'M 10 0 L 0 5 L 10 10 z' },
             '.marker-target': { fill: 'red', d: 'M 10 0 L 0 5 L 10 10 z' }
         });
     },
@@ -400,7 +381,6 @@ var DataFlowGraphView = Backbone.View.extend({
     setWellLink : function(link) {
         link.attr({
             '.connection': { stroke: 'green' },
-            //'.marker-source': { fill: 'red', d: 'M 10 0 L 0 5 L 10 10 z' },
             '.marker-target': { fill: 'green', d: 'M 10 0 L 0 5 L 10 10 z' }
         });
     },
@@ -592,7 +572,7 @@ var DataFlowGraphView = Backbone.View.extend({
         var prototypeId = this.trimId(prototypeName);
         
         //DEBUG
-        console.log("onPrototypeChange: " + prototypeName);
+        //console.log("onPrototypeChange: " + prototypeName);
         
         // add 2 toolbox - show to user
         if(!this.dfgToolboxNodes[prototypeId]) {
@@ -639,7 +619,6 @@ var DataFlowGraphView = Backbone.View.extend({
         try {
             var self = this;
             
-            //self.model.reset();
             self.model.requestLoad(function(id, responseType, responseData) {
                 //show error
                 if(responseType == ResponseType.Error) {
@@ -667,10 +646,6 @@ var DataFlowGraphView = Backbone.View.extend({
                         if(self.dfgModels.count() == 0) {
                             self.model.setDdfg("");
                             self.model.setDdfg(responseData.ddfg);
-                        }
-                        //debug
-                        else {
-                            console.log("!!! DDFG will not be loaded - DFG contains " + self.dfgModels.count() + " nodes!");
                         }
                     }
                 }

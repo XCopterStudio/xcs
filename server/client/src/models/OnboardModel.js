@@ -17,7 +17,6 @@ var OnboardModel = Backbone.Model.extend({
                 model.set('flash', json.data);
             } else if (json.type == "data") {
                 model.set('data', json.data);
-                //console.log("incoming");
             } else if (json.type == "onboard") {
                 model.set('onboard', json.data);
             }
