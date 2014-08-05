@@ -177,8 +177,10 @@ class NodeContainer {
             xObjectFiles[configuration["prototype"]] = configuration["file"];
         };
         
-        // load resources
-        load("nodes/xobject.u", lobby_);
+        // load common resources
+        load("nodes/x_object.u", lobby_);
+        System.eval(XCS.getStructs4RegCode(), lobby_);
+        
         for(var kvp: xObjectFiles) {
             try {
                 XCS_LOG_INFO("Loading CPP " + kvp.second);
@@ -244,8 +246,7 @@ class NodeContainer {
             
                 // force GC
                 dummyNode = nil;
-            }
-            catch(var ex) {
+            } catch(var ex) {
                 XCS_LOG_ERROR("Cannot load info about node \"" + configurationName + "\": " + ex.message() + "!");
             }
         };

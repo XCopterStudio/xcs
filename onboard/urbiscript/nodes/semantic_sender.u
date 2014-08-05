@@ -2,36 +2,26 @@ class SemanticSender : XObject {
     var tag = Tag.new();
     var job;
     
-    function init(adapter, inputs, UJson, refreshFrequency) {        
-        var this._inputs = [ => ];
+    var data_ = [ => ]; // last stored value
+    var metadata_ = [ => ]; // metadata of stored values
+    
+    function init(adapter, UJson, refreshFrequency) {        
+        var this.state_ = 0; // TODO find out why behaves weird
         var this.adapter = adapter;
         var this.period = 1 / refreshFrequency;
 
-        var this.state_ = 0;
-        this.adapter = adapter;
-        this.period = 1 / refreshFrequency;
-
-        for(var input: inputs) {
-            registerXVar(input.first);
-        };
 
         // run in background
         this.job = disown({this.tag: {
             every(this.period) {
-                var dataToSend = [ => ];
-                for(var input: this._inputs) {
-                    if(!this._inputs[input.first].isNil) {
-                        dataToSend[input.first] = this.getSlotValue(input.first);
-                    }
-                };
-                if(dataToSend.size > 0) {
-                    var serialized = UJson.encode([
-                        "type" => "data",
-                        "data" => dataToSend
-                    ]);
+                var serialized = UJson.encode([
+                    "type" => "data",
+                    "data" => this.data_,
+                    "metadata" => this.metadata_
+                ]);
+                
 
-                    this.adapter.send(serialized + "\n");                    
-                };
+                this.adapter.send(serialized + "\n");                    
             };
         }});
         
@@ -49,22 +39,18 @@ class SemanticSender : XObject {
         state_ = 0;
     }|;
     
-    function registerXVar(name, semanticType = nil, syntacticType = nil, uvar = nil) {
+    function registerXVar(name, semanticType, syntacticType, uvar) {
         try {
             var that = this;
-            setSlot(name, nil); // slot for outer "writers"
-            this._inputs[name] = nil; // last stored value
-            var slot = getSlot(name);
+            this.data_[name] = nil; // last stored value
+            this.metadata_[name] = semanticType;
 
-            if(!uvar.isNil) {
-                uvar >> slot;
-            };
-
-            slot.notifyChange(function() {
-                that._inputs[name] = that.getSlotValue(name);
+            uvar.notifyChange(function() {
+                that.data_[name] = uvar.value();
             });
+        } catch(var ex) {
+            echo(ex.asString()); throw ex;
         }
-        catch(var ex) { echo(ex.asString()); throw ex; }
     }|;
 
     function finalize() {

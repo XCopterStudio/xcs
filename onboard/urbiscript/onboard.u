@@ -24,6 +24,7 @@ class Onboard {
         load("boot/adapter.u");
         load("boot/dfg_storage.u");
         load("boot/node_container.u");
+        load("boot/json_receiver.u");
         load("settings_collection.u");
         
         System.loadModule("xsettings");
@@ -33,8 +34,14 @@ class Onboard {
         // load onboard settings
         onboardSettings_ = XSettings.new(XcsPaths.getSettings("onboard.xs").asString(), false);
         
+        // prepare context
         var context = Object.new();
         var context.adapter = Adapter.new();
+        
+        var json = XJson.new(); // TODO add JSON to context
+        var context.jsonReceiver = JsonReceiver.new(context.adapter, json);
+        var context.jsonSender; // TODO
+
         
         // load nodes settings
         var settingsCollection = SettingsCollection.new([XcsPaths.getSettings("xobjects.xs")]);
@@ -47,15 +54,10 @@ class Onboard {
         // start communication
         context.adapter.start(onboardSettings_.get("serverHost"), onboardSettings_.get("serverPort"));
         
-        var json = XJson.new();
         sender_ = OnboardSender.new(context.adapter, json);
-
         
         // initialize onboard receiver 4 communication with server
-        receiver_ = OnboardReceiver.new(context.adapter,  json);
-        at(receiver_.&request.changed?) {
-            this.doRequest_(receiver_.request);
-        };
+        context.jsonReceiver.addReceiver("onboard", this);
         
     };
       
@@ -64,7 +66,8 @@ class Onboard {
      * Handling requests
      */
     
-    function doRequest_(request) {
+    function receive(request) {
+        request = request["request"]; // backward compatibility
         if(!request.has("id") || !request.has("requestData") || !request.has("requestId")) {
             //TODO: what to do with errors? send to client?
             echo("ERROR(doRequest): bad request format: " + request.asString());
@@ -199,7 +202,7 @@ class Onboard {
                 var semT = source.getSemType(sourcePort);
 
                 // execute register xvar method
-                callMethod(target, targetPort, sourcePort, semT, synT, sourceSlot);
+                callMethod(target, targetPort, createChannelName(sourceId, sourcePort), semT, synT, sourceSlot);
                 created = true;
 
                 errorMessage = "";
@@ -296,6 +299,10 @@ class Onboard {
         this.ddfg_ = dfgStorage_.load(onboardSettings_.get("defaultDfg"));
     };
     
+    /*
+     * Utility functions
+     */
+    
     //at least need 2 args: target, method name, args
     function callMethod {
         call.target = call.evalArgAt(0);
@@ -308,6 +315,10 @@ class Onboard {
         call.args = args;
 
         call.target.callMessage(call);
+    };
+    
+    function createChannelName(nodeName, portName) {
+        nodeName + "_" + portName;
     };
 
     

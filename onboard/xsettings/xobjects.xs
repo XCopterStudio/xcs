@@ -44,6 +44,15 @@ Executor {
 Gui {
     prototype SemanticSender
     file nodes/semantic_sender.u 
-    args "adapter, [], UJson, 8"
+    args "adapter, XJson, 8"
     special true
+}
+
+SemanticReceiver {
+    file nodes/semantic_receiver.u
+    args "jsonReceiver, ["\
+        "\"flyControl\" => Pair.new('xcs::FlyControl', \"FLY_CONTROL\"),"\
+        "\"execUrbiscript\" => Pair.new(String, \"URBISCRIPT\"),"\
+        "\"execControl\" => Pair.new(String, \"CONTROL\")"\
+    "]"
 }

@@ -1,0 +1,80 @@
+class XObject : Finalizable {
+    class SyntacticTypes {
+        var structures = XCS.getStructs4Reg();
+        
+        function getSynType(object) {
+            switch(object.type) {
+                case "String":
+                    "std::string"
+                case "Float":
+                    "double"                
+                default:
+                    if(object.type in structures) { // NOTE: this may not be effective
+                        return object.type;
+                    };
+                    throw Exception.new("Object of unknown syntactic type '" + object.type + "'.");
+            };
+        };
+        
+        function deserialize(object, data) {
+            switch(object.type) {
+                case "String":
+                    data;
+                case "Float":
+                    data.asFloat();
+                default:
+                    if(object.type in structures) { // NOTE: this may not be effective
+                        return object.new(data);
+                    };
+                    throw Exception.new("Object of unknown type '" + object.type + "'.");
+            };            
+        };
+    }|;
+
+    var inputs_ = [ => ];
+    var outputs_ = [ => ];
+
+    function getXVars() {
+        return outputs_.keys;
+    }|;
+    
+    function getXInputPorts() {
+        return inputs_.keys;
+    }|;
+    
+    function getSynType(channel) {
+        if(channel in inputs_) {
+            SyntacticTypes.getSynType(inputs_[channel].first);
+        } else if (channel in outputs_) {
+            SyntacticTypes.getSynType(outputs_[channel].first);
+        } else {
+            throw Exception.new("Unknown channel '" + channel + "'.");
+        }
+    }|;
+    
+    function getSemType(channel) {
+        if(channel in inputs_) {
+            inputs_[channel].second;
+        } else if (channel in outputs_) {
+            outputs_[channel].second;
+        } else {
+            throw Exception.new("Unknown channel '" + channel + "'.");
+        }
+    }|;
+    
+    function start() {
+        state_ = 1; // TODO enum/centralization
+    }|;
+    
+    function stop() {
+        state_ = 2; // TODO enum/centralizatoin
+    }|;
+    
+    function getState() {
+        return state_;
+    };
+
+    function finalize() {
+        // NOTE: can be overriden in clones
+    };
+}|;

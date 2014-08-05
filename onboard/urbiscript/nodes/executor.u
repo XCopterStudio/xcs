@@ -1,7 +1,7 @@
 class Executor : XObject {
     var inputs_ = [
-        "code" => Pair.new(Global.SyntacticTypes.STRING, "URBISCRIPT"),
-        "control" => Pair.new(Global.SyntacticTypes.STRING, "CONTROL"),
+        "code" => Pair.new(String, "URBISCRIPT"),
+        "control" => Pair.new(String, "CONTROL"),
     ];
     var outputs_ = [
     ];
