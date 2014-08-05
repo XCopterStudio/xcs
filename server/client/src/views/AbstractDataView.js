@@ -52,7 +52,7 @@ var AbstractDataView = Backbone.View.extend({
 
     onDataChange: function(model) {
         var data = model.get("data");
-
+        
         if(this.dataId == '') {
             this.setData(data);
         }

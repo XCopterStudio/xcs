@@ -7,6 +7,7 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     outPortsType: {},
     registerXVars: [],
     viewIds: [],
+    nodeState: NodeState.NOTCREATED,
     
     markup: '<g class="rotatable"><g class="scalable"><rect></rect></g><text class="label"></text><g class="inPorts"></g><g class="outPorts"></g></g>',
     portMarkup: '<g class="port<%= id %>"><circle class="port"></circle><text></text></g>',
@@ -97,7 +98,9 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     setState : function(state) {
         var color = '#FFFFFF';
         
-        switch(state) {
+        nodeState = state;
+        
+        switch(nodeState) {
             case NodeState.NOTCREATED:
                 color = '#5bc0de';
                 break;
@@ -113,6 +116,10 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
         }
 
         this.attr('rect/fill', color);
+    },
+    
+    getState : function() {
+        return nodeState;
     },
     
     setId : function(newId) {

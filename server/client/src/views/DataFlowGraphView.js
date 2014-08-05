@@ -812,24 +812,57 @@ var DataFlowGraphView = Backbone.View.extend({
                     // set nodes states
                     else if(responseData) {
                         var successCount = 0;
+                        var linkCount = 0;
+                        var unlinkCount = 0;
                         
-                        for(var i = 0; i < responseData.length; ++i) {
-                            var model = self.dfgModels[responseData[i]];
-                            if(model) {
-                                model.setState(NodeState.CREATED);
-                                ++successCount;
-                                
-                                // create widgets
-                                if(model.get("origId") == "Gui") {
-                                    for(var j = 0; j < viewNames.length; ++j) {
-                                        viewNames[j].model.viewIds.push(app.DataView.addViewByName(viewNames[j].viewName, viewNames[j].dataId));
+                        if(responseData.prototype) {
+                            for(var i = 0; i < responseData.prototype.length; ++i) {
+                                var model = self.dfgModels[responseData.prototype[i]];
+                                if(model) {
+                                    model.setState(NodeState.CREATED);
+                                    ++successCount;
+                                    
+                                    // create widgets
+                                    if(model.get("origId") == "Gui") {
+                                        for(var j = 0; j < viewNames.length; ++j) {
+                                            viewNames[j].model.viewIds.push(app.DataView.addViewByName(viewNames[j].viewName, viewNames[j].dataId));
+                                        }
                                     }
                                 }
                             }
                         }
                         
+                        if(responseData.link) {
+                            linkCount = responseData.link;
+                        }
+                        
+                        if(responseData.unlink) {
+                            unlinkCount = responseData.unlink;
+                        }
+                        
+                        if(responseData.registerXVar) {
+                            linkCount += responseData.registerXVar;
+                        }
+                        
+                        if(responseData.unregisterXVar) {
+                            unlinkCount += responseData.unregisterXVar;
+                        }
+                        
+                        var msg = "";
+                        if(successCount > 0) {
+                            msg = "" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " created. ";
+                        }
+                        
+                        if(linkCount > 0) {
+                            msg += "" + linkCount + " " + (linkCount <= 1 ? "link is" : "links are") + " created. "
+                        }
+                        
+                        if(unlinkCount > 0 ) {
+                            msg += "" + unlinkCount + " " + (unlinkCount <= 1 ? "link is" : "links are") + " destroyed.";
+                        }
+                        
                         // show result
-                        app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " created.");
+                        app.Flash.flashSuccess(msg);
                     }
                     
                     //response action
@@ -866,7 +899,7 @@ var DataFlowGraphView = Backbone.View.extend({
             // set nodes states
             else if(responseData) {
                 var successCount = 0;
-                
+
                 for(var i = 0; i < responseData.length; ++i) {
                     var model = self.dfgModels[responseData[i]];
                     if(model) {
@@ -874,9 +907,9 @@ var DataFlowGraphView = Backbone.View.extend({
                         ++successCount;
                     }
                 }
-                
+
                 // show result
-                app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " started.");
+                app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " started.\n");
             }
             
             //response action
