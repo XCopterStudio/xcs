@@ -29,6 +29,8 @@
 
 <script type="text/javascript" src="src/models/ManualControl.js"></script>
 <script type="text/javascript" src="src/models/OnboardModel.js"></script>
+<script type="text/javascript" src="src/models/DataFlowGraphNodeIO.js"></script>
+<script type="text/javascript" src="src/models/DataFlowGraphNode.js"></script>
 <script type="text/javascript" src="src/models/DataFlowGraph.js"></script>
 <script type="text/javascript" src="src/models/DataFlowGraphDefaultModel.js"></script>
 <script type="text/javascript" src="src/models/WaitAction.js"></script>
