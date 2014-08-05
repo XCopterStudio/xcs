@@ -24,11 +24,8 @@ var OnboardModel = Backbone.Model.extend({
         });
     },
 
-    setMode: function (mode) {
-        data = {
-            "type": "onboard",
-            "data": { "mode": mode }
-        };
-        gSocket.emit('resend', JSON.stringify(data));
+    sendData: function (data) {
+        var message = { type: 'data', data: data };
+        gSocket.emit('resend', JSON.stringify(message));
     }
 });

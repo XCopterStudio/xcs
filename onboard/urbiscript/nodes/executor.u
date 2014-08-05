@@ -1,9 +1,15 @@
 class Executor : XObject {
+    class State {
+        var IDLE = "idle";
+        var RUNNING = "running";
+        var FREEZED = "freezed";
+    };
     var inputs_ = [
         "code" => Pair.new(String, "URBISCRIPT"),
         "control" => Pair.new(String, "CONTROL"),
     ];
     var outputs_ = [
+        "state" => Pair.new(String, "EXECUTION_STATE")
     ];
     var state_ = 0; // NOTE: this is necessary to do in every clone of the XObject prototype
     
@@ -12,22 +18,29 @@ class Executor : XObject {
     function init(lobby) {
         var this.lobby_ = lobby;
         var this.control = "";
+        var this.state = State.IDLE;
         var this.tag = Tag.new();
         var this.job;
         var that = this;
+        
+        at(this.tag.leave?) {
+            that.state = that.State.IDLE;
+        };
 
         &control.notifyChange(function() {
-            echo("Changed: " + that.control);
             if(that.control == "run") {
-                //that.tag: System.eval(that.code, that.lobby_),; // run in background (which doesn't work well with >>)
-                that.job = disown({that.tag: System.eval(that.code, that.lobby_)}); // run in background
+                that.state = that.State.RUNNING;
+                that.job = disown({that.tag: System.eval(that.code, that.lobby_)}); // run in background                
             } else if(that.control == "freeze") {
                 that.tag.freeze();
+                that.state = that.State.FREEZED;
             } else if(that.control == "unfreeze") {
+                that.state = that.State.RUNNING;
                 that.tag.unfreeze();
             } else if(that.control == "stop") {
                 that.tag.stop();
                 that.job.terminate();
+                // NOTE: state will be set in event handler for tag leave
             }
         });
     }|;

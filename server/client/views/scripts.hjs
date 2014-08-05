@@ -29,6 +29,7 @@
 
 <script type="text/javascript" src="src/models/ManualControl.js"></script>
 <script type="text/javascript" src="src/models/OnboardModel.js"></script>
+<script type="text/javascript" src="src/models/ConsoleModel.js"></script>
 <script type="text/javascript" src="src/models/DataFlowGraph.js"></script>
 <script type="text/javascript" src="src/models/DataFlowGraphDefaultModel.js"></script>
 <script type="text/javascript" src="src/models/WaitAction.js"></script>
@@ -41,4 +42,5 @@
 <script type="text/javascript" src="src/views/AppView.js"></script>
 <script type="text/javascript" src="src/views/DataFlowGraphView.js"></script>
 <script type="text/javascript" src="src/views/WaitView.js"></script>
+<script type="text/javascript" src="src/views/ConsoleView.js"></script>
 <script type="text/javascript" src="src/app.js"></script>

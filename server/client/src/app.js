@@ -23,13 +23,11 @@ $(function () {
     //set models 
     app.Onboard = new OnboardModel();
     
-    //set standard views
+    //initialize views
     app.Wait = new WaitView();
     app.Flash = new FlashMessagesView();
     
-    //set view for widgets
     app.DataView = new DataView();
-    
-    //set dfg view
     app.DataFlowGraph = new DataFlowGraphView();
+    app.ConsoleView = new ConsoleView();
 });
