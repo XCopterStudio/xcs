@@ -5,7 +5,11 @@ class SemanticSender : XObject {
     var data_ = [ => ]; // last stored value
     var metadata_ = [ => ]; // metadata of stored values
     
-    function init(adapter, UJson, refreshFrequency) {        
+    var lastSendData_ = [ => ];
+    var sendCount_ = 0;
+    var maxSendCount_ = 3;
+
+    function init(adapter, json, refreshFrequency) {        
         var this.state_ = 0; // TODO find out why behaves weird
         var this.adapter = adapter;
         var this.period = 1 / refreshFrequency;
@@ -14,14 +18,23 @@ class SemanticSender : XObject {
         // run in background
         this.job = disown({this.tag: {
             every(this.period) {
-                var serialized = UJson.encode([
-                    "type" => "data",
-                    "data" => this.data_,
-                    "metadata" => this.metadata_
-                ]);
-                
+                if(data_ != lastSendData_ || sendCount_ < maxSendCount_) {
+                    var serialized = json.encode([
+                        "type" => "data",
+                        "data" => this.data_,
+                        "metadata" => this.metadata_
+                    ]);
 
-                this.adapter.send(serialized + "\n");                    
+                    this.adapter.send(serialized + "\n");                    
+
+                    if(data_ != lastSendData_) {
+                        lastSendData_ = data_.clone();
+                        sendCount_ = 0;
+                    }
+                    else if(sendCount_ < maxSendCount_) {
+                        ++sendCount_;
+                    };
+                };
             };
         }});
         
