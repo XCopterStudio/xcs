@@ -3,12 +3,6 @@
 *.so
 *.a
 
-# sheel scripts
-*.bat
-
-# text files
-*.txt
-
 # temporary files
 *~
 
