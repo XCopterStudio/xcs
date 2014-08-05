@@ -4,18 +4,16 @@
 System.loadModule("xxci");
 System.loadModule("xdataplayer");
 System.loadModule("netadapter");
-load("boot/boot.u");
 
 /*
 * Initialize nodes
 */
-var Global.player = XDataplayer.new("tmp/sample.txt");
-var player = Global.player;
+var player = XDataplayer.new("tmp/sample.txt");
+//var player = XDataplayer.new("experiments/sample3.txt");
 
 var netadapter = NetAdapter.new("udp://127.0.0.1:1235");
 
 player.&video >> netadapter.&video;
 
-player.command = "Play";
-
+player.start();
 
