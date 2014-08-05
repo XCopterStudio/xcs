@@ -269,7 +269,7 @@ var DataFlowGraphView = Backbone.View.extend({
         cloneName = cloneName.charAt(0).toLowerCase() + cloneName.slice(1);
         modelId = modelId.charAt(0).toLowerCase() + modelId.slice(1);
         
-        var m = new (joint.shapes.dfg.DataFlowGraphDefaultModel)({
+        var m = new (joint.shapes.dfg.DataFlowGraphCloneNode)({
             position: { x: x, y: y },
         });
         m.setId(modelId);
@@ -313,7 +313,7 @@ var DataFlowGraphView = Backbone.View.extend({
         
         //set context menu
         var self = this;
-        $("#flow-graph-screen .DataFlowGraphDefaultModel").contextMenu({
+        $("#flow-graph-screen .DataFlowGraphCloneNode").contextMenu({
             parentSelector:     "#dfg",
             menuSelector:       "#dfg-screen-context-menu",
             menuSelected:       function (target, selectedMenuItem) {

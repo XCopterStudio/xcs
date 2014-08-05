@@ -36,9 +36,9 @@ var DataFlowGraph = Backbone.Model.extend({
         "dfgDef" : "",
         "savedDfg" : "",
         "ddfg" : "",
-        "xprototype" : new Backbone.Collection([], { model : DataFlowGraphNode }),
-        "xprototypePrivate" : new Backbone.Collection([], { model : DataFlowGraphNode }),
-        "xprototypeSpecial" : new Backbone.Collection([], { model : DataFlowGraphNode })
+        "xprototype" : new Backbone.Collection([], { model : DataFlowGraphPrototypeNode }),
+        "xprototypePrivate" : new Backbone.Collection([], { model : DataFlowGraphPrototypeNode }),
+        "xprototypeSpecial" : new Backbone.Collection([], { model : DataFlowGraphPrototypeNode })
     },
     
     initialize : function() { 
@@ -174,7 +174,7 @@ var DataFlowGraph = Backbone.Model.extend({
                 }
                 else {
                     //create new prototype node
-                    prot = new DataFlowGraphNode();
+                    prot = new DataFlowGraphPrototypeNode();
                     prot.set("name", p.name);
                     
                     // add prototype to collection
@@ -186,7 +186,7 @@ var DataFlowGraph = Backbone.Model.extend({
                     for(var i = 0; i < p.var.length; ++i) {
                         var oldXVar = prot.get("xvar").findWhere({"name": p.var[i].name});
                         if(!oldXVar) {
-                            prot.get("xvar").add(new DataFlowGraphNodeIO({
+                            prot.get("xvar").add(new DataFlowGraphPrototypeNodeIO({
                                 name: p.var[i].name,
                                 synType: p.var[i].synType,
                                 semType: p.var[i].semType
@@ -200,7 +200,7 @@ var DataFlowGraph = Backbone.Model.extend({
                     for(var i = 0; i < p.inputPort.length; ++i) {
                         var oldXIPort = prot.get("xinputPort").findWhere({"name": p.inputPort[i].name});
                         if(!oldXIPort) {
-                            prot.get("xinputPort").add(new DataFlowGraphNodeIO({
+                            prot.get("xinputPort").add(new DataFlowGraphPrototypeNodeIO({
                                 name: p.inputPort[i].name,
                                 synType: p.inputPort[i].synType,
                                 semType: p.inputPort[i].semType
@@ -241,7 +241,7 @@ var DataFlowGraph = Backbone.Model.extend({
                         var oldRegister = prot.get("registerXVar").findWhere({"name": p.registerXVar[i]});
                         if(!oldRegister) {
                             if(p.registerXVar[i].name && p.registerXVar[i].realName) {
-                                prot.get("registerXVar").add(new DataFlowGraphNodeIO({
+                                prot.get("registerXVar").add(new DataFlowGraphPrototypeNodeIO({
                                     name: p.registerXVar[i].name,
                                     synType: "",
                                     semType: "",
@@ -249,7 +249,7 @@ var DataFlowGraph = Backbone.Model.extend({
                                 }));
                             }
                             else {
-                                prot.get("registerXVar").add(new DataFlowGraphNodeIO({
+                                prot.get("registerXVar").add(new DataFlowGraphPrototypeNodeIO({
                                     name: p.registerXVar[i],
                                     synType: "",
                                     semType: ""

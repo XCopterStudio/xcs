@@ -1,4 +1,4 @@
-var DataFlowGraphNodeIO = Backbone.Model.extend({
+var DataFlowGraphPrototypeNodeIO = Backbone.Model.extend({
     defaults : {
         "name" : "",
         "synType" : "",

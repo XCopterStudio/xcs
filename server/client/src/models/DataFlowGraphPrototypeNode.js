@@ -1,4 +1,4 @@
-var DataFlowGraphNode = Backbone.Model.extend({
+var DataFlowGraphPrototypeNode = Backbone.Model.extend({
     initialize : function() {
         // init property name
         if(!this.has("name")) {
@@ -10,7 +10,7 @@ var DataFlowGraphNode = Backbone.Model.extend({
             this.set("xvar", this.get("xvar").clone());
         }
         else {
-            this.set("xvar", new Backbone.Collection([], { model : DataFlowGraphNodeIO }));
+            this.set("xvar", new Backbone.Collection([], { model : DataFlowGraphPrototypeNodeIO }));
         }
         
         // init property xinputPort
@@ -18,7 +18,7 @@ var DataFlowGraphNode = Backbone.Model.extend({
             this.set("xinputPort", this.get("xinputPort").clone());
         }
         else {
-            this.set("xinputPort", new Backbone.Collection([], { model : DataFlowGraphNodeIO }));
+            this.set("xinputPort", new Backbone.Collection([], { model : DataFlowGraphPrototypeNodeIO }));
         }
         
         // init property xinputPort
@@ -26,7 +26,7 @@ var DataFlowGraphNode = Backbone.Model.extend({
             this.set("registerXVar", this.get("registerXVar").clone());
         }
         else {
-            this.set("registerXVar", new Backbone.Collection([], { model : DataFlowGraphNodeIO }));
+            this.set("registerXVar", new Backbone.Collection([], { model : DataFlowGraphPrototypeNodeIO }));
         }
         
         // propagate add/remove on xvar and xinputPort like change

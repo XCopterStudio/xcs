@@ -2,7 +2,7 @@ var NodeState = ENUM("NOTCREATED", "CREATED", "STARTED", "STOPPED");
 
 joint.shapes.dfg = {};
 
-joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_.extend({}, joint.shapes.basic.PortsModelInterface, {
+joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.extend({}, joint.shapes.basic.PortsModelInterface, {
     inPortsType: {},
     outPortsType: {},
     registerXVars: [],
@@ -13,7 +13,7 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     portMarkup: '<g class="port<%= id %>"><circle class="port"></circle><text></text></g>',
         
     defaults: joint.util.deepSupplement({
-        type: "dfg.DataFlowGraphDefaultModel",
+        type: "dfg.DataFlowGraphCloneNode",
         id: "id",
         origId: "origId",
         inPorts: [],
@@ -194,4 +194,4 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     },
 }));
 
-joint.shapes.dfg.DataFlowGraphDefaultModelView = joint.dia.ElementView.extend(joint.shapes.basic.PortsViewInterface);
+joint.shapes.dfg.DataFlowGraphCloneNodeView = joint.dia.ElementView.extend(joint.shapes.basic.PortsViewInterface);
