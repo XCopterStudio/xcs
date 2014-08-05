@@ -117,26 +117,32 @@ class NodeContainer {
         /* return */ lobby_.getSlot(cloneName).value();
     };
     
+    function hasNode(cloneName) {
+        /* return */ lobby_.hasSlot(cloneName);
+    };
+
     function getNodeNames() {
         /* return */ createdNodes_;
     };
     
     function connectNodes(srcName, srcPort, dstName, dstPort) {
-        var srcNode = lobby_.getLocalSlot(srcName).value();
-        var dstNode = lobby_.getLocalSlot(dstName).value();
+        if(hasNode(srcName) && hasNode(dstName)) {
+            var srcNode = getNode(srcName);
+            var dstNode = getNode(dstName);
         
-        var srcPort = srcNode.getSlot(srcPort);
-        var dstPort = dstNode.getSlot(dstPort);
-        var connId =  srcPort.asString() + " >> " + dstPort.asString();
+            var srcPort = srcNode.getSlot(srcPort);
+            var dstPort = dstNode.getSlot(dstPort);
+            var connId =  srcPort.asString() + " >> " + dstPort.asString();
         
-        if(connId not in createdConnections_) {
-            var conn = srcPort >> dstPort;
-            createdConnections_[connId] = [
-                "conn" => conn,
-                "srcName" => srcName,
-                "dstName" => dstName,
-            ];
-            return true;
+            if(connId not in createdConnections_) {
+                var conn = srcPort >> dstPort;
+                createdConnections_[connId] = [
+                    "conn" => conn,
+                    "srcName" => srcName,
+                    "dstName" => dstName,
+                ];
+                return true;
+            };
         };
 
         /* return */ false;
@@ -147,14 +153,16 @@ class NodeContainer {
 
         var idList = [];
         for(var conn: list) {
-            var srcNode = lobby_.getLocalSlot(conn[0]).value();
-            var dstNode = lobby_.getLocalSlot(conn[2]).value();
+            if(hasNode(conn[0]) && hasNode(conn[2])) {
+                var srcNode = getNode(conn[0]);
+                var dstNode = getNode(conn[2]);
 
-            var srcPort = srcNode.getSlot(conn[1]);
-            var dstPort = dstNode.getSlot(conn[3]);
-            var connId =  srcPort.asString() + " >> " + dstPort.asString();
+                var srcPort = srcNode.getSlot(conn[1]);
+                var dstPort = dstNode.getSlot(conn[3]);
+                var connId =  srcPort.asString() + " >> " + dstPort.asString();
 
-            idList << connId;
+                idList << connId;
+            };
         };
 
         var connToRemove = [];
@@ -174,32 +182,34 @@ class NodeContainer {
     };
 
     function registerXVar(srcName, srcPort, dstName, dstPort) {
-        // get nodes
-        var src = getNode(srcName);
-        var dst = getNode(dstName);
+        if(hasNode(srcName) && hasNode(dstName)) {
+            // get nodes
+            var src = getNode(srcName);
+            var dst = getNode(dstName);
 
-        // get source slot
-        var srcSlot = src.getSlot(srcPort); 
+            // get source slot
+            var srcSlot = src.getSlot(srcPort); 
 
-        // get data types
-        var synT = src.getSynType(srcPort);
-        var semT = src.getSemType(srcPort);
+            // get data types
+            var synT = src.getSynType(srcPort);
+            var semT = src.getSemType(srcPort);
 
-        var srcChannelName = createChannelName(srcName, srcPort);
-        var dstChannelName = createChannelName(dstName, dstPort);
-        var channelName = createChannelName(srcChannelName, dstChannelName);
+            var srcChannelName = createChannelName(srcName, srcPort);
+            var dstChannelName = createChannelName(dstName, dstPort);
+            var channelName = createChannelName(srcChannelName, dstChannelName);
 
-        // execute register xvar method
-        if(channelName not in registeredXVars_) {
-            callMethod(dst, dstPort, srcChannelName, semT, synT, srcSlot);
+            // execute register xvar method
+            if(channelName not in registeredXVars_) {
+                callMethod(dst, dstPort, srcChannelName, semT, synT, srcSlot);
 
-            registeredXVars_[channelName] = [
-                "unregister" => getUnregisterXVarMethod(dst, dstPort, srcChannelName),
-                "srcName" => srcName,
-                "dstName" => dstName,
-            ];
+                registeredXVars_[channelName] = [
+                    "unregister" => getUnregisterXVarMethod(dst, dstPort, srcChannelName),
+                    "srcName" => srcName,
+                    "dstName" => dstName,
+                ];
 
-            return true;
+                return true;
+            };
         };
 
         return false;
