@@ -238,7 +238,7 @@ var DataFlowGraph = Backbone.Model.extend({
                 // create new  registerXVars
                 if(p.registerXVar) {
                     for(var i = 0; i < p.registerXVar.length; ++i) {
-                        var oldRegister = prot.get("registerXVar").findWhere({"name": p.registerXVar[i]});
+                        var oldRegister = prot.get("registerXVar").findWhere({"name": (p.registerXVar[i].name ? p.registerXVar[i].name : p.registerXVar[i])});
                         if(!oldRegister) {
                             if(p.registerXVar[i].name && p.registerXVar[i].realName) {
                                 prot.get("registerXVar").add(new DataFlowGraphPrototypeNodeIO({
