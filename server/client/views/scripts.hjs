@@ -12,12 +12,6 @@
 <!-- code mirror -->
 <script type="text/javascript" src="js/codemirror/codemirror.js"></script>
 <script type="text/javascript" src="js/codemirror/xcsMode.js"></script>
-<!-- blockly -->
-<script type="text/javascript" src="js/blockly/blockly_compressed.js"></script>
-<script type="text/javascript" src="js/blockly/blocks_compressed.js"></script>
-<script type="text/javascript" src="js/blockly/msg/js/en.js"></script>
-<script type="text/javascript" src="js/blockly/javascript_compressed.js"></script>
-<script type="text/javascript" src="js/blockly/urbiscript.js"></script>
 <!-- jointJS -->
 <!-- TODO: this version should contain own version of backbone and underscore - change version -->
 <script type="text/javascript" src="js/jointjs/joint.nojquery.js"></script>

@@ -78,8 +78,6 @@ var DataFlowGraphView = Backbone.View.extend({
         this.listenTo(this.model, "change:dfgDef", this.onDfgDefChange);
         
         this.initializeDfg();
-        
-        //this.initializeBlockly();
     },
     
     
@@ -1294,106 +1292,5 @@ var DataFlowGraphView = Backbone.View.extend({
                 }
             }
         }
-    },
-    
-    /********************
-    ** BLOCKLY SECTION **
-    *********************/
-    initializeBlockly : function() {
-        //init style 4 screen
-        var blocklyScreen = $('#script-generator-screen');
-        blocklyScreen.css({
-            "height": "500px",
-            "width": "500px",
-        });
-        
-        // add script generator console
-        var blocklyConsole = $('#script-generator-console');
-        blocklyConsole.append('<textarea id="script-generator-scriptScreen" rows="5" cols="80"></textarea>');
-        
-        this.registerBlocks();
-        
-        // generate toolbox
-        var toolbox = $("#script-generator-toolbox");
-//        toolbox.append( // controls category
-//            '<category name="Control">\
-//                <block type="controls_if"></block>\
-//                <block type="controls_repeat_ext"></block>\
-//            </category>');
-//        toolbox.append( // logic category
-//            '<category name="Logic">\
-//            <block type="logic_compare"></block>\
-//            <block type="math_number"></block>\
-//            <block type="math_arithmetic"></block>\
-//            <block type="text"></block>\
-//            <block type="text_print"></block>\
-//        </category>');
-//        // other categories
-//        toolbox.append('<category name="Variables" custom="VARIABLE"></category>');
-//        toolbox.append('<category name="Functions" custom="PROCEDURE"></category>');
-        toolbox.append( // dataflow graf category
-            '<category name="Dataflow graf">\
-                <block type="connect"></block>\
-                <block type="test"></block>\
-            </category>');
-        
-        
-        // load blockly
-        Blockly.inject(
-            document.getElementById('script-generator-screen'),
-            {
-                  path : './js/blockly/'
-                , toolbox : document.getElementById('script-generator-toolbox')
-                , scrollbars : false //If false, supress scrollbars that appear if the toolbox has categories. Defaults to true.
-                //, collapse : true //Allows blocks to be collapsed or expanded. Defaults to true if the toolbox has categories, false otherwis
-                //, maxBlocks : Infinity //Maximum number of blocks that may be created. Useful for student exercises. Defaults to Infinity.
-                //, readOnly : false //If true, prevent the user from editing. Supresses the toolbox and trashcan. Defaults to false.
-                //, rtl : false //If true, mirror the editor for Arabic or Hebrew locales. See RTL demo. Defaults to false.
-                //, trashcan : true // Displays or hides the trashcan. Defaults to true if the toolbox has categories, false otherwise.
-
-            });
-        
-        //window.setTimeout(loadScript, 0);
-        //this.loadScript();
-        
-        // add change listener 
-        Blockly.addChangeListener(this.scriptWriter);  
-    },
-    
-    registerBlocks : function() {
-        Blockly.Blocks['test'] = {
-            init: function() {
-                this.setHelpUrl('');
-                this.appendDummyInput().
-                    appendField("test");
-                this.appendDummyInput()
-                    .appendField("   param1")
-                    .appendField(new Blockly.FieldTextInput(""), "PARAM1")
-                this.setPreviousStatement(true);
-                this.setNextStatement(true);
-                this.setTooltip('');
-            }
-        };
-        
-        Blockly.JavaScript['test'] = function(block) {
-            var param1 = block.getFieldValue('PARAM1');
-            
-            var code = 'test(' + param1 + ');\n';
-            
-            return code;
-        };
-    },
-    
-    scriptWriter: function() {
-        //var xml = Blockly.Xml.workspaceToDom(Blockly.getMainWorkspace());
-        //var code = Blockly.Xml.domToText(xml)
-        var code = Blockly.JavaScript.workspaceToCode();
-        document.getElementById('script-generator-scriptScreen').value = code;
-    },
-    
-    loadScript: function(xmlScript) {
-        //var savedXml = Blockly.Xml.textToDom('<xml><block type="connect" id="2" x="148" y="385"><field name="XOB1">subject</field><field name="XVAR1">out</field><field name="XOB2">observer</field><field name="XVAR2">in</field></block></xml>');
-        var savedXml = Blockly.Xml.textToDom(xmlScript);
-        Blockly.Xml.domToWorkspace(Blockly.getMainWorkspace(), savedXml);
-    },
+    }
 });
