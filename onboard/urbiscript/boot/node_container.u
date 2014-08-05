@@ -109,6 +109,8 @@ class NodeContainer {
     };
     
     function disconnectNodesNotIn(list) {
+        var disconnectedNodes = [];
+
         var idList = [];
         for(var conn: list) {
             var srcNode = lobby_.getLocalSlot(conn[0]).value();
@@ -131,9 +133,10 @@ class NodeContainer {
         for(var connId in connToRemove) {
             createdConnections_[connId].disconnect();
             createdConnections_.erase(connId);
+            disconnectedNodes << connId;
         };
 
-        return connToRemove.size() > 0;
+        return disconnectedNodes;
     };
 
     function registerXVar(srcName, srcPort, dstName, dstPort) {
@@ -164,7 +167,9 @@ class NodeContainer {
         return false;
     };
 
-    function unRegisterXVarsNotIn(list) {
+    function unregisterXVarsNotIn(list) {
+        var unregisterXVars = [];
+
         var nameList = [];
         for(var reg: list) {            
             var srcChannelName = createChannelName(reg[0], reg[1]);
@@ -184,9 +189,10 @@ class NodeContainer {
         for(var regName in regToRemove) { 
             this.callMessage(registeredXVars_[regName]);
             registeredXVars_.erase(regName);
+            unregisterXVars << regName;
         };
 
-        return regToRemove.size() > 0;
+        return unregisterXVars;
     };
 
     function startNodes(cloneName = nil) {
