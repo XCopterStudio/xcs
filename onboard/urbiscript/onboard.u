@@ -5,7 +5,7 @@ class Onboard {
         var dfgs = { if("XCS_DFGS_PATH" in System.env) Path.new(System.env["XCS_DFGS_PATH"]) else Path.cwd / "dfgs" };
 
         function getSettings(filename) {
-            settings / filename;
+            (settings / filename).asString();
         }|; 
     };
     
@@ -32,7 +32,7 @@ class Onboard {
         System.loadModule("ujson");
         
         // load onboard settings
-        onboardSettings_ = XSettings.new(XcsPaths.getSettings("onboard.xs").asString(), false);
+        onboardSettings_ = XSettings.new(XcsPaths.getSettings("onboard.xs"), false);
         
         // prepare context
         var context = Object.new();
@@ -41,6 +41,8 @@ class Onboard {
         var json = XJson.new(); // TODO add JSON to context
         var context.jsonReceiver = JsonReceiver.new(context.adapter, json);
         var context.jsonSender; // TODO
+        
+        var context.xcsPaths = XcsPaths;
 
         
         // load nodes settings

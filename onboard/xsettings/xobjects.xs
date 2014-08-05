@@ -26,7 +26,7 @@ XciVrep {
 }
 
 XControl {
-    args "\"xsettings/xcontrol.xs\""
+    args "xcsPaths.getSettings(\"xcontrol.xs\")"
 }
 
 XHermitMovement {
@@ -34,7 +34,7 @@ XHermitMovement {
 }
 
 XLocalization {
-    args "\"xsettings/xlocalization.xs\""
+    args "xcsPaths.getSettings(\"xlocalization.xs\")"
 }
 
 Executor {

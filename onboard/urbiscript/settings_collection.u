@@ -14,7 +14,7 @@ class SettingsCollection {
     
     function init(settingPaths) {
         for(var path: settingPaths) {
-            var settings = XSettings.new(path.asString(), false);
+            var settings = XSettings.new(path, false);
             for(var key: settings.getKeys("")) {
                 if(key in collection_) {
                     XCS_LOG_WARN("Ingored configuration name '" + key + "'.");
