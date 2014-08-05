@@ -32,13 +32,22 @@ module.exports = OnboardConnection;
 /*
  * Handler functions
  */
+var bufferData = "";
 
-function handleData(data) {
+function handleData(data) {    
     try {
         var parsed = JSON.parse(data);
-    } catch (e) {
-        parsed = null;
-        console.log(e.message);
+        bufferData = "";
+    } catch(e1) {
+        try {
+            console.log("JSON from onboard - try use buffered data.");
+            bufferData += data;
+            parsed = JSON.parse(bufferData);
+            bufferData = "";
+        } catch (e2) {
+            parsed = null;
+            console.log("ERROR (parse incoming data)" + e1.message);
+        }
     }
 
     if (parsed) {
