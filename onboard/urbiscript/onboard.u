@@ -167,7 +167,6 @@ class Onboard {
                 errorMessage = sourceId + "." + sourcePort + " >> " + targetId + "." + targetPort;
 
                 var connected = nodeContainer_.connectNodes(sourceId, sourcePort, targetId, targetPort);
-
                 if(connected) {
                     created = true;
                 };
@@ -183,6 +182,7 @@ class Onboard {
             };
 
             // register xvars
+            var registrations = [];
             for(var r: requestData["registerXVar"]) {
                 var sourceId = r["source"]["id"];
                 var sourcePort = r["source"]["port"];
@@ -190,28 +190,26 @@ class Onboard {
                 var targetPort = r["target"]["port"];
 
                 errorMessage = sourceId + "." + sourcePort + " register to " + targetId + "." + targetPort;
+                
+                var registered = nodeContainer_.registerXVar(sourceId, sourcePort, targetId, targetPort);
+                if(registered) {
+                    created = true;
+                };
 
-                var source = nodeContainer_.getNode(sourceId);
-                var target = nodeContainer_.getNode(targetId);
-
-                // get source slot
-                var sourceSlot = source.getSlot(sourcePort); 
-
-                // get data types
-                var synT = source.getSynType(sourcePort);
-                var semT = source.getSemType(sourcePort);
-
-                // execute register xvar method
-                callMethod(target, targetPort, createChannelName(sourceId, sourcePort), semT, synT, sourceSlot);
-                created = true;
+                registrations << (sourceId, sourcePort, targetId, targetPort);
 
                 errorMessage = "";
+            };
+
+            var unregistered = nodeContainer_.unRegisterXVarsNotIn(registrations);
+            if(unregistered) {
+                created = true;
             };
         } catch(var ex) {
             for(var node: createdNodes) {
                 doDfgReset_(false, node);
-            };            
-           
+            };
+
             if(errorMessage == "") {
                 throw ex;
             }
@@ -298,31 +296,6 @@ class Onboard {
     function loadDdfg_() {
         this.ddfg_ = dfgStorage_.load(onboardSettings_.get("defaultDfg"));
     };
-    
-    /*
-     * Utility functions
-     */
-    
-    //at least need 2 args: target, method name, args
-    function callMethod {
-        call.target = call.evalArgAt(0);
-        call.message = call.evalArgAt(1);
-    
-        var args = [];
-        for(var i = 2; i < call.argsCount; ++i) {
-            args << call.args[i];
-        };
-        call.args = args;
-
-        call.target.callMessage(call);
-    };
-    
-    function createChannelName(nodeName, portName) {
-        nodeName + "_" + portName;
-    };
-
-    
-
 }|;
 
 

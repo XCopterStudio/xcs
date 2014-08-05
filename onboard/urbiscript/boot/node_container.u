@@ -12,11 +12,12 @@ class NodeContainer {
         var STATE_STOPPED = 2;                
     };
     
-    var settingsCollection_; // settings aggregator, configuration name => init info
-    var loadedXObjects_ = [ => ]; // prototypeName => SourceFiles)
-    var prototypeInfo_ = []; // item is a dictionary with info
-    var createdNodes_ = []; // item is a node name
-    var createdConnections_ = [ => ]; // connection name => UConnection
+    var settingsCollection_;            // settings aggregator, configuration name => init info
+    var loadedXObjects_ = [ => ];       // prototypeName => SourceFiles)
+    var prototypeInfo_ = [];            // item is a dictionary with info
+    var createdNodes_ = [];             // item is a node name
+    var createdConnections_ = [ => ];   // connection name => UConnection
+    var registeredXVars_ = [ => ];      // register xvar name => unregister method message
     
     var lobby_;
 
@@ -133,6 +134,59 @@ class NodeContainer {
         };
 
         return connToRemove.size() > 0;
+    };
+
+    function registerXVar(srcName, srcPort, dstName, dstPort) {
+        // get nodes
+        var src = getNode(srcName);
+        var dst = getNode(dstName);
+
+        // get source slot
+        var srcSlot = src.getSlot(srcPort); 
+
+        // get data types
+        var synT = src.getSynType(srcPort);
+        var semT = src.getSemType(srcPort);
+
+        var srcChannelName = createChannelName(srcName, srcPort);
+        var dstChannelName = createChannelName(dstName, dstPort);
+        var channelName = createChannelName(srcChannelName, dstChannelName);
+
+        // execute register xvar method
+        if(channelName not in registeredXVars_) {
+            callMethod(dst, dstPort, srcChannelName, semT, synT, srcSlot);
+
+            registeredXVars_[channelName] = getUnregisterXVarMethod(dst, dstPort, srcChannelName);
+
+            return true;
+        };
+
+        return false;
+    };
+
+    function unRegisterXVarsNotIn(list) {
+        var nameList = [];
+        for(var reg: list) {            
+            var srcChannelName = createChannelName(reg[0], reg[1]);
+            var dstChannelName = createChannelName(reg[2], reg[3]);
+            var channelName = createChannelName(srcChannelName, dstChannelName); 
+
+            nameList << channelName;
+        };
+
+        var regToRemove = [];
+        for(var reg: registeredXVars_) {
+            if(reg.first() not in nameList) {
+                regToRemove << reg.first();
+            };
+        };
+
+        for(var regName in regToRemove) { 
+            this.callMessage(registeredXVars_[regName]);
+            registeredXVars_.erase(regName);
+        };
+
+        return regToRemove.size() > 0;
     };
 
     function startNodes(cloneName = nil) {
@@ -252,5 +306,45 @@ class NodeContainer {
         };
     };
     
+    /*
+     * Utility functions
+     */
+
+    //at least need 2 args: target, method name, args
+    function callMethod {
+        call.target = call.evalArgAt(0);
+        call.message = call.evalArgAt(1);
+    
+        var args = [];
+        for(var i = 2; i < call.argsCount; ++i) {
+            args << call.args[i];
+        };
+        call.args = args;
+
+        call.target.callMessage(call);
+    };
+
+    function createChannelName(nodeName, portName) {
+        nodeName + "_" + portName;
+    };
+
+    function createUnregisterXVarMethodName(registerXVarMethodName) {
+        "un" + registerXVarMethodName;
+    };
+
+    function getUnregisterXVarMethod(dst, dstPort, srcChannelName) {
+        call.target = this;
+        call.message = "callMethod";
+
+        var methodName = createUnregisterXVarMethodName(dstPort);
+
+        call.args = [ 
+            Lazy.new(function(){ dst; }), 
+            Lazy.new(function(){ methodName; }), 
+            Lazy.new(function(){ srcChannelName; })
+        ];
+
+        return call;
+    };
 };
 
