@@ -22,7 +22,6 @@ NetAdapter::NetAdapter(const std::string &name) :
 
     XBindVarF(video, &NetAdapter::onChangeVideo);
     XBindFunction(NetAdapter, init);
-    XBindFunction(NetAdapter, start);
 
 
 //    avframe_ = avcodec_alloc_frame();
@@ -64,10 +63,6 @@ void NetAdapter::init(const std::string &location) {
 
     videoWriter_ = new datalogger::VideoWriter(location);
 
-}
-
-void NetAdapter::start() {
-    //webrtcFacade_->start();
 }
 
 void NetAdapter::onChangeVideo(::urbi::UImage frame) { // TODO: try to change UVar to UImage.. should work

@@ -22,7 +22,6 @@ public:
     NetAdapter(const std::string &name);
     ~NetAdapter();
     void init(const std::string &location);
-    void start();
 
     XInputPort<::urbi::UImage> video;
 
