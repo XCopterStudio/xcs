@@ -823,7 +823,9 @@ var DataFlowGraphView = Backbone.View.extend({
                                     // create widgets
                                     if(model.get("origId") == "Gui") {
                                         for(var j = 0; j < viewNames.length; ++j) {
-                                            viewNames[j].model.viewIds.push(app.DataView.addViewByName(viewNames[j].viewName, viewNames[j].dataId));
+                                            if(viewNames[j].model.get("id") == model.get("id")) {
+                                                viewNames[j].model.viewIds.push(app.DataView.addViewByName(viewNames[j].viewName, viewNames[j].dataId));
+                                            }
                                         }
                                     }
                                 }
