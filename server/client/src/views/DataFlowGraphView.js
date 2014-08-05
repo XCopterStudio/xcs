@@ -1,8 +1,3 @@
-var DfgState = ENUM(
-    "DFG_STATE_NODES_LOADED", 
-    "DFG_STATE_NOTCREATED", "DFG_STATE_CREATED", "DFG_STATE_STARTED", "DFG_STATE_STOPPED" //,    // DFG STATE
-    );
-
 var NODE_TYPE = ENUM(
     "PUBLIC",
     "PRIVATE",
@@ -56,9 +51,7 @@ var DataFlowGraphView = Backbone.View.extend({
     },
     
     dfgCounter : [],
-    
-    dfgState_ : DfgState.DFG_STATE_NOTCREATED,
-    
+        
     initialize : function() {
         this.model = new DataFlowGraph();
         
@@ -648,16 +641,13 @@ var DataFlowGraphView = Backbone.View.extend({
                             self.model.setDdfg(responseData.ddfg);
                         }
                     }
+                    
+                    app.Wait.setWaitHtml("#dfgLoad", "Reload nodes");
                 }
                 
                 // response
                 if(response) {
                     response();
-                }
-                
-                // set state - must be at the end
-                if(responseType == ResponseType.Done) {
-                    self.setDfgState(DfgState.DFG_STATE_NODES_LOADED);
                 }
             });
         }
@@ -844,11 +834,6 @@ var DataFlowGraphView = Backbone.View.extend({
                     if(response) {
                         response();
                     }
-                    
-                    // set state - must be at the end
-                    if(responseType == ResponseType.Done && !modelId) {
-                        self.setDfgState(DfgState.DFG_STATE_CREATED);
-                    }
                 });
             }
         }
@@ -891,11 +876,6 @@ var DataFlowGraphView = Backbone.View.extend({
             if(response) {
                 response();
             }
-            
-            // set state - must be at the end
-            if(responseType == ResponseType.Done && !modelId) {
-                self.setDfgState(DfgState.DFG_STATE_STARTED);
-            }
         });
     },
     
@@ -925,11 +905,6 @@ var DataFlowGraphView = Backbone.View.extend({
             
             if(response) {
                 response();
-            }
-            
-            // set state - must be at the end
-            if(responseType == ResponseType.Done && !modelId) {
-                self.setDfgState(DfgState.DFG_STATE_STOPPED);
             }
         });
     },
@@ -1003,11 +978,6 @@ var DataFlowGraphView = Backbone.View.extend({
                 
                 if(response) {
                     response();
-                }
-                
-                // set state - must be at the end
-                if(responseType == ResponseType.Done && !modelId) {
-                    self.setDfgState(DfgState.DFG_STATE_NOTCREATED);
                 }
             });
         }
@@ -1114,160 +1084,4 @@ var DataFlowGraphView = Backbone.View.extend({
             }
         });
     },
-    
-    setDfgState : function(state) {
-        //debug
-        //console.log("set state: " + DfgState.getName(state));
-        //console.log("... old states: " + DfgState.getNames(this.dfgState_));
-        
-        var stateSetted = false;
-        switch(state) {
-            case DfgState.DFG_STATE_NODES_LOADED:
-                this.dfgState_ |= state;
-                stateSetted = true;
-                break;
-            case DfgState.DFG_STATE_NOTCREATED:
-                if(((this.dfgState_ & DfgState.DFG_STATE_STOPPED) == DfgState.DFG_STATE_STOPPED) ||
-                  ((this.dfgState_ & DfgState.DFG_STATE_CREATED) == DfgState.DFG_STATE_CREATED)) {
-                    // remove old state
-                    this.dfgState_ &= ~DfgState.DFG_STATE_STOPPED;
-                    this.dfgState_ &= ~DfgState.DFG_STATE_CREATED;
-                    
-                    // add new state
-                    this.dfgState_ |= state;
-                    stateSetted = true;
-                }
-                break;
-            case DfgState.DFG_STATE_CREATED:
-                if(((this.dfgState_ & DfgState.DFG_STATE_NOTCREATED) == DfgState.DFG_STATE_NOTCREATED)) {
-                    // remove old state
-                    this.dfgState_ &= ~DfgState.DFG_STATE_NOTCREATED;
-                    
-                    // add new state
-                    this.dfgState_ |= state;
-                    stateSetted = true;
-                }
-                break;
-            case DfgState.DFG_STATE_STARTED:
-                if(((this.dfgState_ & DfgState.DFG_STATE_CREATED) == DfgState.DFG_STATE_CREATED)) {
-                    // remove old state
-                    this.dfgState_ &= ~DfgState.DFG_STATE_CREATED;
-                    
-                    // add new state
-                    this.dfgState_ |= state;
-                    stateSetted = true;
-                }
-                else if(((this.dfgState_ & DfgState.DFG_STATE_STOPPED) == DfgState.DFG_STATE_STOPPED)) {
-                    // remove old state
-                    this.dfgState_ &= ~DfgState.DFG_STATE_STOPPED;
-                    
-                    // add new state
-                    this.dfgState_ |= state;
-                    stateSetted = true;
-                }
-                break;
-            case DfgState.DFG_STATE_STOPPED:
-                if(((this.dfgState_ & DfgState.DFG_STATE_STARTED) == DfgState.DFG_STATE_STARTED)) {
-                    // remove old state
-                    this.dfgState_ &= ~DfgState.DFG_STATE_STARTED;
-                    
-                    // add new state
-                    this.dfgState_ |= state;
-                    stateSetted = true;
-                }
-                break;
-        }
-        
-        //debug
-        //console.log("... new states: " + DfgState.getNames(this.dfgState_));
-        
-//        if(stateSetted) {
-//            this.onStateChanged();    
-//        }
-    },
-    
-    onStateChanged : function() {
-        var buttons = {
-            load: { disabled: false, selector: "#dfgLoad", type: "attr"},
-            create: { disabled: false, selector: "#dfgCreate", type: "attr"},
-            start: { disabled: false, selector: "#dfgStart", type: "attr"},
-            stop: { disabled: false, selector: "#dfgStop", type: "attr"},
-            destroy: { disabled: false, selector: "#dfgDestroy", type: "attr"},
-            reset: { disabled: false, selector: "#dfgReset", type: "attr"},
-            otherAction: { disabled: false, selector: "#dfgOtherAction", type: "attr"},
-            saveDfg: { disabled: false, selector: "#dfgSaveDfg", type: "attr"},
-            loadDfg: { disabled: false, selector: ".dfgLoadDfg", type: "class"},
-        };
-        
-        if(((this.dfgState_ & DfgState.DFG_STATE_NODES_LOADED) != DfgState.DFG_STATE_NODES_LOADED)) {
-            app.Wait.setWaitHtml("#dfgLoad", "Load nodes");
-            
-            buttons.create.disabled = true;
-            buttons.start.disabled = true;
-            buttons.stop.disabled = true;
-            buttons.destroy.disabled = true;
-            buttons.reset.disabled = true;
-            buttons.otherAction.disabled = true;
-            buttons.saveDfg.disabled = true; 
-            buttons.loadDfg.disabled = true; 
-        }
-        else {
-            app.Wait.setWaitHtml("#dfgLoad", "Reload nodes");
-            
-            buttons.create.disabled = false;
-            buttons.start.disabled = false;
-            buttons.stop.disabled = false;
-            buttons.destroy.disabled = false;
-            buttons.reset.disabled = false;
-            buttons.otherAction.disabled = false; 
-            buttons.saveDfg.disabled = false; 
-            buttons.loadDfg.disabled = false;
-        
-            if(((this.dfgState_ & DfgState.DFG_STATE_NOTCREATED) == DfgState.DFG_STATE_NOTCREATED)) {
-                buttons.start.disabled = true;
-                buttons.stop.disabled = true;
-                buttons.destroy.disabled = true;
-            }
-            
-            else if(((this.dfgState_ & DfgState.DFG_STATE_CREATED) == DfgState.DFG_STATE_CREATED)) {
-                buttons.create.disabled = true;
-                buttons.stop.disabled = true;
-                buttons.loadDfg.disabled = true;
-            }
-            
-            else if(((this.dfgState_ & DfgState.DFG_STATE_STARTED) == DfgState.DFG_STATE_STARTED)) {
-                buttons.create.disabled = true;
-                buttons.start.disabled = true;
-                buttons.destroy.disabled = true;
-                buttons.reset.disabled = true;
-                buttons.loadDfg.disabled = true;
-            }
-            
-            else if(((this.dfgState_ & DfgState.DFG_STATE_STOPPED) == DfgState.DFG_STATE_STOPPED)) {
-                buttons.create.disabled = true;
-                buttons.stop.disabled = true;
-                buttons.loadDfg.disabled = true;
-            }
-        }
-        
-        // enable/disable buttons
-        for(var p in buttons){
-            if(buttons[p].disabled) {
-                if(buttons[p].type == "attr") {
-                    $(buttons[p].selector).attr("disabled", "disabled");
-                }
-                else { // "class"
-                    $(buttons[p].selector).addClass("disabled");
-                }
-            }
-            else {
-                if(buttons[p].type == "attr") {
-                    $(buttons[p].selector).removeAttr("disabled");
-                }
-                else {
-                    $(buttons[p].selector).removeClass("disabled");
-                }
-            }
-        }
-    }
 });
