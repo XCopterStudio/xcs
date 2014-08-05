@@ -287,7 +287,7 @@ class NodeContainer {
             
                 // get info and prepare data about registerXVar functions
                 var registerXVars = [];
-                if(dummyNode.hasSlot("registerXVar")) {
+                if(dummyNode.hasSlot("registerXVar") && dummyNode.hasSlot(createUnregisterXVarMethodName("registerXVar"))) {
                     registerXVars << "registerXVar";
                 };
             
