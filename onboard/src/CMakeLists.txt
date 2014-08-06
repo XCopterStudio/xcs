@@ -48,5 +48,7 @@ add_subdirectory(xcs/nodes/xobject)
 add_subdirectory(xcs/nodes/settings.xob)
 add_subdirectory(xcs/nodes/json.xob)
 
+add_subdirectory(xcs/nodes/multiplexer.xob)
+
 # Subprojects (urbiscript)
 #add_subdirectory(../urbiscript ./urbiscript)
