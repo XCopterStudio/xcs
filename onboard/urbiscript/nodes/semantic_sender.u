@@ -10,6 +10,7 @@ class SemanticSender : XObject {
     function init(adapter, json, refreshFrequency) {        
         var this.tag_ = Tag.new();
         var this.job_ = nil;
+        var this.bufferMtx_ = Mutex.new();
         
         var this.state_ = 0;
         var this.adapter = adapter;
@@ -47,37 +48,34 @@ class SemanticSender : XObject {
     };
     
     function flush_() {
-        /*echo("Comparing"); echo(data_); echo("and"); echo(lastSentData_);
-        if(data_ != lastSentData_ || sentCount_ < maxSendCount_) {*/
-            var serialized = this.json.encode([
-                "type" => "data",
-                "data" => this.data_,
-                "metadata" => this.metadata_
-            ]);
-            this.adapter.send(serialized + "\n");                    
+        var toSend;
+        bufferMtx_: {
+            toSend = data_.clone();
+            data_.clear();
+        };
+        if(!toSend) {
+            return;
+        };
+        
+        var that = this;
+        var metadata = toSend.keys.map(function(it) { that.metadata_[it];});
+        var serialized = this.json.encode([
+            "type" => "data",
+            "data" => toSend,
+            "metadata" => metadata,
+        ]);
+        this.adapter.send(serialized + "\n");                    
 
-            /*if(data_ != lastSentData_) {
-                lastSentData_ = data_.clone();
-                sentCount_ = 0;
-            } else if(sentCount_ < maxSendCount_) {
-                ++sentCount_;
-            };
-        };*/
     };
     
     function registerXVar(name, semanticType, syntacticType, uvar) {
-        try {
-            var that = this;
-            this.data_[name] = nil; // last stored value
-            this.metadata_[name] = semanticType;
+        var that = this;
+        this.metadata_[name] = semanticType;
 
-            this.registerData_[name] = uvar.notifyChange(function() {
-                that.data_[name] = uvar.value();
-            });
-        } catch(var ex) {
-            echo(ex.asString()); throw ex;
-        }
-    }|;
+        this.registerData_[name] = uvar.notifyChange(function() {
+            that.bufferMtx_: that.data_[name] = uvar.value();
+        });
+    };
 
     function unregisterXVar(name) {
         this.registerData_[name].disconnected = true;
