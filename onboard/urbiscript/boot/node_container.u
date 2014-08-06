@@ -15,16 +15,21 @@ class NodeContainer {
     var settingsCollection_;            // settings aggregator, configuration name => init info
     var loadedXObjects_ = [ => ];       // prototypeName => SourceFiles)
     var prototypeInfo_ = [];            // item is a dictionary with info
-    var createdNodes_ = [];             // item is a node name
+    var createdNodes_ = [ => ];         // clone name => configuration name
     var createdConnections_ = [ => ];   // connection name => UConnection
     var registeredXVars_ = [ => ];      // register xvar name => unregister method message
     
+    var context_;                       // keeps reference to auxiliar object that aren't a node of DFG
     var lobby_;
 
     function init(settingsCollection, context) {
-        settingsCollection_ = settingsCollection.getCollection(); // NOTE: workaroud since SettingsCollection cannot inherit Dictionary
+        // NOTE: workaroud since SettingsCollection cannot inherit Dictionary
+        settingsCollection_ = settingsCollection.getCollection(); 
+        settingsCollection_.addProto(settingsCollection);
+        
+        context_ = context;
         lobby_ = Lobby.create();
-        lobby_.addProto(context);
+        lobby_.addProto(context_);
         checkAndLoad_();
         fillPrototypeInfo_();  
     };
@@ -66,17 +71,46 @@ class NodeContainer {
         var createCode = configuration["prototype"] + ".new(" + configuration["args"] + ")";
         var node = System.eval(createCode, lobby_);
         lobby_.setSlot(cloneName, node);
-        createdNodes_ << cloneName;
+        createdNodes_[cloneName] = configurationName;
+        
+        /*
+         * Some nodes are created specially (depends on flags)
+         */
+        if(settingsCollection_.XObjectFlags.RECEIVER in configuration["flags"]) {
+            context_.jsonReceiver.addReceiver("data", node);
+        };
+
+        /* return */ true;
+    };
+    
+    function destroyNode_(cloneName) {
+        if(!(cloneName in createdNodes_)) {
+            return false;
+        };
+        
+        var configuration = settingsCollection_[createdNodes_[cloneName]];
+        
+        /*
+         * Some nodes are destroyed specially (depends on flags)
+         */
+        if(settingsCollection_.XObjectFlags.RECEIVER in configuration["flags"]) {
+            context_.jsonReceiver.removeReceiver("data");
+        };
+        
+        lobby_.getLocalSlot(cloneName).value = nil;
+        lobby_.removeLocalSlot(cloneName);
+        createdNodes_.erase(cloneName);
+        
         /* return */ true;
     };
     
     function destroyNodes(cloneName = nil) {
         var changed = [];
         for(var cloneNameIt: getNodeNames()) {
-            if(!cloneName || cloneNameIt == cloneName) {
-                lobby_.getLocalSlot(cloneNameIt).value = nil;
-                lobby_.removeLocalSlot(cloneNameIt);
-                createdNodes_.remove(cloneNameIt);
+            if(cloneName && cloneNameIt != cloneName) {
+                continue;
+            };
+            if(destroyNode_(cloneNameIt)) {                
                 changed << cloneNameIt;
             };
         };
@@ -88,7 +122,7 @@ class NodeContainer {
     };
     
     function getNodeNames() {
-        /* return */ createdNodes_;
+        /* return */ createdNodes_.keys;
     };
     
     function connectNodes(srcName, srcPort, dstName, dstPort) {

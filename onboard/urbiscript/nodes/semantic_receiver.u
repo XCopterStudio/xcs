@@ -1,22 +1,24 @@
 class SemanticReceiver : XObject {
     
-    function init(jsonReceiver, outputs) {
+    function init(outputs) {
         this.outputs_ = outputs;
+        
         var this.state_ = 0; // TODO find out why behaves weird
-        jsonReceiver.addReceiver("data", this);
+        
         for(var kvp: outputs_) {
             setSlot(kvp.first, nil);
-        };
+        };        
     };
-    
+       
     function receive(data) {
         for(var kvp: data) {
-            if(!(kvp.first in outputs_)) {
-                XCS_LOG_WARN("Received unknown data '" + kvp.first + "'");
-            };
             var name = kvp.first;
-            var typeObject = outputs_[name].first;
+            if(!(name in outputs_)) {
+                XCS_LOG_WARN("Received unknown data '" + name + "'");
+                continue;
+            };
 
+            var typeObject = outputs_[name].first;
             this.updateSlot(name, SyntacticTypes.deserialize(typeObject, kvp.second));
         };
     };

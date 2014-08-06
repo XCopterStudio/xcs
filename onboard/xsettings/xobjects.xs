@@ -50,9 +50,10 @@ Gui {
 
 SemanticReceiver {
     file nodes/semantic_receiver.u
-    args "jsonReceiver, ["\
+    args "["\
         "\"flyControl\" => Pair.new('xcs::FlyControl', \"FLY_CONTROL\"),"\
         "\"execUrbiscript\" => Pair.new(String, \"URBISCRIPT\"),"\
         "\"execControl\" => Pair.new(String, \"CONTROL\")"\
     "]"
+    receiver true
 }

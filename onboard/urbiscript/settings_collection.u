@@ -4,10 +4,12 @@ class SettingsCollection {
     
     enum XObjectFlags {
         SPECIAL,
+        RECEIVER,
     };
     
     var configToFlag_ = [
-        "special" => XObjectFlags.SPECIAL
+        "special" => XObjectFlags.SPECIAL,
+        "receiver" => XObjectFlags.RECEIVER
     ];
     
     var collection_ = [ => ];

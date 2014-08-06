@@ -6,8 +6,8 @@ class SemanticSender : XObject {
     var metadata_ = [ => ]; // metadata of stored values
     var registerData_ = [ => ]; // data name => subscription
     
-    var lastSendData_ = [ => ];
-    var sendCount_ = 0;
+    var lastSentData_ = [ => ];
+    var sentCount_ = 0;
     var maxSendCount_ = 3;
 
     function init(adapter, json, refreshFrequency) {        
@@ -19,7 +19,8 @@ class SemanticSender : XObject {
         // run in background
         this.job = disown({this.tag: {
             every(this.period) {
-                if(data_ != lastSendData_ || sendCount_ < maxSendCount_) {
+                /*echo("Comparing"); echo(data_); echo("and"); echo(lastSentData_);
+                if(data_ != lastSentData_ || sentCount_ < maxSendCount_) {*/
                     var serialized = json.encode([
                         "type" => "data",
                         "data" => this.data_,
@@ -28,14 +29,13 @@ class SemanticSender : XObject {
 
                     this.adapter.send(serialized + "\n");                    
 
-                    if(data_ != lastSendData_) {
-                        lastSendData_ = data_.clone();
-                        sendCount_ = 0;
-                    }
-                    else if(sendCount_ < maxSendCount_) {
-                        ++sendCount_;
+                    /*if(data_ != lastSentData_) {
+                        lastSentData_ = data_.clone();
+                        sentCount_ = 0;
+                    } else if(sentCount_ < maxSendCount_) {
+                        ++sentCount_;
                     };
-                };
+                };*/
             };
         }});
         

@@ -36,4 +36,8 @@ class JsonReceiver {
     function addReceiver(dataType, receiver) {
         receivers[dataType] = receiver;
     };
+    
+    function removeReceiver(dataType) {
+        receivers.erase(dataType);
+    };
 }|;
