@@ -3,7 +3,7 @@ class SemanticReceiver : XObject {
     function init(outputs) {
         this.outputs_ = outputs;
         
-        var this.state_ = 0; // TODO find out why behaves weird
+        var this.state_ = 0;
         
         for(var kvp: outputs_) {
             setSlot(kvp.first, nil);
@@ -11,6 +11,10 @@ class SemanticReceiver : XObject {
     };
        
     function receive(data) {
+        if(state_ != 1) {
+            return;
+        };
+        
         for(var kvp: data) {
             var name = kvp.first;
             if(!(name in outputs_)) {
