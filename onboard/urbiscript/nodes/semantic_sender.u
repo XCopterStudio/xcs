@@ -1,7 +1,4 @@
 class SemanticSender : XObject {
-    var tag = Tag.new();
-    var job;
-    
     var data_ = [ => ]; // last stored value
     var metadata_ = [ => ]; // metadata of stored values
     var registerData_ = [ => ]; // data name => subscription
@@ -11,47 +8,62 @@ class SemanticSender : XObject {
     var maxSendCount_ = 3;
 
     function init(adapter, json, refreshFrequency) {        
-        var this.state_ = 0; // TODO find out why behaves weird
+        var this.tag_ = Tag.new();
+        var this.job_ = nil;
+        
+        var this.state_ = 0;
         var this.adapter = adapter;
+        var this.json = json;
         var this.period = 1 / refreshFrequency;
 
 
-        // run in background
-        this.job = disown({this.tag: {
-            every(this.period) {
-                /*echo("Comparing"); echo(data_); echo("and"); echo(lastSentData_);
-                if(data_ != lastSentData_ || sentCount_ < maxSendCount_) {*/
-                    var serialized = json.encode([
-                        "type" => "data",
-                        "data" => this.data_,
-                        "metadata" => this.metadata_
-                    ]);
-
-                    this.adapter.send(serialized + "\n");                    
-
-                    /*if(data_ != lastSentData_) {
-                        lastSentData_ = data_.clone();
-                        sentCount_ = 0;
-                    } else if(sentCount_ < maxSendCount_) {
-                        ++sentCount_;
-                    };
-                };*/
-            };
-        }});
-        
         at(this.state_->changed?) {
             switch(this.state_) {
-                case 0:
-                    this.tag.freeze();
                 case 1:
-                    this.tag.unfreeze();
+                    start_();
                 case 2:
-                    this.tag.freeze();
+                    stop_();
             };
         };
-
-        state_ = 0;
     }|;
+    
+    function start_() {
+        if(!job_) {
+            job_ = disown({tag_: {
+                every(period) {
+                    flush_()
+                };
+            }});
+        } else {
+            tag_.unfreeze();
+        };
+    };
+    
+    function stop_() {
+        if(!job_) {
+            return;
+        };
+        tag_.freeze();
+    };
+    
+    function flush_() {
+        /*echo("Comparing"); echo(data_); echo("and"); echo(lastSentData_);
+        if(data_ != lastSentData_ || sentCount_ < maxSendCount_) {*/
+            var serialized = this.json.encode([
+                "type" => "data",
+                "data" => this.data_,
+                "metadata" => this.metadata_
+            ]);
+            this.adapter.send(serialized + "\n");                    
+
+            /*if(data_ != lastSentData_) {
+                lastSentData_ = data_.clone();
+                sentCount_ = 0;
+            } else if(sentCount_ < maxSendCount_) {
+                ++sentCount_;
+            };
+        };*/
+    };
     
     function registerXVar(name, semanticType, syntacticType, uvar) {
         try {
@@ -73,7 +85,7 @@ class SemanticSender : XObject {
     };
 
     function finalize() {
-        this.tag.stop();
-        this.job.terminate();
+        tag_.stop();
+        job_.terminate();
     }|;
 }|;
