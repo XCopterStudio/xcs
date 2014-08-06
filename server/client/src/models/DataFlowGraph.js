@@ -1,70 +1,4 @@
 /* global gSocket */
-
-var DataFlowGraphNodeIO = Backbone.Model.extend({
-    defaults : {
-        "name" : "",
-        "synType" : "",
-        "semType" : "",
-        "realName" : "",
-    }
-});
-
-var DataFlowGraphNode = Backbone.Model.extend({
-    initialize : function() {
-        // init property name
-        if(!this.has("name")) {
-            this.set("name", "");
-        }
-        
-        // init property xvar
-        if(this.has("xvar")) {
-            this.set("xvar", this.get("xvar").clone());
-        }
-        else {
-            this.set("xvar", new Backbone.Collection([], { model : DataFlowGraphNodeIO }));
-        }
-        
-        // init property xinputPort
-        if(this.has("xinputPort")) {
-            this.set("xinputPort", this.get("xinputPort").clone());
-        }
-        else {
-            this.set("xinputPort", new Backbone.Collection([], { model : DataFlowGraphNodeIO }));
-        }
-        
-        // init property xinputPort
-        if(this.has("registerXVar")) {
-            this.set("registerXVar", this.get("registerXVar").clone());
-        }
-        else {
-            this.set("registerXVar", new Backbone.Collection([], { model : DataFlowGraphNodeIO }));
-        }
-        
-        // propagate add/remove on xvar and xinputPort like change
-        this.listenTo(this.get("xvar"), "add", this.onXvarChange);
-        this.listenTo(this.get("xinputPort"), "add", this.onXinputPortChange);
-        this.listenTo(this.get("registerXVar"), "add", this.onRegisterXVarChange);
-        this.listenTo(this.get("xvar"), "remove", this.onXvarChange);
-        this.listenTo(this.get("xinputPort"), "remove", this.onXinputPortChange);
-        this.listenTo(this.get("registerXVar"), "remove", this.onRegisterXVarChange);
-    },
-    
-    onXvarChange : function() {
-        this.trigger("change", this);
-        this.trigger("change:xvar", this);
-    },
-    
-    onXinputPortChange : function() {
-        this.trigger("change", this);
-        this.trigger("change:xinputPort", this);
-    },
-    
-    onRegisterXVarChange : function() {
-        this.trigger("change", this);
-        this.trigger("change:registerXVar", this);
-    },
-});
-
 var ResponseType = ENUM("Done", "Error");
 
 var DataFlowGraph = Backbone.Model.extend({    
@@ -102,9 +36,9 @@ var DataFlowGraph = Backbone.Model.extend({
         "dfgDef" : "",
         "savedDfg" : "",
         "ddfg" : "",
-        "xprototype" : new Backbone.Collection([], { model : DataFlowGraphNode }),
-        "xprototypePrivate" : new Backbone.Collection([], { model : DataFlowGraphNode }),
-        "xprototypeSpecial" : new Backbone.Collection([], { model : DataFlowGraphNode })
+        "xprototype" : new Backbone.Collection([], { model : DataFlowGraphPrototypeNode }),
+        "xprototypePrivate" : new Backbone.Collection([], { model : DataFlowGraphPrototypeNode }),
+        "xprototypeSpecial" : new Backbone.Collection([], { model : DataFlowGraphPrototypeNode })
     },
     
     initialize : function() { 
@@ -240,7 +174,7 @@ var DataFlowGraph = Backbone.Model.extend({
                 }
                 else {
                     //create new prototype node
-                    prot = new DataFlowGraphNode();
+                    prot = new DataFlowGraphPrototypeNode();
                     prot.set("name", p.name);
                     
                     // add prototype to collection
@@ -252,7 +186,7 @@ var DataFlowGraph = Backbone.Model.extend({
                     for(var i = 0; i < p.var.length; ++i) {
                         var oldXVar = prot.get("xvar").findWhere({"name": p.var[i].name});
                         if(!oldXVar) {
-                            prot.get("xvar").add(new DataFlowGraphNodeIO({
+                            prot.get("xvar").add(new DataFlowGraphPrototypeNodeIO({
                                 name: p.var[i].name,
                                 synType: p.var[i].synType,
                                 semType: p.var[i].semType
@@ -266,7 +200,7 @@ var DataFlowGraph = Backbone.Model.extend({
                     for(var i = 0; i < p.inputPort.length; ++i) {
                         var oldXIPort = prot.get("xinputPort").findWhere({"name": p.inputPort[i].name});
                         if(!oldXIPort) {
-                            prot.get("xinputPort").add(new DataFlowGraphNodeIO({
+                            prot.get("xinputPort").add(new DataFlowGraphPrototypeNodeIO({
                                 name: p.inputPort[i].name,
                                 synType: p.inputPort[i].synType,
                                 semType: p.inputPort[i].semType
@@ -304,10 +238,10 @@ var DataFlowGraph = Backbone.Model.extend({
                 // create new  registerXVars
                 if(p.registerXVar) {
                     for(var i = 0; i < p.registerXVar.length; ++i) {
-                        var oldRegister = prot.get("registerXVar").findWhere({"name": p.registerXVar[i]});
+                        var oldRegister = prot.get("registerXVar").findWhere({"name": (p.registerXVar[i].name ? p.registerXVar[i].name : p.registerXVar[i])});
                         if(!oldRegister) {
                             if(p.registerXVar[i].name && p.registerXVar[i].realName) {
-                                prot.get("registerXVar").add(new DataFlowGraphNodeIO({
+                                prot.get("registerXVar").add(new DataFlowGraphPrototypeNodeIO({
                                     name: p.registerXVar[i].name,
                                     synType: "",
                                     semType: "",
@@ -315,7 +249,7 @@ var DataFlowGraph = Backbone.Model.extend({
                                 }));
                             }
                             else {
-                                prot.get("registerXVar").add(new DataFlowGraphNodeIO({
+                                prot.get("registerXVar").add(new DataFlowGraphPrototypeNodeIO({
                                     name: p.registerXVar[i],
                                     synType: "",
                                     semType: ""
@@ -329,10 +263,8 @@ var DataFlowGraph = Backbone.Model.extend({
         
         // check deleted protypes
         var p2Del = [];
-        //console.log("..." + this.get("xprototype").length);
         for(var j = 0; j < this.get(prototypeName).length; ++j) {
             var p = this.get(prototypeName).at(j);
-            //console.log("... " + p.get("name"));
             var prot = $.grep(prototype, function(item){ return item.name == p.get("name"); });
             
             // prototype was deleted

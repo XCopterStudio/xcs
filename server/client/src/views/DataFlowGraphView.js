@@ -1,9 +1,3 @@
-var DfgState = ENUM(
-    "DFG_STATE_NODES_LOADED", 
-    "DFG_STATE_NOTCREATED", "DFG_STATE_CREATED", "DFG_STATE_STARTED", "DFG_STATE_STOPPED" //,    // DFG STATE
-    //"DFG_STATE_USER_DFG_LOADED", "DFG_STATE_DEFAULT_DFG_LOADED", "DFG_STATE_NODE_DFG_LOADED"    // LOADED DFG TYPE
-    );
-
 var NODE_TYPE = ENUM(
     "PUBLIC",
     "PRIVATE",
@@ -57,9 +51,7 @@ var DataFlowGraphView = Backbone.View.extend({
     },
     
     dfgCounter : [],
-    
-    dfgState_ : DfgState.DFG_STATE_NOTCREATED,
-    
+        
     initialize : function() {
         this.model = new DataFlowGraph();
         
@@ -120,20 +112,6 @@ var DataFlowGraphView = Backbone.View.extend({
         this.listenTo(this.dfgGraph, 'change:source', this.setLink);
 
         this.listenTo(this.dfgGraph, 'remove', this.removeNode);
-        
-        //debug
-//        var flowGraphConsole = $('#flow-graph-console');
-//        flowGraphConsole.append('<textarea id="flow-graph-txt" rows="15" cols="150"></textarea>');
-//        
-//        this.dfgGraph.on('change', function(model) {
-//            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
-//        });
-//        this.dfgGraph.on('add', function(cell) {
-//            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
-//        });
-//        this.dfgGraph.on('remove', function(cell) {
-//            $('#flow-graph-txt').val(JSON.stringify(this.toJSON()));
-//        });
 
         this.initializeDfgToolbox4Drop();
            
@@ -284,7 +262,7 @@ var DataFlowGraphView = Backbone.View.extend({
         cloneName = cloneName.charAt(0).toLowerCase() + cloneName.slice(1);
         modelId = modelId.charAt(0).toLowerCase() + modelId.slice(1);
         
-        var m = new (joint.shapes.dfg.DataFlowGraphDefaultModel)({
+        var m = new (joint.shapes.dfg.DataFlowGraphCloneNode)({
             position: { x: x, y: y },
         });
         m.setId(modelId);
@@ -315,9 +293,6 @@ var DataFlowGraphView = Backbone.View.extend({
         if(registerXVars) {
             registerXVars.forEach(function(reg) {
                 var registerName = reg.get("name");
-//                var registerSynType = "*";
-//                var registerSemType = "*";
-//                m.addInputPort(registerName, registerSemType, registerSynType);
                 m.addRegisterXVar(registerName);
             });
         }
@@ -331,7 +306,7 @@ var DataFlowGraphView = Backbone.View.extend({
         
         //set context menu
         var self = this;
-        $("#flow-graph-screen .DataFlowGraphDefaultModel").contextMenu({
+        $("#flow-graph-screen .DataFlowGraphCloneNode").contextMenu({
             parentSelector:     "#dfg",
             menuSelector:       "#dfg-screen-context-menu",
             menuSelected:       function (target, selectedMenuItem) {
@@ -392,7 +367,6 @@ var DataFlowGraphView = Backbone.View.extend({
     setBadLink : function(link) {
         link.attr({
             '.connection': { stroke: 'red' },
-            //'.marker-source': { fill: 'red', d: 'M 10 0 L 0 5 L 10 10 z' },
             '.marker-target': { fill: 'red', d: 'M 10 0 L 0 5 L 10 10 z' }
         });
     },
@@ -400,7 +374,6 @@ var DataFlowGraphView = Backbone.View.extend({
     setWellLink : function(link) {
         link.attr({
             '.connection': { stroke: 'green' },
-            //'.marker-source': { fill: 'red', d: 'M 10 0 L 0 5 L 10 10 z' },
             '.marker-target': { fill: 'green', d: 'M 10 0 L 0 5 L 10 10 z' }
         });
     },
@@ -592,7 +565,7 @@ var DataFlowGraphView = Backbone.View.extend({
         var prototypeId = this.trimId(prototypeName);
         
         //DEBUG
-        console.log("onPrototypeChange: " + prototypeName);
+        //console.log("onPrototypeChange: " + prototypeName);
         
         // add 2 toolbox - show to user
         if(!this.dfgToolboxNodes[prototypeId]) {
@@ -639,7 +612,6 @@ var DataFlowGraphView = Backbone.View.extend({
         try {
             var self = this;
             
-            //self.model.reset();
             self.model.requestLoad(function(id, responseType, responseData) {
                 //show error
                 if(responseType == ResponseType.Error) {
@@ -668,21 +640,14 @@ var DataFlowGraphView = Backbone.View.extend({
                             self.model.setDdfg("");
                             self.model.setDdfg(responseData.ddfg);
                         }
-                        //debug
-                        else {
-                            console.log("!!! DDFG will not be loaded - DFG contains " + self.dfgModels.count() + " nodes!");
-                        }
                     }
+                    
+                    app.Wait.setWaitHtml("#dfgLoad", "Reload nodes");
                 }
                 
                 // response
                 if(response) {
                     response();
-                }
-                
-                // set state - must be at the end
-                if(responseType == ResponseType.Done) {
-                    self.setDfgState(DfgState.DFG_STATE_NODES_LOADED);
                 }
             });
         }
@@ -810,34 +775,64 @@ var DataFlowGraphView = Backbone.View.extend({
                     // set nodes states
                     else if(responseData) {
                         var successCount = 0;
+                        var linkCount = 0;
+                        var unlinkCount = 0;
                         
-                        for(var i = 0; i < responseData.length; ++i) {
-                            var model = self.dfgModels[responseData[i]];
-                            if(model) {
-                                model.setState(NodeState.CREATED);
-                                ++successCount;
-                                
-                                // create widgets
-                                if(model.get("origId") == "Gui") {
-                                    for(var j = 0; j < viewNames.length; ++j) {
-                                        viewNames[j].model.viewIds.push(app.DataView.addViewByName(viewNames[j].viewName, viewNames[j].dataId));
+                        if(responseData.prototype) {
+                            for(var i = 0; i < responseData.prototype.length; ++i) {
+                                var model = self.dfgModels[responseData.prototype[i]];
+                                if(model) {
+                                    model.setState(NodeState.CREATED);
+                                    ++successCount;
+                                    
+                                    // create widgets
+                                    if(model.get("origId") == "Gui") {
+                                        for(var j = 0; j < viewNames.length; ++j) {
+                                            if(viewNames[j].model.get("id") == model.get("id")) {
+                                                viewNames[j].model.viewIds.push(app.DataView.addViewByName(viewNames[j].viewName, viewNames[j].dataId));
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                         
+                        if(responseData.link) {
+                            linkCount = responseData.link;
+                        }
+                        
+                        if(responseData.unlink) {
+                            unlinkCount = responseData.unlink;
+                        }
+                        
+                        if(responseData.registerXVar) {
+                            linkCount += responseData.registerXVar;
+                        }
+                        
+                        if(responseData.unregisterXVar) {
+                            unlinkCount += responseData.unregisterXVar;
+                        }
+                        
+                        var msg = "";
+                        if(successCount > 0) {
+                            msg = "" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " created. ";
+                        }
+                        
+                        if(linkCount > 0) {
+                            msg += "" + linkCount + " " + (linkCount <= 1 ? "link is" : "links are") + " created. "
+                        }
+                        
+                        if(unlinkCount > 0 ) {
+                            msg += "" + unlinkCount + " " + (unlinkCount <= 1 ? "link is" : "links are") + " destroyed.";
+                        }
+                        
                         // show result
-                        app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " created.");
+                        app.Flash.flashSuccess(msg);
                     }
                     
                     //response action
                     if(response) {
                         response();
-                    }
-                    
-                    // set state - must be at the end
-                    if(responseType == ResponseType.Done && !modelId) {
-                        self.setDfgState(DfgState.DFG_STATE_CREATED);
                     }
                 });
             }
@@ -864,7 +859,7 @@ var DataFlowGraphView = Backbone.View.extend({
             // set nodes states
             else if(responseData) {
                 var successCount = 0;
-                
+
                 for(var i = 0; i < responseData.length; ++i) {
                     var model = self.dfgModels[responseData[i]];
                     if(model) {
@@ -872,19 +867,14 @@ var DataFlowGraphView = Backbone.View.extend({
                         ++successCount;
                     }
                 }
-                
+
                 // show result
-                app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " started.");
+                app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " started.\n");
             }
             
             //response action
             if(response) {
                 response();
-            }
-            
-            // set state - must be at the end
-            if(responseType == ResponseType.Done && !modelId) {
-                self.setDfgState(DfgState.DFG_STATE_STARTED);
             }
         });
     },
@@ -915,11 +905,6 @@ var DataFlowGraphView = Backbone.View.extend({
             
             if(response) {
                 response();
-            }
-            
-            // set state - must be at the end
-            if(responseType == ResponseType.Done && !modelId) {
-                self.setDfgState(DfgState.DFG_STATE_STOPPED);
             }
         });
     },
@@ -993,11 +978,6 @@ var DataFlowGraphView = Backbone.View.extend({
                 
                 if(response) {
                     response();
-                }
-                
-                // set state - must be at the end
-                if(responseType == ResponseType.Done && !modelId) {
-                    self.setDfgState(DfgState.DFG_STATE_NOTCREATED);
                 }
             });
         }
@@ -1104,160 +1084,4 @@ var DataFlowGraphView = Backbone.View.extend({
             }
         });
     },
-    
-    setDfgState : function(state) {
-        //debug
-        //console.log("set state: " + DfgState.getName(state));
-        //console.log("... old states: " + DfgState.getNames(this.dfgState_));
-        
-        var stateSetted = false;
-        switch(state) {
-            case DfgState.DFG_STATE_NODES_LOADED:
-                this.dfgState_ |= state;
-                stateSetted = true;
-                break;
-            case DfgState.DFG_STATE_NOTCREATED:
-                if(((this.dfgState_ & DfgState.DFG_STATE_STOPPED) == DfgState.DFG_STATE_STOPPED) ||
-                  ((this.dfgState_ & DfgState.DFG_STATE_CREATED) == DfgState.DFG_STATE_CREATED)) {
-                    // remove old state
-                    this.dfgState_ &= ~DfgState.DFG_STATE_STOPPED;
-                    this.dfgState_ &= ~DfgState.DFG_STATE_CREATED;
-                    
-                    // add new state
-                    this.dfgState_ |= state;
-                    stateSetted = true;
-                }
-                break;
-            case DfgState.DFG_STATE_CREATED:
-                if(((this.dfgState_ & DfgState.DFG_STATE_NOTCREATED) == DfgState.DFG_STATE_NOTCREATED)) {
-                    // remove old state
-                    this.dfgState_ &= ~DfgState.DFG_STATE_NOTCREATED;
-                    
-                    // add new state
-                    this.dfgState_ |= state;
-                    stateSetted = true;
-                }
-                break;
-            case DfgState.DFG_STATE_STARTED:
-                if(((this.dfgState_ & DfgState.DFG_STATE_CREATED) == DfgState.DFG_STATE_CREATED)) {
-                    // remove old state
-                    this.dfgState_ &= ~DfgState.DFG_STATE_CREATED;
-                    
-                    // add new state
-                    this.dfgState_ |= state;
-                    stateSetted = true;
-                }
-                else if(((this.dfgState_ & DfgState.DFG_STATE_STOPPED) == DfgState.DFG_STATE_STOPPED)) {
-                    // remove old state
-                    this.dfgState_ &= ~DfgState.DFG_STATE_STOPPED;
-                    
-                    // add new state
-                    this.dfgState_ |= state;
-                    stateSetted = true;
-                }
-                break;
-            case DfgState.DFG_STATE_STOPPED:
-                if(((this.dfgState_ & DfgState.DFG_STATE_STARTED) == DfgState.DFG_STATE_STARTED)) {
-                    // remove old state
-                    this.dfgState_ &= ~DfgState.DFG_STATE_STARTED;
-                    
-                    // add new state
-                    this.dfgState_ |= state;
-                    stateSetted = true;
-                }
-                break;
-        }
-        
-        //debug
-        //console.log("... new states: " + DfgState.getNames(this.dfgState_));
-        
-//        if(stateSetted) {
-//            this.onStateChanged();    
-//        }
-    },
-    
-    onStateChanged : function() {
-        var buttons = {
-            load: { disabled: false, selector: "#dfgLoad", type: "attr"},
-            create: { disabled: false, selector: "#dfgCreate", type: "attr"},
-            start: { disabled: false, selector: "#dfgStart", type: "attr"},
-            stop: { disabled: false, selector: "#dfgStop", type: "attr"},
-            destroy: { disabled: false, selector: "#dfgDestroy", type: "attr"},
-            reset: { disabled: false, selector: "#dfgReset", type: "attr"},
-            otherAction: { disabled: false, selector: "#dfgOtherAction", type: "attr"},
-            saveDfg: { disabled: false, selector: "#dfgSaveDfg", type: "attr"},
-            loadDfg: { disabled: false, selector: ".dfgLoadDfg", type: "class"},
-        };
-        
-        if(((this.dfgState_ & DfgState.DFG_STATE_NODES_LOADED) != DfgState.DFG_STATE_NODES_LOADED)) {
-            app.Wait.setWaitHtml("#dfgLoad", "Load nodes");
-            
-            buttons.create.disabled = true;
-            buttons.start.disabled = true;
-            buttons.stop.disabled = true;
-            buttons.destroy.disabled = true;
-            buttons.reset.disabled = true;
-            buttons.otherAction.disabled = true;
-            buttons.saveDfg.disabled = true; 
-            buttons.loadDfg.disabled = true; 
-        }
-        else {
-            app.Wait.setWaitHtml("#dfgLoad", "Reload nodes");
-            
-            buttons.create.disabled = false;
-            buttons.start.disabled = false;
-            buttons.stop.disabled = false;
-            buttons.destroy.disabled = false;
-            buttons.reset.disabled = false;
-            buttons.otherAction.disabled = false; 
-            buttons.saveDfg.disabled = false; 
-            buttons.loadDfg.disabled = false;
-        
-            if(((this.dfgState_ & DfgState.DFG_STATE_NOTCREATED) == DfgState.DFG_STATE_NOTCREATED)) {
-                buttons.start.disabled = true;
-                buttons.stop.disabled = true;
-                buttons.destroy.disabled = true;
-            }
-            
-            else if(((this.dfgState_ & DfgState.DFG_STATE_CREATED) == DfgState.DFG_STATE_CREATED)) {
-                buttons.create.disabled = true;
-                buttons.stop.disabled = true;
-                buttons.loadDfg.disabled = true;
-            }
-            
-            else if(((this.dfgState_ & DfgState.DFG_STATE_STARTED) == DfgState.DFG_STATE_STARTED)) {
-                buttons.create.disabled = true;
-                buttons.start.disabled = true;
-                buttons.destroy.disabled = true;
-                buttons.reset.disabled = true;
-                buttons.loadDfg.disabled = true;
-            }
-            
-            else if(((this.dfgState_ & DfgState.DFG_STATE_STOPPED) == DfgState.DFG_STATE_STOPPED)) {
-                buttons.create.disabled = true;
-                buttons.stop.disabled = true;
-                buttons.loadDfg.disabled = true;
-            }
-        }
-        
-        // enable/disable buttons
-        for(var p in buttons){
-            if(buttons[p].disabled) {
-                if(buttons[p].type == "attr") {
-                    $(buttons[p].selector).attr("disabled", "disabled");
-                }
-                else { // "class"
-                    $(buttons[p].selector).addClass("disabled");
-                }
-            }
-            else {
-                if(buttons[p].type == "attr") {
-                    $(buttons[p].selector).removeAttr("disabled");
-                }
-                else {
-                    $(buttons[p].selector).removeClass("disabled");
-                }
-            }
-        }
-    }
 });

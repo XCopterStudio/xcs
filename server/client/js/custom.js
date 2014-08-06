@@ -100,21 +100,6 @@ $(function() {
             .css({borderRadius: ledSize / 2, backgroundColor: "#5bb75b"});
 
     /***
-
-    // initialize gridster
-    var gridster = $(".gridster > ul").gridster({
-        widget_margins: [10, 10],
-        widget_base_dimensions: [270, 150]
-    }).data('gridster');
-    
-    gridster.disable();
-    $('#gridster-enable').toggleClick(function (){
-        gridster.enable();
-        $('#gridster-enable').parent().addClass('active');
-    }, function (){
-        gridster.disable();
-        $('#gridster-enable').parent().removeClass('active');
-    });
     
     // sidepanels init
     //$("#left-menu").css("float", "left").css("background", "whitesmoke").css("overflow", "hidden").css("width", "50px").css("z-index", "1001");

@@ -6,16 +6,6 @@ var WaitView = Backbone.View.extend({
     initialize : function() {
         $(window).resize(this.setFontSize);
         $(window).load(this.setFontSize);
-        
-        //debug
-//        var action = new WaitAction(".red", WaitActionType.Click);
-//        var self = this;
-//        action.set("action", function() {
-//            action.start();
-//            console.log("foo"); 
-//            setTimeout(function() { action.stop(); }, 5000);
-//        });
-//        this.setWaitAction(action);
     },
     
     setWaitHtml : function(selector, content) {
@@ -67,9 +57,6 @@ var WaitView = Backbone.View.extend({
     },
     
     onWaitActionStateChange_ : function(waitAction) {
-        //debug
-        //console.log("zmena stavu: " + waitAction.get("actionState"));
-        
         if(waitAction.get("actionState") == WaitActionState.Started) {
             $(waitAction.get("selector")).each(function() { 
                 var self = $(this);
@@ -146,10 +133,6 @@ var WaitView = Backbone.View.extend({
             self.find(".wait-text").each(function() {
                 $(this).css('font-size', textFontSize + "px");
             });
-            
-            //debug
-//            console.log("icon font size: " + iconFontSize);
-//            console.log("text font size: " + textFontSize);
         });
     },
 });

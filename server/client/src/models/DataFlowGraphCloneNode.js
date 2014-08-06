@@ -2,17 +2,18 @@ var NodeState = ENUM("NOTCREATED", "CREATED", "STARTED", "STOPPED");
 
 joint.shapes.dfg = {};
 
-joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_.extend({}, joint.shapes.basic.PortsModelInterface, {
+joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.extend({}, joint.shapes.basic.PortsModelInterface, {
     inPortsType: {},
     outPortsType: {},
     registerXVars: [],
     viewIds: [],
+    nodeState: NodeState.NOTCREATED,
     
     markup: '<g class="rotatable"><g class="scalable"><rect></rect></g><text class="label"></text><g class="inPorts"></g><g class="outPorts"></g></g>',
     portMarkup: '<g class="port<%= id %>"><circle class="port"></circle><text></text></g>',
         
     defaults: joint.util.deepSupplement({
-        type: "dfg.DataFlowGraphDefaultModel",
+        type: "dfg.DataFlowGraphCloneNode",
         id: "id",
         origId: "origId",
         inPorts: [],
@@ -97,7 +98,9 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     setState : function(state) {
         var color = '#FFFFFF';
         
-        switch(state) {
+        nodeState = state;
+        
+        switch(nodeState) {
             case NodeState.NOTCREATED:
                 color = '#5bc0de';
                 break;
@@ -113,6 +116,10 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
         }
 
         this.attr('rect/fill', color);
+    },
+    
+    getState : function() {
+        return nodeState;
     },
     
     setId : function(newId) {
@@ -187,4 +194,4 @@ joint.shapes.dfg.DataFlowGraphDefaultModel = joint.shapes.basic.Generic.extend(_
     },
 }));
 
-joint.shapes.dfg.DataFlowGraphDefaultModelView = joint.dia.ElementView.extend(joint.shapes.basic.PortsViewInterface);
+joint.shapes.dfg.DataFlowGraphCloneNodeView = joint.dia.ElementView.extend(joint.shapes.basic.PortsViewInterface);

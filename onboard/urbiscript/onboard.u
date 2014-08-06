@@ -29,7 +29,6 @@ class Onboard {
         
         System.loadModule("xsettings");
         System.loadModule("xjson");
-        System.loadModule("ujson");
         
         // load onboard settings
         onboardSettings_ = XSettings.new(XcsPaths.getSettings("onboard.xs"), false);
@@ -139,6 +138,10 @@ class Onboard {
     // reset old dfg and create new one
     function doDfgCreate_(requestData) {
         var createdNodes = [];
+        var createdConnections = [];
+        var destroyedConnections = [];
+        var registeredXVars = [];
+        var unregisteredXVars = [];
         var created = false;
         var errorMessage = "";
 
@@ -170,6 +173,7 @@ class Onboard {
 
                 var connected = nodeContainer_.connectNodes(sourceId, sourcePort, targetId, targetPort);
                 if(connected) {
+                    createdConnections << l;
                     created = true;
                 };
                 
@@ -178,8 +182,8 @@ class Onboard {
                 errorMessage = "";
             };
 
-            var disconnected = nodeContainer_.disconnectNodesNotIn(connections);
-            if(disconnected) {
+            destroyedConnections = nodeContainer_.disconnectNodesNotIn(connections);
+            if(destroyedConnections.size() > 0) {
                 created = true;
             };
 
@@ -195,6 +199,7 @@ class Onboard {
                 
                 var registered = nodeContainer_.registerXVar(sourceId, sourcePort, targetId, targetPort);
                 if(registered) {
+                    registeredXVars << r;
                     created = true;
                 };
 
@@ -203,8 +208,8 @@ class Onboard {
                 errorMessage = "";
             };
 
-            var unregistered = nodeContainer_.unRegisterXVarsNotIn(registrations);
-            if(unregistered) {
+            unregisteredXVars = nodeContainer_.unregisterXVarsNotIn(registrations);
+            if(unregisteredXVars.size() > 0) {
                 created = true;
             };
         } catch(var ex) {
@@ -224,7 +229,13 @@ class Onboard {
             throw Exception.new("nothing to create");
         }; 
         
-        /* return */ nodeContainer_.getNodeNames();
+        return [
+            "prototype" => createdNodes,
+            "link" => createdConnections.size(),
+            "unlink" => destroyedConnections.size(),
+            "registerXVar" => registeredXVars.size(),
+            "unregisterXVar" => unregisteredXVars.size(),
+        ];
     };
 
     function doDfgStart_(cloneName = nil) {
