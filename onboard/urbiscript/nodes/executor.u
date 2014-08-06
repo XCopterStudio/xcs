@@ -13,7 +13,7 @@ class Executor : XObject {
     ];
     var state_ = 0; // NOTE: this is necessary to do in every clone of the XObject prototype
     
-    var code;
+    var code = "";
     
     function init(lobby) {
         var this.lobby_ = lobby;
@@ -26,8 +26,11 @@ class Executor : XObject {
         at(this.tag.leave?) {
             that.state = that.State.IDLE;
         };
-
+        
         &control.notifyChange(function() {
+            if(that.state_ != 1) {
+                return;
+            };
             if(that.control == "run") {
                 that.state = that.State.RUNNING;
                 that.job = disown({that.tag: System.eval(that.code, that.lobby_)}); // run in background                

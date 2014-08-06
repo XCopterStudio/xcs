@@ -14,7 +14,7 @@ var ConsoleModel = Backbone.Model.extend({
         var data = onboard.get('data');
         var key = this.get('channelState');
 
-        if (!(key in data)) {
+        if (!(key in data) || !data[key]) {
             return;
         }
 

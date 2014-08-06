@@ -11,6 +11,7 @@ var ConsoleView = Backbone.View.extend({
 
         this.$buttonStart = this.$('#console-start');
         this.$buttonStop = this.$('#console-stop');
+        this.$state = this.$('#console-state');
         this.$codeElement = this.$('textarea');
 
         this.onChangeState(this.model);
@@ -32,6 +33,7 @@ var ConsoleView = Backbone.View.extend({
     onClickStop: function() {
         switch (this.model.get('state')) {
             case ConsoleModel.State.RUNNING:
+            case ConsoleModel.State.FREEZED:
                 this.model.stop();
                 break;
         }
@@ -43,7 +45,7 @@ var ConsoleView = Backbone.View.extend({
 
         switch (model.get('state')) {
             case ConsoleModel.State.IDLE:
-                this.$buttonStart.val(START);
+                this.$buttonStart.html(START);
                 this.$buttonStart.prop('disabled', false);
                 this.$buttonStop.prop('disabled', true);
                 this.$codeElement.prop('disabled', false);
@@ -54,18 +56,19 @@ var ConsoleView = Backbone.View.extend({
                 this.$codeElement.prop('disabled', true);
                 break;
             case ConsoleModel.State.RUNNING:
-                this.$buttonStart.val(PAUSE);
+                this.$buttonStart.html(PAUSE);
                 this.$buttonStart.prop('disabled', false);
                 this.$buttonStop.prop('disabled', false);
                 this.$codeElement.prop('disabled', true);
                 break;
             case ConsoleModel.State.FREEZED:
-                this.$buttonStart.val(RESUME);
+                this.$buttonStart.html(RESUME);
                 this.$buttonStart.prop('disabled', false);
                 this.$buttonStop.prop('disabled', false);
                 this.$codeElement.prop('disabled', true);
                 break;
         }
+        this.$state.html(model.get('state'));
     }
 
 });
