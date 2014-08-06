@@ -61,7 +61,7 @@ void NetAdapter::init(const std::string &location) {
 
     //av_register_all();
 
-    videoWriter_ = new datalogger::VideoWriter(location);
+    videoWriter_ = new VideoWriter(location, 640, 480);
 
 }
 

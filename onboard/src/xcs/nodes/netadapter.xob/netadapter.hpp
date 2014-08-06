@@ -13,9 +13,7 @@ namespace xcs {
 namespace nodes {
 
 //class WebrtcFacade;
-namespace datalogger {
-    class VideoWriter;
-}
+class VideoWriter;
 
 class NetAdapter : public XObject {
 public:
@@ -36,7 +34,7 @@ private:
     AVStream* stream_;
     AVPacket packet_;
 
-    datalogger::VideoWriter* videoWriter_;
+    VideoWriter* videoWriter_;
 
     //WebrtcFacade* webrtcFacade_;
 };

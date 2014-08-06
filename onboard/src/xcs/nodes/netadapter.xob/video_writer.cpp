@@ -1,38 +1,23 @@
 #include "video_writer.hpp"
 
-using namespace std;
-using namespace std::chrono;
-using namespace xcs::nodes::datalogger;
+using namespace xcs::nodes;
 
-VideoWriter::VideoWriter(const std::string &name) :
-  AbstractWriter(name),
+VideoWriter::VideoWriter(const std::string &videoFile, const unsigned int &width, const unsigned int &height) : //AbstractWriter(name),
   frameNumber_(0) {
+
     avframe_ = avcodec_alloc_frame();
+
+    avformat_network_init();
+
+    videoFileWriter_ = new VideoFileWriter(videoFile, width, height);
 }
 
 VideoWriter::~VideoWriter() {
     avcodec_free_frame(&avframe_);
-}
-
-void VideoWriter::init(const std::string &videoFile, const unsigned int &width, const unsigned int &height, const std::string &dataName, LoggerContext &context, ::urbi::UVar &uvar) {
-    basicInit(dataName, context, uvar);
-    videoFileWriter_ = unique_ptr<VideoFileWriter>(new VideoFileWriter(videoFile, width, height));
-    //UNotifyThreadedChange(uvar, &VideoWriter::write, ::urbi::LOCK_FUNCTION);
-    UNotifyChange(uvar, &VideoWriter::write);
+    delete videoFileWriter_;
 }
 
 void VideoWriter::write(urbi::UImage image) {
-    if (!context_->enabled) {
-        return;
-    }
-
-    {
-        std::lock_guard<std::mutex> lck(context_->lock);
-        writeRecordBegin();
-
-        context_->file << frameNumber_++;
-        context_->file << endl;
-    }
 
     avframe_->width = image.width;
     avframe_->height = image.height;
