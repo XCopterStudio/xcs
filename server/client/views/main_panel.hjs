@@ -184,7 +184,7 @@
 <div class="container-fluid" id="console">
     <div class="col-xs-12 panel panel-default">
         <div class="row">
-            <textarea id="console-input" rows="8" cols="80">{
+            <textarea id="console-input" rows="8">{
   var i = 1;
   while(true) {
     echo(i);
@@ -195,7 +195,7 @@
 </textarea>
         </div>
         <div class="row">
-            <textarea id="console-output" rows="8" cols="80" disabled="disabled"></textarea>
+            <textarea id="console-output" rows="5" style="width:100%" disabled="disabled"></textarea>
         </div>
         <div class="row">
             <div class="btn-toolbar">
