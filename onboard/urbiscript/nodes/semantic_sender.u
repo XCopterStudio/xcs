@@ -1,4 +1,21 @@
 class SemanticSender : XObject {
+    /*
+     * Multiple updates may occur between buffer flushing,
+     * this lists possible aggregation methods.
+     */
+    enum Aggregation {
+        CONCAT, // buffered values are string-concatenated
+        LAST    // only last value is sent
+    };
+    
+    /*
+     * Aggregation method is specified per semantic type.
+     */
+    var aggregationMap = [
+        "EXECUTION_ERROR" => Aggregation.CONCAT,
+        "EXECUTION_OUTPUT" => Aggregation.CONCAT,
+    ];
+    
     var data_ = [ => ]; // last stored value
     var metadata_ = [ => ]; // metadata of stored values
     var registerData_ = [ => ]; // data name => subscription
@@ -71,10 +88,25 @@ class SemanticSender : XObject {
     function registerXVar(name, semanticType, syntacticType, uvar) {
         var that = this;
         this.metadata_[name] = semanticType;
-
-        this.registerData_[name] = uvar.notifyChange(function() {
-            that.bufferMtx_: that.data_[name] = uvar.value();
-        });
+        
+        var aggregation = {if(aggregationMap.has(semanticType)) aggregationMap[semanticType] else Aggregation.LAST};
+        switch(aggregation) {
+            case Aggregation.CONCAT:
+                this.registerData_[name] = uvar.notifyChange(function() {
+                    that.bufferMtx_: {
+                        if(name in that.data_) {
+                            that.data_[name] += uvar.value().asString();
+                        } else {
+                            that.data_[name] = uvar.value();
+                        };
+                    };
+                });
+            default:    
+                this.registerData_[name] = uvar.notifyChange(function() {
+                    that.bufferMtx_: that.data_[name] = uvar.value();
+                });
+        };
+        
     };
 
     function unregisterXVar(name) {
