@@ -1,70 +1,53 @@
 var KeyboardControllerView = Backbone.View.extend({
+    //el: 'body', // is this correct?
+    events: {
 
-    el : 'body',
-
-    events : {
-        "click #takeoff" : "takeOff",
-        "click #land" : "land",
-        "keydown" : "keydown",
-        "keyup" : "keyup"
     },
+    initialize: function(model, name) {
+        this.model = model;
+        this.name = name;
 
-    initialize : function() {
-        this.model = new ManualControl();
         this.keyMap = {
-                65: { action: this.model.setRoll, value: -0.2 }, // A
-                68: { action: this.model.setRoll, value: 0.2 }, // D
-                83: { action: this.model.setPitch, value: 0.2 }, // S
-                87: { action: this.model.setPitch, value: -0.2 }, // W
-                37: { action: this.model.setYaw, value: -1.0 }, // left
-                39: { action: this.model.setYaw, value: 1.0 }, // right
-                38: { action: this.model.setGaz, value: 0.2 }, // up
-                40: { action: this.model.setGaz, value: -0.2 } // down
-            };
+            65: {control: 'roll', value: -0.2}, // A
+            68: {control: 'roll', value: 0.2}, // D
+            83: {control: 'pitch', value: 0.2}, // S
+            87: {control: 'pitch', value: -0.2}, // W
+            37: {control: 'yaw', value: -1.0}, // left
+            39: {control: 'yaw', value: 1.0}, // right
+            38: {control: 'gaz', value: 0.2}, // up
+            40: {control: 'gaz', value: -0.2} // down
+        };
         this.down = {};
+
+        // Workaround for event on body, something native Backbone events don't support when
+        // view is on body's subelement (and nested in another view).
+        $('body').on('keydown', this, this.keydown);
+        $('body').on('keyup', this, this.keyup);
     },
-
-    render : function() {
-
-    },
-
-    takeOff : function() {
-        this.model.takeOff();
-    },
-
-    land : function() {
-        this.model.land();
-    },
-
-    keydown : function(e) {
-        if (e.which == 32 && e.ctrlKey) { // ctrl+space
-            app.Onboard.setMode("free_flight");
-        }
-        if (e.which == 13 && e.ctrlKey) { // ctrl+enter
-            app.Onboard.setMode("scripting");
-        }
-
-        if (this.keyMap[e.which] === undefined) {
+    keydown: function(e) {
+        var that = e.data;
+        if (that.keyMap[e.which] === undefined) {
             return;
         }
         // comment condition for repeated sending of fly params
-        if (this.down[e.which])
-            return;
-        this.down[e.which] = true;
-
-        command = this.keyMap[e.which]['action'];
-        value = this.keyMap[e.which]['value'];
-        command(value, this.model);
-    },
-
-    keyup : function(e) {
-        if (this.keyMap[e.which] === undefined) {
+        if (that.down[e.which]) {
             return;
         }
-        this.down[e.which] = false;
+        that.down[e.which] = true;
 
-        command = this.keyMap[e.which]['action'];
-        command(0.0, this.model);
+        var control = that.keyMap[e.which]['control'];
+        var value = that.keyMap[e.which]['value'];
+        that.model.setControl(that.name, control, value);
+    },
+    keyup: function(e) {
+        var that = e.data;
+        if (that.keyMap[e.which] === undefined) {
+            return;
+        }
+        that.down[e.which] = false;
+
+        var control = that.keyMap[e.which]['control'];
+        that.model.setControl(that.name, control, 0);
     }
 
 });
