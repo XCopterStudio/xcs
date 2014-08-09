@@ -146,8 +146,10 @@ var DataFlowGraphView = Backbone.View.extend({
         var prototypeId = model.get("origId");
         var cloneId = model.get("id");
         
-        console.log("ON REMOVE NODE");
-        this.checkGuiWidgets();
+        // check if model is node
+        if(prototypeId && cloneId) {
+            this.checkGuiWidgets();
+        }
     },
     
     trimId : function(id) {
@@ -655,7 +657,7 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgCreate : function(response, modelId) {
         try {
             // load dfg 2 json object
-            var jsonDfg = this.dfgGraph.toJSON()
+            var jsonDfg = this.dfgGraph.toJSON();
             
             if(jsonDfg.cells) {
                 // prepare object 4 dfg info
@@ -784,9 +786,6 @@ var DataFlowGraphView = Backbone.View.extend({
                             unlinkCount += responseData.unregisterXVar;
                         }
                         
-                        console.log("CREATE");
-                        self.checkGuiWidgets();
-                        
                         var msg = "";
                         if(successCount > 0) {
                             msg = "" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " created. ";
@@ -803,6 +802,9 @@ var DataFlowGraphView = Backbone.View.extend({
                         // show result
                         app.Flash.flashSuccess(msg);
                     }
+                    
+                    // create all widgets
+                    self.checkGuiWidgets();
                     
                     //response action
                     if(response) {
@@ -823,8 +825,6 @@ var DataFlowGraphView = Backbone.View.extend({
     },
     
     checkGuiWidgets : function() {
-        console.log("CHECK GUI WIDGETS");
-        
         var views = [];
                     
         // load dfg 2 json object
@@ -842,7 +842,6 @@ var DataFlowGraphView = Backbone.View.extend({
                     if(!cloneModel || 
                        cloneModel.get("origId") != "Gui" || 
                        !(cloneModel.getState() == NodeState.CREATED || cloneModel.getState() == NodeState.STARTED)) {
-                        console.log("DST: " + cell.source.id + "." + cell.source.port + " -> " +  cell.target.id + "." + cell.target.port + "(" + cloneModel.get("origId") + ", " + NodeState.getName(cloneModel.getState()) + ")");
                         continue;
                     }
                     
@@ -850,7 +849,6 @@ var DataFlowGraphView = Backbone.View.extend({
                     var srcCloneModel = this.dfgModels[cell.source.id];
                     if(!srcCloneModel || 
                        !(srcCloneModel.getState() == NodeState.CREATED || srcCloneModel.getState() == NodeState.STARTED)) {
-                        console.log("SRC: " + cell.source.id + "." + cell.source.port + " -> " +  cell.target.id + "." + cell.target.port);
                         continue;
                     }
                     
@@ -858,7 +856,6 @@ var DataFlowGraphView = Backbone.View.extend({
                     var prototypeId = cloneModel.get("origId");
                     var modelPrototype = this.dfgToolboxNodes[prototypeId];
                     if(!modelPrototype) {
-                        console.log("MODEL PROT: " + cell.source.id + "." + cell.source.port + " -> " +  cell.target.id + "." + cell.target.port);
                         continue;
                     }
                     
@@ -876,7 +873,7 @@ var DataFlowGraphView = Backbone.View.extend({
         }
             
             
-        app.DataView.setCreatedViews(views);
+        return app.DataView.setCreatedViews(views);
     },
     
     dfgStart : function(response, modelId) {
@@ -994,7 +991,6 @@ var DataFlowGraphView = Backbone.View.extend({
                             }
                         }
                         
-                        console.log("DESTROY");
                         self.checkGuiWidgets();
                         
                         // show result

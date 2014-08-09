@@ -97,6 +97,8 @@ var DataView = Backbone.View.extend({
     },
     
     setCreatedViews: function(views) {
+        var changed = false;
+        
         //create new views
         for(var i = 0; i < views.length; ++i) {
             var view = views[i];
@@ -108,6 +110,7 @@ var DataView = Backbone.View.extend({
             var createdView = this.getViewByName(view.viewName, view.dataId);
             if(!createdView) {
                 this.addViewByName(view.viewName, view.dataId);
+                changed = true;
             }
         }
         
@@ -135,6 +138,9 @@ var DataView = Backbone.View.extend({
         //remove old views
         for(var i = 0; i < viewToRemove.length; ++i) {
             this.removeView(viewToRemove[i]);
+            changed = true;
         }
+        
+        return changed;
     },
 });
