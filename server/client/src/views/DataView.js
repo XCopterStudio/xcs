@@ -56,14 +56,19 @@ var DataView = Backbone.View.extend({
         return view;
     },
     
-    addViewByName: function(viewName, dataId, attrs) {
+    addViewByName: function(viewName, dataId, attrs, register) {
+        // default value 4 register is true
+        register = typeof register !== 'undefined' ? register : true;
+        
         for(var view in this.views) {
             if (this.views.hasOwnProperty(view) && this.views[view].name && this.views[view].ctor && this.views[view].name == viewName) {
                 var createdView = this.views[view].ctor(dataId, attrs);
                 if(createdView) {
                     createdView.widgetTypeId = view;
                     createdView.widgetTypeName = this.views[view].name;
-                    this.createdViews[createdView.widgetId] = createdView;
+                    if(register) { 
+                        this.createdViews[createdView.widgetId] = createdView;
+                    }
                     return createdView.widgetId;
                 }
             }
@@ -72,7 +77,10 @@ var DataView = Backbone.View.extend({
         return -1;
     },
     
-    addView: function(viewId, dataId, attrs) {
+    addView: function(viewId, dataId, attrs, register) {
+        // default value 4 register is true
+        register = typeof register !== 'undefined' ? register : true;
+        
         console.log("ADD VIEW: " + viewId);
         for(var view in this.views) {
             if (this.views.hasOwnProperty(view) && this.views[view].name && this.views[view].ctor && view == viewId) {
@@ -80,7 +88,9 @@ var DataView = Backbone.View.extend({
                 if(createdView) {
                     createdView.widgetTypeId = view;
                     createdView.widgetTypeName = this.views[view].name;
-                    this.createdViews[createdView.widgetId] = createdView;
+                    if(register) { 
+                        this.createdViews[createdView.widgetId] = createdView;
+                    };
                     return createdView.widgetId;
                 }
             }
