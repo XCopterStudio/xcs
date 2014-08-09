@@ -18,6 +18,10 @@ var AbstractDataView = Backbone.View.extend({
     
     widgetId: -1,
     
+    widgetTypeId: "",
+    
+    widgetTypeName: "",
+    
     initialize: function(dataId, attrs) {
         this.model = app.Onboard;
         this.listenTo(app.Onboard, "change:data", this.onDataChange);

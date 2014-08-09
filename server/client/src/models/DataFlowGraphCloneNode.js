@@ -2,17 +2,15 @@ var NodeState = ENUM("NOTCREATED", "CREATED", "STARTED", "STOPPED");
 
 joint.shapes.dfg = {};
 
-joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.extend({}, joint.shapes.basic.PortsModelInterface, {
-    inPortsType: {},
-    outPortsType: {},
-    registerXVars: [],
-    viewIds: [],
-    nodeState: NodeState.NOTCREATED,
-    
+joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.extend({}, joint.shapes.basic.PortsModelInterface, {        
     markup: '<g class="rotatable"><g class="scalable"><rect></rect></g><text class="label"></text><g class="inPorts"></g><g class="outPorts"></g></g>',
     portMarkup: '<g class="port<%= id %>"><circle class="port"></circle><text></text></g>',
         
     defaults: joint.util.deepSupplement({
+        inPortsType: {},
+        outPortsType: {},
+        registerXVars: [],
+        nodeState: NodeState.NOTCREATED,
         type: "dfg.DataFlowGraphCloneNode",
         id: "id",
         origId: "origId",
@@ -98,9 +96,9 @@ joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.ex
     setState : function(state) {
         var color = '#FFFFFF';
         
-        nodeState = state;
+        this.set("nodeState", state);
         
-        switch(nodeState) {
+        switch(state) {
             case NodeState.NOTCREATED:
                 color = '#5bc0de';
                 break;
@@ -119,7 +117,7 @@ joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.ex
     },
     
     getState : function() {
-        return nodeState;
+        return this.get("nodeState");
     },
     
     setId : function(newId) {
@@ -162,8 +160,8 @@ joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.ex
     
     addRegisterXVar : function(portId) {
         // mark portid like registerXVar method
-        if(this.registerXVars.indexOf(portId) < 0) {
-            this.registerXVars.push(portId);
+        if(this.get("registerXVars").indexOf(portId) < 0) {
+            this.get("registerXVars").push(portId);
         }
         
         // add classic input port
@@ -182,14 +180,14 @@ joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.ex
     addInputPort : function(portId, semT, synT) {
         var inPorts = this.get('inPorts').slice();
         inPorts.push(portId);
-        this.inPortsType[portId] = {semType: semT, synType: synT};
+        this.get("inPortsType")[portId] = {semType: semT, synType: synT};
         this.set('inPorts', inPorts);
     },
     
     addOutpuPort : function(portId, semT, synT) {
         var outp = this.get('outPorts').slice();
         outp.push(portId);
-        this.outPortsType[portId] = {semType: semT, synType: synT};
+        this.get("outPortsType")[portId] = {semType: semT, synType: synT};
         this.set('outPorts', outp);
     },
 }));

@@ -40,11 +40,29 @@ var DataView = Backbone.View.extend({
         return views;
     },
     
+    getViewByName: function(viewName, dataId) {
+        var view;
+        
+        for(var viewId in this.createdViews) {
+            if (this.createdViews.hasOwnProperty(viewId)) {
+                var createdView = this.createdViews[viewId];
+                if(createdView.widgetTypeName == viewName && createdView.dataId == dataId) {
+                    view = createdView;
+                    break;
+                }   
+            }
+        }
+        
+        return view;
+    },
+    
     addViewByName: function(viewName, dataId, attrs) {
         for(var view in this.views) {
             if (this.views.hasOwnProperty(view) && this.views[view].name && this.views[view].ctor && this.views[view].name == viewName) {
                 var createdView = this.views[view].ctor(dataId, attrs);
                 if(createdView) {
+                    createdView.widgetTypeId = view;
+                    createdView.widgetTypeName = this.views[view].name;
                     this.createdViews[createdView.widgetId] = createdView;
                     return createdView.widgetId;
                 }
@@ -60,6 +78,8 @@ var DataView = Backbone.View.extend({
             if (this.views.hasOwnProperty(view) && this.views[view].name && this.views[view].ctor && view == viewId) {
                 var createdView = this.views[view].ctor(dataId, attrs);
                 if(createdView) {
+                    createdView.widgetTypeId = view;
+                    createdView.widgetTypeName = this.views[view].name;
                     this.createdViews[createdView.widgetId] = createdView;
                     return createdView.widgetId;
                 }
@@ -73,6 +93,48 @@ var DataView = Backbone.View.extend({
         if(this.createdViews[widgetId]) {
             this.createdViews[widgetId].remove();
             delete this.createdViews[widgetId];
+        }
+    },
+    
+    setCreatedViews: function(views) {
+        //create new views
+        for(var i = 0; i < views.length; ++i) {
+            var view = views[i];
+            
+            if(!view.viewName || !view.dataId) {
+                throw "bad views format";
+            }
+            
+            var createdView = this.getViewByName(view.viewName, view.dataId);
+            if(!createdView) {
+                this.addViewByName(view.viewName, view.dataId);
+            }
+        }
+        
+        //find old views (to remove)
+        var viewToRemove = [];
+        for(var viewId in this.createdViews) {
+            if(this.createdViews.hasOwnProperty(viewId)) {
+                var createdView = this.createdViews[viewId];
+                
+                var remove = true;
+                for(var i = 0; i < views.length; ++i) {
+                    var view = views[i];
+                    if(createdView.widgetTypeName == view.viewName && createdView.dataId == view.dataId) {
+                        remove = false;
+                        break;
+                    }
+                }
+                
+                if(remove) {
+                    viewToRemove.push(createdView.widgetId);
+                }
+            }
+        }
+        
+        //remove old views
+        for(var i = 0; i < viewToRemove.length; ++i) {
+            this.removeView(viewToRemove[i]);
         }
     },
 });

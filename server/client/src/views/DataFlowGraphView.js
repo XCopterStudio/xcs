@@ -111,7 +111,7 @@ var DataFlowGraphView = Backbone.View.extend({
         this.listenTo(this.dfgGraph, 'change:target', this.setLink);
         this.listenTo(this.dfgGraph, 'change:source', this.setLink);
 
-        this.listenTo(this.dfgGraph, 'remove', this.removeNode);
+        this.listenTo(this.dfgGraph, 'remove', this.onRemoveNode);
 
         this.initializeDfgToolbox4Drop();
            
@@ -126,10 +126,10 @@ var DataFlowGraphView = Backbone.View.extend({
                     var idS = magnetS.getAttribute("port");
                     var idT = magnetT.getAttribute("port");
 
-                    var semTT = cellViewT.model.inPortsType[idT].semType;
-                    var synTT = cellViewT.model.inPortsType[idT].synType;
+                    var semTT = cellViewT.model.get("inPortsType")[idT].semType;
+                    var synTT = cellViewT.model.get("inPortsType")[idT].synType;
                     
-                    return self.model.isConnectable(cellViewS.model.outPortsType[idS].synType, cellViewS.model.outPortsType[idS].semType, synTT, semTT);
+                    return self.model.isConnectable(cellViewS.model.get("outPortsType")[idS].synType, cellViewS.model.get("outPortsType")[idS].semType, synTT, semTT);
                 }
                 
                 return false;
@@ -141,23 +141,13 @@ var DataFlowGraphView = Backbone.View.extend({
         });
     },
     
-    removeNode : function(model) {
+    onRemoveNode : function(model) {
         // create widgets
         var prototypeId = model.get("origId");
         var cloneId = model.get("id");
         
-        if(prototypeId && cloneId) {
-            switch(prototypeId) {
-                case "Gui":
-                    // for each registerXVar call remove on DataView
-                    var viewIds = model.viewIds;
-                    for(var k = 0; k < viewIds.length; ++k) {
-                        var viewId = viewIds[k];
-                        app.DataView.removeView(viewId);
-                    }
-                    break;
-            }
-        }
+        console.log("ON REMOVE NODE");
+        this.checkGuiWidgets();
     },
     
     trimId : function(id) {
@@ -675,8 +665,6 @@ var DataFlowGraphView = Backbone.View.extend({
                     registerXVar: []
                 };
                 
-                var viewNames = [];
-                    
                 for(var i = 0; i < jsonDfg.cells.length; ++i) {
                     var cell = jsonDfg.cells[i];
                     
@@ -739,14 +727,6 @@ var DataFlowGraphView = Backbone.View.extend({
                                     port: targetPort,
                                 },
                             });
-                            
-                            if(cloneModel.get("origId") == "Gui") {
-                                viewNames.push({
-                                    viewName: cell.target.port,
-                                    dataId: cell.source.id + "_" + cell.source.port,
-                                    model: cloneModel
-                                });
-                            }
                         }
                         else {
                             // prepare links info 4 sending
@@ -784,15 +764,6 @@ var DataFlowGraphView = Backbone.View.extend({
                                 if(model) {
                                     model.setState(NodeState.CREATED);
                                     ++successCount;
-                                    
-                                    // create widgets
-                                    if(model.get("origId") == "Gui") {
-                                        for(var j = 0; j < viewNames.length; ++j) {
-                                            if(viewNames[j].model.get("id") == model.get("id")) {
-                                                viewNames[j].model.viewIds.push(app.DataView.addViewByName(viewNames[j].viewName, viewNames[j].dataId));
-                                            }
-                                        }
-                                    }
                                 }
                             }
                         }
@@ -812,6 +783,9 @@ var DataFlowGraphView = Backbone.View.extend({
                         if(responseData.unregisterXVar) {
                             unlinkCount += responseData.unregisterXVar;
                         }
+                        
+                        console.log("CREATE");
+                        self.checkGuiWidgets();
                         
                         var msg = "";
                         if(successCount > 0) {
@@ -846,6 +820,63 @@ var DataFlowGraphView = Backbone.View.extend({
                 response();
             }
         }
+    },
+    
+    checkGuiWidgets : function() {
+        console.log("CHECK GUI WIDGETS");
+        
+        var views = [];
+                    
+        // load dfg 2 json object
+        var jsonDfg = this.dfgGraph.toJSON()
+        
+        if(jsonDfg.cells) {
+            for(var i = 0; i < jsonDfg.cells.length; ++i) {
+                var cell = jsonDfg.cells[i];
+                
+                // links
+                if(cell.source && cell.target && cell.source.id && cell.target.id && cell.type && cell.type == "link") {
+                    // load clone info
+                    var cloneId = cell.target.id;
+                    var cloneModel = this.dfgModels[cloneId];
+                    if(!cloneModel || 
+                       cloneModel.get("origId") != "Gui" || 
+                       !(cloneModel.getState() == NodeState.CREATED || cloneModel.getState() == NodeState.STARTED)) {
+                        console.log("DST: " + cell.source.id + "." + cell.source.port + " -> " +  cell.target.id + "." + cell.target.port + "(" + cloneModel.get("origId") + ", " + NodeState.getName(cloneModel.getState()) + ")");
+                        continue;
+                    }
+                    
+                    // load clone info about source
+                    var srcCloneModel = this.dfgModels[cell.source.id];
+                    if(!srcCloneModel || 
+                       !(srcCloneModel.getState() == NodeState.CREATED || srcCloneModel.getState() == NodeState.STARTED)) {
+                        console.log("SRC: " + cell.source.id + "." + cell.source.port + " -> " +  cell.target.id + "." + cell.target.port);
+                        continue;
+                    }
+                    
+                    // load prototypes info
+                    var prototypeId = cloneModel.get("origId");
+                    var modelPrototype = this.dfgToolboxNodes[prototypeId];
+                    if(!modelPrototype) {
+                        console.log("MODEL PROT: " + cell.source.id + "." + cell.source.port + " -> " +  cell.target.id + "." + cell.target.port);
+                        continue;
+                    }
+                    
+                    // register xvar methods
+                    var model = modelPrototype.get("registerXVar").findWhere({"name": cell.target.port});
+                    if(model) {
+                        views.push({
+                            viewName: cell.target.port,
+                            dataId: cell.source.id + "_" + cell.source.port,
+                            model: cloneModel
+                        });
+                    }
+                }
+            }
+        }
+            
+            
+        app.DataView.setCreatedViews(views);
     },
     
     dfgStart : function(response, modelId) {
@@ -960,11 +991,11 @@ var DataFlowGraphView = Backbone.View.extend({
                             if(model) {
                                 model.setState(NodeState.NOTCREATED);
                                 ++successCount;
-                                
-                                // create widgets
-                                self.removeNode(model);
                             }
                         }
+                        
+                        console.log("DESTROY");
+                        self.checkGuiWidgets();
                         
                         // show result
                         if(successCount > 0) {
