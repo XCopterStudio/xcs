@@ -16,7 +16,8 @@ var OnboardModel = Backbone.Model.extend({
                 console.log('>>> Setting flash data');
                 model.set('flash', json.data);
             } else if (json.type == "data") {
-                model.set('data', json.data);
+                model.set('data', json.data, {silent: true});
+                model.trigger('change:data', model); // NOTE: we trigger on update, not only change
             } else if (json.type == "onboard") {
                 model.set('onboard', json.data);
             }

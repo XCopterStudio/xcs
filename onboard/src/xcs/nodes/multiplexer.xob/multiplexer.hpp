@@ -16,22 +16,23 @@
 // std library header
 #include <atomic>
 #include <list>
+#include <sstream>
 
 namespace xcs{
 namespace nodes{
 namespace multiplexer{
   
     template<class type> 
-    class Channel{
+    class Channel : public XObject{
         unsigned int id_;
         std::atomic<unsigned int>& channel_;
         std::atomic<bool>& stopped_;
+        xcs::nodes::XInputPort<type>& input_; 
         xcs::nodes::XVar<type>& output_;
     public:
         Channel(const unsigned int id, std::atomic<unsigned int> &channel,
-            xcs::nodes::XVar<type>& output, std::atomic<bool>& stopped);
-
-        xcs::nodes::XInputPort<type> input;
+            xcs::nodes::XInputPort<type>& input, xcs::nodes::XVar<type>& output,
+            std::atomic<bool>& stopped);
 
         // XCS invoke this method when encounter some changes on input 
         // port associated with this channel
@@ -40,9 +41,11 @@ namespace multiplexer{
 
     template<class type>
     Channel<type>::Channel(const unsigned int id, std::atomic<unsigned int> &channel,
-        xcs::nodes::XVar<type>& output, std::atomic<bool>& stopped)
-        : id_(id), channel_(channel), stopped_(stopped),
-        output_(output), input("ALL"){
+        xcs::nodes::XInputPort<type>& input, xcs::nodes::XVar<type>& output,
+        std::atomic<bool>& stopped)
+        : XObject(std::string()), id_(id), input_(input), channel_(channel), stopped_(stopped),
+        output_(output){
+        UNotifyChange(dynamic_cast<urbi::UVar&>(input), &Channel<type>::onChangeInput); // TODO: wrong! use std::bind or something similar
     }
 
     template<class type>
@@ -55,12 +58,14 @@ namespace multiplexer{
     template<class type>
     class XMultiplexer : public XObject{
         typedef std::list<std::shared_ptr<Channel<type> > > Channels;
+        typedef std::list<xcs::nodes::XInputPort<type> > InputPorts;
 
         unsigned int channelCount_;
         std::atomic<unsigned int> channel_;
         std::atomic<bool> stopped_;
 
         Channels channels_;
+        InputPorts inputPorts_;
 
         void onChangeChannel(unsigned int channel);
     protected:
@@ -121,10 +126,16 @@ namespace multiplexer{
         }
 
         for (int i = 0; i < channelCount_; ++i){
+            inputPorts_.emplace_back("ALL");
+
+            std::stringstream name;
+            name << "input";
+            name << i;
+            XBindVarRename(inputPorts_.back(), name.str());
+
             std::shared_ptr<Channel<type> > channel = std::shared_ptr<Channel<type> >(
-                new Channel<type>(i, channel_, output, stopped_));
-            channels_.push_back(channel);
-            XBindVarF(channel->input, &Channel<type>::onChangeInput); // TODO: wrong! use std::bind or something similar
+                new Channel<type>(i, channel_, inputPorts_.back(), output, stopped_));
+            channels_.push_back(channel); 
         }
     }
 

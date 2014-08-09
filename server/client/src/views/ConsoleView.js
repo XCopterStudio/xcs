@@ -2,19 +2,39 @@ var ConsoleView = Backbone.View.extend({
     el: '#console',
     events: {
         "click #console-start": "onClickStart",
-        "click #console-stop": "onClickStop"
+        "click #console-stop": "onClickStop",
+        "click #console-clear": "onClickClear"
     },
     initialize: function() {
         this.model = new ConsoleModel();
 
         this.listenTo(this.model, 'change:state', this.onChangeState);
+        this.listenTo(this.model, 'change:error', this.onChangeError);
+        this.listenTo(this.model, 'change:output', this.onChangeOutput);
 
         this.$buttonStart = this.$('#console-start');
         this.$buttonStop = this.$('#console-stop');
         this.$state = this.$('#console-state');
-        this.$codeElement = this.$('textarea');
+        this.$codeElement = this.$('#console-input');
+        this.$outputElement = this.$('#console-output');
 
         this.onChangeState(this.model);
+
+        this.editor = CodeMirror.fromTextArea(this.$codeElement.get(0), {
+            //theme: "night",
+            mode: "xcs",
+            lineNumbers: true,
+            matchBrackets: true,
+            indentUnit: 2,
+            tabSize: 2,
+            smartIndent: true,
+            electricChars: true,
+            lineWrapping: false,
+            showCursorWhenSelecting: false,
+            undoDepth: 1000,
+            autoFocus: false,
+            //onKeyEvent: function (e, s) { if (s.type == "keyup") { CodeMirror.showHint(e); console.log("test"); } }
+        });
     },
     onClickStart: function() {
         switch (this.model.get('state')) {
@@ -37,6 +57,10 @@ var ConsoleView = Backbone.View.extend({
                 this.model.stop();
                 break;
         }
+    },
+    onClickClear: function() {
+        this.$outputElement.html('');
+        this.$outputElement.removeClass('alert-danger');
     },
     onChangeState: function(model) {
         var START = 'Start';
@@ -69,6 +93,23 @@ var ConsoleView = Backbone.View.extend({
                 break;
         }
         this.$state.html(model.get('state'));
+    },
+    onChangeError: function(model) {
+        var error = model.get('error');
+        if (!error) {
+            this.$outputElement.removeClass('alert-danger');
+        } else {
+            this.$outputElement.addClass('alert-danger');
+            this.printOutput_(error);
+        }
+    },
+    onChangeOutput: function(model) {
+        var output = model.get('output');
+        this.printOutput_(output);
+    },
+    printOutput_: function(string) {
+        this.$outputElement.append(document.createTextNode(string));
+        this.$outputElement.get(0).scrollTop = this.$outputElement.get(0).scrollHeight;
     }
 
 });

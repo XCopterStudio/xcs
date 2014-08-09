@@ -1,5 +1,3 @@
-model = new ManualControl();
-
 var MobileControllerView = Backbone.View.extend({
     el: 'window',
 

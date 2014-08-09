@@ -27,6 +27,7 @@ $(function () {
     app.Wait = new WaitView();
     app.Flash = new FlashMessagesView();
     
+    app.FlyControlView = new FlyControlView();
     app.DataView = new DataView();
     app.DataFlowGraph = new DataFlowGraphView();
     app.ConsoleView = new ConsoleView();

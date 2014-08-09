@@ -52,6 +52,7 @@ SemanticReceiver {
     file nodes/semantic_receiver.u
     args "["\
         "\"flyControl\" => Pair.new('xcs::FlyControl', \"FLY_CONTROL\"),"\
+        "\"command\" => Pair.new(String, \"COMMAND\"),"\
         "\"execUrbiscript\" => Pair.new(String, \"URBISCRIPT\"),"\
         "\"execControl\" => Pair.new(String, \"CONTROL\")"\
     "]"
