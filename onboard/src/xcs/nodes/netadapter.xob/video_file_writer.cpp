@@ -73,17 +73,53 @@ AVStream* VideoFileWriter::createVideoStream(const CodecID codecId, const unsign
     }
 
     codecContext = videoStream->codec;
+
+    AVCodec* codec;
+    codec = avcodec_find_encoder(AV_CODEC_ID_VP8);
+    avcodec_get_context_defaults3(codecContext, codec);
+
     codecContext->codec_id = codecId;
     codecContext->codec_type = AVMEDIA_TYPE_VIDEO;
     
     codecContext->width = width;
     codecContext->height = height;
-    codecContext->bit_rate = bitrate;
+//    codecContext->bit_rate = bitrate;
 
     codecContext->time_base.den = STREAM_FRAME_RATE;
     codecContext->time_base.num = 1;
-    codecContext->gop_size = 12; /* emit one intra frame every twelve frames at most */
+    codecContext->gop_size = 1; // number of pictures in a group of pictures
+                                // (emit one intra frame for each gop_size number frames at most)
     codecContext->pix_fmt = STREAM_PIX_FMT;
+
+//    codec = avcodec_find_encoder(AV_CODEC_ID_H264);
+//    assert(codec);
+//    codecContext = avcodec_alloc_context3(codec); // also set codec's context default parameters according to given codec
+//    assert(codecContext);
+
+//    // TODO: options fixed for H264 codec
+//    codecContext->codec_id = AV_CODEC_ID_H264;
+
+//    codecContext->bit_rate = 500*10;//500*1000;
+//    codecContext->bit_rate_tolerance = 0;
+//    codecContext->rc_max_rate = 0;
+//    codecContext->rc_buffer_size = 0;
+//    codecContext->gop_size = 40;
+//    codecContext->max_b_frames = 3;
+//    codecContext->b_frame_strategy = 1;
+//    codecContext->coder_type = 1;
+//    codecContext->me_cmp = 1;
+//    codecContext->me_range = 16;
+//    codecContext->qmin = 10;
+//    codecContext->qmax = 51;
+//    codecContext->scenechange_threshold = 40;
+//    codecContext->flags |= CODEC_FLAG_LOOP_FILTER;
+//    codecContext->me_method = ME_HEX;
+//    codecContext->me_subpel_quality = 5;
+//    codecContext->i_quant_factor = 0.71;
+//    codecContext->qcompress = 0.6;
+//    codecContext->max_qdiff = 4;
+//    //codecContext->directpred = 1;
+//    //codecContext->flags2 |= CODEC_FLAG2_FASTPSKIP;
 
     if (codecContext->codec_id == CODEC_ID_MPEG2VIDEO) {
         /* just for testing, we also add B frames */
@@ -126,12 +162,16 @@ AVFrame* VideoFileWriter::allocPicture(const PixelFormat pixelFormat, const int 
     return picture;
 }
 
-VideoFileWriter::VideoFileWriter(const std::string &fileName, const unsigned int &width, const unsigned int &height, const unsigned int &bitrate){
+VideoFileWriter::VideoFileWriter(const std::string &fileName, const std::string &mimetype, const unsigned int &width, const unsigned int &height, const unsigned int &bitrate){
     pictureConvertContext_ = nullptr;
 
     av_register_all();
 
-    outputFormat_ = av_guess_format(NULL, fileName.c_str(), NULL);
+    outputFormat_ = av_guess_format(NULL, NULL, mimetype.c_str());
+    if (!outputFormat_) {
+        cerr << "Could not deduce output format from MIME type: trying deduction from filename";
+        outputFormat_ = av_guess_format(NULL, fileName.c_str(), NULL);
+    }
     if (!outputFormat_){
         cerr << "Could not deduce output format from file extension: using mpeg" << endl;
         outputFormat_ = av_guess_format("mpeg", NULL, NULL);

@@ -11,7 +11,7 @@ System.loadModule("netadapter");
 var player = XDataplayer.new("tmp/sample.txt");
 //var player = XDataplayer.new("experiments/sample3.txt");
 
-var netadapter = NetAdapter.new("udp://127.0.0.1:1235");
+var netadapter = NetAdapter.new("udp://127.0.0.1:1235", "video/webm");
 
 player.&video >> netadapter.&video;
 

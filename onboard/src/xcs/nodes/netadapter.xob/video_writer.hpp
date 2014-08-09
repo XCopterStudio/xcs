@@ -15,7 +15,7 @@ class VideoWriter {
     VideoFileWriter* videoFileWriter_;
 
 public:
-    VideoWriter(const std::string &videoFile, const unsigned int &width, const unsigned int &height);
+    VideoWriter(const std::string &videoFile, const std::string &mimetype, const unsigned int &width, const unsigned int &height);
     virtual ~VideoWriter();
 
     void write(::urbi::UImage image);

@@ -44,6 +44,7 @@
 <script type="text/javascript" src="src/views/DataView.js"></script>
 <script type="text/javascript" src="src/views/AbstractDataView.js"></script>
 <script type="text/javascript" src="src/views/RawDataView.js"></script>
+<script type="text/javascript" src="src/views/VideoDataView.js"></script>
 <script type="text/javascript" src="src/views/AppView.js"></script>
 <script type="text/javascript" src="src/views/DataFlowGraphView.js"></script>
 <script type="text/javascript" src="src/views/WaitView.js"></script>

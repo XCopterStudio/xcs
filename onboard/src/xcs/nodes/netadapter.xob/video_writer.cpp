@@ -2,14 +2,15 @@
 
 using namespace xcs::nodes;
 
-VideoWriter::VideoWriter(const std::string &videoFile, const unsigned int &width, const unsigned int &height) : //AbstractWriter(name),
+VideoWriter::VideoWriter(const std::string &videoFile, const std::string &mimetype, const unsigned int &width, const unsigned int &height) : //AbstractWriter(name),
   frameNumber_(0) {
 
     avframe_ = avcodec_alloc_frame();
 
     avformat_network_init();
 
-    videoFileWriter_ = new VideoFileWriter(videoFile, width, height);
+    videoFileWriter_ = new VideoFileWriter(videoFile, mimetype, width, height);
+
 }
 
 VideoWriter::~VideoWriter() {

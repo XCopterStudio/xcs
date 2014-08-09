@@ -32,4 +32,8 @@ $(function () {
     
     //set dfg view
     app.DataFlowGraph = new DataFlowGraphView();
+    
+    
+    // tmp set video widget
+    app.videoWidget = new VideoDataView();
 });

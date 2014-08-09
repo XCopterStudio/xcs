@@ -54,14 +54,14 @@ NetAdapter::~NetAdapter() {
     //avcodec_free_frame(&avframe_);
 }
 
-void NetAdapter::init(const std::string &location) {
+void NetAdapter::init(const std::string &location, const std::string &mimetype) {
     //webrtcFacade_ = new WebrtcFacade(); // TODO: leak
 
     cv::namedWindow("Test", cv::WINDOW_AUTOSIZE);
 
     //av_register_all();
 
-    videoWriter_ = new VideoWriter(location, 640, 480);
+    videoWriter_ = new VideoWriter(location, mimetype, 640, 480);
 
 }
 
@@ -71,9 +71,9 @@ void NetAdapter::onChangeVideo(::urbi::UImage frame) { // TODO: try to change UV
 
     //XCS_LOG_INFO("...incomming frame");
 
-    cv::Mat src(frame.height, frame.width, CV_8UC3, frame.data);
-    cv::imshow("Test", src);
-    cv::waitKey(10);
+//    cv::Mat src(frame.height, frame.width, CV_8UC3, frame.data);
+//    cv::imshow("Test", src);
+//    cv::waitKey(10);
 
 
 //    avframe_->width = frame.width;

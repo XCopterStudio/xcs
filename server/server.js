@@ -45,5 +45,6 @@ io.sockets.on('connection', function (socket) {
 });
 
 OnboardConnection.on('data', function (data) { if (client) client.emit('data', data); });
+OnboardConnection.on('video', function (data) { if (client) client.emit('video', data); });
 
 
