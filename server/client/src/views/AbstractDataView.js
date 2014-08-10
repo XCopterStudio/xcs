@@ -4,25 +4,29 @@ var AbstractDataView = Backbone.View.extend({
 
     id: 'data-from-onboard',
     
-    template: '',
-    
-    sizeX: 1,
-    
-    sizeY: 1,
-    
-    dataId: '',
-    
-    attrs: {
-        dataId: '',
-    },
-    
-    widgetId: -1,
-    
-    widgetTypeId: "",
-    
-    widgetTypeName: "",
-    
     initialize: function(dataId, attrs) {
+        // initialize attributes, which can be overriden
+        if(!this.template) {
+            this.template = '';
+        }
+        if(!this.sizeX) { 
+            this.sizeX = 1;
+        }
+        if(!this.sizeY) {
+            this.sizeY = 1;
+        }
+        if(!this.dataId) {
+            this.dataId = '';
+        }
+        
+        // initilize attributes, which should not be overriden
+        this.attrs = {
+            dataId: '',
+        };
+        this.widgetId = -1;
+        this.widgetTypeId = "";
+        this.widgetTypeName = "";
+        
         this.model = app.Onboard;
         this.listenTo(app.Onboard, "change:data", this.onDataChange);
         
@@ -43,11 +47,13 @@ var AbstractDataView = Backbone.View.extend({
             }
         }
         
-        if(this.markup != '' && this.sizeX > 0 && this.sizeY > 0) {
+        if(this.template != '' && this.sizeX > 0 && this.sizeY > 0) {
+            console.log("ADD WIDGET");
             var gridster = $(".gridster > ul").gridster().data('gridster');
             var compiledTemplate = _.template(this.template);
             gridster.add_widget('<div id="widget' + this.widgetId + '">' + compiledTemplate(this.attrs) + '</div>', this.sizeX, this.sizeY);
-        };
+        }
+        else {console.log("WIDGET WILL NOT BE LOAD");}
         
         // custom implementation init
         this.init();
