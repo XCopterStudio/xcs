@@ -26,6 +26,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Subprojects
 #
 add_subdirectory(xcs)
+add_subdirectory(xcs/xci)
 add_subdirectory(xcs/xci/parrot)
 add_subdirectory(xcs/xci/dodo)
 add_subdirectory(xcs/xci/vrep)

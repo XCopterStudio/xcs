@@ -18,3 +18,6 @@ find_package(UrbiAll)
 use_urbi(${PROJECT_NAME})
 
 use_logging(${PROJECT_NAME})
+
+install(TARGETS ${PROJECT_NAME}
+        DESTINATION lib)

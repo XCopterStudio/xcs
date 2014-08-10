@@ -15,3 +15,11 @@ include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
 use_logging(${PROJECT_NAME})
+
+install(TARGETS ${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}
+        DESTINATION lib)
+
+install(FILES ${HEADERS} DESTINATION include/xcs)
+
+install(EXPORT ${PROJECT_NAME} DESTINATION share)

@@ -16,7 +16,13 @@ x_target_link_libraries(${PROJECT_NAME} xcs)
 find_package(UrbiAll)
 use_urbi(${PROJECT_NAME})
 
+install(TARGETS ${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}
+        DESTINATION lib)
 
+install(FILES ${HEADERS} DESTINATION include/xcs/nodes/xobject)
+
+install(EXPORT ${PROJECT_NAME} DESTINATION share)
 
 
 

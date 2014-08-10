@@ -22,4 +22,7 @@ function(add_x_object TARGET_NAME)
 
     find_package(UrbiAll)
     use_urbi(${TARGET_NAME})
+
+    install(TARGETS ${TARGET_NAME}        
+        DESTINATION lib/xcs/xobjects)
 endfunction(add_x_object)
