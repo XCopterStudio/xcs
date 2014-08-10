@@ -28,7 +28,7 @@ XVar<synT>::XVar(const SemanticTypeInfo& semT, const synT defVal) :
 
 template<class synT>
 XVar<synT>& XVar<synT>::operator=(const synT& val) {
-    Data() = val;
+    data() = val;
     return *this;
 }
 

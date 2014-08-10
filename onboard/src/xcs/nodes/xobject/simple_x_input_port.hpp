@@ -14,10 +14,10 @@ class XOBJECT_EXPORT SimpleXInputPort {
 public:
     SimpleXInputPort(const XType &type);
     virtual ~SimpleXInputPort();
-    urbi::InputPort& Data();
-    const XType& Type() const;
-    void Init(xcs::nodes::XObject& parent, const std::string& varname);
-    void PrivateInit(xcs::nodes::XObject& parent, const std::string& varname);
+    urbi::InputPort& data();
+    const XType& type() const;
+    void initData(xcs::nodes::XObject& parent, const std::string& varname);
+    void privateInitData(xcs::nodes::XObject& parent, const std::string& varname);
 private:
     urbi::InputPort* input_;
     XType xType_;

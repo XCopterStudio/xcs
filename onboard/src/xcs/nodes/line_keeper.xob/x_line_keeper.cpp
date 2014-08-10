@@ -10,7 +10,7 @@ using namespace std::chrono;
 
 const size_t XLineKeeper::REFRESH_PERIOD = 20; // ms
 
-//TODO remove static_cast<EulerianVector> (rotation.Data()).psi in favor of static_cast<EulerianVector> (rotation).psi
+//TODO remove static_cast<EulerianVector> (rotation.data()).psi in favor of static_cast<EulerianVector> (rotation).psi
 XLineKeeper::XLineKeeper(const string& name) :
   XObject(name),
   velocity("VELOCITY_LOC"),
@@ -52,7 +52,7 @@ int XLineKeeper::update() {
      */
     double distance = 0;
     VectorType deviationVector(cos(initialDeviation_), sin(initialDeviation_));
-    auto scale = static_cast<double> (cameraScale) / (static_cast<double> (altitude.Data()) + 1e-9);
+    auto scale = static_cast<double> (cameraScale) / (static_cast<double> (altitude.data()) + 1e-9);
     VectorType scaledPositionShift;
     /*
      * drone coordinates: x (forward), y (leftward)
@@ -67,7 +67,7 @@ int XLineKeeper::update() {
     /*
      * Calculate deviation
      */
-    auto deviation = -static_cast<EulerianVector> (rotation.Data()).psi + initialDevOffset_; // beware: psi has opposite sign
+    auto deviation = -static_cast<EulerianVector> (rotation.data()).psi + initialDevOffset_; // beware: psi has opposite sign
 
     /*
      * Notify
@@ -91,7 +91,7 @@ void XLineKeeper::setLineDrawer(UObject *drawer) {
 void XLineKeeper::reset(double distance, double deviation) {
     initialDistance_ = distance;
     initialDeviation_ = deviation;
-    initialDevOffset_ = deviation + static_cast<EulerianVector> (rotation.Data()).psi; // beware: psi has opposite sign, this is difference
+    initialDevOffset_ = deviation + static_cast<EulerianVector> (rotation.data()).psi; // beware: psi has opposite sign, this is difference
 
     positionShift_.x = 0;
     positionShift_.y = 0;

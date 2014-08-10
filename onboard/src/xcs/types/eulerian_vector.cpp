@@ -5,3 +5,4 @@
 #define X_STRUCT_NAMESPACE "xcs::"
 X_GENERATE_STRUCT(EulerianVector, phi, psi, theta);
 X_GENERATE_STRUCT(EulerianVectorChronologic, phi, psi, theta, time);
+#undef X_STRUCT_NAMESPACE

@@ -8,22 +8,20 @@ GD_CATEGORY(Test.All);
 
 # define XBindVar(x) XBindVarRename(x, #x)
 
-# define XBindPrivateVar(x) x.PrivateInit(*this, #x)
+# define XBindPrivateVar(x) x.privateInitData(*this, #x)
 
-# define XBindVarRename(x, name) x.Init(*this, name)
+# define XBindVarRename(x, name) x.initData(*this, name)
 
-//TODO: prejmenovat na XBindVar (pretizit)
 # define XBindVarF(x, f)	\
     XBindVar(x);			\
-    UNotifyChange(x.Data(), f)
+    UNotifyChange(x.data(), f)
 
 # define XBindFunction(xObj, f) UBindFunction(xObj, f)
 
-//# define XNotifyChange(x, f) UNotifyChange(x.Data(), f)
+//# define XNotifyChange(x, f) UNotifyChange(x.data(), f)
 
 # define XStart(type) UStart(type)
 
-//TODO: prejmenovat na XStart (pretizit)
 # define XStartRename(type, name) UStartRename(type, name)
 
 # define X_REGISTER_STRUCT(cName, ...)          \

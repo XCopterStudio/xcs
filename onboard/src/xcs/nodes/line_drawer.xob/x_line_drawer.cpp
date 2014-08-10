@@ -74,7 +74,7 @@ void XLineDrawer::onChangeVideo(::urbi::UVar& uvar) {
     lastFrame_ = uvar;
     hasFrame_ = true;
     lineUtils_.setDimensions(lastFrame_.width, lastFrame_.height);
-    auto rotationVector = static_cast<EulerianVector>(rotation.Data()); // TODO use directoy operator on XVar
+    auto rotationVector = static_cast<EulerianVector>(rotation.data()); // TODO use directoy operator on XVar
     lineUtils_.updateReferencePoint(rotationVector.theta, rotationVector.phi, cameraParam);
 }
 

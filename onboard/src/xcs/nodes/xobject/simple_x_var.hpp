@@ -15,12 +15,12 @@ class XOBJECT_EXPORT SimpleXVar {
 public:
     SimpleXVar(const XType &type);
     virtual ~SimpleXVar();
-    urbi::UVar& Data();
-    const XType& Type() const;
+    urbi::UVar& data();
+    const XType& type() const;
     template<class T>
     SimpleXVar& operator=(const T&);
-    void Init(xcs::nodes::XObject& parent, const std::string& varname);
-    void PrivateInit(xcs::nodes::XObject& parent, const std::string& varname);
+    void initData(xcs::nodes::XObject& parent, const std::string& varname);
+    void privateInitData(xcs::nodes::XObject& parent, const std::string& varname);
 private:
     urbi::UVar* data_;
     XType xType_;
@@ -28,7 +28,7 @@ private:
 
 template<class T>
 SimpleXVar& SimpleXVar::operator=(const T& val) {
-    Data() = val;
+    data() = val;
     return *this;
 }
 
