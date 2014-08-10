@@ -10,9 +10,11 @@ set(Port_DIR ${URBI_ROOT}/share/cmake/port)
 find_package(Port)
 mark_as_advanced(PORT_LIBRARIES)
 
-set(Qijpeg_DIR ${URBI_ROOT}/share/cmake/qijpeg)
-find_package(Qijpeg)
-mark_as_advanced(QIJPEG_LIBRARIES)
+if(NOT USE_SYSTEM_LIBRARIES)
+    set(Qijpeg_DIR ${URBI_ROOT}/share/cmake/qijpeg)
+    find_package(Qijpeg)
+    mark_as_advanced(QIJPEG_LIBRARIES)
+endif()
 
 set(Sched_DIR ${URBI_ROOT}/share/cmake/sched)
 find_package(Sched)
@@ -30,7 +32,7 @@ set(Urbi_DIR ${URBI_ROOT}/share/cmake/urbi)
 find_package(Urbi)
 mark_as_advanced(URBI_LIBRARIES)
 
-find_package(Boost 1.55 REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system)
 
 set(URBIALL_INCLUDE_DIRS ${PORT_INCLUDE_DIRS};${QIJPEG_INCLUDE_DIRS};${SCHED_INCLUDE_DIRS};${SERIALIZE_INCLUDE_DIRS};${UOBJECT_INCLUDE_DIRS};${Boost_INCLUDE_DIRS})
 #set(URBIALL_LIBRARIES ${PORT_LIBRARIES};${QIJPEG_LIBRARIES};${SCHED_LIBRARIES};${SERIALIZE_LIBRARIES};${UOBJECT_LIBRARIES};${Boost_LIBRARIES})

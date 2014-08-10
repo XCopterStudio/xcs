@@ -12,14 +12,14 @@ endif()
 
 add_x_object(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-find_package(Boost 1.55 REQUIRED COMPONENTS thread)
+find_package(Boost REQUIRED COMPONENTS thread)
 include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
 find_package(OpenGL)
 find_package(GLUT)
 
-find_library(PTAM_LIB ptam PATHS ${PTAM_ROOT}/lib)
+find_library(PTAM_LIB xcs-ptam PATHS ${PTAM_ROOT}/lib)
 find_library(GVARS_LIB GVars3 PATHS ${PTAM_ROOT}/lib)
 find_library(CVD_LIB cvd PATHS ${PTAM_ROOT}/lib)
 set(PTAM_LIBRARIES ${PTAM_LIB} ${GVARS_LIB} ${CVD_LIB})
