@@ -48,12 +48,10 @@ var AbstractDataView = Backbone.View.extend({
         }
         
         if(this.template != '' && this.sizeX > 0 && this.sizeY > 0) {
-            console.log("ADD WIDGET");
             var gridster = $(".gridster > ul").gridster().data('gridster');
             var compiledTemplate = _.template(this.template);
             gridster.add_widget('<div id="widget' + this.widgetId + '">' + compiledTemplate(this.attrs) + '</div>', this.sizeX, this.sizeY);
         }
-        else {console.log("WIDGET WILL NOT BE LOAD");}
         
         // custom implementation init
         this.init();

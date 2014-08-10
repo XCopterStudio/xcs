@@ -48,6 +48,18 @@ var DataView = Backbone.View.extend({
                  }
             }
         },
+        progress: {
+            name: "progress data",
+            ctor: function(dataId) {
+                var words = dataId.split("_");
+                if(words.length == 2) {
+                    var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
+                    var portName = words[1];
+                    
+                    return new ProgressDataView(dataId, { name: nodeName + " " + portName });
+                 }
+            }
+        },
     },
     
     createdViews: {},
