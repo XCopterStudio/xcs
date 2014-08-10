@@ -26,11 +26,15 @@ var AbstractDataView = Backbone.View.extend({
         this.model = app.Onboard;
         this.listenTo(app.Onboard, "change:data", this.onDataChange);
         
+        //set unique widget id 
+        this.widgetId = ++abstractDataViewFreeId;
+        
         // set data id
         this.dataId = typeof dataId !== 'undefined' ? dataId : '';
         
         // set attributes
-        this.attrs.dataId = this.dataId;        
+        this.attrs.dataId = this.dataId;  
+        this.attrs.widgetId = this.widgetId;
         if(attrs) {
             for(var attr in attrs) {
                 if (attrs.hasOwnProperty(attr)) {
@@ -39,14 +43,18 @@ var AbstractDataView = Backbone.View.extend({
             }
         }
         
-        //set unique widget id 
-        this.widgetId = ++abstractDataViewFreeId;
-        
         if(this.markup != '' && this.sizeX > 0 && this.sizeY > 0) {
             var gridster = $(".gridster > ul").gridster().data('gridster');
             var compiledTemplate = _.template(this.template);
             gridster.add_widget('<div id="widget' + this.widgetId + '">' + compiledTemplate(this.attrs) + '</div>', this.sizeX, this.sizeY);
-        }
+        };
+        
+        // custom implementation init
+        this.init();
+    },
+    
+    init: function() {
+        // prepare for override
     },
     
     remove: function() {
