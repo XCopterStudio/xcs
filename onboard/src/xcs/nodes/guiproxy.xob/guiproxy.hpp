@@ -1,5 +1,5 @@
-#ifndef NETADAPTER_HPP
-#define NETADAPTER_HPP
+#ifndef GUIPROXY_HPP
+#define GUIPROXY_HPP
 
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
@@ -9,10 +9,10 @@ namespace nodes {
 
 class VideoWriter;
 
-class NetAdapter : public XObject {
+class GuiProxy : public XObject {
 public:
-    NetAdapter(const std::string &name);
-    ~NetAdapter();
+    GuiProxy(const std::string &name);
+    ~GuiProxy();
     void init(const std::string &location, const std::string &mimetype);
 
     XInputPort<::urbi::UImage> video;
@@ -25,4 +25,4 @@ private:
 }
 }
 
-#endif // NETADAPTER_HPP
+#endif // GUIPROXY_HPP

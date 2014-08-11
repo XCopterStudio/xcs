@@ -1,4 +1,4 @@
-set(PROJECT_NAME netadapter)
+set(PROJECT_NAME guiproxy)
 project(${PROJECT_NAME})
 
 file(GLOB SOURCES *.cpp)
