@@ -1,0 +1,94 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+
+MK_FILE := $(abspath $(lastword $(MAKEFILE_LIST)))
+MK_DIR := $(patsubst %/,%,$(dir $(MK_FILE)))
+
+ONBOARD_SRC_DIR=$(MK_DIR)/../onboard/src
+ONBOARD_BUILD_DIR=$(MK_DIR)/../build_$(DEB_BUILD_ARCH)
+ONBOARD_INS_DIR=$(MK_DIR)/tmp
+
+
+MAKEFLAGS=
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    MAKEFLAGS += -j$(NUMJOBS)
+endif
+
+NODES=control datalogger dataplayer hermit-movement\
+  json\
+  localization multiplexer settings xci
+# line-drawer line-finder line-keeper
+
+DRIVERS=dodo parrot vrep
+
+build: build-arch build-indep
+
+build-indep:
+
+build-arch:
+	mkdir -p $(ONBOARD_BUILD_DIR)
+	cd $(ONBOARD_BUILD_DIR) && cmake $(ONBOARD_SRC_DIR)\
+		-DUSE_SYSTEM_LIBRARIES=1\
+		-DCMAKE_INSTALL_PREFIX=$(ONBOARD_INS_DIR)
+	$(MAKE) $(MAKEFLAGS) -C $(ONBOARD_BUILD_DIR) install
+	touch $@
+
+
+binary: binary-arch binary-indep
+
+binary-indep:
+
+binary-arch: bin-xcs-core bin-xcs-core-dev\
+  $(addprefix bin-driver-, $(DRIVERS)) bin-driver-dev\
+  $(addprefix bin-node-, $(NODES))
+
+clean: $(addprefix clean-driver-, $(DRIVERS))\
+  $(addprefix clean-node-, $(NODES))
+	rm -f build-arch binary-arch prepare_binary
+	rm -rf $(ONBOARD_BUILD_DIR) $(ONBOARGD_INS_DIR)
+	rm -rf $(MK_DIR)/xcs-core $(MK_DIR)/xcs-core-dev $(MK_DIR)/xcs-driver-dev
+
+#
+# Implementation
+#
+
+prepare_binary:
+	dh_install --sourcedir=$(MK_DIR)/tmp
+	touch $@
+
+bin-driver-%: prepare_binary
+	mkdir -p $(MK_DIR)/xcs-driver-$*/DEBIAN
+	rm -rf $(MK_DIR)/files
+	dpkg-shlibdeps -pshlibs-driver-$* $(ONBOARD_INS_DIR)/lib/xci_$*.so 2>/dev/null
+	dpkg-gencontrol -pxcs-driver-$* -P$(MK_DIR)/xcs-driver-$*
+	dpkg-deb -b $(MK_DIR)/xcs-driver-$* ..
+
+bin-node-%: prepare_binary
+	mkdir -p $(MK_DIR)/xcs-node-$*/DEBIAN
+	rm -rf $(MK_DIR)/files
+	dpkg-shlibdeps -pshlibs-node-$* $(ONBOARD_INS_DIR)/lib/xcs/xobjects/x$(subst -,_,$*).so 2>/dev/null
+	dpkg-gencontrol -pxcs-node-$* -P$(MK_DIR)/xcs-node-$*
+	dpkg-deb -b $(MK_DIR)/xcs-node-$* ..
+
+bin-xcs-core: prepare_binary
+	mkdir -p $(MK_DIR)/xcs-core/DEBIAN
+	rm -rf $(MK_DIR)/files
+	dpkg-shlibdeps -pshlibs-core -e$(ONBOARD_INS_DIR)/lib/libxcs.so -e$(ONBOARD_INS_DIR)/lib/libxobject.so 2>/dev/null
+	dpkg-gencontrol -pxcs-core -P$(MK_DIR)/xcs-core
+	dpkg-deb -b $(MK_DIR)/xcs-core ..
+
+bin-xcs-core-dev: prepare_binary
+	mkdir -p $(MK_DIR)/xcs-core-dev/DEBIAN
+	rm -rf $(MK_DIR)/files
+	dpkg-gencontrol -pxcs-core-dev -P$(MK_DIR)/xcs-core-dev
+	dpkg-deb -b $(MK_DIR)/xcs-core-dev ..
+
+
+clean-driver-%:
+	rm -rf $(MK_DIR)/xcs-driver-$*
+
+clean-node-%:
+	rm -rf $(MK_DIR)/xcs-node-$*
+

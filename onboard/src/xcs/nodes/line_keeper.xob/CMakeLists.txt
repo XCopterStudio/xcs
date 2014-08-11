@@ -1,4 +1,4 @@
-set(PROJECT_NAME xlinekeeper)
+set(PROJECT_NAME xline_keeper)
 project(${PROJECT_NAME})
 
 file(GLOB SOURCES *.cpp)

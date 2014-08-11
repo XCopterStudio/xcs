@@ -2,7 +2,102 @@ Source: xcs
 Section: unknown
 Priority: optional
 Maintainer: Michal Koutný <xm.koutny@gmail.com>
-Build-Depends: debhelper (>= 8.0.0), TODO
+Build-Depends: debhelper (>= 8.0.0),
+  binutils,
+  cmake,
+  cmake-data,
+  cpp (>= 4.8),
+  dash,
+  g++ (>= 4.8),
+  gcc (>= 4.8),
+  libarchive13,
+  libasn1-8-heimdal,
+  libattr1,
+  libavcodec54,
+  libavcodec-dev,
+  libavfilter3,
+  libavformat54,
+  libavformat-dev,
+  libavutil52,
+  libavutil-dev,
+  libblas3,
+  libblas-dev,
+  libboost-dev,
+  libboost-filesystem-dev,
+  libboost-log-dev,
+  libboost-regex-dev,
+  libboost-system-dev,
+  libboost-thread-dev,
+  libbz2-1.0,
+  libc6-dev,
+  libc-bin,
+  libcloog-isl4,
+  libcomerr2,
+  libcurl3,
+  libegl1-mesa,
+  libfakeroot,
+  libffi6,
+  libgcc1,
+  libgcc-4.8-dev,
+  libgcrypt11,
+  libgl1-mesa-dev,
+  libgl1-mesa-glx,
+  libgl1-mesa-glx:i386,
+  libglu1-mesa,
+  libglu1-mesa-dev,
+  libgmp10,
+  libgnutls26,
+  libgpg-error0,
+  libgssapi3-heimdal,
+  libgssapi-krb5-2,
+  libhcrypto4-heimdal,
+  libheimbase1-heimdal,
+  libheimntlm0-heimdal,
+  libhx509-5-heimdal,
+  libice6,
+  libice-dev,
+  libidn11,
+  libisl10,
+  libk5crypto3,
+  libkeyutils1,
+  libkrb5-26-heimdal,
+  libkrb5-3,
+  libkrb5support0,
+  liblapack3,
+  liblapack-dev,
+  libldap-2.4-2,
+  liblzma5,
+  liblzo2-2,
+  libmpc3,
+  libmpfr4,
+  libnettle4,
+  libopencv-dev,
+  libp11-kit0,
+  libport,
+  libport-dev,
+  libroken18-heimdal,
+  librtmp0,
+  libsasl2-2,
+  libsm6,
+  libsm-dev,
+  libsqlite3-0,
+  libssl1.0.0,
+  libstdc++-4.8-dev,
+  libstdc++6,
+  libswscale2,
+  libswscale-dev,
+  libtasn1-6,
+  libwind0-heimdal,
+  libx11-6,
+  libx11-dev,
+  libxext6,
+  libxext-dev,
+  libxml2,
+  locales,
+  make,
+  urbi,
+  urbi-dev,
+  zlib1g
 Standards-Version: 3.9.4
 Homepage: http://drones.ms.mff.cuni.cz/xcs
 #Vcs-Git: git://git.debian.org/collab-maint/urbi.git
@@ -13,7 +108,7 @@ Homepage: http://drones.ms.mff.cuni.cz/xcs
 #
 Package: xcs-core
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs-core:Depends}
 Description: TODO
 
 Package: xcs-core-dev
@@ -32,17 +127,17 @@ Description: SDK for robotics
 
 Package: xcs-driver-parrot
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs-driver:Depends}
 Description: SDK for robotics
 
 Package: xcs-driver-dodo
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs-driver:Depends}
 Description: SDK for robotics
 
 Package: xcs-driver-vrep
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs-driver:Depends}
 Description: SDK for robotics
 
 #
@@ -67,62 +162,62 @@ Description: Development files for Urbi SDK
 #
 Package: xcs-node-control
 Architecture: all
-Depends: TODO
+Depends: ${shlibs-node-control:Depends}
 Description: XCS node control...
 
 Package: xcs-node-datalogger
 Architecture: all
-Depends: TODO
+Depends: ${shlibs-node-datalogger:Depends}
 Description: XCS node datalogger...
 
 Package: xcs-node-dataplayer
 Architecture: all
-Depends: TODO
+Depends: ${shlibs-node-dataplayer:Depends}
 Description: XCS node dataplayer...
 
 Package: xcs-node-hermit-movement
 Architecture: all
-Depends: TODO
-Description: XCS node hermit_movement...
+Depends: ${shlibs-node-hermit-movement:Depends}
+Description: XCS node hermit-movement...
 
 Package: xcs-node-json
 Architecture: all
-Depends: TODO
+Depends: ${shlibs-node-json:Depends}
 Description: XCS node json...
 
 Package: xcs-node-line-drawer
 Architecture: all
-Depends: TODO
-Description: XCS node line_drawer...
+Depends: ${shlibs-node-line-drawer:Depends}
+Description: XCS node line-drawer...
 
 Package: xcs-node-line-finder
 Architecture: all
-Depends: TODO
-Description: XCS node line_finder...
+Depends: ${shlibs-node-line-finder:Depends}
+Description: XCS node line-finder...
 
 Package: xcs-node-line-keeper
 Architecture: all
-Depends: TODO
-Description: XCS node line_keeper...
+Depends: ${shlibs-node-line-keeper:Depends}
+Description: XCS node line-keeper...
 
 Package: xcs-node-localization
 Architecture: all
-Depends: TODO
+Depends: ${shlibs-node-localization:Depends}
 Description: XCS node localization...
 
 Package: xcs-node-multiplexer
 Architecture: all
-Depends: TODO
+Depends: ${shlibs-node-multiplexer:Depends}
 Description: XCS node multiplexer...
 
 Package: xcs-node-settings
 Architecture: all
-Depends: TODO
+Depends: ${shlibs-node-settings:Depends}
 Description: XCS node settings...
 
 Package: xcs-node-xci
 Architecture: all
-Depends: xcs-driver-dodo, TODO
+Depends: ${shlibs-node-xci:Depends}
 Recommends: xcs-driver-parrot, xcs-driver-vrep
 Description: XCS node xci...
 

@@ -6,11 +6,12 @@ DIR=`cd "$PWD/$self" && pwd`
 for node in `find $DIR/../onboard/src/xcs/nodes -type d -name "*.xob" | sort` ; do
 	node=`basename $node`
 	node=${node%.xob}
-	pkg_name=xcs-node-${node/_/-}
+	node=${node/_/-}
+	pkg_name=xcs-node-${node}
 	cat <<EOD
 Package: $pkg_name
 Architecture: all
-Depends: TODO
+Depends: \${shlibs-node-$node:Depends}
 Description: XCS node ${node}...
 
 EOD

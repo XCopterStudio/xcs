@@ -1,4 +1,4 @@
-set(PROJECT_NAME xlinefinder)
+set(PROJECT_NAME xline_finder)
 project(${PROJECT_NAME})
 
 file(GLOB SOURCES *.cpp)

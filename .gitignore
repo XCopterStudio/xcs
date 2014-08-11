@@ -34,3 +34,11 @@ onboard/logs/display_vel_z.sh
 3rd-party/urbi
 3rd-party/urbi_d
 
+# Debian build process
+debian/*.log
+debian/tmp
+debian/substvars
+debian/files
+prepare_binary
+build-arch
+build_*
