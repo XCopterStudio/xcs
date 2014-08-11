@@ -1,0 +1,128 @@
+Source: xcs
+Section: unknown
+Priority: optional
+Maintainer: Michal Koutný <xm.koutny@gmail.com>
+Build-Depends: debhelper (>= 8.0.0), TODO
+Standards-Version: 3.9.4
+Homepage: http://drones.ms.mff.cuni.cz/xcs
+#Vcs-Git: git://git.debian.org/collab-maint/urbi.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/urbi.git;a=summary
+
+#
+# Core
+#
+Package: xcs-core
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: TODO
+
+Package: xcs-core-dev
+Architecture: any
+Depends: xcs-core
+Recommends: xcs-driver-dev
+Description: TODO
+
+#
+# Drivers
+#
+Package: xcs-driver-dev
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: SDK for robotics
+
+Package: xcs-driver-parrot
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: SDK for robotics
+
+Package: xcs-driver-dodo
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: SDK for robotics
+
+Package: xcs-driver-vrep
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: SDK for robotics
+
+#
+# Urbiscripts
+#
+Package: xcs-onboard
+Architecture: all
+Depends: TODO
+Recommends: 
+Description: Development files for Urbi SDK
+
+#
+# Server
+#
+Package: xcs-server
+Architecture: all
+Depends: TODO
+Description: Development files for Urbi SDK
+
+#
+# Nodes
+#
+Package: xcs-node-control
+Architecture: all
+Depends: TODO
+Description: XCS node control...
+
+Package: xcs-node-datalogger
+Architecture: all
+Depends: TODO
+Description: XCS node datalogger...
+
+Package: xcs-node-dataplayer
+Architecture: all
+Depends: TODO
+Description: XCS node dataplayer...
+
+Package: xcs-node-hermit-movement
+Architecture: all
+Depends: TODO
+Description: XCS node hermit_movement...
+
+Package: xcs-node-json
+Architecture: all
+Depends: TODO
+Description: XCS node json...
+
+Package: xcs-node-line-drawer
+Architecture: all
+Depends: TODO
+Description: XCS node line_drawer...
+
+Package: xcs-node-line-finder
+Architecture: all
+Depends: TODO
+Description: XCS node line_finder...
+
+Package: xcs-node-line-keeper
+Architecture: all
+Depends: TODO
+Description: XCS node line_keeper...
+
+Package: xcs-node-localization
+Architecture: all
+Depends: TODO
+Description: XCS node localization...
+
+Package: xcs-node-multiplexer
+Architecture: all
+Depends: TODO
+Description: XCS node multiplexer...
+
+Package: xcs-node-settings
+Architecture: all
+Depends: TODO
+Description: XCS node settings...
+
+Package: xcs-node-xci
+Architecture: all
+Depends: xcs-driver-dodo, TODO
+Recommends: xcs-driver-parrot, xcs-driver-vrep
+Description: XCS node xci...
+
