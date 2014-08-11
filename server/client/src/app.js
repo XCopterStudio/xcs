@@ -31,4 +31,6 @@ $(function () {
     app.DataView = new DataView();
     app.DataFlowGraph = new DataFlowGraphView();
     app.ConsoleView = new ConsoleView();
+    // tmp set video widget
+    //app.videoWidget = new VideoDataView();
 });

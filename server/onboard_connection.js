@@ -19,6 +19,27 @@ OnboardConnection.start = function (port) {
     });
 };
 
+OnboardConnection.startVideoListener = function (port) {
+    
+    var PORT = port;
+    var HOST = '127.0.0.1';
+
+    var dgram = require('dgram');
+    var server = dgram.createSocket('udp4');
+
+    server.on('listening', function () {
+        var address = server.address();
+        console.log('XCS video UDP Server listening on ' + address.address + ":" + address.port);
+    });
+
+    server.on('message', function (message, remote) {
+        //console.log(remote.address + ':' + remote.port +' - ' + message);
+        OnboardConnection.emit('video', message);
+    });
+
+    server.bind(PORT, HOST);
+}
+
 OnboardConnection.send = function (data) {
     if (socket) {
         socket.write(data);
