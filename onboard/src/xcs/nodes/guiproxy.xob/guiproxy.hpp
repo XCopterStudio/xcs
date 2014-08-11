@@ -4,10 +4,12 @@
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
 
+class AVFrame;
+
 namespace xcs {
 namespace nodes {
 
-class VideoWriter;
+class VideoFileWriter;
 
 class GuiProxy : public XObject {
 public:
@@ -19,7 +21,8 @@ public:
 
 private:
     void onChangeVideo(::urbi::UImage frame);
-    VideoWriter* videoWriter_;
+    AVFrame* avframe_;
+    VideoFileWriter* videoFileWriter_;
 };
 
 }
