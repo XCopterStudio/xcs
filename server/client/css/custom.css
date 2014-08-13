@@ -45,8 +45,26 @@ body { background-image: url("../image/first_aid_kit.png"); }
 
 .gridster li {
     list-style-type: none;
-    background-color: whitesmoke;
+    background: #fff;
+	background: linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
     text-align: center;
+}
+
+.widget-chart-container {
+    width: 100%;
+	height: 100%;
+	padding: 20px 15px 15px 15px;
+}
+
+.widget-chart {
+	width: 100%;
+	height: 100%;
+	font-size: 14px;
+	line-height: 1.2em;
 }
 
 /*** SIDEPANELs ***/
