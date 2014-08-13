@@ -1,86 +1,84 @@
-var ms,
-    sourceBuffer,
-    video,
-    queue = [];
-
-
 var VideoDataView = AbstractDataView.extend({
-    template: '<video autoplay width="640" height="480"></video>',
+    // TODO: video element position fixed so it can overflow widget [name], rethink CSS styling
+    template: '<li class="widget-line"><div><%= name %></div><video autoplay width="640" height="480" style="margin-top: -60px;"></video></li>',
     
-    initialize: function () {
-        AbstractDataView.prototype.initialize.call(this);
-        this.sizeY = 3;
-        this.sizeY = 2;
-        
-        // init video
+    sizeX: 3,
+    
+    sizeY: 3,
+    
+    init: function () {
+
         window.MediaSource = window.MediaSource || window.WebKitMediaSource;
 
-        ms = new MediaSource();
-
-        video = document.querySelector('video');
-        video.src = window.URL.createObjectURL(ms);
-
-        ms.addEventListener('webkitsourceopen', initSourceBuffer, false); // TODO: not supported any more?
-        ms.addEventListener('sourceopen', initSourceBuffer, false);
+        this.queue = [];
+        this.sourceBuffer = {};
+        this.ms = new MediaSource();
+        this.video = document.querySelector('video');
+        this.video.src = window.URL.createObjectURL(this.ms);
         
-        // debugging
-        ms.addEventListener('webkitsourceclose', function(e) { console.log('webkitsourceclose: ' + ms.readyState); }, false);
-        ms.addEventListener('webkitsourceopen', function(e) { console.log('webkitsourceopen: ' + ms.readyState); }, false);
+        _.bindAll(this, 'processVideoSegments');
+        _.bindAll(this, 'appendSourceBuffer');
+        _.bindAll(this, 'initSourceBuffer');
+        _.bindAll(this, 'resetSourceBuffer');
         
-        ms.addEventListener('sourceopen', function(e) { console.log('sourceopen: ' + ms.readyState); });
-        ms.addEventListener('sourceclose', function(e) { console.log('sourceclose: ' + ms.readyState); });
-        ms.addEventListener('sourceended', function(e) { console.log('sourceended: ' + ms.readyState); });
-        ms.addEventListener('error', function(e) { console.log('error: ' + ms.readyState); });
-
+        this.ms.addEventListener('sourceopen', this.initSourceBuffer, false);
+        this.ms.addEventListener('sourceclose', this.resetSourceBuffer, false);
         
-        // incomming video processing
-        gSocket.on('video', function (data) {
-            
-            if (sourceBuffer.updating || queue.length > 0) {
-                queue.push(new Uint8Array(data));
-            } else {
-                sourceBuffer.appendBuffer(new Uint8Array(data));
-            }
-            
-            // debugging
-            var i,
-                len,
-                ranges = sourceBuffer.buffered;
-
-            console.log("--STATUS-------");
-            console.log("CURRENT TIME: " + video.currentTime);
-            console.log("BUFFERED RANGES: " + ranges.length);
-            for (i = 0, len = ranges.length; i < len; i += 1) {
-                console.log("RANGE: " + ranges.start(i) + " - " + ranges.end(i));
-            }
-            console.log("---------------");
-            
-        });
+//        this.ms.addEventListener('sourceended', function(e) { console.log('sourceended: ' + this.ms.readyState); });
+//        this.ms.addEventListener('error', function(e) { console.log('error: ' + this.ms.readyState); });
     },
     
     setData: function(data) {
+        // empty, data retrieved directly from websocket
     },
     
+    initSourceBuffer: function () {
+        console.log("MediaSource OPENED.");
+        this.queue = [];
+        //sourceBuffer = ms.addSourceBuffer('video/mp4;codecs="avc1.4D401F"');
+        this.sourceBuffer = this.ms.addSourceBuffer('video/webm;codecs="vp8"');
+        this.sourceBuffer.addEventListener('update', this.appendSourceBuffer); // Note: Have tried 'updateend'
+        // debugging
+//        this.sourceBuffer.addEventListener('updatestart', function(e) { console.log('updatestart: ' + this.ms.readyState); });
+//        this.sourceBuffer.addEventListener('update', function(e) { console.log('update: ' + this.ms.readyState); });
+//        this.sourceBuffer.addEventListener('updateend', function(e) { console.log('updateend: ' + this.ms.readyState); });
+//        this.sourceBuffer.addEventListener('error', function(e) { console.log('error: ' + this.ms.readyState); });
+//        this.sourceBuffer.addEventListener('abort', function(e) { console.log('abort: ' + this.ms.readyState); });
+
+        gSocket.on('video', this.processVideoSegments);
+        gSocket.emit('resend', JSON.stringify({ type: "onboard", data: "init-video" }));
+    },
+    
+    resetSourceBuffer: function () {
+        // TODO: listener should also be removed on DFG destroy action, 
+        // which leads to methods onDestroy, onCreate, onStart, onStop on DataViews for similar purposes
+        // onStop method shuould fire this method for live camera view to proceed correctly on next start
+        gSocket.removeListener('video', this.processVideoSegments);
+        gSocket.emit('resend', JSON.stringify({ type: "onboard", data: "deinit-video" }));
+        this.video.src = window.URL.createObjectURL(this.ms);
+    },
+    
+    processVideoSegments: function (data) {
+        this.queue.push(new Uint8Array(data));
+        this.appendSourceBuffer();
+    //  debugging
+//        var i,
+//            len,
+//            ranges = sourceBuffer.buffered;
+//
+//        console.log("--STATUS-------");
+//        console.log("CURRENT TIME: " + video.currentTime);
+//        console.log("BUFFERED RANGES: " + ranges.length);
+//        for (i = 0, len = ranges.length; i < len; i += 1) {
+//            console.log("RANGE: " + ranges.start(i) + " - " + ranges.end(i));
+//        }
+//        console.log("---------------");
+    },
+    
+    appendSourceBuffer: function () {
+        if (this.queue.length > 0 && !this.sourceBuffer.updating) {
+            this.sourceBuffer.appendBuffer(this.queue.shift());
+        }
+    },
     
 });
-
-function initSourceBuffer() {
-
-    console.log("MediaSource OPENED.");
-
-    //sourceBuffer = ms.addSourceBuffer('video/mp4;codecs="avc1.4D401F"');
-    sourceBuffer = ms.addSourceBuffer('video/webm;codecs="vp8"');
-    
-    // debugging
-//    sourceBuffer.addEventListener('updatestart', function(e) { console.log('updatestart: ' + ms.readyState); });
-//    sourceBuffer.addEventListener('update', function(e) { console.log('update: ' + ms.readyState); });
-//    sourceBuffer.addEventListener('updateend', function(e) { console.log('updateend: ' + ms.readyState); });
-    sourceBuffer.addEventListener('error', function(e) { console.log('error: ' + ms.readyState); });
-    sourceBuffer.addEventListener('abort', function(e) { console.log('abort: ' + ms.readyState); });
-    
-    sourceBuffer.addEventListener('update', function() { // Note: Have tried 'updateend'
-        if (queue.length > 0 && !sourceBuffer.updating) {
-            sourceBuffer.appendBuffer(queue.shift());
-        }
-    });
-}

@@ -3,7 +3,7 @@
  */
 System.loadModule("xxci");
 System.loadModule("xdataplayer");
-System.loadModule("netadapter");
+System.loadModule("guiproxy");
 
 /*
 * Initialize nodes
@@ -11,9 +11,18 @@ System.loadModule("netadapter");
 var player = XDataplayer.new("tmp/sample.txt");
 //var player = XDataplayer.new("experiments/sample3.txt");
 
-var netadapter = NetAdapter.new("udp://127.0.0.1:1235", "video/webm");
+var location = "udp://127.0.0.1:1235";
+var mimetype = "video/webm";
+var guiProxy = GuiProxy.new(location, mimetype);
 
-player.&video >> netadapter.&video;
+var connection = player.&video >> guiProxy.&video;
+
+guiProxy.initVideo();
 
 player.start();
 
+//sleep(15);
+
+//clog << "DISCONNECTING...";
+//connection.disconnect();
+//clog << "DISCONNECTED";

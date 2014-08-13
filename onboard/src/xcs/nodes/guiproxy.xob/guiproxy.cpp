@@ -11,10 +11,12 @@ namespace nodes {
 
 GuiProxy::GuiProxy(const std::string &name) :
   XObject(name),
-  video("VIDEO") {
+  video("CAMERA") {
 
     XBindVarF(video, &GuiProxy::onChangeVideo);
     XBindFunction(GuiProxy, init);
+    XBindFunction(GuiProxy, initVideo);
+    XBindFunction(GuiProxy, deinitVideo);
 }
 
 GuiProxy::~GuiProxy() {
@@ -25,8 +27,17 @@ GuiProxy::~GuiProxy() {
 void GuiProxy::init(const std::string &location, const std::string &mimetype) {
 //    cv::namedWindow("Test", cv::WINDOW_AUTOSIZE);
     avframe_ = avcodec_alloc_frame();
-    avformat_network_init();
     videoFileWriter_ = new VideoFileWriter(location, mimetype);
+}
+
+void GuiProxy::initVideo() {
+    XCS_LOG_INFO("Initializing video transmitter.");
+    videoFileWriter_->openVideo();
+}
+
+void GuiProxy::deinitVideo() {
+    XCS_LOG_INFO("Deinitialize video transmitter.");
+    videoFileWriter_->closeVideo();
 }
 
 void GuiProxy::onChangeVideo(::urbi::UImage image) { // TODO: try to change UVar to UImage.. should work
