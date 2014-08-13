@@ -6,9 +6,9 @@ class Onboard {
 
         function getSettings(filename) {
             (settings / filename).asString();
-        }|; 
+        }|;
     };
-    
+
     var nodeContainer_;
     var onboardSettings_;
     var dfgStorage_;
@@ -29,6 +29,7 @@ class Onboard {
         
         System.loadModule("xsettings");
         System.loadModule("xjson");
+        System.loadModule("guiproxy");
         
         // load onboard settings
         onboardSettings_ = XSettings.new(XcsPaths.getSettings("onboard.xs"), false);
@@ -68,6 +69,23 @@ class Onboard {
      */
     
     function receive(request) {
+
+        // TODO: Very wicked hack!! Create separate receiver for video.
+        if (request == "init-video") {
+            echo("init video request");
+            if (Global.hasSlot("guiProxy")) {
+                Global.guiProxy.initVideo();
+            };
+            return;
+        };
+        if (request == "deinit-video") {
+            echo("deinit video request");
+            if (Global.hasSlot("guiProxy")) {
+                Global.guiProxy.deinitVideo();
+            };
+            return;
+        };
+
         request = request["request"]; // backward compatibility
         if(!request.has("id") || !request.has("requestData") || !request.has("requestId")) {
             //TODO: what to do with errors? send to client?
@@ -132,7 +150,7 @@ class Onboard {
     };
     
     /*
-     * DFG nodes manipulation
+     * DFG nodes manipulation
      */
     
     // reset old dfg and create new one
@@ -276,7 +294,7 @@ class Onboard {
     };
     
     /*
-     * DFG load and save
+     * DFG load and save
      */
     function doDfgSave_(requestData) {
         var filename = requestData["filename"];
@@ -313,3 +331,4 @@ class Onboard {
 
 
 var onboard = Onboard.new() |;
+var Global.onboard = onboard |; // TODO: discuss scoping for important objects like onboard, settings, etc.

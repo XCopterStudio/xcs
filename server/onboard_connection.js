@@ -33,7 +33,6 @@ OnboardConnection.startVideoListener = function (port) {
     });
 
     server.on('message', function (message, remote) {
-        //console.log(remote.address + ':' + remote.port +' - ' + message);
         OnboardConnection.emit('video', message);
     });
 

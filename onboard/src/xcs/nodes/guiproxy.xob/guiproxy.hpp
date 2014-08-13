@@ -16,11 +16,14 @@ public:
     GuiProxy(const std::string &name);
     ~GuiProxy();
     void init(const std::string &location, const std::string &mimetype);
+    void initVideo();
+    void deinitVideo();
 
     XInputPort<::urbi::UImage> video;
 
 private:
     void onChangeVideo(::urbi::UImage frame);
+
     AVFrame* avframe_;
     VideoFileWriter* videoFileWriter_;
 };

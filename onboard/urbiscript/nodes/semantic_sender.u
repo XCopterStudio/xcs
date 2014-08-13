@@ -86,6 +86,27 @@ class SemanticSender : XObject {
     };
     
     function registerXVar(name, semanticType, syntacticType, uvar) {
+
+        // TODO: temporary solution for video transmission
+        if (semanticType == "CAMERA") {
+
+            if (!Global.hasSlot("guiProxy")) {
+                var onboardSettings_ = XSettings.new(Global.onboard.XcsPaths.getSettings("onboard.xs"), false);
+                var location = "udp://";
+                location += onboardSettings_.get("serverHost") + ":" + onboardSettings_.get("serverVideoPort");
+                var mimetype = "video/webm";
+                var Global.guiProxy = GuiProxy.new(location, mimetype);
+            }
+            else {
+                Global.guiProxy.deinitVideo();  // TODO: caused segfault in some case,
+                                                // probably when there was no initVideo in the first place,
+                                                // had no time to debug
+            };
+
+            this.registerData_[name] = uvar >> Global.guiProxy.&video;
+            return;
+        };
+
         var that = this;
         this.metadata_[name] = semanticType;
         
