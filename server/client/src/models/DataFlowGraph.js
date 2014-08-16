@@ -314,6 +314,7 @@ var DataFlowGraph = Backbone.Model.extend({
     },
     
     requestReset: function(modelId, response) {
+        this.sendRequest("SAVED_DFG", "", response);
         this.sendRequest("DFG_RESET", modelId, response);
     },
     
