@@ -825,55 +825,61 @@ var DataFlowGraphView = Backbone.View.extend({
     },
     
     checkGuiWidgets : function() {
-        var views = [];
+        try {
+            var views = [];
+                        
+            // load dfg 2 json object
+            var jsonDfg = this.dfgGraph.toJSON()
+            
+            if(jsonDfg.cells) {
+                for(var i = 0; i < jsonDfg.cells.length; ++i) {
+                    var cell = jsonDfg.cells[i];
                     
-        // load dfg 2 json object
-        var jsonDfg = this.dfgGraph.toJSON()
-        
-        if(jsonDfg.cells) {
-            for(var i = 0; i < jsonDfg.cells.length; ++i) {
-                var cell = jsonDfg.cells[i];
-                
-                // links
-                if(cell.source && cell.target && cell.source.id && cell.target.id && cell.type && cell.type == "link") {
-                    // load clone info
-                    var cloneId = cell.target.id;
-                    var cloneModel = this.dfgModels[cloneId];
-                    if(!cloneModel || 
-                       cloneModel.get("origId") != "Gui" || 
-                       !(cloneModel.getState() == NodeState.CREATED || cloneModel.getState() == NodeState.STARTED)) {
-                        continue;
-                    }
-                    
-                    // load clone info about source
-                    var srcCloneModel = this.dfgModels[cell.source.id];
-                    if(!srcCloneModel || 
-                       !(srcCloneModel.getState() == NodeState.CREATED || srcCloneModel.getState() == NodeState.STARTED)) {
-                        continue;
-                    }
-                    
-                    // load prototypes info
-                    var prototypeId = cloneModel.get("origId");
-                    var modelPrototype = this.dfgToolboxNodes[prototypeId];
-                    if(!modelPrototype) {
-                        continue;
-                    }
-                    
-                    // register xvar methods
-                    var model = modelPrototype.get("registerXVar").findWhere({"name": cell.target.port});
-                    if(model) {
-                        views.push({
-                            viewName: cell.target.port,
-                            dataId: cell.source.id + "_" + cell.source.port,
-                            model: cloneModel
-                        });
+                    // links
+                    if(cell.source && cell.target && cell.source.id && cell.target.id && cell.type && cell.type == "link") {
+                        // load clone info
+                        var cloneId = cell.target.id;
+                        var cloneModel = this.dfgModels[cloneId];
+                        if(!cloneModel || 
+                           cloneModel.get("origId") != "Gui" || 
+                           !(cloneModel.getState() == NodeState.CREATED || cloneModel.getState() == NodeState.STARTED)) {
+                            continue;
+                        }
+                        
+                        // load clone info about source
+                        var srcCloneModel = this.dfgModels[cell.source.id];
+                        if(!srcCloneModel || 
+                           !(srcCloneModel.getState() == NodeState.CREATED || srcCloneModel.getState() == NodeState.STARTED)) {
+                            continue;
+                        }
+                        
+                        // load prototypes info
+                        var prototypeId = cloneModel.get("origId");
+                        var modelPrototype = this.dfgToolboxNodes[prototypeId];
+                        if(!modelPrototype) {
+                            continue;
+                        }
+                        
+                        // register xvar methods
+                        var model = modelPrototype.get("registerXVar").findWhere({"name": cell.target.port});
+                        if(model) {
+                            views.push({
+                                viewName: cell.target.port,
+                                dataId: cell.source.id + "_" + cell.source.port,
+                                model: cloneModel
+                            });
+                        }
                     }
                 }
             }
+                
+                
+            return app.DataView.setCreatedViews(views);
         }
-            
-            
-        return app.DataView.setCreatedViews(views);
+        catch(ex) {
+            app.Flash.flashError("Error when try to create/remove widgets: " + ex.message + "!");
+            return false;    
+        }
     },
     
     dfgStart : function(response, modelId) {
