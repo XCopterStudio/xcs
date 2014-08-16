@@ -26,6 +26,7 @@ $(function () {
     //initialize views
     app.Wait = new WaitView();
     app.Flash = new FlashMessagesView();
+    app.StateView = new StateView();
     
     app.FlyControlView = new FlyControlView();
     app.DataView = new DataView();
