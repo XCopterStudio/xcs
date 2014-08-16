@@ -375,8 +375,14 @@ var DataFlowGraphView = Backbone.View.extend({
         
         var loadItems = $('#DFG-saved-items');
         
-        //NOTE: there should be no need to unregister old click events - jquery should handle it yourself
-        loadItems.html('');
+        // reset saved dfgs
+        if(dfgs.length > 0) {
+            //NOTE: there should be no need to unregister old click events - jquery should handle it yourself
+            loadItems.html('');
+        }
+        else {
+            loadItems.html('<li class="text-center small"><em>No DFG for load...</em></li>');
+        }
         
         var self = this;
         var loadDfgAction = {};

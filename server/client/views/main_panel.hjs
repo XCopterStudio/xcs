@@ -109,6 +109,7 @@
                                             Load DFG 
                                         </a>
                                         <ul class="dropdown-menu sub-menu-left" id="DFG-saved-items">
+                                            <li class="text-center small"><em>Use Reload nodes or Reset DFG action first...</em></li>
                                         </ul>
                                     </li>
                                     <li class="divider"></li>
