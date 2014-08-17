@@ -4,8 +4,8 @@ joint.shapes.dfg = {};
 
 joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.extend({}, joint.shapes.basic.PortsModelInterface, {        
     markup: '<g class="rotatable"><g class="scalable"><rect></rect></g><text class="label"></text><g class="inPorts"></g><g class="outPorts"></g></g>',
-    portMarkup: '<g class="port<%= id %>"><circle class="port"></circle><text></text></g>',
-        
+    portMarkup: '<g class="port<%= id %> xtooltip" data-toggle="tooltip" title="<%= port.title %>"><circle class="port"></circle><text></text></g>',
+    
     defaults: joint.util.deepSupplement({
         inPortsType: {},
         outPortsType: {},
@@ -16,9 +16,14 @@ joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.ex
         origId: "origId",
         inPorts: [],
         outPorts: [],
-        size: { width: 120, height: 90 },
+        size: { 
+            width: 120, 
+            height: 90 
+        },
         attrs: {
-            '.': { magnet: false },
+            '.': { 
+                magnet: false 
+            },
             text: {
                 'fill': 'black',
                 'pointer-events': 'none'
@@ -71,13 +76,27 @@ joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.ex
         var portCircleSelector = portSelector + '>circle';
 
         attrs[portTextSelector] = { 
-            text: portName 
+            text: portName
         };
+        
+        var dataType = this.get("outPortsType")[portName]
+        var title;
+        if(!dataType) {
+            dataType = this.get("inPortsType")[portName];
+        }
+        if(!dataType || !dataType.semType || !dataType.synType) {
+            title = "";
+        }
+        else {
+            title = "" + dataType.semType + "(" + dataType.synType + ")";
+            title = title.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        }
         
         attrs[portCircleSelector] = { 
             port: { 
                 id: portName || _.uniqueId(type), 
                 type: type,
+                title: title,
             }
         };
         
