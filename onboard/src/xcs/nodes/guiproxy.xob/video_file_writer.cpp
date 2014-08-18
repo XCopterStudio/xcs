@@ -12,7 +12,7 @@ extern "C" {
 
 using namespace xcs::nodes;
 
-const unsigned int VideoFileWriter::STREAM_FRAME_RATE = 25;
+const unsigned int VideoFileWriter::STREAM_FRAME_RATE = 30;
 const unsigned int VideoFileWriter::VIDEO_BUFFER_SIZE = 200000;
 const AVPixelFormat VideoFileWriter::STREAM_PIX_FMT = PIX_FMT_YUV420P;
 
@@ -34,6 +34,8 @@ void VideoFileWriter::prepareCodecContext(
     codecContext->time_base.den = STREAM_FRAME_RATE;
     codecContext->time_base.num = 1;
     codecContext->pix_fmt = STREAM_PIX_FMT;
+
+    codecContext->bit_rate = 10000;
 
     if (!leaveDefault) {
         codecContext->bit_rate = bitrate;

@@ -13,7 +13,9 @@ GuiProxy::GuiProxy(const std::string &name) :
   XObject(name),
   video("CAMERA") {
 
-    XBindVarF(video, &GuiProxy::onChangeVideo);
+    //XBindVarF(video, &GuiProxy::onChangeVideo);
+    XBindVar(video);
+    UNotifyThreadedChange(video.data(), &GuiProxy::onChangeVideo, urbi::LOCK_FUNCTION_DROP);
     XBindFunction(GuiProxy, init);
     XBindFunction(GuiProxy, initVideo);
     XBindFunction(GuiProxy, deinitVideo);
