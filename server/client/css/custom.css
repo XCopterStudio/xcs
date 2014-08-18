@@ -100,9 +100,10 @@ body { background-image: url("../image/first_aid_kit.png"); }
 .dropdown-menu .sub-menu-left {
     right: 100%;
     position: absolute;
-    top: 0;
+    bottom: 0;
     visibility: hidden;
-    margin-top: -2px;
+    margin-bottom: -2px;
+    margin-right: 200px;
 }
 
 .dropdown-menu li {
