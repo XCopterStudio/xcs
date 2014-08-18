@@ -1,0 +1,165 @@
+load("init_onboard.u");
+System.loadModule("xcontrol");
+System.loadModule("xhermit_movement");
+
+// inicialization
+
+var localization = XLocalization.new("../xsettings/xlocalization.xs");
+
+var xci = XXci.new("xci_parrot");
+xci.start();
+
+var control = XControl.new("../xsettings/xcontrol.xs");
+
+var hermit = XHermitMovement.new();
+
+// inicialize logger
+var logname = Date.now().asString().replace(" ", "_").replace(":","-");
+var logger = XDatalogger.new("../logs/" + logname + ".txt");
+
+/* Register to logger */
+
+if(xci.hasSlot("rotation")) logger.registerData("rotation","ROTATION","xcs::EulerianVector",xci.&rotation);
+if(xci.hasSlot("velocity")) logger.registerData("velocity","VELOCITY","xcs::CartesianVector",xci.&velocity);
+if(xci.hasSlot("altitude")) logger.registerData("altitude","ALTITUDE","double",xci.&altitude);
+if(xci.hasSlot("altitudeAll")) logger.registerData("altitudeAll","ALTITUDE_ALL","xcs::CartesianVector",xci.&altitudeAll);
+if(xci.hasSlot("altitudeV")) logger.registerData("altitudeV","ALTITUDE_V","double",xci.&altitudeV);
+if(xci.hasSlot("acceleration")) logger.registerData("acceleration","ACCELERATION","xcs::CartesianVector",xci.&acceleration);
+if(xci.hasSlot("gyro")) logger.registerData("gyro","GYRO_RAW","xcs::CartesianVector",xci.&gyro);
+if(xci.hasSlot("magneto")) logger.registerData("magneto","MAGNETO_RAW","xcs::CartesianVector",xci.&magneto);
+if(xci.hasSlot("internalTimeImu")) logger.registerData("internalTimeImu","TIME_LOC","double",xci.&internalTimeImu);
+if(xci.hasSlot("internalTimeVideo")) logger.registerData("internalTimeVideo","TIME_LOC","double",xci.&internalTimeVideo);
+
+if(localization.hasSlot("position")) logger.registerData("ekf_position", "POSITION_ABS", "xcs::CartesianVector", localization.&position);
+if(localization.hasSlot("rotation")) logger.registerData("ekf_rotation", "ROTATION", "xcs::EulerianVector", localization.&rotation);
+if(localization.hasSlot("velocity")) logger.registerData("ekf_velocity", "VELOCITY", "xcs::CartesianVector", localization.&velocity);
+if(localization.hasSlot("velocityPsi")) logger.registerData("ekf_velocityPsi", "VELOCITY_PSI", "double", localization.&velocityPsi);
+
+if(control.hasSlot("flyControl")) logger.registerData("flyControl", "FlyControl", "xcs::FlyControl", control.&flyControl);
+
+if(xci.hasSlot("video")) logger.registerVideo(640, 360, "video","CAMERA","xcs::BitmapType",xci.&video);
+
+// Create DFG
+xci.&velocity >> localization.&measuredVelocity ;
+xci.&rotation >> localization.&measuredAnglesRotation;
+xci.&altitude >> localization.&measuredAltitude;
+xci.&internalTimeImu >> localization.&timeImu;
+xci.&video >> localization.&video;
+xci.&internalTimeVideo >> localization.&videoTime;
+//localization.ptamControl
+
+control.&flyControl >> localization.&flyControl;
+control.&flyControl >> xci.&flyControl;
+
+localization.&velocity >> control.&velocity; 
+localization.&rotation >> control.&rotation;
+
+localization.&position >> hermit.&dronePosition;
+localization.&rotation >> hermit.&droneRotation;
+hermit.&speedControl >> control.&desireVelocity;
+ 
+// fly sequence
+logger.start();
+
+sleep(1s);
+xci.command = "TakeOff";
+sleep(7s);
+localization.control = "resetEkf";
+sleep(1s);
+
+var start = Checkpoint.new();
+start.x = 0;
+start.y = 0;
+start.z = 1.5;
+start.xOut = 0;
+start.yOut = 0;
+start.zOut = 0;
+
+var right = Checkpoint.new();
+right.x = 1;
+right.y = 1;
+right.z = 1.5;
+right.xOut = 0;
+right.yOut = 0;
+right.zOut = 0;
+
+var topRight = Checkpoint.new();
+topRight.x = -1;
+topRight.y = 1;
+topRight.z = 1.5;
+topRight.xOut = 0;
+topRight.yOut = 0;
+topRight.zOut = 0;
+
+var topLeft = Checkpoint.new();
+topLeft.x = 1;
+topLeft.y = -1;
+topLeft.z = 1.5;
+topLeft.xOut = 0;
+topLeft.yOut = 0;
+topLeft.zOut = 0;
+
+var left = Checkpoint.new();
+left.x = -1;
+left.y = -1;
+left.z = 1.5;
+left.xOut = 0;
+left.yOut = 0;
+left.zOut = 0;
+
+hermit.checkpoint = start;
+hermit.checkpoint = right;
+hermit.checkpoint = topRight;
+hermit.checkpoint = start;
+hermit.checkpoint = topLeft;
+hermit.checkpoint = left;
+hermit.checkpoint = start;
+
+var upSpeed = SpeedControl.new();
+upSpeed.vx = 0;
+upSpeed.vy = 0;
+upSpeed.vz = 0.2;
+upSpeed.psi = 0;
+
+var downSpeed = SpeedControl.new();
+downSpeed.vx = 0;
+downSpeed.vy = 0;
+downSpeed.vz = -0.2;
+downSpeed.psi = 0;
+
+var nullSpeed = SpeedControl.new();
+nullSpeed.vx = 0;
+nullSpeed.vy = 0;
+nullSpeed.vz = 0;
+nullSpeed.psi = 0;
+
+control.start();
+
+while(localization.ptamStatus != 3 && localization.ptamStatus != 4){
+  echo("Inicialize");
+  localization.control = "init";
+  control.desireVelocity = upSpeed;
+  sleep(2s);
+  localization.control = "init";
+  sleep(2s);
+  control.desireVelocity = downSpeed;
+  sleep(4s);
+};
+
+
+control.desireVelocity = nullSpeed;
+echo("Start hermit");
+hermit.start();
+
+var count = 0;
+
+at(hermit.reachedCheckpoint){
+  if(count == 4){
+    xci.command = "Land";
+    sleep(2s);
+    shutdown;
+  };
+  
+  echo("Reached checkpoint");
+  count = count + 1;
+};
