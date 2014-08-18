@@ -29,7 +29,7 @@ body { background-image: url("../image/first_aid_kit.png"); }
 /*** GRIDSTER ***/
 .widget { background-color: whitesmoke; border-radius: 3px; }
 
-.widget-line { font-size: 200%; line-height: 48pt; height:100%; width:100%; text-align: right; }
+.widget-line { font-size: 120%; line-height: 1.5em; height:100%; width:100%; text-align: right; }
 
 .widget-graph {}
 

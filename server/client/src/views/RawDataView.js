@@ -1,5 +1,5 @@
 var RawDataView = AbstractDataView.extend({
-    template: '<li class="widget-line"><div><%= name %></div><div id="raw_<%= widgetId %>_<%= dataId %>"></div></li>',
+    template: '<li class="widget-line"><div><%= name %></div><br><div id="raw_<%= widgetId %>_<%= dataId %>"></div></li>',
     
     init: function() {
         this.$raw = $("#raw_" + this.attrs.widgetId + "_" + this.attrs.dataId);
@@ -14,7 +14,7 @@ var RawDataView = AbstractDataView.extend({
                 }
                 parts.push(key + ': ' + data[key]);                
             }
-            this.$raw.html(parts.join(', '));
+            this.$raw.html(parts.join('<br>'));
         } else if(data) {
             this.$raw.html(data);
         }
