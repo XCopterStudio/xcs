@@ -245,16 +245,16 @@ XciParrot::~XciParrot() {
         threadSendingATCmd_.join();
     }
 
-    if (threadReceiveNavData_.joinable()){
-        threadReceiveNavData_.join();
-    }
-
     if (threadReadVideoData_.joinable()){
         threadReadVideoData_.join();
     }
 
     if (threadReadVideoReceiver_.joinable()){
         threadReadVideoReceiver_.join();
+    }
+
+    if (threadReceiveNavData_.joinable()){
+        threadReceiveNavData_.join();
     }
 }
 

@@ -109,6 +109,10 @@ void NavdataReceiver::checkDeadlineNavdata() {
 }
 
 void NavdataReceiver::processState(uint32_t parrotState) {
+    if (end_){
+        return;
+    }
+
     parrotState_.updateState(parrotState);
 
     if (parrotState_.getState(FLAG_ARDRONE_COM_WATCHDOG_MASK)) { // reset sequence number
