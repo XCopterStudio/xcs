@@ -848,14 +848,18 @@ var DataFlowGraphView = Backbone.View.extend({
                         var cloneModel = this.dfgModels[cloneId];
                         if(!cloneModel || 
                            cloneModel.get("origId") != "Gui" || 
-                           !(cloneModel.getState() == NodeState.CREATED || cloneModel.getState() == NodeState.STARTED)) {
+                           !(cloneModel.getState() == NodeState.CREATED || 
+                                cloneModel.getState() == NodeState.STARTED || 
+                                cloneModel.getState() == NodeState.STOPPED)) {
                             continue;
                         }
                         
                         // load clone info about source
                         var srcCloneModel = this.dfgModels[cell.source.id];
                         if(!srcCloneModel || 
-                           !(srcCloneModel.getState() == NodeState.CREATED || srcCloneModel.getState() == NodeState.STARTED)) {
+                           !(srcCloneModel.getState() == NodeState.CREATED || 
+                             srcCloneModel.getState() == NodeState.STARTED ||
+                             srcCloneModel.getState() == NodeState.STOPPED)) {
                             continue;
                         }
                         
