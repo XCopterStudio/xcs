@@ -15,7 +15,7 @@ namespace xcs{
 namespace xci{
 namespace parrot{
 
-    typedef xcs::Tsqueue< AtCommand* > AtCommandQueue;
+    typedef xcs::Tsqueue<AtCommandPtr> AtCommandQueue;
 
     class AtCommandSender{
         static const unsigned int TIMEOUT;

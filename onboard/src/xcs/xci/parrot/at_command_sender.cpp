@@ -38,10 +38,9 @@ void AtCommandSender::handleConnectedAtCommand(const boost::system::error_code& 
 }
 
 void AtCommandSender::sendAtCommand(){
-    AtCommand* atCommand = nullptr;
+    std::shared_ptr<AtCommand> atCommand;
     if (atCommandQueue_.tryPop(atCommand)){
         lastAtcommand_ = atCommand->toString(sequenceNumber_++);
-        delete atCommand;
 
         deadline_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
         socket_.async_send(boost::asio::buffer(lastAtcommand_, lastAtcommand_.length()), boost::bind(&AtCommandSender::handleWritedAtCommand, this, _1));

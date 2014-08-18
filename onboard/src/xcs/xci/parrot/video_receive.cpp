@@ -72,7 +72,7 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
             if (!receivedHeader_){
                 receivedHeader_ = true;
 
-                lastFrame_ = (VideoFrame*) &buffer[index*BUFFER_SIZE];
+                lastFrame_ = (VideoFrame*) &buffer_[index_*BUFFER_SIZE];
                 // fill lastFrame data
                 lastFrame_->width = parrotPave_.encoded_stream_width;
                 lastFrame_->height = parrotPave_.encoded_stream_height;
@@ -82,8 +82,8 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
                 lastFrame_->frame_number = parrotPave_.frame_number;
                 lastFrame_->frame_type = parrotPave_.frame_type;
                 lastFrame_->timestamp = parrotPave_.timestamp / 1000.0;
-                lastFrame_->data = (uint8_t*)&buffer[index*BUFFER_SIZE + sizeof(VideoFrame)];
-                index = (index + 1) % BUFFER_COUNT;
+                lastFrame_->data = (uint8_t*)&buffer_[index_*BUFFER_SIZE + sizeof(VideoFrame)];
+                index_ = (index_ + 1) % BUFFER_COUNT;
                 //cerr << "index " << index << endl;
                 //lastFrame_->data = new uint8_t[lastFrame_->payload_size];
 
@@ -158,8 +158,8 @@ socketVideo_(io_serviceVideo),
 parrotVideo(address::from_string(ipAdress), port){
     end_ = false;
 
-    index = 0;
-    buffer = new char[BUFFER_COUNT*BUFFER_SIZE];
+    index_ = 0;
+    buffer_ = new char[BUFFER_COUNT*BUFFER_SIZE];
 
     lastFrame_ = nullptr;
     lastFrameNumber_ = 0;
@@ -170,7 +170,7 @@ parrotVideo(address::from_string(ipAdress), port){
 VideoReceiver::~VideoReceiver(){
 	end_ = true;
 	socketVideo_.close();
-    delete buffer;
+    delete buffer_;
 	/*vector<VideoFramePtr> frames = videoFrames_.popAll();
 	for (auto frame : frames){
 		delete frame;

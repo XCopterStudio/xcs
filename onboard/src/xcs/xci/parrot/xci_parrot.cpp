@@ -58,24 +58,22 @@ void XciParrot::processVideoData() {
     }
 }
 
-bool XciParrot::setConfirmedConfigure(AtCommand *command) {
+bool XciParrot::setConfirmedConfigure(AtCommandPtr command) {
 
     unsigned int count = 0;
     do {
-        atCommandQueue_.push(new AtCommandCONFIG_IDS("0a1b2c3d", "0a1b2c3d", "0a1b2c3d"));
-        atCommandQueue_.push(command->clone());
+        atCommandQueue_.push(AtCommandPtr(new AtCommandCONFIG_IDS("0a1b2c3d", "0a1b2c3d", "0a1b2c3d")));
+        atCommandQueue_.push(AtCommandPtr(command->clone()));
         this_thread::sleep_for(std::chrono::milliseconds(20));
         if (++count > 20) {
             XCS_LOG_WARN("Cannot receive ack.");
-            delete command;
             return false;
         }
     } while (!state_.getState(FLAG_ARDRONE_COMMAND_MASK));
-    delete command;
 
     count = 0;
     do {
-        atCommandQueue_.push(new AtCommandCTRL(STATE_ACK_CONTROL_MODE));
+        atCommandQueue_.push(AtCommandPtr(new AtCommandCTRL(STATE_ACK_CONTROL_MODE)));
         this_thread::sleep_for(std::chrono::milliseconds(20));
 
         if (++count >= 20) {
@@ -88,20 +86,20 @@ bool XciParrot::setConfirmedConfigure(AtCommand *command) {
 }
 
 bool XciParrot::setDefaultConfiguration() {
-    setConfirmedConfigure(new AtCommandCONFIG("custom:application_id", "0a1b2c3d"));
-    setConfirmedConfigure(new AtCommandCONFIG("custom:profile_id", "0a1b2c3d"));
-    setConfirmedConfigure(new AtCommandCONFIG("custom:session_id", "0a1b2c3d"));
+    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("custom:application_id", "0a1b2c3d")));
+    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("custom:profile_id", "0a1b2c3d")));
+    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("custom:session_id", "0a1b2c3d")));
 
     std::stringstream value;
     //value << H264_720P_CODEC;
     value << H264_360P_CODEC;
-    setConfirmedConfigure(new AtCommandCONFIG("video:video_codec", value.str()));
-    setConfirmedConfigure(new AtCommandCONFIG("video:bitrate_control_mode", "1"));
-    setConfirmedConfigure(new AtCommandCONFIG("video:max_bitrate", "4000"));
-    setConfirmedConfigure(new AtCommandCONFIG("video:video_channel", "0"));
+    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("video:video_codec", value.str())));
+    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("video:bitrate_control_mode", "1")));
+    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("video:max_bitrate", "4000")));
+    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("video:video_channel", "0")));
 
     //receive only reduced navdata set
-    setConfirmedConfigure(new AtCommandCONFIG("general:navdata_demo", "FALSE"));
+    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("general:navdata_demo", "FALSE")));
     // set which data will be send
     unsigned int ndOptions = ((1 << NAVDATA_DEMO_TAG) |
             (1 << NAVDATA_ALTITUDE_TAG) |
@@ -111,9 +109,9 @@ bool XciParrot::setDefaultConfiguration() {
 
     stringstream ndOptionsString;
     ndOptionsString << ndOptions;
-    setConfirmedConfigure(new AtCommandCONFIG("general:navdata_options", ndOptionsString.str()));
+    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("general:navdata_options", ndOptionsString.str())));
     // disable visual detection
-    setConfirmedConfigure(new AtCommandCONFIG("detect:detect_type", "3"));
+    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("detect:detect_type", "3")));
 
     return true;
 }
@@ -202,28 +200,28 @@ SpecialCMDList XciParrot::specialCMD() {
 
 void XciParrot::configuration(const std::string &key, const std::string &value) {
     configuration_[key] = value;
-    setConfirmedConfigure(new AtCommandCONFIG(key, value));
+    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG(key, value)));
 }
 
 void XciParrot::configuration(const InformationMap &configuration) {
     for (auto element : configuration) {
         configuration_[element.first] = element.second;
-        setConfirmedConfigure(new AtCommandCONFIG(element.first, element.second));
+        setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG(element.first, element.second)));
     }
 }
 
 void XciParrot::command(const std::string &command) {
     if (command == "TakeOff") {
-        atCommandQueue_.push(new AtCommandRef(STATE_TAKEOFF));
+        atCommandQueue_.push(AtCommandPtr(new AtCommandRef(STATE_TAKEOFF)));
     } else if (command == "Land") {
-        atCommandQueue_.push(new AtCommandRef(STATE_LAND));
+        atCommandQueue_.push(AtCommandPtr(new AtCommandRef(STATE_LAND)));
     } else if (command == "EmegrencyStop") {
         if (!state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)) {
-            atCommandQueue_.push(new AtCommandRef(STATE_EMERGENCY));
+            atCommandQueue_.push(AtCommandPtr(new AtCommandRef(STATE_EMERGENCY)));
         }
     } else if (command == "Normal") {
         if (state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)) {
-            atCommandQueue_.push(new AtCommandRef(STATE_NORMAL));
+            atCommandQueue_.push(AtCommandPtr(new AtCommandRef(STATE_NORMAL)));
         }
     } else {
         XCS_LOG_WARN("Unsupported command " + command);
@@ -232,9 +230,9 @@ void XciParrot::command(const std::string &command) {
 
 void XciParrot::flyControl(float roll, float pitch, float yaw, float gaz) {
     if (std::abs(pitch) < EPSILON && std::abs(roll) < EPSILON) {
-        atCommandQueue_.push(new AtCommandPCMD(DroneMove(roll, pitch, yaw, gaz)));
+        atCommandQueue_.push(AtCommandPtr(new AtCommandPCMD(DroneMove(roll, pitch, yaw, gaz))));
     } else {
-        atCommandQueue_.push(new AtCommandPCMD(DroneMove(roll, pitch, yaw, gaz), false, false, true));
+        atCommandQueue_.push(AtCommandPtr(new AtCommandPCMD(DroneMove(roll, pitch, yaw, gaz), false, false, true)));
     }
 
 }
@@ -242,15 +240,22 @@ void XciParrot::flyControl(float roll, float pitch, float yaw, float gaz) {
 XciParrot::~XciParrot() {
     endAll_ = true;
 
-    // wait for atCMDThread end and then clear memory
-    threadSendingATCmd_.join();
-    threadReceiveNavData_.join();
-    threadReadVideoData_.join();
-    threadReadVideoReceiver_.join();
+    // wait for all thread ends and then clear memory
+    if (threadSendingATCmd_.joinable()){
+        threadSendingATCmd_.join();
+    }
 
-    // delete all AtCommand in queue
-    while (atCommandQueue_.empty())
-        delete atCommandQueue_.pop();
+    if (threadReceiveNavData_.joinable()){
+        threadReceiveNavData_.join();
+    }
+
+    if (threadReadVideoData_.joinable()){
+        threadReadVideoData_.join();
+    }
+
+    if (threadReadVideoReceiver_.joinable()){
+        threadReadVideoReceiver_.join();
+    }
 }
 
 extern "C" {

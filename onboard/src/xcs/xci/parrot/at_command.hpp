@@ -3,6 +3,7 @@
 
 #include <string>
 #include <cstdint>
+#include <memory>
 
 namespace xcs{
 namespace xci{
@@ -73,6 +74,8 @@ namespace parrot{
                 */
         virtual std::string toString(const int32_t sequenceNumber) const  = 0;
     };
+
+    typedef std::shared_ptr<AtCommand> AtCommandPtr;
 
     //! Drone take off, landing and emergency stop command.
 

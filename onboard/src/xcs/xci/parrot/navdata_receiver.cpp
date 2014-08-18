@@ -113,7 +113,7 @@ void NavdataReceiver::processState(uint32_t parrotState) {
 
     if (parrotState_.getState(FLAG_ARDRONE_COM_WATCHDOG_MASK)) { // reset sequence number
         sequenceNumberNavdata_ = DEFAULT_SEQUENCE_NUMBER - 1;
-        atCommandQueue_.push(new AtCommandCOMWDG());
+        atCommandQueue_.push(std::shared_ptr<AtCommand>(new AtCommandCOMWDG()));
     }
 
     if (parrotState_.getState(FLAG_ARDRONE_COM_LOST_MASK)) {

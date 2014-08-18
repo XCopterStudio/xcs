@@ -133,5 +133,5 @@ void ConfigurationReceiver::connect(){
 };
 
 void ConfigurationReceiver::update(){
-    atCommandQueue_.push(new AtCommandCTRL(STATE_CFG_GET_CONTROL_MODE));
+    atCommandQueue_.push(std::shared_ptr<AtCommand>(new AtCommandCTRL(STATE_CFG_GET_CONTROL_MODE)));
 }

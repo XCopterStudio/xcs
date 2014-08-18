@@ -17,7 +17,7 @@ xci.&position >> xhermit.&dronePosition;
 xci.&rotation >> xhermit.&droneRotation;
 xhermit.&speedControl >> xcontrol.&desireSpeed; 
  
-xci.xciInit();
+xci.start();
 
 var point = Checkpoint.new();
 point.x = 0.0;
