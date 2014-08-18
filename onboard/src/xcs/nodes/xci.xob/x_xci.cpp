@@ -93,7 +93,7 @@ void XXci::xciStart() {
 }
 
 void XXci::xciStop() {
-    if (xciInited_) {
+    if (!xciInited_) {
         XCS_LOG_WARN("[XXci] not initialized.");
     } else {
         setFlyControlActive(false); // NOTE: after re-starting flyControl persistence won't be deliberately active

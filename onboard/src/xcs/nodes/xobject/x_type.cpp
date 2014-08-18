@@ -44,13 +44,26 @@ std::string XType::demangle(const char* name) {
 }
 
 #else
-// TODO implement for MSVC
-// see: http://stackoverflow.com/questions/281818/unmangling-the-result-of-stdtype-infoname
-// see: http://stackoverflow.com/questions/13777681/demangling-in-msvc
 
-// does nothing if not g++
 std::string XType::demangle(const char* name) {
-    return name;
+    //translate known types
+    if (strcmp(name, typeid(std::string).name()) == 0) {
+        return "std::string";
+    }
+
+    string sName = name;
+
+    // trim
+    string trimTokens[] = { "struct ", "class " };
+    for each (string token in trimTokens) {
+        size_t found = sName.find(token);
+        if (found == 0) { 
+            sName = sName.substr(token.length()); 
+            break;     
+       }
+    }
+    
+    return sName;
 }
 
 #endif

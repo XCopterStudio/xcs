@@ -1,7 +1,7 @@
 var express = require('express');
 var server = express();
 var http = require('http').createServer(server);
-var io = require('socket.io').listen(http);
+var io = require('socket.io').listen(http, { log: false } );
 var OnboardConnection = require('./onboard_connection.js');
 
 // Configuration
