@@ -17,6 +17,10 @@ const unsigned int VideoReceiver::BUFFER_COUNT = 30;
 const unsigned int VideoReceiver::BUFFER_SIZE = 200000;
 
 void VideoReceiver::handleConnectedVideo(const boost::system::error_code& ec){
+    if (end_){
+        return;
+    }
+
     if (!socketVideo_.is_open()){
         XCS_LOG_WARN("Connect video socket timed out.");
         connect();
@@ -96,7 +100,8 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
                 if (checkPaveSignature(parrotPave_.signature)){
                     if ((++lastFrameNumber_ == parrotPave_.frame_number) || isIFrame(parrotPave_.frame_type)){
                         if (isIFrame(parrotPave_.frame_type) && !videoFrames_.empty()){
-							cerr << "Delete frames from video queue." << endl;
+							XCS_LOG_WARN("Delete frames from video queue.");
+                            XCS_LOG_WARN("End_ : " << end_);
                             std::vector<VideoFramePtr> frames = videoFrames_.popAll();
                             /*for (auto i : frames){
                                 delete i;

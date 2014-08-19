@@ -241,20 +241,28 @@ XciParrot::~XciParrot() {
     endAll_ = true;
 
     // wait for all thread ends and then clear memory
+    io_serviceCMD_.stop();
     if (threadSendingATCmd_.joinable()){
         threadSendingATCmd_.join();
+    }
+
+    io_serviceVideo_.stop();
+    if (threadReadVideoReceiver_.joinable()){
+        threadReadVideoReceiver_.join();
     }
 
     if (threadReadVideoData_.joinable()){
         threadReadVideoData_.join();
     }
 
-    if (threadReadVideoReceiver_.joinable()){
-        threadReadVideoReceiver_.join();
-    }
-
+    io_serviceNavdata_.stop();
     if (threadReceiveNavData_.joinable()){
         threadReceiveNavData_.join();
+    }
+
+    io_serviceConfiguration_.stop();
+    if (threadConfiguration_.joinable()){
+        threadConfiguration_.join();
     }
 }
 

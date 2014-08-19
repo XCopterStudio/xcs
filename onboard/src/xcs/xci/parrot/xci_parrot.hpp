@@ -58,7 +58,7 @@ class XciParrot : public virtual Xci {
     std::thread threadSendingATCmd_; //!< Handler on atcommand sender thread
     std::thread threadReceiveNavData_; //!< Handler on navdata receiver thread
     std::thread threadReadVideoReceiver_; //!< Handler on video receiver thread
-    std::thread threadReadVideoData_; //!< Handler on atcommand sender thread
+    std::thread threadReadVideoData_; //!< Handler on decode video thread
     std::thread threadConfiguration_; //!< Handler on configuration receiver thread
 
     //! Indicate closing of the xci_parrot -> threads use for its end

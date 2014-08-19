@@ -34,7 +34,7 @@ class DataReceiver;
 struct Sensor {
     std::string name; /*!< Unique name in Xci for sensor. */
     std::string semanticType; /*!< Type of sensor (ACCELEROMETR, CAMERA etc.). */
-    std::string syntacticType; /*! Fully qualified name of type of data (e.g. std::string) */
+    std::string syntacticType; /*! Fully qualified name of data type (e.g. std::string) */
     InformationMap additionalInformation; /*!< Additional information about sensor in plain text. Example: "Resolution:1280x720,FPS:20" */
 
     Sensor(const std::string& name, const std::string& semanticType, const std::string& syntacticType, InformationMap additionalInformation = InformationMap()) :
@@ -67,6 +67,9 @@ public:
 
     Xci(DataReceiver& dataReceiver) : dataReceiver_(dataReceiver) {
     };
+
+    virtual ~Xci(){};
+
     //! A pure virtual member returning name of x-copter Xci
     virtual std::string name() = 0;
 

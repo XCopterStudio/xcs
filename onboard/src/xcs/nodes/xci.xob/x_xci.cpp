@@ -30,6 +30,7 @@ XXci::XXci(const std::string& name) :
   gaz("GAZ"),
   flyControl("FLY_CONTROL"),
   command("COMMAND"),
+  xci_(nullptr),
   xciInited_(false),
   roll_(0),
   pitch_(0),
@@ -215,6 +216,9 @@ void XXci::sendFlyControl() {
 
 XXci::~XXci() {
     stopFlyControlsThread();
+    if (xci_ != nullptr){
+        delete xci_;
+    }
 }
 
 XStart(XXci);

@@ -58,7 +58,6 @@ XciDodo::XciDodo(DataReceiver& dataReceiver) :
 }
 
 XciDodo::~XciDodo() {
-
 }
 
 void XciDodo::init() {

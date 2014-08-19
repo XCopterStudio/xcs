@@ -39,8 +39,12 @@ void XciVrep::updateSensors() {
                 //printf("XciVrep: drone rotation[%f,%f,%f] \n", droneRotation_.phi, droneRotation_.theta, droneRotation_.psi);
             }
         }
+        else{
+            XCS_LOG_WARN("Lost connection with v-rep simulator.");
+        }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        //extApi_sleepMs(25);
+        std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
 }
 
@@ -57,7 +61,8 @@ void XciVrep::updateImages() {
                 printf("Image resolution [%i,%i]", resolution[0], resolution[1]);
             }
         }
-
+        
+        //extApi_sleepMs(40);
         std::this_thread::sleep_for(std::chrono::milliseconds(40));
     }
 }
@@ -80,14 +85,23 @@ XciVrep::XciVrep(DataReceiver& dataReceiver,
   portNumber_(portNumber) {
     clientID_ = -1;
     endAll_ = false;
-    configuration_["XCI_PARAM_FP_PERSISTENCE"] = "50";
+    configuration_["XCI_PARAM_FP_PERSISTENCE"] = "40";
 }
 
 XciVrep::~XciVrep() {
+    endAll_ = true;
+
+    if (updateThread_.joinable()){
+        updateThread_.join();
+    }
+
+    if (videoThread_.joinable()){
+        videoThread_.join();
+    }
+
     if (clientID_ != -1) {
         simxFinish(clientID_);
     }
-    endAll_ = true;
 }
 
 std::string XciVrep::name() {
@@ -133,21 +147,32 @@ void XciVrep::command(const std::string &command) {
 }
 
 void XciVrep::flyControl(float roll, float pitch, float yaw, float gaz) {
-    if (simxGetConnectionId(clientID_) != -1) { // we have connection with simulation server
-        float angle[3];
-        angle[0] = 0;
-        angle[1] = 0;
-        angle[2] = radiansToDegrees(normAngle(droneRotation_.psi + yaw));
-        simxSetObjectOrientation(clientID_, targetHandler_, -1, angle, simx_opmode_oneshot);
-        //printf("XciVrep: New rotation [%f,%f,%f] \n", angle[0], angle[1], angle[2]);
-        // gaz    
+    if (simxGetConnectionId(clientID_) != -1) { // we have connection with simulation server 
         float position[3];
         position[0] = dronePosition_.x + cos(droneRotation_.psi) * roll * POS_MULTI - sin(droneRotation_.psi) * pitch*POS_MULTI;
         position[1] = dronePosition_.y - sin(droneRotation_.psi) * roll * POS_MULTI - cos(droneRotation_.psi) * pitch*POS_MULTI;
         position[2] = dronePosition_.z + gaz*POS_MULTI;
-        simxSetObjectPosition(clientID_, targetHandler_, -1, position, simx_opmode_oneshot);
-        //printf("XciVrep: New position [%f,%f,%f] \n", position[0],position[1],position[2]);
+        int error = simxSetObjectPosition(clientID_, targetHandler_, -1, position, simx_opmode_oneshot);
+        if (error){
+            XCS_LOG_WARN("Cannot call set object position with error: " << error);
+        }
+        /*printf("XciVrep: New position [%f,%f,%f] \n", position[0],position[1],position[2]);
+        printf("XciVrep: Fly control [%f,%f,%f,%f] \n", roll, pitch, yaw,gaz);
+        XCS_LOG_WARN("New fly control with connected client.");*/
+
+        float angle[3];
+        angle[0] = 0;
+        angle[1] = 0;
+        angle[2] = radiansToDegrees(normAngle(droneRotation_.psi + yaw));
+        error = simxSetObjectOrientation(clientID_, targetHandler_, -1, angle, simx_opmode_oneshot);
+        if (error){
+            XCS_LOG_WARN("Cannot call set object orientation with error: " << error);
+        }
+        //printf("XciVrep: New rotation [%f,%f,%f] \n", angle[0], angle[1], angle[2]);
     }
+    /*else{
+        XCS_LOG_WARN("New fly control without connected client.");
+    }*/
 }
 
 void XciVrep::init() {
@@ -158,30 +183,48 @@ void XciVrep::init() {
     inited_ = true;
     // connect to the remote simulator with reconnection
     clientID_ = simxStart(address_.c_str(), portNumber_, true, false, 2000, 5);
+
     if (clientID_ != -1) {
         int error = 0;
-        error |= simxGetObjectHandle(clientID_, droneName_.c_str(), &droneHandler_, simx_opmode_oneshot_wait);
-        error |= simxGetObjectHandle(clientID_, frontCameraName_.c_str(), &frontCameraHandler_, simx_opmode_oneshot_wait);
-        error |= simxGetObjectHandle(clientID_, bottomCameraName_.c_str(), &bottomCameraHandler_, simx_opmode_oneshot_wait);
-        error |= simxGetObjectHandle(clientID_, targetName_.c_str(), &targetHandler_, simx_opmode_oneshot_wait);
-
-        if (error == 0) {
-            // Send request for periodic updates
+        error = simxGetObjectHandle(clientID_, droneName_.c_str(), &droneHandler_, simx_opmode_oneshot_wait);
+        if (error == 0){
             simxGetObjectPosition(clientID_, droneHandler_, -1, NULL, simx_opmode_streaming);
             simxGetObjectVelocity(clientID_, droneHandler_, NULL, NULL, simx_opmode_streaming);
             simxGetObjectOrientation(clientID_, droneHandler_, -1, NULL, simx_opmode_streaming);
-
-            // Send camera request for periodic updates
-            simxGetVisionSensorImage(clientID_, frontCameraHandler_, NULL, NULL, 0, simx_opmode_streaming_split + 4000);
-            simxGetVisionSensorImage(clientID_, bottomCameraHandler_, NULL, NULL, 0, simx_opmode_streaming_split + 4000);
-
             updateThread_ = std::thread(&XciVrep::updateSensors, this);
+        }
+        else{
+            XCS_LOG_ERROR("Cannot get handle on drone. With error: " << error);
+        }
+        
+        error = simxGetObjectHandle(clientID_, targetName_.c_str(), &targetHandler_, simx_opmode_oneshot_wait);
+        if (error != 0){
+            XCS_LOG_ERROR("Cannot get handle on target. With error: " << error);
+        }
+
+        bool camera = false;
+        error = simxGetObjectHandle(clientID_, frontCameraName_.c_str(), &frontCameraHandler_, simx_opmode_oneshot_wait);
+        if (error == 0){
+            simxGetVisionSensorImage(clientID_, frontCameraHandler_, NULL, NULL, 0, simx_opmode_streaming_split + 4000);
+            camera = true;
+        }
+        else{
+            XCS_LOG_WARN("Cannot get handle on front Camera. With error: " << error);
+        }
+
+        error = simxGetObjectHandle(clientID_, bottomCameraName_.c_str(), &bottomCameraHandler_, simx_opmode_oneshot_wait);
+        if (error == 0){
+            simxGetVisionSensorImage(clientID_, bottomCameraHandler_, NULL, NULL, 0, simx_opmode_streaming_split + 4000);
+            camera = true;
+        }else{
+            XCS_LOG_WARN("Cannot get handle on bottom Camera. With error: " << error);
+        }
+        
+        if (camera){
             videoThread_ = std::thread(&XciVrep::updateImages, this);
-        } else {
-            XCS_LOG_ERROR("Cannot get objects handlers.");
         }
     } else {
-        // TODO: error can not connect with simulation
+        XCS_LOG_ERROR("Cannot connect with v-rep simulator.");
     }
 }
 
