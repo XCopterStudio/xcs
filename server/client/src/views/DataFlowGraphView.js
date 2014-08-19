@@ -48,14 +48,6 @@ var DataFlowGraphView = Backbone.View.extend({
             
             return c;
         },
-        
-//        refresh: function() {
-//            for(var p in this) {
-//                if (this.hasOwnProperty(p) && !_.isFunction(this[p]) && _.isFunction(this[p].refresh)) {
-//                    this[p].refresh();
-//                }
-//            }
-//        },
     },
     
     dfgCounter : [],
@@ -153,11 +145,23 @@ var DataFlowGraphView = Backbone.View.extend({
         });
     },
     
-//    refresh : function() {
-//        console.log("refresh");
-////        this.dfgPaper.setDimensions(1024, 500);
-//        this.dfgModels.refresh();
-//    },
+    refresh : function() {
+        var nodes = this.dfgGraph.getElements();
+        for(var i = 0; i < nodes.length; ++i){
+            var view = this.dfgPaper.findViewByModel(nodes[i]);
+            if(view) {
+                view.render();
+            }
+        }
+            
+        var links = this.dfgGraph.getLinks();
+        for(var i = 0; i < links.length; ++i){
+            var view = this.dfgPaper.findViewByModel(links[i]);
+            if(view) {
+                view.render();
+            }
+        }
+    },
     
     onRemoveNode : function(model) {
         // create widgets
