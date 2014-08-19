@@ -98,15 +98,15 @@ body { background-image: url("../image/first_aid_kit.png"); }
 
 /*** DROPDOWN SUBMENU ***/
 .dropdown-menu .sub-menu-left {
-    right: 100%;
+    left: 100%;
     position: absolute;
     bottom: 0;
     visibility: hidden;
     margin-bottom: -2px;
-    margin-right: 200px;
+    margin-right: 0px;
 }
 
-.dropdown-menu li {
+.sub-menu {
     position: relative;
 }
 
@@ -119,6 +119,17 @@ body { background-image: url("../image/first_aid_kit.png"); }
     border-bottom: 4px solid transparent;
     border-top: 4px solid transparent;
     border-right: 4px solid #000000;
+    display: inline-block;
+    height: 0;
+    opacity: 0.3;
+    vertical-align: middle;
+    width: 0;
+}
+
+.right-caret {
+    border-bottom: 4px solid transparent;
+    border-top: 4px solid transparent;
+    border-left: 4px solid;
     display: inline-block;
     height: 0;
     opacity: 0.3;

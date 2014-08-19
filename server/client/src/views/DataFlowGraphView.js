@@ -48,6 +48,14 @@ var DataFlowGraphView = Backbone.View.extend({
             
             return c;
         },
+        
+//        refresh: function() {
+//            for(var p in this) {
+//                if (this.hasOwnProperty(p) && !_.isFunction(this[p]) && _.isFunction(this[p].refresh)) {
+//                    this[p].refresh();
+//                }
+//            }
+//        },
     },
     
     dfgCounter : [],
@@ -103,8 +111,12 @@ var DataFlowGraphView = Backbone.View.extend({
         resetAction.set("action", function() { resetAction.start(); self.dfgReset(true, function() { resetAction.stop() }); });
         app.Wait.setWaitAction(resetAction);
         
+        var saveDfgAsAction = new WaitAction("#dfgSaveAsDfg", WaitActionType.Click)
+        saveDfgAsAction.set("action", function() { saveDfgAsAction.start(); self.dfgSaveAsDfg(function() { saveDfgAsAction.stop() }); });
+        app.Wait.setWaitAction(saveDfgAsAction);
+        
         var saveDfgAction = new WaitAction("#dfgSaveDfg", WaitActionType.Click)
-        saveDfgAction.set("action", function() { saveDfgAction.start(); self.dfgSaveDfg(function() { saveDfgAction.stop() }); });
+        saveDfgAction.set("action", function() { saveDfgAction.start(); self.dfgSaveAsDfg(self.lastFileName, function() { saveDfgAction.stop() }); });
         app.Wait.setWaitAction(saveDfgAction);
         
         this.dfgGraph = new joint.dia.Graph;
@@ -115,7 +127,7 @@ var DataFlowGraphView = Backbone.View.extend({
 
         this.initializeDfgToolbox4Drop();
            
-        var paper = new joint.dia.Paper({
+        this.dfgPaper = new joint.dia.Paper({
             el: $('#flow-graph-screen'),
             width: 1024, 
             height: 500, 
@@ -140,6 +152,12 @@ var DataFlowGraphView = Backbone.View.extend({
             snapLinks: { radius: 45 },
         });
     },
+    
+//    refresh : function() {
+//        console.log("refresh");
+////        this.dfgPaper.setDimensions(1024, 500);
+//        this.dfgModels.refresh();
+//    },
     
     onRemoveNode : function(model) {
         // create widgets
@@ -388,7 +406,7 @@ var DataFlowGraphView = Backbone.View.extend({
         var loadDfgAction = {};
         for(var i = 0; i < dfgs.length; ++i) {
             var id = "dfgLoadDfg_" + this.trimId(dfgs[i]);
-            loadItems.append('<li><a class="btn dfgLoadDfg" id="' + id + '" role="button" filename="' + dfgs[i] + '">' + dfgs[i] + '</a></li>');
+            loadItems.append('<li><a class="dfgLoadDfg" id="' + id + '" role="menuitem" filename="' + dfgs[i] + '" tabindex="-1" href="#">' + dfgs[i] + '</a></li>');
             
             loadDfgAction[id] = new WaitAction("#" + id, WaitActionType.Click);
             loadDfgAction[id].set("action", function(event) { 
@@ -403,29 +421,32 @@ var DataFlowGraphView = Backbone.View.extend({
     },
     
     onDfgDefChange : function(model) {
-        // TODO: show some question? 
-        
+        // TODO: show some question?        
         var graph = model.get("dfgDef");
-        if(graph && graph.DFG) {
-            this.loadGraph(graph.DFG);
+        if(graph && graph.DFG && graph.filename) {
+            this.loadGraph(graph.filename, graph.DFG);
         }
     },
      
     onDdfgChange : function(model) {
         // TODO: show some question? 
         var graph = model.get("ddfg");       
-        this.loadGraph(graph);
+        this.loadGraph("default", graph);
     },
     
-    loadGraph : function(dfg, append) {        
+    loadGraph : function(filename, dfg, append) {        
         // default value 4 append is false
         append = typeof append !== 'undefined' ? append : false;
         
-        if(!dfg) {
+        if(!dfg || !filename) {
             return;
         }
         
         try {
+            this.lastFileName = filename;
+            $("#dfgSaveDfgPresentation").removeClass("disabled");
+            $("#dfgSaveDfg .filename").text(" (" + this.lastFileName + ")");
+            
             if(!append) {
                 this.dfgReset(false);
             }
@@ -1053,32 +1074,34 @@ var DataFlowGraphView = Backbone.View.extend({
         }
     }, 
     
-    dfgSaveDfg : function(response) {
-        var inputFilename = $('#dfgSaveDfg-filename');
-        
-        // read filenam
-        var filename = inputFilename.val().trim();
-
-        // validate filename
-        var errorMsg = '';
-        if(filename == '') {
-            errorMsg += 'You must set the filename first! ';    
-        }
-        
-        //TODO: properly show error message
-        //show error message
-        if(errorMsg != '') {
-            console.log(errorMsg);
+    dfgSaveAsDfg : function(filename, response) {
+        if(!filename) {
+            var inputFilename = $('#dfgSaveAsDfg-filename');
             
-            if(response) {
-                response();
+            // read filenam
+            var filename = inputFilename.val().trim();
+    
+            // validate filename
+            var errorMsg = '';
+            if(filename == '') {
+                errorMsg += 'You must set the filename first! ';    
             }
             
-            return;
-        }        
-
-        // clean input 4 filename
-        inputFilename.val('');
+            //TODO: properly show error message
+            //show error message
+            if(errorMsg != '') {
+                console.log(errorMsg);
+                
+                if(response) {
+                    response();
+                }
+                
+                return;
+            }        
+    
+            // clean input 4 filename
+            inputFilename.val('');
+        }
         
         // load dfg 2 json object
         var jsonDfg = this.dfgGraph.toJSON();
@@ -1099,7 +1122,9 @@ var DataFlowGraphView = Backbone.View.extend({
     },
     
     dfgLoadDfg : function(event, response) {
+        //debug
         console.log("dfgLoadDfg");
+        
         var dfg = $(event.currentTarget);
         var dfgFilename = dfg.attr("filename");
         

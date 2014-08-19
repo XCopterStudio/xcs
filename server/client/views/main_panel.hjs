@@ -197,32 +197,39 @@ sleep(1s);
                                 <i class="icon-reorder"></i>
                             </button>
                             <ul class="dropdown-menu" role="menu">
-                                <li class="dropdown-header">DFG actions</li>
-                                <li>
-                                    <div class="navbar-form">
-                                        <button id="dfgReset" type="button" class="btn btn-default">Reset DFG</button>
+                                <!--li role="presentation" class="dropdown-header">Actions</li-->
+                                <li role="presentation">
+                                    <a id="dfgReset" role="menuitem" tabindex="-1" href="#">
+                                        Reset DFG
+                                    </a>
+                                </li>
+                                <li role="presentation" class="divider"></li>
+                                <li role="presentation" id="dfgSaveDfgPresentation" class="disabled">
+                                    <a id="dfgSaveDfg" role="menuitem" tabindex="-1" href="#">
+                                        Save DFG 
+                                        <div class="filename small" style="display:inline;"></div>
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <div class="input-group navbar-form">
+                                        <span class="input-group-btn">
+                                            <button id="dfgSaveAsDfg" class="btn btn-default" type="button">Save as</button>
+                                        </span>
+                                        <input id="dfgSaveAsDfg-filename" type="text" class="form-control" placeholder="filename">
                                     </div>
                                 </li>
-                                <li class="dropdown-header">DFG files</li>
-                                <li>
-                                    <div class="navbar-form">
-                                        <button id="dfgSaveDfg" type="button" class="btn btn-default">Save</button>
-                                        <input id="dfgSaveDfg-filename" type="text" class="form-control" placeholder="filename">
-                                    </form>
-                                </li>
-                                <li> <!-- <li class="navbar-form"> -->
-                                    <!--<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                        Load DFG <span class="caret"></span>
-                                    </button>-->
-                                    <a class="dropdown-toggle" data-toggle="dropdown">
-                                        <b class="left-caret"></b>
+                                <li role="presentation" class="divider"></li>
+                                <!--li role="presentation" class="dropdown-header">Files</li-->
+                                <li role="presentation" class="sub-menu">
+                                    <a data-toggle="dropdown">
                                         Load DFG 
+                                        <b class="right-caret pull-right"></b>
                                     </a>
                                     <ul class="dropdown-menu sub-menu-left" id="DFG-saved-items">
-                                        <li class="text-center small"><em>Use Reload nodes or Reset DFG action first...</em></li>
+                                        <li class="text-center small"><em>Use Load nodes or Reset DFG action first...</em></li>
                                     </ul>
                                 </li>
-                                <li class="divider"></li>
+                                <li role="presentation" class="divider"></li>
                             </ul>
                         </div>
                     </div>
