@@ -34,6 +34,6 @@ $(function () {
     app.ConsoleView = new ConsoleView();
     
     app.BottomToolbarView = new BottomToolBarView();
-    app.BottomToolbarView.addView("dfg-trigger", "dfg");
+    app.BottomToolbarView.addView("dfg-trigger", "dfg", app.DataFlowGraph);
     app.BottomToolbarView.addView("console-trigger", "console");
 });

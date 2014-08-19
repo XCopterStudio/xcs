@@ -8,7 +8,7 @@ var BottomToolBarView = Backbone.View.extend({
         // empty
     },
     
-    addView: function (triggerId, viewId) {
+    addView: function (triggerId, viewId, view) {
         this.views.push({ trigger: triggerId, view: viewId });
         
         var $trigger = $('#' + triggerId);
@@ -23,6 +23,10 @@ var BottomToolBarView = Backbone.View.extend({
                 this.expanded = true;
                 $(this).children('i').removeClass('icon-double-angle-up');
                 $(this).children('i').addClass('icon-double-angle-down');
+                
+                if(view && _.isFunction(view.refresh)) {
+                    app.DataFlowGraph.refresh();
+                }
             }
             else {
                 $view.slideUp('fast');
