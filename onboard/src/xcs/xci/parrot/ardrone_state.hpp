@@ -7,7 +7,10 @@
 namespace xcs{
 namespace xci{
 namespace parrot{
-
+    /*! \brief Possible states of parrot 2.0.
+        
+        Parrot return in navdata packet its state as number which correspond with this enum.
+    */
     enum ArdronePossibleStates{
         FLAG_ARDRONE_FLY_MASK = 1U << 0,  /*!< FLY MASK : (0) ardrone is landed, (1) ardrone is flying */
         FLAG_ARDRONE_VIDEO_MASK = 1U << 1,  /*!< VIDEO MASK : (0) video disable, (1) video enable */
@@ -17,7 +20,7 @@ namespace parrot{
         FLAG_ARDRONE_USER_FEEDBACK_START = 1U << 5,  /*!< USER feedback : Start button state */
         FLAG_ARDRONE_COMMAND_MASK = 1U << 6,  /*!< Control command ACK : (0) None, (1) one received */
         FLAG_ARDRONE_CAMERA_MASK = 1U << 7,  /*!< CAMERA MASK : (0) camera not ready, (1) Camera ready */
-        FLAG_ARDRONE_TRAVELLING_MASK = 1U << 8,  /*!< Travelling mask : (0) disable, (1) enable */
+        FLAG_ARDRONE_TRAVELLING_MASK = 1U << 8,  /*!< Traveling mask : (0) disable, (1) enable */
         FLAG_ARDRONE_USB_MASK = 1U << 9,  /*!< USB key : (0) usb key not ready, (1) usb key ready */
         FLAG_ARDRONE_NAVDATA_DEMO_MASK = 1U << 10, /*!< Navdata demo : (0) All navdata, (1) only navdata demo */
         FLAG_ARDRONE_NAVDATA_BOOTSTRAP = 1U << 11, /*!< Navdata bootstrap : (0) options sent in all or demo mode, (1) no navdata options sent */
@@ -47,12 +50,24 @@ namespace parrot{
         #endif
     };
 
+    /*! \brief Hold drone state and return true if desired enum bit is high. 
+    
+    */
     class ArdroneState{
-        uint32_t bitFieldStates_;
-        std::mutex stateMutex_;
+        uint32_t bitFieldStates_; //! < Parrot 2.0 state as bit field
+        std::mutex stateMutex_; //!< Synchronization
     public:
+        /*! Set all state bits zero.
+        */
         ArdroneState() : bitFieldStates_(0) {};
+        /*! Update parrot 2.0 state.
+            \param bitFieldStates value from navdata header packet sent from parrot 2.0
+        */
         void updateState(uint32_t bitFieldStates){ std::lock_guard<std::mutex> lock(stateMutex_); this->bitFieldStates_ = bitFieldStates; };
+        /*! 
+            \param state on parrot 2.0 which user want know from enum \see ArdronePossibleStates
+            \return true if desire bit according to the state in bitFieldState_ is high. 
+        */
         bool getState(ArdronePossibleStates state){ std::lock_guard<std::mutex> lock(stateMutex_); return state & bitFieldStates_ ? true : false; };
     };
 

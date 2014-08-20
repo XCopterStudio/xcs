@@ -20,7 +20,6 @@ namespace parrot{
     };
 
     //! Basic behavior of parrot drone
-
     enum Behavior{
         STATE_TAKEOFF,
         STATE_LAND,
@@ -33,7 +32,6 @@ namespace parrot{
 
     //! Use this union for preserving float values of an at command, because parrot
     //! expect this values written in at command as 32bit integer.
-
     union FloatInt {
         int32_t intNumber;
         float floatNumber;
@@ -48,9 +46,8 @@ namespace parrot{
     //! Drone's constant representation of movement. 
 
     //! All input value must be in range <-1,1> otherwise constructor and setter 
-    //! correct input value to this range. All values lower or higher than limits
+    //! truncate input value to this range. All values lower or higher than limits
     //! will be replaced with this limits. 
-
     struct DroneMove {
         FloatInt roll; /*< Negative values makes the drone tilt to its left and positive to its right. */
         FloatInt pitch; /*< Negative values makes the drone lower its nose and positive raise its nose. */
@@ -60,17 +57,16 @@ namespace parrot{
         DroneMove(float roll = 0, float pitch = 0, float yaw = 0, float gaz = 0);
     };
 
-    //! Basic class representing at command from which all at commands must be inherited.
+    //! Basic class representing AtCommand from which all AtCommands have to be inherited.
 
-    //! At command class serve only as general pointer to the inherited commands and printing.
-
+    //! AtCommand class serve only as general pointer to the inherited commands and printing.
     class AtCommand {
     public:
         virtual AtCommand* clone() const = 0;
-        //! Return text representation of at command.
+        //! Return text representation of an AtCommand.
         /*!
-                \param sequenceNumber have to be in increasing order. Drone discard all at command with lower seqNumber than last one.
-                \return text representation of an at command according to ar drone 2.0. documentation
+                \param sequenceNumber have to be in increasing order. Drone discard all AtCommands with lower seqNumber than last one.
+                \return text representation of an AtCommand according to the ArDrone 2.0. documentation
                 */
         virtual std::string toString(const int32_t sequenceNumber) const  = 0;
     };
@@ -81,12 +77,12 @@ namespace parrot{
 
     //! When you want change drone state from emergency to normal or otherwise
     //! first check in which state drone is because both commands have same 
-    //! syntax. And when you send more then one command for changing drone state. 
+    //! syntax. When you send more then one command for changing drone state. 
     //! Drone will flip flop between this states.
 
     class AtCommandRef : public AtCommand {
-        static const std::string nameOfCommand_; /*!< AT command name according to the ar drone 2.0 documentation. */
-        Behavior basicBehavior_; /*< Represent behavior of drone (take off, land etc.).*/
+        static const std::string nameOfCommand_; /*!< AT command name according to the ArDrone 2.0 documentation. */
+        Behavior basicBehavior_; /*< Represent behavior of drone (take off, land etc.). See \see Behavior */
     public:
         //! Initialize constant class representing at command for drone movement.
 
