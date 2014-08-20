@@ -93,11 +93,11 @@ void AtCommandSender::checkDeadlineAtCommand(){
 
 // =========================== public functions ====================
 
-AtCommandSender::AtCommandSender(AtCommandQueue& atCommandQueue, boost::asio::io_service& io_serviceAtCommand, std::string ipAdress, unsigned int port)
-: deadline_(io_serviceAtCommand), 
-wait_(io_serviceAtCommand), 
-socket_(io_serviceAtCommand),
-parrot_(address::from_string(ipAdress),port),
+AtCommandSender::AtCommandSender(AtCommandQueue& atCommandQueue, boost::asio::io_service& io_service, std::string ipAddress, unsigned int port)
+: deadline_(io_service), 
+wait_(io_service), 
+socket_(io_service),
+parrot_(address::from_string(ipAddress),port),
 atCommandQueue_(atCommandQueue)
 {
     end_ = false;

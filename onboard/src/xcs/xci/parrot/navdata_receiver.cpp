@@ -143,12 +143,12 @@ void NavdataReceiver::processNavdata(vector<OptionAcceptor*> &options) {
 NavdataReceiver::NavdataReceiver(DataReceiver& dataReceiver,
     AtCommandQueue& atCommandQueue,
     ArdroneState& parrotState,
-    boost::asio::io_service& io_serviceNavdata,
-    std::string ipAdress,
+    boost::asio::io_service& io_service,
+    std::string ipAddress,
     unsigned int port) :
-  deadlineNavdata_(io_serviceNavdata),
-  socketNavdata_(io_serviceNavdata),
-  parrotNavdata_(address::from_string(ipAdress), port),
+  deadlineNavdata_(io_service),
+  socketNavdata_(io_service),
+  parrotNavdata_(address::from_string(ipAddress), port),
   dataReceiver_(dataReceiver),
   parrotState_(parrotState),
   atCommandQueue_(atCommandQueue) {

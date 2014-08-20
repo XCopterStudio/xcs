@@ -95,11 +95,12 @@ class XciParrot : public virtual Xci {
 public:
     //! Initialize all private variables
     XciParrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1");
-    //! Wait for end of all threads
+    //! Wait until all threads ends
     ~XciParrot();
 
-    //! Initialize Xci for use
+    //! Initialize Xci for use. Connect to the AR.Drone 2.0.
     void init();
+
     //! Stop producing data
     void stop();
     //! Return name of x-copter Xci
