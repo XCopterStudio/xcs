@@ -23,5 +23,12 @@ class DfgStorage {
         /* return */ settings.get("DFG");
     };
     
+    function remove(filename) {
+        var path = baseDir_ / filename;
+        if(path.exists) {
+            var file = File.new(path);
+            file.remove();
+        };
+    };
 };
 

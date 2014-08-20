@@ -117,6 +117,8 @@ class Onboard {
                     responseData = doSavedDfg_();
                 case "DFG_LOAD":
                     responseData = doLoadDfg_(requestData);
+                case "DFG_REMOVE":
+                    responseData = doRemoveDfg_(requestData);
                 default:
                     echo("...unknown request");
                     responseData = "Unknown request: " + id + ".";
@@ -316,6 +318,15 @@ class Onboard {
         return dfg;
     };
 
+    function doRemoveDfg_(filename) {
+        //remove dfg
+        dfgStorage_.remove(filename);
+
+        //return saved dfg
+        var data = [ => ];
+        data["savedDfg"] = dfgStorage_.getGraphs();
+        return data;
+    };
 
     function doSavedDfg_() {
         var data = [ => ];
