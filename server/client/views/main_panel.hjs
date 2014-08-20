@@ -1,3 +1,39 @@
+<div id="modals">
+
+    <div class="modal fade" id="modal-msg">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">X-Copter Studio</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="modal-dfg-files">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">DFG files</h4>
+                </div>
+            <div class="modal-body">
+                <table class="table table-hover">
+                    <thead><tr><th>Use Load nodes or Reset DFG action first...</th></tr></thead>
+                </table>
+            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
 <!-- Main X-copter Panel -->
 <nav class="navbar navbar-default" role="navigation">
         <div class="container-fluid">
@@ -221,13 +257,9 @@ sleep(1s);
                                 <li role="presentation" class="divider"></li>
                                 <!--li role="presentation" class="dropdown-header">Files</li-->
                                 <li role="presentation" class="sub-menu">
-                                    <a data-toggle="dropdown">
-                                        Load DFG 
-                                        <b class="right-caret pull-right"></b>
+                                    <a id="dfgLoadDfg" data-toggle="dropdown" href="#">
+                                        Load DFG
                                     </a>
-                                    <ul class="dropdown-menu sub-menu-left" id="DFG-saved-items">
-                                        <li class="text-center small"><em>Use Load nodes or Reset DFG action first...</em></li>
-                                    </ul>
                                 </li>
                                 <li role="presentation" class="divider"></li>
                             </ul>

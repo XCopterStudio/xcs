@@ -57,4 +57,5 @@
 <script type="text/javascript" src="src/views/ConsoleView.js"></script>
 <script type="text/javascript" src="src/views/StateView.js"></script>
 <script type="text/javascript" src="src/views/BottomToolbarView.js"></script>
+<script type="text/javascript" src="src/views/ModalView.js"></script>
 <script type="text/javascript" src="src/app.js"></script>
