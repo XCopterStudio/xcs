@@ -7,7 +7,11 @@ var NODE_TYPE = ENUM(
 var DataFlowGraphView = Backbone.View.extend({
     id : 'data-flow-graph',
     
-    el : '#dfg',
+    el : 'body',
+    
+    events : {
+        "click #dfgLoadDfg": "dfgShowFiles"
+    },
         
     dfgGraph : {},
     
@@ -104,7 +108,7 @@ var DataFlowGraphView = Backbone.View.extend({
         app.Wait.setWaitAction(resetAction);
         
         var saveDfgAsAction = new WaitAction("#dfgSaveAsDfg", WaitActionType.Click)
-        saveDfgAsAction.set("action", function() { saveDfgAsAction.start(); self.dfgSaveAsDfg(function() { saveDfgAsAction.stop() }); });
+        saveDfgAsAction.set("action", function() { saveDfgAsAction.start(); self.dfgSaveAsDfg(undefined, function() { saveDfgAsAction.stop() }); });
         app.Wait.setWaitAction(saveDfgAsAction);
         
         var saveDfgAction = new WaitAction("#dfgSaveDfg", WaitActionType.Click)
@@ -395,32 +399,56 @@ var DataFlowGraphView = Backbone.View.extend({
     onSavedDfgChange : function(model) {
         var dfgs = model.get("savedDfg");
         
-        var loadItems = $('#DFG-saved-items');
+        var modalDfgItems = $('#modal-dfg-files .modal-body table');  
         
         // reset saved dfgs
         if(dfgs.length > 0) {
             //NOTE: there should be no need to unregister old click events - jquery should handle it yourself
-            loadItems.html('');
+            modalDfgItems.html('<thead><tr><th>#</th><th>File Name</th><th>Actions</th></tr></thead><tbody></tbody>');
+            modalDfgItems = modalDfgItems.find("tbody");
         }
         else {
-            loadItems.html('<li class="text-center small"><em>No DFG for load...</em></li>');
+            modalDfgItems.html('<thead><tr><th>No DFG for load...</th></tr></thead>');
         }
         
         var self = this;
         var loadDfgAction = {};
+        var removeDfgAction = {};
         for(var i = 0; i < dfgs.length; ++i) {
-            var id = "dfgLoadDfg_" + this.trimId(dfgs[i]);
-            loadItems.append('<li><a class="dfgLoadDfg" id="' + id + '" role="menuitem" filename="' + dfgs[i] + '" tabindex="-1" href="#">' + dfgs[i] + '</a></li>');
+            var idLoad = "dfgLoadDfg_" + this.trimId(dfgs[i]);
+            var idRemove = "dfgRemoveDfg_" + this.trimId(dfgs[i]);
             
-            loadDfgAction[id] = new WaitAction("#" + id, WaitActionType.Click);
-            loadDfgAction[id].set("action", function(event) { 
+            modalDfgItems.append(
+                '<tr>\
+                    <td>' + (i+1) + '</td>\
+                    <td>' + dfgs[i] + '</td>\
+                    <td>\
+                        <button type="button" class="dfgLoadDfg btn btn-link" id="' + idLoad + '" filename="' + dfgs[i] + '" tabindex="-1" href="#">Load</button>\
+                        <button type="button" class="dfgRemoveDfg btn btn-link" id="' + idRemove + '" filename="' + dfgs[i] + '" tabindex="-1" href="#">Remove</button>\
+                    </td>\
+                </tr>');
+            
+            // set load action
+            loadDfgAction[idLoad] = new WaitAction("#" + idLoad, WaitActionType.Click);
+            loadDfgAction[idLoad].set("action", function(event) { 
                 var hrefId = $(event.currentTarget).attr("id");
                 loadDfgAction[hrefId].start(); 
                 self.dfgLoadDfg(event, function() { 
                     loadDfgAction[hrefId].stop(); 
                 }); 
             });
-            app.Wait.setWaitAction(loadDfgAction[id]);
+            app.Wait.setWaitAction(loadDfgAction[idLoad]);
+            
+            // set remove action
+            removeDfgAction[idRemove] = new WaitAction("#" + idRemove, WaitActionType.Click);
+            removeDfgAction[idRemove].set("action", function(event) { 
+                var hrefId = $(event.currentTarget).attr("id");
+                removeDfgAction[hrefId].start(); 
+                self.dfgRemoveDfg(event, function() { 
+                    removeDfgAction[hrefId].stop(); 
+                }); 
+            });
+            app.Wait.setWaitAction(removeDfgAction[idRemove]);
         }
     },
     
@@ -1090,11 +1118,13 @@ var DataFlowGraphView = Backbone.View.extend({
             if(filename == '') {
                 errorMsg += 'You must set the filename first! ';    
             }
+            else if(this.model.dfgExist(filename)) {
+                //TODO: show question
+            }
             
-            //TODO: properly show error message
             //show error message
             if(errorMsg != '') {
-                console.log(errorMsg);
+                app.Flash.flashWarning(errorMsg);
                 
                 if(response) {
                     response();
@@ -1113,10 +1143,15 @@ var DataFlowGraphView = Backbone.View.extend({
         //send request
         var self = this;
         self.model.requestSaveDfg(JSON.stringify(jsonDfg), filename, true, function(id, responseType, responseData) {
-            if(responseType == ResponseType.Done) {
+            if(responseType == ResponseType.Error) {
+                app.Flash.flashError("Error when try to save DFG: " + responseData + ".");
+            }
+            else if(responseType == ResponseType.Done) {
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
                 }
+                
+                app.Flash.flashSuccess("DFG was saved");
             }
             
             if(response) {
@@ -1155,5 +1190,35 @@ var DataFlowGraphView = Backbone.View.extend({
                 response();
             }
         });
+    },
+    
+    dfgRemoveDfg: function(event, response) {
+        //debug
+        console.log("dfgRemoveDfg");
+        
+        var dfg = $(event.currentTarget);
+        var dfgFilename = dfg.attr("filename");
+        
+        var self = this;
+        self.model.requestRemoveDfg(dfgFilename, function(id, responseType, responseData) {
+            //show error
+            if(responseType == ResponseType.Error) {
+                app.Flash.flashError("Error when try to remove saved data flow graph: " + responseData + ".");
+            }
+            else if(responseType == ResponseType.Done) {
+                if(responseData.savedDfg) {
+                    self.model.setSavedDfg(responseData.savedDfg);
+                }
+                app.Flash.flashSuccess('Data flow graph "' + responseData.filename + '" was successfully removed.');
+            }
+            
+            if(response) {
+                response();
+            }
+        });
+    },
+    
+    dfgShowFiles: function() {
+        app.ModalView.showModal("#modal-dfg-files");
     },
 });

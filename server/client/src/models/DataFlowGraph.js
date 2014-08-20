@@ -120,6 +120,19 @@ var DataFlowGraph = Backbone.Model.extend({
         this.set("savedDfg", savedDfg);
     },
     
+    dfgExist: function(dfgName) {
+        var dfgs = this.get("savedDfg");
+        if(dfgs){
+            for(var i = 0; i < dfgs.length; ++i) {
+                if(dfgs[i] == dfgName) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    },
+    
     setPrototypePrivate: function(prototype) {
         this.setPrototype(prototype, "xprototypePrivate");
     },
@@ -333,6 +346,10 @@ var DataFlowGraph = Backbone.Model.extend({
     
     requestLoadDfg: function(dfgFilename, response) {
         this.sendRequest("DFG_LOAD", dfgFilename, response);
+    },
+    
+    requestRemoveDfg: function(dfgFilename, response) {
+        this.sendRequest("DFG_REMOVE", dfgFilename, response);
     },
     
     sendRequest: function(request, data, response) {
