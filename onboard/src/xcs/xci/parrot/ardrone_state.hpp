@@ -7,9 +7,10 @@
 namespace xcs{
 namespace xci{
 namespace parrot{
+
     /*! \brief Possible states of parrot 2.0.
         
-        Parrot return in navdata packet its state as number which correspond with this enum.
+        Parrot return in navdata packet its state as bit field in which all bits correspond to this enum.
     */
     enum ArdronePossibleStates{
         FLAG_ARDRONE_FLY_MASK = 1U << 0,  /*!< FLY MASK : (0) ardrone is landed, (1) ardrone is flying */
@@ -50,23 +51,25 @@ namespace parrot{
         #endif
     };
 
-    /*! \brief Hold drone state and return true if desired enum bit is high. 
+    /*! \brief Holds AR.Drone 2.0 state. 
     
+        Store AR.Drone 2.0 state as bit field from navdata packets and user can gain in which state AR.Drone 2.0 is. 
+        Xci_parrot always call updateState() when new navdata packets arrive.
     */
     class ArdroneState{
-        uint32_t bitFieldStates_; //! < Parrot 2.0 state as bit field
-        std::mutex stateMutex_; //!< Synchronization
+        uint32_t bitFieldStates_; /*!< Parrot 2.0 state as bit field */
+        std::mutex stateMutex_; /*!< Synchronization */
     public:
-        /*! Set all state bits zero.
+        /*! Set all bits zero in ArdroneState::bitFieldStates_.
         */
         ArdroneState() : bitFieldStates_(0) {};
         /*! Update parrot 2.0 state.
-            \param bitFieldStates value from navdata header packet sent from parrot 2.0
+            \param bitFieldStates value have to be acquired from navdata header sent from parrot 2.0
         */
         void updateState(uint32_t bitFieldStates){ std::lock_guard<std::mutex> lock(stateMutex_); this->bitFieldStates_ = bitFieldStates; };
         /*! 
-            \param state on parrot 2.0 which user want know from enum \see ArdronePossibleStates
-            \return true if desire bit according to the state in bitFieldState_ is high. 
+            \param state of AR.Drone 2.0 which user want to know from ArdronePossibleStates
+            \return true if AR.Drone 2.0 is in the state. 
         */
         bool getState(ArdronePossibleStates state){ std::lock_guard<std::mutex> lock(stateMutex_); return state & bitFieldStates_ ? true : false; };
     };

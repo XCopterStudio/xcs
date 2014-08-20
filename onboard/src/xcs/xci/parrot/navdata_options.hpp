@@ -14,11 +14,16 @@ namespace xcs{
 namespace xci{
 namespace parrot{
 
+    /// Navdata header identifier
     static const unsigned int NAVDATA_HEADER = 0x55667788;
+    /// Maximum navdata packet size
     static const unsigned int NAVDATA_MAX_SIZE = 4096;
+
     static const unsigned int NAVDATA_MAX_CUSTOM_TIME_SAVE = 20;
 
+    /// How much gyros have axes
     static const unsigned int GYROS_NUMBER = 3;
+    /// How much accelerometer have axes
     static const unsigned int ACCELEROMETERS_NUMBER = 3;
 
     /* !!! Warning !!! - changing the value below would break compatibility with older applications

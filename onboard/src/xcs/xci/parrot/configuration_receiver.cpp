@@ -101,10 +101,10 @@ void ConfigurationReceiver::checkDeadlineConfiguration(){
 
 // ======================= public functions ===============================
 
-ConfigurationReceiver::ConfigurationReceiver(AtCommandQueue& atCommandQueue, InformationMap& configuration, boost::asio::io_service& io_service, std::string ipAdress, unsigned int port)
+ConfigurationReceiver::ConfigurationReceiver(AtCommandQueue& atCommandQueue, InformationMap& configuration, boost::asio::io_service& io_service, std::string ipAddress, unsigned int port)
 : deadline_(io_service),
 socket_(io_service),
-parrot_(address::from_string(ipAdress), port),
+parrot_(address::from_string(ipAddress), port),
 atCommandQueue_(atCommandQueue),
 configuration_(configuration)
 {
