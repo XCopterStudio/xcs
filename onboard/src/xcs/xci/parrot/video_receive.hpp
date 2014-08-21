@@ -39,6 +39,10 @@ struct VideoFrame{
 
 typedef VideoFrame* VideoFramePtr;
 
+/*! \brief Maintain connection with the AR.Drone 2.0 video channel and update output of video sensor on xci_parrot.
+
+    Use asynchronous connection with reconnection when connection is lost.
+*/
 class VideoReceiver{
     //! Define operations timeout for connection, received data etc.
     static const unsigned int TIMEOUT;
@@ -101,9 +105,22 @@ class VideoReceiver{
     bool isIFrame(uint8_t frameType);
     void checkVideoDeadline();
 public:
-    VideoReceiver(boost::asio::io_service& io_serviceVideo, std::string ipAdress = "192.168.1.1", unsigned int port = 5555);
+    /*! Initialize data structure.
+
+    \param io_service VideoReceiver use this boost io_service for network communication
+    \param ipAddress of the AR.Drone 2.0 with whom maintain connection
+    \port video port on the AR.Drone 2.0
+    */
+    VideoReceiver(boost::asio::io_service& io_service, std::string ipAddress = "192.168.1.1", unsigned int port = 5555);
+    /*! End all operation in progress and close connection with the AR.Drone 2.0. */
 	~VideoReceiver();
+    /*! Create connection with the AR.Drone 2.0*/
     void connect();
+    /*! Try get first encoded video frame from video buffer. After call pointer in buffer will be on next video frame.
+
+        \param videoFrame function will set pointer on encoded video frame if VideoReceiver have some. Check return value for pointer validity.
+        \return true if pointer is set in function correctly otherwise false
+    */
     bool tryGetVideoFrame(VideoFramePtr& videoFrame);
 };
 
