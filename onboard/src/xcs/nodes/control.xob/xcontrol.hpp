@@ -18,6 +18,12 @@ namespace xcs{
 namespace nodes{
 namespace control{
 
+    /*! \brief XObject wrapper on Control.
+
+    Desire and actual quadricopter velocity have to be in m/s and global frame.
+    Quadricopter rotation have to be in radians.
+    \warning Xobject user have to assure that change first velocity and then rotation.
+    */
     class XControl : public XObject{
         Control control_;
 
@@ -32,13 +38,22 @@ namespace control{
         virtual void stateChanged(XObject::State state);
     public:
         // Incoming data
+        /// Quadricopter actual velocity
         xcs::nodes::XInputPort<xcs::CartesianVector> velocity;
+        /// Quadricopter actual rotation
         xcs::nodes::XInputPort<xcs::EulerianVector> rotation;
+        /// Desire quadricopter velocity
         xcs::nodes::XInputPort<xcs::SpeedControl> desireVelocity;
         // Output data
+        /// FlyControl for the quadricopter
         xcs::nodes::XVar<xcs::FlyControl> flyControl;
 
+        /// Initialize private variables and get name from Urbi
         XControl(const std::string& name);
+        /*! Load Control PID parameters from file.
+            
+            \param file absolute path of XControl setting file
+        */
         void init(const std::string &file);
     };
 

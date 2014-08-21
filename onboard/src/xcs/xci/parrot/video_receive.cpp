@@ -157,10 +157,10 @@ void VideoReceiver::checkVideoDeadline(){
 
 // ===================== public functions ========================================
 
-VideoReceiver::VideoReceiver(boost::asio::io_service& io_serviceVideo, std::string ipAdress, unsigned int port)
-: deadlineVideo_(io_serviceVideo),
-socketVideo_(io_serviceVideo),
-parrotVideo(address::from_string(ipAdress), port){
+VideoReceiver::VideoReceiver(boost::asio::io_service& io_service, std::string ipAddress, unsigned int port)
+: deadlineVideo_(io_service),
+socketVideo_(io_service),
+parrotVideo(address::from_string(ipAddress), port){
     end_ = false;
 
     index_ = 0;

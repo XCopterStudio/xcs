@@ -35,6 +35,7 @@ enum ParrotFrameType {
 
 typedef xcs::Tsqueue<AtCommandPtr> AtCommandQueue;
 
+/*! Xci implementation for Parrot AR.Drone 2.0 */
 class XciParrot : public virtual Xci {
     // Constant
     static const float EPSILON;
@@ -93,7 +94,11 @@ class XciParrot : public virtual Xci {
     bool setDefaultConfiguration();
 
 public:
-    //! Initialize all private variables
+    /*! Initialize private variables
+
+        \param dataReceiver serve for publishing new sensor data
+        \ipAddress of the AR.Drone 2.0 with whom xci_parrot will maintain connection
+    */
     XciParrot(DataReceiver &dataReceiver, std::string ipAddress = "192.168.1.1");
     //! Wait until all threads ends
     ~XciParrot();
@@ -105,11 +110,11 @@ public:
     void stop();
     //! Return name of x-copter Xci
     std::string name();
-    //!Return list of all available sensors on drone 2.0
+    //!Return list of all available sensors on the AR.Drone 2.0
     SensorList sensorList();
     //! Return x-copter�s configuration
     /*!
-        \param key name of parrot 2.0 or xci configuration field
+        \param key name of an AR.Drone 2.0 or xci configuration field
         \return value of desired key or empty string
     */
     std::string configuration(const std::string &key);
@@ -121,7 +126,7 @@ public:
     //! Return list of x-copter�s special commands 
     /*!
         \sa command()
-        \return Names of all special command which user can invoke on parrot 2.0 as TakeOff, Land etc.
+        \return Names of all special command which user can invoke on AR.Drone 2.0 as TakeOff, Land etc.
     */
     SpecialCMDList specialCMD();
 
@@ -145,10 +150,10 @@ public:
     //! Take four values for controlling drone 2.0 roll, pitch, yaw and gaz
     /*!
         All values have to be in range <-1,1> or It will be trimmed on this range. Parrot 2.0 mapped this range on <-max angle, max angle>.
-        \param roll define parrot 2.0 tilt on sides, -1 mean left, 1 right
-        \param pitch define parrot 2.0 nose tilt, -1 mean forward, 1 backward
-        \param yaw define parrot 2.0 rotation velocity, -1 mean nose rotation on left side, 1 mean nose rotation on right side
-        \param gaz define parrot 2.0 rise or ascension speed, -1 mean max ascension speed, 1 mean max rise speed
+        \param roll tilt on sides, -1 mean left, 1 right
+        \param pitch nose tilt, -1 mean forward, 1 backward
+        \param yaw rotation velocity, -1 mean nose rotation on left side, 1 mean nose rotation on right side
+        \param gaz rise up or ascension speed, -1 mean max ascension speed, 1 mean max rise up speed
     */
     void flyControl(float roll, float pitch, float yaw, float gaz);
 };

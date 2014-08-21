@@ -174,6 +174,8 @@ SensorList XciParrot::sensorList() {
 
     sensorList.push_back(Sensor("alive", "ALIVE", "int"));
 
+    sensorList.push_back(Sensor("wifiQuality","QUALITY","int"));
+
     return sensorList;
 }
 

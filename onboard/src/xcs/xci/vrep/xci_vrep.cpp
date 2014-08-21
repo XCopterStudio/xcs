@@ -182,7 +182,7 @@ void XciVrep::init() {
     }
     inited_ = true;
     // connect to the remote simulator with reconnection
-    clientID_ = simxStart(address_.c_str(), portNumber_, true, false, 2000, 5);
+    clientID_ = simxStart((simxChar*)address_.c_str(), portNumber_, true, false, 2000, 5);
 
     if (clientID_ != -1) {
         int error = 0;
