@@ -102,4 +102,6 @@ void OptionVisitor::visit(NavdataHDVideoStream* hdVideoStream){}
 
 void OptionVisitor::visit(NavdataGames* games){}
 
-void OptionVisitor::visit(NavdataWifi* wifi){}
+void OptionVisitor::visit(NavdataWifi* wifi){
+    dataReceiver_.notify("wifiQuality", wifi->link_quality);
+}

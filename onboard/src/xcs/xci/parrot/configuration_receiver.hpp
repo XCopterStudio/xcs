@@ -21,7 +21,7 @@ namespace parrot{
 
     const unsigned int BUFFER_SIZE = 1024;
 
-    //! \brief Maintain connection with the AR.Drone 2.0 configuration channel and update local stored configuration map.
+    /*! \brief Maintain connection with the AR.Drone 2.0 configuration channel and update local stored configuration map.
     
         Use asynchronous connection with reconnection when connection is lost.
     */
