@@ -15,9 +15,9 @@ namespace control{
     typedef double RETURN_TYPE;
     typedef xcs::PID<PID_TYPE, RETURN_TYPE> PID;
 
-    /*! \brief Computer FlyControl based on desire quadricopter velocity and actual quadricopter state.
+    /*! \brief Control quadricopter velocity based on desire quadricopter velocity and actual quadricopter state.
     
-        Desire speed and quadricopter velocity have to be in m/s.
+        Desire and actual quadricopter velocity have to be in m/s and global frame.
         Quadricopter rotation have to be in radians.
         \warning Programmer have to assure that firstly change velocity, rotation and immediately after that call computeControl!!!
     */
