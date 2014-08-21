@@ -29,8 +29,14 @@ XControl {
     args "xcsPaths.getSettings(\"xcontrol.xs\")"
 }
 
-XHermitMovement {
-    file xhermit_movement
+XCheckpointMovement {
+    file xcheckpoint_movement
+}
+
+FlyControl {
+    prototype XMultiplexerFlyControl
+    file xmultiplexer
+    args "2"
 }
 
 XLocalization {
