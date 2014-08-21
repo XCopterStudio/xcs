@@ -93,7 +93,7 @@ class XciParrot : public virtual Xci {
     bool setDefaultConfiguration();
 
 public:
-    /*! Initialize all private variables
+    /*! Initialize private variables
 
         \param dataReceiver serve for publishing new sensor data
         \ipAddress of the AR.Drone 2.0 with whom xci_parrot will maintain connection
@@ -109,7 +109,7 @@ public:
     void stop();
     //! Return name of x-copter Xci
     std::string name();
-    //!Return list of all available sensors on drone 2.0
+    //!Return list of all available sensors on the AR.Drone 2.0
     SensorList sensorList();
     //! Return x-copter�s configuration
     /*!
