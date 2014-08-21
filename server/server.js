@@ -1,11 +1,15 @@
+var app = {};
+
 var express = require('express');
 var server = express();
 var http = require('http').createServer(server);
-var io = require('socket.io').listen(http, { log: false } );
-var OnboardConnection = require('./onboard_connection.js');
+var config = require('./config.json');
+
+app.Server = server;
+app.Http = http;
+app.Config = config;
 
 // Configuration
-server.set('port', 3000);
 server.set('views', __dirname + '/client/views');
 server.set('view engine', 'hjs');
 
@@ -21,30 +25,12 @@ server.get('/', function (req, res) {
     res.render('index.hjs', partials);
 });
 
-// Listen for Clients
-http.listen(server.get('port'), function () {
-    console.log('XCS client service running on port ' + server.get('port'));
-});
+app.Onboard = require('./onboard_connection.js')(app);
+app.Client = require('./client_connection.js')(app);
 
-OnboardConnection.start(1234);
-OnboardConnection.startVideoListener(1235);
+app.Client.start(app.Config.clientPort);
+app.Onboard.start(app.Config.onboardPort);
+app.Onboard.startVideo(app.Config.onboardVideoHost, app.Config.onboardVideoPort);
 
-// WebSockets logic
-var client = null;
-io.sockets.on('connection', function (socket) {
-    client = socket;
-    // handling states
-    socket.on('disconnect', function () {
-        client = null;
-    })
-    // just resend data from client to onboard
-    socket.on('resend', function (cmd) {
-        OnboardConnection.send(cmd + '\n');
-        console.log('Client COMMAND: ' + cmd);
-    });
-});
-
-OnboardConnection.on('data', function (data) { if (client) client.emit('data', data); });
-OnboardConnection.on('video', function (data) { if (client) client.emit('video', data); });
 
 
