@@ -1,5 +1,5 @@
-#ifndef MULTIPLEXER_H
-#define MULTIPLEXER_H
+#ifndef X_MULTIPLEXER_H
+#define X_MULTIPLEXER_H
 
 // xcs logging library
 #include <xcs/logging.hpp>
@@ -22,6 +22,7 @@ namespace xcs{
 namespace nodes{
 namespace multiplexer{
   
+    /*! \brief Input channel for incoming dat in to the XMultiplexer. */
     template<class type> 
     class Channel : public XObject{
         unsigned int id_;
@@ -29,13 +30,24 @@ namespace multiplexer{
         std::atomic<bool>& stopped_;
         xcs::nodes::XVar<type>& output_;
     public:
+        /// Urbi input port with incomming data
         xcs::nodes::XInputPort<type> input;
 
+        /*! Initialize private variables.
+
+            \param id channel unique identifier
+            \param channel selector
+            \param output channel
+            \param stopped stop data redirection
+        */
         Channel(const unsigned int id, std::atomic<unsigned int> &channel,
             xcs::nodes::XVar<type>& output, std::atomic<bool>& stopped);
 
-        // XCS invoke this method when encounter some changes on input 
-        // port associated with this channel
+        /*! Redirect data from input port to the output when Channel id is equal to the channel.
+
+            Urbi invoke this method when encounter some changes on input 
+            port associated with this channel
+        */
         void onChangeInput(const type data);
     };
 
@@ -54,6 +66,10 @@ namespace multiplexer{
         }
     }
 
+    /*! \brief Simple multiplexer which listen on many input channels and get on output only data from selected channel.
+
+        For syntax specialization go in to the x_multiplexer.cpp an add your specialization.
+    */
     template<class type>
     class XMultiplexer : public XObject{
         typedef std::list<std::shared_ptr<Channel<type> > > Channels;
@@ -69,12 +85,19 @@ namespace multiplexer{
     protected:
         virtual void stateChanged(XObject::State state);
     public:
-        // Input data
+        /// Set which channel will be redirected to the output_
         xcs::nodes::XInputPort<unsigned int> setChannel;
-        // Output data
+        /// Redirected data from selected input channel
         xcs::nodes::XVar<type> output;
 
+        //! Initialize private variables.
         XMultiplexer(const std::string& name);
+
+        /*! Create input channels according to the channelCount and register they in Urbi as XMultiplexer inputs.
+        
+            Bind output and setChannel in Urbi and set notifier onChangeChannel on setChannel input port.
+            \param channelCount how much input channel will be created
+        */
         void init(const unsigned int channelCount);
     };
 
