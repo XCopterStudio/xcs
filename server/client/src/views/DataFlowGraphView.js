@@ -74,6 +74,9 @@ var DataFlowGraphView = Backbone.View.extend({
         this.listenTo(this.model, "change:dfgDef", this.onDfgDefChange);
         
         this.initializeDfg();
+        
+        //bind functions
+        this.refresh = _.bind(this.refresh, this);
     },
     
     

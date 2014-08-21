@@ -19,14 +19,15 @@ var BottomToolBarView = Backbone.View.extend({
         
         $trigger.click(function () {
             if (!this.expanded) {
-                $view.slideDown('fast');
+                if(view && _.isFunction(view.refresh)) {
+                    $view.slideDown('fast', view.refresh);
+                }
+                else {
+                    $view.slideDown('fast');
+                }
                 this.expanded = true;
                 $(this).children('i').removeClass('icon-double-angle-up');
                 $(this).children('i').addClass('icon-double-angle-down');
-                
-                if(view && _.isFunction(view.refresh)) {
-                    app.DataFlowGraph.refresh();
-                }
             }
             else {
                 $view.slideUp('fast');
