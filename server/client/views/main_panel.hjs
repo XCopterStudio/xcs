@@ -1,17 +1,20 @@
 <div id="modals">
 
     <div class="modal fade" id="modal-msg">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title">X-Copter Studio</h4>
-          </div>
-          <div class="modal-body"></div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          </div>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">X-Copter Studio</h4>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-yes" data-dismiss="modal">Yes</button>
+                    <button type="button" class="btn btn-default btn-no" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-default btn-ok" data-dismiss="modal">Ok</button>
+                    <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
     
     <div class="modal fade" id="modal-dfg-files">
