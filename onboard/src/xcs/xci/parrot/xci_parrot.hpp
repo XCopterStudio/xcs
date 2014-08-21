@@ -35,6 +35,7 @@ enum ParrotFrameType {
 
 typedef xcs::Tsqueue<AtCommandPtr> AtCommandQueue;
 
+/*! Xci implementation for Parrot AR.Drone 2.0 */
 class XciParrot : public virtual Xci {
     // Constant
     static const float EPSILON;

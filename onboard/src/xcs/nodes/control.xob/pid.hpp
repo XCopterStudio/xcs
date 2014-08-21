@@ -3,6 +3,10 @@
 
 namespace xcs{
 
+    /*! \brief PID controller. 
+    
+        \sa http://en.wikipedia.org/wiki/PID_controller
+    */
     template <class pid_type, class value_type>
     class PID{
         pid_type P_;
@@ -12,6 +16,12 @@ namespace xcs{
         value_type sumError_;
         value_type lastValue_;
     public:
+        /*! Initialize parameters of the PID controller.
+        
+            \param p Proportional parameter
+            \param i
+            \param d
+        */
         PID(const pid_type p = 1, const pid_type i = 0, const pid_type d = 0);
 
         inline void P(const pid_type &p){ P_ = p; };
