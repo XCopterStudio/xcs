@@ -44,7 +44,7 @@ namespace multiplexer{
         xcs::nodes::XVar<type>& output, std::atomic<bool>& stopped)
         : XObject(std::string()), id_(id), input("*"), channel_(channel), stopped_(stopped),
         output_(output){
-        UNotifyChange(dynamic_cast<urbi::UVar&>(input), &Channel<type>::onChangeInput);
+        XBindVarF(input, &Channel<type>::onChangeInput);
     }
 
     template<class type>
