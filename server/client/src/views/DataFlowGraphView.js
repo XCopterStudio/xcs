@@ -74,6 +74,9 @@ var DataFlowGraphView = Backbone.View.extend({
         this.listenTo(this.model, "change:dfgDef", this.onDfgDefChange);
         
         this.initializeDfg();
+        
+        //bind functions
+        this.refresh = _.bind(this.refresh, this);
     },
     
     
@@ -1119,7 +1122,33 @@ var DataFlowGraphView = Backbone.View.extend({
                 errorMsg += 'You must set the filename first! ';    
             }
             else if(this.model.dfgExist(filename)) {
-                //TODO: show question
+                var self = this;
+                
+                // show question: rewrite
+                app.ModalView.show(
+                    "DFG file with the same name already exists. Do you want to rewrite it?",
+                    ModalButtonType.NO | ModalButtonType.YES, 
+                    function(result) {
+                        if(result == ModalButtonType.NO) {
+                            app.Flash.flashWarning("DFG was not saved.");
+                            
+                            // clean input 4 filename
+                            inputFilename.val('');
+                            
+                            if(response) {
+                                response();
+                            }
+                        }
+                        else {
+                            // rewrite
+                            self.dfgSaveAsDfg(filename, response);
+                            
+                            // clean input 4 filename
+                            inputFilename.val('');
+                        }
+                });
+                
+                return;
             }
             
             //show error message
@@ -1150,6 +1179,11 @@ var DataFlowGraphView = Backbone.View.extend({
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
                 }
+                
+                // set filename for save
+                self.lastFileName = filename;
+                $("#dfgSaveDfgPresentation").removeClass("disabled");
+                $("#dfgSaveDfg .filename").text(" (" + self.lastFileName + ")");
                 
                 app.Flash.flashSuccess("DFG was saved");
             }

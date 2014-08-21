@@ -2,7 +2,7 @@
 /*jshint unused:false */
 var app = app || {};
 
-gSocket = io.connect('http://localhost:3000');
+gSocket = io.connect('http://' + location.host);
 
 var router = Backbone.Router.extend({
     routes : {
