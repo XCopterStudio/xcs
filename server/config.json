@@ -1,0 +1,6 @@
+{
+    "clientPort": 3000,
+    "onboardPort": 1234,
+    "onboardVideoHost": "127.0.0.1",
+    "onboardVideoPort": 1235
+}
