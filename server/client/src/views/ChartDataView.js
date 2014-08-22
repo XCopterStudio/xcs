@@ -19,8 +19,8 @@ var ChartDataView = AbstractDataView.extend({
     max: 100,
                                                                                         
     settings: [
-        { name: "minimum value", type: SettingType.NUMBER, default: this.min },
-        { name: "maximum value", type: SettingType.NUMBER, default: this.max },
+        { name: "minimum value", type: SettingType.NUMBER, default: 0 },
+        { name: "maximum value", type: SettingType.NUMBER, default: 100 },
     ],
                                             
     init: function() {
