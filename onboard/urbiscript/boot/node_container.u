@@ -414,7 +414,7 @@ class NodeContainer {
     };
 
     function createChannelName(nodeName, portName) {
-        nodeName + "_" + portName;
+        nodeName + "__" + portName;
     };
 
     function createUnregisterXVarMethodName(registerXVarMethodName) {
