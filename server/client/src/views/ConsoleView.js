@@ -1,5 +1,5 @@
 var ConsoleView = Backbone.View.extend({
-    el: '#console',
+    el: 'body',
     events: {
         "click #console-start": "onClickStart",
         "click #console-stop": "onClickStop",
