@@ -1,6 +1,6 @@
 load("init_onboard.u");
 System.loadModule("xcontrol");
-System.loadModule("xhermit_movement");
+System.loadModule("xcheckpoint_movement");
 
 // inicialization
 
@@ -11,7 +11,7 @@ xci.start();
 
 var control = XControl.new("../xsettings/xcontrol.xs");
 
-var hermit = XHermitMovement.new();
+var hermit = XCheckpointMovement.new();
 
 // inicialize logger
 var logname = Date.now().asString().replace(" ", "_").replace(":","-");

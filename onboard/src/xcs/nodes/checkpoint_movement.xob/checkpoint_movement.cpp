@@ -108,8 +108,8 @@ xcs::VelocityControl CheckpointMovement::flyOnCheckpoint(const double &speed){
         double deltaZ = targetCheckpoint_.z - dronePosition_.z;        
 
         if (distance < EPSILON){
-            printf("Drone achieved destination: [%f,%f,%f] \n", targetCheckpoint_.x, targetCheckpoint_.y, targetCheckpoint_.z);
-            printf("Hermit: New checkpoint \n");
+            //printf("Drone achieved destination: [%f,%f,%f] \n", targetCheckpoint_.x, targetCheckpoint_.y, targetCheckpoint_.z);
+            //printf("Hermit: New checkpoint \n");
             newCheckpoint_ = true;
             if (reachedCallback_ != nullptr){
                 reachedCallback_(true);
@@ -127,7 +127,7 @@ xcs::VelocityControl CheckpointMovement::flyOnCheckpoint(const double &speed){
             );
         }
 
-        printf("Drone state: [%f,%f,%f,%f] \n", dronePosition_.x, dronePosition_.y, dronePosition_.z,droneRotation_.psi);
+        //printf("Drone state: [%f,%f,%f,%f] \n", dronePosition_.x, dronePosition_.y, dronePosition_.z,droneRotation_.psi);
         //TODO: use yaw difference
         //printf("Hermit: Control speed [%f,%f,%f,%f] \n", norm*deltaX*boundSpeed, norm*deltaY*boundSpeed, norm*deltaZ*boundSpeed, 0);
         
@@ -138,7 +138,7 @@ xcs::VelocityControl CheckpointMovement::flyOnCheckpoint(const double &speed){
 }
 
 void CheckpointMovement::addCheckpoint(const Checkpoint &checkpoint){
-    printf("Hermit: insert checkpoint \n");
+    //printf("Hermit: insert checkpoint \n");
     checkpointQueue_.push(checkpoint);
 }
 

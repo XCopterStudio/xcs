@@ -78,6 +78,10 @@ namespace checkpoint{
             From this queue are taken checkpoints for quadricopter speed control.
         */
         void addCheckpoint(const xcs::Checkpoint &checkpoint);
+        /*!  Clear checkpoint queue.
+        
+            Stop actual fly on checkpoint and delete all checkpoints from checkpoint queue.
+        */
         void deleteCheckpoints();
     };
 

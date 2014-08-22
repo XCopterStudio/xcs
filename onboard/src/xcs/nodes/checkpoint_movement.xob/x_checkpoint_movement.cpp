@@ -37,7 +37,7 @@ void XCheckpointMovement::stateChanged(XObject::State state) {
 
 //==================== public functions =============
 XCheckpointMovement::XCheckpointMovement(const std::string& name) : XObject(name) ,
-CheckpointMovement_(boost::bind(&XCheckpointMovement::callbackHermit, this, _1)),
+CheckpointMovement_(boost::bind(&XCheckpointMovement::callback, this, _1)),
 command("COMMAND"),
 checkpoint("CHECKPOINT"),
 dronePosition("POSITION_ABS"),
@@ -56,7 +56,7 @@ reachedCheckpoint("BOOL")
     reachedCheckpoint = false;
 }
 
-void XCheckpointMovement::callbackHermit(bool reached){
+void XCheckpointMovement::callback(bool reached){
     reachedCheckpoint = reached;
 }
 
