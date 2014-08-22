@@ -8,8 +8,6 @@ XDataplayer {
     args "\"experiments/sample3.txt\""   ;TODO: change file name - or file name like xinputport
 }
 
-XOnboard { }    ; TODO remove
-
 XciDodo {
     prototype XXci
     args "\"xci_dodo\""
