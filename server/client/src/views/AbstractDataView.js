@@ -145,6 +145,20 @@ var AbstractDataView = Backbone.View.extend({
         // show modal window
         app.ModalView.showModal('#modal-widget-settings', { show: true, backdrop: false, keyboard: false });
         
+        //set default
+        for(var i = 0; i < this.settings.length; ++i) {
+            var setting = this.settings[i];
+            if(setting.default !== undefined) {
+                if(setting.type == SettingType.BOOLEAN) {
+                    $('#widget-settings-input' + i).prop('checked', setting.default) 
+                }
+                else {
+                    $('#widget-settings-input' + i).val(setting.default);
+                }
+            }
+            else {console.log("no default value");}
+        }
+        
         var self = this;
         
         // set ok action
