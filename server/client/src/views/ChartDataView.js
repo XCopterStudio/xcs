@@ -14,41 +14,23 @@ var ChartDataView = AbstractDataView.extend({
     
     plot: {},
     
+    min: 0,
+                                            
+    max: 100,
+                                                                                        
+    settings: [
+        { name: "minimum value", type: SettingType.NUMBER, default: this.min },
+        { name: "maximum value", type: SettingType.NUMBER, default: this.max },
+    ],
+                                            
     init: function() {
-        var plotData = [];
         for(var i = 0; i < this.totalPoints; ++i) {
             this.data.push(0);
-            plotData.push([i, 0]);
         }
             
         var plotSelector = "#chart_" + this.attrs.widgetId + "_" + this.attrs.dataId;
     
-        this.plot = $.plot(
-            plotSelector, 
-            [{data: plotData, label: this.attrs.name, color: "blue"}], {
-                series: {
-                    shadowSize: 0,	// Drawing is faster without shadows
-                    lines: {
-                        show: true,
-                        fill: true,
-                    },
-                    points: {
-                        show: false
-                    }
-                },
-                yaxis: {
-                    min: 0,
-                    max: 100
-                },
-                xaxis: {
-                    show: false
-                },
-                grid: {
-                    hoverable: true,
-                    clickable: true,
-                    autoHighlight: false
-                },
-        });
+        this.setPlot();
 
         var tooltipId = "tooltip_" + this.attrs.widgetId + "_" + this.attrs.dataId;    
         var tooltipSelector = "#" + tooltipId;    
@@ -76,6 +58,42 @@ var ChartDataView = AbstractDataView.extend({
             }
 		});
     },
+        
+    setPlot: function() {
+        var plotSelector = "#chart_" + this.attrs.widgetId + "_" + this.attrs.dataId;
+        
+        var plotData = [];
+        for(var i = 0; i < this.data.length; ++i) {
+            plotData.push([i, this.data[i]]);
+        }
+        
+        this.plot = $.plot(
+            plotSelector, 
+            [{data: plotData, label: this.attrs.name, color: "blue"}], {
+                series: {
+                    shadowSize: 0,	// Drawing is faster without shadows
+                    lines: {
+                        show: true,
+                        fill: true,
+                    },
+                    points: {
+                        show: false
+                    }
+                },
+                yaxis: {
+                    min: this.min,
+                    max: this.max
+                },
+                xaxis: {
+                    show: false
+                },
+                grid: {
+                    hoverable: true,
+                    clickable: true,
+                    autoHighlight: false
+                },
+        });
+    },
     
     addValue: function(value) {
         if(this.data.length >= this.totalPoints) {
@@ -98,5 +116,54 @@ var ChartDataView = AbstractDataView.extend({
         if(!isNaN(intData)) {            
             this.addValue(intData);    
         }
+    },
+        
+    setSettings: function(settings) {
+        console.log("set settings: " + JSON.stringify(settings));
+        
+        for(var i = 0; i < settings.length; ++i) {
+            var setting = settings[i];
+
+            switch(setting.name) {
+                case "minimum value":
+                    this.min = setting.value;
+                    break;
+                case "maximum value":
+                    this.max = setting.value;
+                    break;
+            }
+        }
+        
+        this.setPlot();
+    },
+    
+    validateSettings: function(settings) {
+        console.log("validate settings: " + JSON.stringify(settings));
+        
+        var result = [];
+        var msg;
+        
+        for(var i = 0; i < settings.length; ++i) {
+            var setting = settings[i];
+            msg = "";
+            
+            switch(setting.name) {
+                case "minimum value":
+                    msg = this.validateNumber(setting.value);
+                    break;
+                case "maximum value":
+                    msg = this.validateNumber(setting.value);
+                    break;
+            }
+            
+            if(msg) {
+                result.push({
+                    name: setting.name,
+                    msg: msg,
+                });
+            }
+        }
+                    
+        return result;
     },
 });
