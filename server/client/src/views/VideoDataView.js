@@ -54,7 +54,6 @@ var VideoDataView = AbstractDataView.extend({
         // which leads to methods onDestroy, onCreate, onStart, onStop on DataViews for similar purposes
         // onStop method shuould fire this method for live camera view to proceed correctly on next start
         gSocket.removeListener('video', this.processVideoSegments);
-        gSocket.emit('resend', JSON.stringify({ type: "onboard", data: "deinit-video" }));
         this.video.src = window.URL.createObjectURL(this.ms);
     },
     

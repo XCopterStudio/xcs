@@ -78,13 +78,6 @@ class Onboard {
             };
             return;
         };
-        if (request == "deinit-video") {
-            echo("deinit video request");
-            if (Global.hasSlot("guiProxy")) {
-                Global.guiProxy.deinitVideo();
-            };
-            return;
-        };
 
         request = request["request"]; // backward compatibility
         if(!request.has("id") || !request.has("requestData") || !request.has("requestId")) {

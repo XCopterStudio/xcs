@@ -96,11 +96,6 @@ class SemanticSender : XObject {
                 location += onboardSettings_.get("serverHost") + ":" + onboardSettings_.get("serverVideoPort");
                 var mimetype = "video/webm";
                 var Global.guiProxy = GuiProxy.new(location, mimetype);
-            }
-            else {
-                Global.guiProxy.deinitVideo();  // TODO: caused segfault in some case,
-                                                // probably when there was no initVideo in the first place,
-                                                // had no time to debug
             };
 
             this.registerData_[name] = uvar >> Global.guiProxy.&video;
