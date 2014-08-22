@@ -931,7 +931,7 @@ var DataFlowGraphView = Backbone.View.extend({
                         if(model) {
                             views.push({
                                 viewName: cell.target.port,
-                                dataId: cell.source.id + "_" + cell.source.port,
+                                dataId: cell.source.id + "__" + cell.source.port,
                                 model: cloneModel
                             });
                         }

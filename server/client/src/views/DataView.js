@@ -7,7 +7,7 @@ var DataView = Backbone.View.extend({
             name: "raw data",
             ctor: function(dataId) {
                 //var dataName = dataId.charAt(0).toUpperCase() + dataId.slice(1);
-                var words = dataId.split("_");
+                var words = dataId.split("__");
                 if(words.length == 2) {
                     var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
                     var portName = words[1];
@@ -19,7 +19,7 @@ var DataView = Backbone.View.extend({
         gauge100: {
             name: "gauge data",
             ctor: function(dataId) {
-                var words = dataId.split("_");
+                var words = dataId.split("__");
                 if(words.length == 2) {
                     var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
                     var portName = words[1];
@@ -33,7 +33,7 @@ var DataView = Backbone.View.extend({
         progress: {
             name: "progress data",
             ctor: function(dataId) {
-                var words = dataId.split("_");
+                var words = dataId.split("__");
                 if(words.length == 2) {
                     var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
                     var portName = words[1];
@@ -45,7 +45,7 @@ var DataView = Backbone.View.extend({
         chart: {
             name: "chart data",
             ctor: function(dataId) {
-                var words = dataId.split("_");
+                var words = dataId.split("__");
                 if(words.length == 2) {
                     var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
                     var portName = words[1];
@@ -56,7 +56,7 @@ var DataView = Backbone.View.extend({
         video: {
             name: "video",
             ctor: function(dataId) {
-                var words = dataId.split("_");
+                var words = dataId.split("__");
                 if(words.length == 2) {
                     var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
                     var portName = words[1];
