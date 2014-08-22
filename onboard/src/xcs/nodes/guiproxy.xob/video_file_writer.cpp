@@ -134,12 +134,15 @@ VideoFileWriter::VideoFileWriter(const std::string &url, const std::string &mime
 }
 
 VideoFileWriter::~VideoFileWriter() {
-    closeVideo();
+    freeResources();
     avformat_network_deinit();
 }
 
 void VideoFileWriter::openVideo() {
     initMtx_.lock();
+
+    // free potentialy allocated structures
+    freeResources();
 
     pictureConvertContext_ = nullptr;
 
@@ -231,28 +234,25 @@ void VideoFileWriter::openVideo() {
     initMtx_.unlock();
 }
 
-void VideoFileWriter::closeVideo() {
-    initMtx_.lock();
-
-    isWriteable_ = false;
-
-    av_write_trailer(formatContext_);
-    if (videoStream_){
-        avcodec_close(videoStream_->codec);
-        av_free(picture_->data[0]);
-        av_free(picture_);
-        av_free(videoBuffer_);
+void VideoFileWriter::freeResources() {
+    if (isWriteable_) {
+        av_write_trailer(formatContext_);
+        if (videoStream_){
+            avcodec_close(videoStream_->codec);
+            av_free(picture_->data[0]);
+            av_free(picture_);
+            av_free(videoBuffer_);
+        }
+        for (int i = 0; i < formatContext_->nb_streams; ++i){
+            av_freep(&formatContext_->streams[i]->codec);
+            av_freep(&formatContext_->streams[i]);
+        }
+        if (!(outputFormat_->flags & AVFMT_NOFILE)){
+            avio_close(formatContext_->pb);
+        }
+        av_free(formatContext_);
+        isWriteable_ = false;
     }
-    for (int i = 0; i < formatContext_->nb_streams; ++i){
-        av_freep(&formatContext_->streams[i]->codec);
-        av_freep(&formatContext_->streams[i]);
-    }
-    if (!(outputFormat_->flags & AVFMT_NOFILE)){
-        avio_close(formatContext_->pb);
-    }
-    av_free(formatContext_);
-
-    initMtx_.unlock();
 }
 
 void VideoFileWriter::writeVideoFrame(const AVFrame& frame){

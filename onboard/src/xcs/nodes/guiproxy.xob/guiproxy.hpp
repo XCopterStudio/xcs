@@ -17,7 +17,6 @@ public:
     ~GuiProxy();
     void init(const std::string &location, const std::string &mimetype);
     void initVideo();
-    void deinitVideo();
 
     XInputPort<::urbi::UImage> video;
 

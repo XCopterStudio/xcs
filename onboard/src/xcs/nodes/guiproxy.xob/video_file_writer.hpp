@@ -42,7 +42,7 @@ public:
     VideoFileWriter(const std::string &fileName, const std::string &mimetype, const unsigned int &width = 640, const unsigned int &height = 480, const unsigned int &bitrate = 400000);
     ~VideoFileWriter();
     void openVideo();
-    void closeVideo();
+    void freeResources();
     void writeVideoFrame(const AVFrame& frame);
 };
 

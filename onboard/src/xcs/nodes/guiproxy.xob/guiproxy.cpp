@@ -18,7 +18,6 @@ GuiProxy::GuiProxy(const std::string &name) :
     UNotifyThreadedChange(video.data(), &GuiProxy::onChangeVideo, urbi::LOCK_FUNCTION_DROP);
     XBindFunction(GuiProxy, init);
     XBindFunction(GuiProxy, initVideo);
-    XBindFunction(GuiProxy, deinitVideo);
 }
 
 GuiProxy::~GuiProxy() {
@@ -35,11 +34,6 @@ void GuiProxy::init(const std::string &location, const std::string &mimetype) {
 void GuiProxy::initVideo() {
     XCS_LOG_INFO("Initializing video transmitter.");
     videoFileWriter_->openVideo();
-}
-
-void GuiProxy::deinitVideo() {
-    XCS_LOG_INFO("Deinitialize video transmitter.");
-    videoFileWriter_->closeVideo();
 }
 
 void GuiProxy::onChangeVideo(::urbi::UImage image) { // TODO: try to change UVar to UImage.. should work
