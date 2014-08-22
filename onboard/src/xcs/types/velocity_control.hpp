@@ -5,15 +5,13 @@
 
 namespace xcs {
 
-//TODO rename to velocity control
-
-struct SpeedControl {
+struct VelocityControl {
     double vx;
     double vy;
     double vz;
     double psi;
 
-    SpeedControl(double vx = 0, double vy = 0, double vz = 0, double psi = 0) :
+    VelocityControl(double vx = 0, double vy = 0, double vz = 0, double psi = 0) :
       vx(vx), vy(vy), vz(vz), psi(psi) {
     };
 
@@ -23,14 +21,14 @@ struct SpeedControl {
     }
 
     template<typename T>
-            static SpeedControl deserialize(T &stream) {
+            static VelocityControl deserialize(T &stream) {
         double vx, vy, vz, psi;
         stream >> vx >> vy >> vz >> psi;
-        return SpeedControl(vx, vy, vz);
+        return VelocityControl(vx, vy, vz);
     }
 };
 }
 
-X_REGISTER_STRUCT(xcs::SpeedControl, vx, vy, vz, psi);
+X_REGISTER_STRUCT(xcs::VelocityControl, vx, vy, vz, psi);
 
 #endif

@@ -23,6 +23,15 @@ namespace nodes {
 typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::time_point<std::chrono::high_resolution_clock> TimePoint;
 
+/*! \brief XObject wrapper for quadricopter localization in 3 dimensional space.
+
+    \warning Update data in input ports in following order for 
+        imu measurements: measuredVelocity, measuredRotation, measuredAltitude, timeImu
+        cam measurements: video, videoTime
+        flyControls: flyControl, flyControlSendTime
+        because only in time update is created appropriate structure and pass in Localization
+        other methods only set temporally copy of the input data
+*/
 class XLocalization : public XObject {
     typedef std::unique_ptr<localization::Ptam> PtamPtr;
 
@@ -53,14 +62,14 @@ class XLocalization : public XObject {
     std::atomic<bool> ptamEnabled_;
 
     void onChangeVelocity(xcs::CartesianVector measuredVelocity);
-    void onChangeRotation(xcs::EulerianVector measuredAnglesRotation);
+    void onChangeRotation(xcs::EulerianVector measuredRotation);
     void onChangeAltitude(double altitude);
     // change time after you change all imu measurements (velocity etc.) 
     // because this add new imu measurement in ekf queue
     void onChangeTimeImu(double internalTime);
 
     void onChangeVideo(::urbi::UImage image);
-    void onChangeVideoTime(xcs::Timestamp internalTime); // TODE deprecated use onChanheTimeCam or vice versa
+    void onChangeVideoTime(xcs::Timestamp internalTime);
 
     void onChangeFlyControl(const xcs::FlyControl flyControl);
     void onChangeFlyControlSendTime(const double flyControlSendTime);
@@ -80,34 +89,49 @@ class XLocalization : public XObject {
     void loadParameters(const xcs::Settings &settings);
 
 public:
-    // imu measurements
+    /// velocity from imu sensors
     XInputPort<xcs::CartesianVector> measuredVelocity;
-    XInputPort<xcs::EulerianVector> measuredAnglesRotation; // TODO rename
+    /// rotation from imu sensors
+    XInputPort<xcs::EulerianVector> measuredRotation;
+    /// quadricopter altitude 
     XInputPort<double> measuredAltitude;
+    /// time when all imu measurement have been measured
     XInputPort<double> timeImu;
-    // visual data
+    /// video from quadricopter front camera
     XInputPort<::urbi::UImage> video;
+    /// time when video have been captured
     XInputPort<double> videoTime;
-    // drone fly control
+    /// quadricopter fly control
     XInputPort<xcs::FlyControl> flyControl;
+    /// time when fly control takes effect on quadricopter
     XInputPort<double> flyControlSendTime;
-    // PTAM and EKF control
+    /// PTAM and EKF control commands
     XInputPort<std::string> control;
+    /// Enable and disable ptam framework
     XInputPort<bool> ptamEnabled;
-    // Set EKF position
+    /// Set localization position
     XInputPort<xcs::CartesianVector> setPosition;
+    /// Set localization rotation
     XInputPort<xcs::EulerianVector> setRotation;
 
-    // computed ekf output
+    /// Computed quadricopter position
     XVar<xcs::CartesianVector> position;
+    /// Computed quadricopter velocity
     XVar<xcs::CartesianVector> velocity;
+    /// Computed quadricopter rotation
     XVar<xcs::EulerianVector> rotation;
+    /// Computed quadricopter rotation velocity in z axis
     XVar<double> velocityPsi;
-    // PTAM status
+    /// PTAM status
     XVar<int> ptamStatus;
 
+    /// Initialize private variables
     XLocalization(const std::string &name);
 
+    /*! Load and apply localization settings from configuration file on XLocalization
+
+        \param congifFile absolute path of the XLocalization configuration file
+    */
     void init(const std::string &configFile);
 };
 

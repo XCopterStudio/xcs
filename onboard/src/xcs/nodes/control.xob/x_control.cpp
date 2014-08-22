@@ -19,7 +19,7 @@ void XControl::onChangeRotation(xcs::EulerianVector rotation){
     }
 }
 
-void XControl::onChangeDesireVelocity(xcs::SpeedControl desireVelocity){
+void XControl::onChangeDesireVelocity(xcs::VelocityControl desireVelocity){
     control_.desireVelocity(desireVelocity);
 }
 

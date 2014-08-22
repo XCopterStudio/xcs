@@ -20,7 +20,7 @@ void XCheckpointMovement::onChangeDronePosition(xcs::CartesianVector position){
 void XCheckpointMovement::onChangeDroneRotation(xcs::EulerianVector rotation){
     CheckpointMovement_.droneRotation(rotation);
     if (!stopped_){
-        speedControl = CheckpointMovement_.flyOnCheckpoint();
+        velocityControl = CheckpointMovement_.flyOnCheckpoint();
     }
 }
 
@@ -37,26 +37,26 @@ void XCheckpointMovement::stateChanged(XObject::State state) {
 
 //==================== public functions =============
 XCheckpointMovement::XCheckpointMovement(const std::string& name) : XObject(name) ,
-CheckpointMovement_(boost::bind(&XCheckpointMovement::callbackHermit, this, _1)),
+CheckpointMovement_(boost::bind(&XCheckpointMovement::callback, this, _1)),
 command("COMMAND"),
 checkpoint("CHECKPOINT"),
 dronePosition("POSITION_ABS"),
 droneRotation("ROTATION"),
-speedControl("SPEED_CONTROL_ABS"),
+velocityControl("SPEED_CONTROL_ABS"),
 reachedCheckpoint("BOOL")
 {
     XBindVarF(command, &XCheckpointMovement::onChangeCommand);
     XBindVarF(checkpoint, &XCheckpointMovement::onChangeAddCheckpoint);
     XBindVarF(dronePosition, &XCheckpointMovement::onChangeDronePosition);
     XBindVarF(droneRotation, &XCheckpointMovement::onChangeDroneRotation);
-    XBindVar(speedControl);
+    XBindVar(velocityControl);
     XBindVar(reachedCheckpoint);
 
     stopped_ = true;
     reachedCheckpoint = false;
 }
 
-void XCheckpointMovement::callbackHermit(bool reached){
+void XCheckpointMovement::callback(bool reached){
     reachedCheckpoint = reached;
 }
 

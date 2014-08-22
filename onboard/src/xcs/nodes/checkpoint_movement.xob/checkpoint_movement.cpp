@@ -8,7 +8,7 @@
 
 using namespace arma;
 using namespace xcs;
-using namespace xcs::nodes::hermit;
+using namespace xcs::nodes::checkpoint;
 
 const unsigned int CheckpointMovement::POINTS_ON_METER = 100;
 const double CheckpointMovement::EPSILON = 0.1;
@@ -65,11 +65,11 @@ void CheckpointMovement::droneRotation(const xcs::EulerianVector &droneRotation)
     droneRotation_ = droneRotation;
 }
 
-xcs::SpeedControl CheckpointMovement::flyOnCheckpoint(const double &speed){
+xcs::VelocityControl CheckpointMovement::flyOnCheckpoint(const double &speed){
     if (clear_){
         newCheckpoint_ = true;
         clear_ = false;
-        return SpeedControl();
+        return VelocityControl();
     }
 
     if (newCheckpoint_){
@@ -108,8 +108,8 @@ xcs::SpeedControl CheckpointMovement::flyOnCheckpoint(const double &speed){
         double deltaZ = targetCheckpoint_.z - dronePosition_.z;        
 
         if (distance < EPSILON){
-            printf("Drone achieved destination: [%f,%f,%f] \n", targetCheckpoint_.x, targetCheckpoint_.y, targetCheckpoint_.z);
-            printf("Hermit: New checkpoint \n");
+            //printf("Drone achieved destination: [%f,%f,%f] \n", targetCheckpoint_.x, targetCheckpoint_.y, targetCheckpoint_.z);
+            //printf("Hermit: New checkpoint \n");
             newCheckpoint_ = true;
             if (reachedCallback_ != nullptr){
                 reachedCallback_(true);
@@ -117,28 +117,28 @@ xcs::SpeedControl CheckpointMovement::flyOnCheckpoint(const double &speed){
         }
         else{
             //double norm = boundSpeed / std::max(std::abs(deltaX), std::max(std::abs(deltaY), std::abs(deltaZ)));
-            //return SpeedControl(norm*deltaX, norm*deltaY, norm*deltaZ, 0);
+            //return VelocityControl(norm*deltaX, norm*deltaY, norm*deltaZ, 0);
 
             double norm = 4;
-            return SpeedControl(valueInRange(norm*deltaX*boundSpeed, -boundSpeed, boundSpeed),
+            return VelocityControl(valueInRange(norm*deltaX*boundSpeed, -boundSpeed, boundSpeed),
             valueInRange(norm*deltaY*boundSpeed, -boundSpeed, boundSpeed),
             valueInRange(norm*deltaZ*boundSpeed, -boundSpeed, boundSpeed),
             0
             );
         }
 
-        printf("Drone state: [%f,%f,%f,%f] \n", dronePosition_.x, dronePosition_.y, dronePosition_.z,droneRotation_.psi);
+        //printf("Drone state: [%f,%f,%f,%f] \n", dronePosition_.x, dronePosition_.y, dronePosition_.z,droneRotation_.psi);
         //TODO: use yaw difference
         //printf("Hermit: Control speed [%f,%f,%f,%f] \n", norm*deltaX*boundSpeed, norm*deltaY*boundSpeed, norm*deltaZ*boundSpeed, 0);
         
         
     }
     
-    return SpeedControl();
+    return VelocityControl();
 }
 
 void CheckpointMovement::addCheckpoint(const Checkpoint &checkpoint){
-    printf("Hermit: insert checkpoint \n");
+    //printf("Hermit: insert checkpoint \n");
     checkpointQueue_.push(checkpoint);
 }
 

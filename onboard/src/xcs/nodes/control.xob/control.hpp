@@ -4,7 +4,7 @@
 #include <xcs/types/fly_control.hpp>
 #include <xcs/types/cartesian_vector.hpp>
 #include <xcs/types/eulerian_vector.hpp>
-#include <xcs/types/speed_control.hpp>
+#include <xcs/types/velocity_control.hpp>
 #include "pid.hpp"
 
 namespace xcs{
@@ -36,7 +36,7 @@ namespace control{
         xcs::EulerianVector rotation_;
 
         // Drone desire speed
-        xcs::SpeedControl desireVelocity_;
+        xcs::VelocityControl desireVelocity_;
         
     public:
         /*! Initialize private PID variables. */
@@ -56,9 +56,9 @@ namespace control{
         void rotation(const xcs::EulerianVector &rotation);
         /*! Set desire velocity which Control try keep with an quadricopter
         
-            \param speedControl desire speed an quadricopter in m/s
+            \param velocityControl desire velocity an quadricopter in m/s
         */
-        void desireVelocity(const xcs::SpeedControl &speedControl);
+        void desireVelocity(const xcs::VelocityControl &velocityControl);
 
         /*! Compute FlyControl for an quadricopter based on actual state and desire velocity.
         

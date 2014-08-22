@@ -27,9 +27,9 @@ void XLocalization::onChangeVelocity(xcs::CartesianVector measuredVelocity) {
     lastMeasurement_.velocity.y = measuredVelocity.y;
 }
 
-void XLocalization::onChangeRotation(xcs::EulerianVector measuredAnglesRotation) {
-    lastMeasurement_.velocityPsi = measuredAnglesRotation.psi - lastMeasurement_.rotation.psi;
-    lastMeasurement_.rotation = measuredAnglesRotation;
+void XLocalization::onChangeRotation(xcs::EulerianVector measuredRotation) {
+    lastMeasurement_.velocityPsi = measuredRotation.psi - lastMeasurement_.rotation.psi;
+    lastMeasurement_.rotation = measuredRotation;
 }
 
 void XLocalization::onChangeAltitude(double altitude) {
@@ -160,7 +160,7 @@ void XLocalization::onChangeSetRotation(xcs::EulerianVector rotation){
 XLocalization::XLocalization(const std::string &name) :
   XObject(name),
   measuredVelocity("VELOCITY_LOC"),
-  measuredAnglesRotation("ROTATION"),
+  measuredRotation("ROTATION"),
   measuredAltitude("ALTITUDE"),
   timeImu("TIME_LOC"),
   video("CAMERA"),
@@ -183,7 +183,7 @@ XLocalization::XLocalization(const std::string &name) :
     ptamEnabled_ = true;
 
     XBindVarF(measuredVelocity, &XLocalization::onChangeVelocity);
-    XBindVarF(measuredAnglesRotation, &XLocalization::onChangeRotation);
+    XBindVarF(measuredRotation, &XLocalization::onChangeRotation);
     XBindVarF(measuredAltitude, &XLocalization::onChangeAltitude);
     XBindVarF(timeImu, &XLocalization::onChangeTimeImu);
 

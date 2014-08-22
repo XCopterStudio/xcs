@@ -9,7 +9,7 @@
 #include <xcs/types/cartesian_vector.hpp>
 #include <xcs/types/eulerian_vector.hpp>
 #include <xcs/types/fly_control.hpp>
-#include <xcs/types/speed_control.hpp>
+#include <xcs/types/velocity_control.hpp>
 #include <xcs/types/checkpoint.hpp>
 
 #define XCS_SCALAR_TYPES LIBPORT_LIST( \
@@ -23,7 +23,7 @@
         xcs::CartesianVector, \
         xcs::CartesianVectorChronologic, \
         xcs::FlyControl,\
-        xcs::SpeedControl,\
+        xcs::VelocityControl,\
         xcs::Checkpoint, )
 
 #define XCS_VIDEO_TYPES LIBPORT_LIST( \
