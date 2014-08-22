@@ -24,8 +24,8 @@ void Control::rotation(const EulerianVector &rotation){
     rotation_ = rotation;
 }
 
-void Control::desireVelocity(const xcs::SpeedControl &speedControl){
-    desireVelocity_ = speedControl;
+void Control::desireVelocity(const xcs::VelocityControl &velocityControl){
+    desireVelocity_ = velocityControl;
     desireVelocity_.psi = xcs::normAngle(desireVelocity_.psi);
 }
 

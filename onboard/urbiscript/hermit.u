@@ -56,7 +56,7 @@ localization.&rotation >> control.&rotation;
 
 localization.&position >> hermit.&dronePosition;
 localization.&rotation >> hermit.&droneRotation;
-hermit.&speedControl >> control.&desireVelocity;
+hermit.&velocityControl >> control.&desireVelocity;
  
 // fly sequence
 logger.start();
@@ -115,19 +115,19 @@ hermit.checkpoint = topLeft;
 hermit.checkpoint = left;
 hermit.checkpoint = start;
 
-var upSpeed = SpeedControl.new();
+var upSpeed = VelocityControl.new();
 upSpeed.vx = 0;
 upSpeed.vy = 0;
 upSpeed.vz = 0.2;
 upSpeed.psi = 0;
 
-var downSpeed = SpeedControl.new();
+var downSpeed = VelocityControl.new();
 downSpeed.vx = 0;
 downSpeed.vy = 0;
 downSpeed.vz = -0.2;
 downSpeed.psi = 0;
 
-var nullSpeed = SpeedControl.new();
+var nullSpeed = VelocityControl.new();
 nullSpeed.vx = 0;
 nullSpeed.vy = 0;
 nullSpeed.vz = 0;

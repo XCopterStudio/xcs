@@ -15,7 +15,7 @@ xcontrol.&flyControl >> xci.&flyControl;
 //   >> xhermit.&checkpoint;
 xci.&position >> xhermit.&dronePosition;
 xci.&rotation >> xhermit.&droneRotation;
-xhermit.&speedControl >> xcontrol.&desireSpeed; 
+xhermit.&velocityControl >> xcontrol.&desireVelocity; 
  
 xci.start();
 

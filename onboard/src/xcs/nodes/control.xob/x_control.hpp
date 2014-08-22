@@ -8,7 +8,7 @@
 #include <xcs/types/eulerian_vector.hpp>
 #include <xcs/types/cartesian_vector.hpp>
 #include <xcs/types/fly_control.hpp>
-#include <xcs/types/speed_control.hpp>
+#include <xcs/types/velocity_control.hpp>
 
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
@@ -31,7 +31,7 @@ namespace control{
 
         void onChangeVelocity(xcs::CartesianVector velocity);
         void onChangeRotation(xcs::EulerianVector rotation);
-        void onChangeDesireVelocity(xcs::SpeedControl desireVelocity);
+        void onChangeDesireVelocity(xcs::VelocityControl desireVelocity);
 
         void loadParameters(const std::string &file);
     protected:
@@ -43,7 +43,7 @@ namespace control{
         /// Quadricopter actual rotation
         xcs::nodes::XInputPort<xcs::EulerianVector> rotation;
         /// Desire quadricopter velocity
-        xcs::nodes::XInputPort<xcs::SpeedControl> desireVelocity;
+        xcs::nodes::XInputPort<xcs::VelocityControl> desireVelocity;
         // Output data
         /// FlyControl for the quadricopter
         xcs::nodes::XVar<xcs::FlyControl> flyControl;

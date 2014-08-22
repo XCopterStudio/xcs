@@ -6,7 +6,7 @@
 #include <xcs/types/checkpoint.hpp>
 #include <xcs/types/cartesian_vector.hpp>
 #include <xcs/types/eulerian_vector.hpp>
-#include <xcs/types/speed_control.hpp>
+#include <xcs/types/velocity_control.hpp>
 
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_input_port.hpp>
@@ -16,7 +16,7 @@ namespace xcs {
 namespace nodes {
 
 class XCheckpointMovement : public xcs::nodes::XObject {
-    xcs::nodes::hermit::CheckpointMovement CheckpointMovement_;
+    xcs::nodes::checkpoint::CheckpointMovement CheckpointMovement_;
 
     std::atomic<bool> stopped_;
 
@@ -35,7 +35,7 @@ public:
     xcs::nodes::XInputPort<xcs::CartesianVector> dronePosition;
     xcs::nodes::XInputPort<xcs::EulerianVector> droneRotation;
     // xvars
-    xcs::nodes::XVar<xcs::SpeedControl> speedControl;
+    xcs::nodes::XVar<xcs::VelocityControl> velocityControl;
     xcs::nodes::XVar<bool> reachedCheckpoint;
 
     void callbackHermit(bool reached);
