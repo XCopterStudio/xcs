@@ -75,7 +75,11 @@ class SemanticSender : XObject {
         };
         
         var that = this;
-        var metadata = toSend.keys.map(function(it) { that.metadata_[it];});
+        var metadata = [ => ];
+        for(var key in toSend.keys) {
+            metadata[key] = metadata_[key];
+        };
+        
         var serialized = this.json.encode([
             "type" => "data",
             "data" => toSend,

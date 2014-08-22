@@ -2,9 +2,6 @@
 
 var ConsoleModel = Backbone.Model.extend({
     defaults: {
-        channelState: 'executor_state',
-        channelError: 'executor_error',
-        channelOutput: 'executor_output',
         channelUrbiscript: 'execUrbiscript',
         channelControl: 'execControl',
         responseTimeout: 2000,
@@ -14,37 +11,27 @@ var ConsoleModel = Backbone.Model.extend({
     },
     initialize: function() {
         this.set('state', ConsoleModel.State.IDLE); // cannot be in default because of ConsoleModel.State "visibility"
-        this.listenTo(app.Onboard, "change:data", this.onDataChange);
+        this.listenTo(app.Onboard, "sem_update:EXECUTION_STATE", this.onStateChange);
+        this.listenTo(app.Onboard, "sem_update:EXECUTION_ERROR", this.onErrorChange);
+        this.listenTo(app.Onboard, "sem_update:EXECUTION_OUTPUT", this.onOutputChange);
     },
-    onDataChange: function(onboard) {
-        var data = onboard.get('data');
-
-        // update state
-        var stateKey = this.get('channelState');
-        if ((stateKey in data) && data[stateKey]) {
-            if (this.get('timeoutRef')) {
-                window.clearTimeout(this.get('timeoutRef'));
-            }
-            var value = data[stateKey];
-            // trigger on update, not only change
-            this.set('state', value, {silent: true});
-            this.trigger('change:state', this);
+    onStateChange: function(value) {
+        if (this.get('timeoutRef')) {
+            window.clearTimeout(this.get('timeoutRef'));
         }
-
-        // update error
-        var errorKey = this.get('channelError');
-        if ((errorKey in data) && data[errorKey]) {
-            // trigger on update, not only change (error may stay same)
-            this.set('error', data[errorKey], {silent: true});
-            this.trigger('change:error', this);
-        }
-        // update output
-        var outputKey = this.get('channelOutput');
-        if ((outputKey in data) && data[outputKey]) {
-            // trigger on update, not only change (output may stay same)
-            this.set('output', data[outputKey], {silent: true});
-            this.trigger('change:output', this);
-        }
+        // trigger on update, not only change
+        this.set('state', value, {silent: true});
+        this.trigger('change:state', this);
+    },
+    onErrorChange: function(value) {
+        // trigger on update, not only change (error may stay same)
+        this.set('error', value, {silent: true});
+        this.trigger('change:error', this);
+    },
+    onOutputChange: function(value) {
+        // trigger on update, not only change (output may stay same)
+        this.set('output', value, {silent: true});
+        this.trigger('change:output', this);
     },
     /* Executive functions */
     start: function() {
@@ -80,7 +67,7 @@ var ConsoleModel = Backbone.Model.extend({
         this.set('state', ConsoleModel.State.WAITING);
         var that = this;
         this.set('timeoutRef', window.setTimeout(function() {
-            app.Flash.flashError('Onboard console is not responding.');
+            app.Flash.flashError('Onboard console is not responding. Check that you have an Executor node created and it\'s running.');
             that.set('state', ConsoleModel.State.IDLE);
         }, this.get('responseTimeout')));
     }
