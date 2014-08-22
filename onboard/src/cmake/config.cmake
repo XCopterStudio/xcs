@@ -14,6 +14,7 @@ else()
     set(URBI_D_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/urbi_d)
     set(URBI_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/urbi)
     set(BOOST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/boost)
+    set(Boost_NO_SYSTEM_PATHS 1)
 endif()
 
 # Nonstandard and header-only libraries that are used as git submodules.

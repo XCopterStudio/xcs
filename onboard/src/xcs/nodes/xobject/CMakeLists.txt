@@ -22,7 +22,4 @@ install(TARGETS ${PROJECT_NAME}
 
 install(FILES ${HEADERS} DESTINATION include/xcs/nodes/xobject)
 
-install(EXPORT ${PROJECT_NAME} DESTINATION share)
-
-
 
