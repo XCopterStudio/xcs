@@ -232,7 +232,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
         ekf_.measurementCam(droneToWResult, timestamp);
         goodObservations_ += 1;
     } else {
-        ekf_.clearUpToTime(timestamp);
+        ekf_.clearUpToTime(std::max(timestamp - 1,0.0));
     }
 
     /*
