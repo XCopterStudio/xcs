@@ -14,6 +14,7 @@ class Executor : XObject {
         "output" => Pair.new(String, "EXECUTION_OUTPUT"),
     ];
     var state_ = 0; // NOTE: this is necessary to do in every clone of the XObject prototype
+    // NOTE no. 2: it's different from 'state' output port related to executed code
     
     function init(lobby) {
         // Inputs
@@ -55,11 +56,10 @@ class Executor : XObject {
                 return;
             };
             if(that.control == "run") {
-                //TODO consider cleaning all lobby slots that aren't nodes for repeated runs, or simply wrap the code in a scope {...}
                 that.state = that.State.RUNNING;
                 that.job = disown({that.tag:{
                     try {
-                        System.eval(that.code, that.lobby_);                    
+                        System.eval("{" + that.code + "}", that.lobby_); // we run the code in a separate scope
                     } catch(var e) {
                         that.error = e.asString();
                     };
@@ -72,6 +72,9 @@ class Executor : XObject {
                 that.tag.unfreeze();
             } else if(that.control == "stop") {
                 that.tag.stop();
+                if(that.tag.frozen) { // tag.stop() doesn't leaves the code freezed
+                    that.tag.unfreeze();
+                };
                 that.job.terminate();
                 // NOTE: state will be set in event handler for tag leave
             }

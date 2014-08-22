@@ -18,8 +18,6 @@ var ConsoleView = Backbone.View.extend({
         this.$codeElement = this.$('#console-input');
         this.$outputElement = this.$('#console-output');
 
-        this.onChangeState(this.model);
-
         this.editor = CodeMirror.fromTextArea(this.$codeElement.get(0), {
             //theme: "night",
             mode: "xcs",
@@ -35,11 +33,14 @@ var ConsoleView = Backbone.View.extend({
             autoFocus: false,
             //onKeyEvent: function (e, s) { if (s.type == "keyup") { CodeMirror.showHint(e); console.log("test"); } }
         });
+        
+        this.onChangeState(this.model);
     },
     onClickStart: function() {
         switch (this.model.get('state')) {
             case ConsoleModel.State.IDLE:
-                this.model.set('urbiscript', this.$codeElement.val());
+                var code = this.editor.doc.getValue();
+                this.model.set('urbiscript', code);
                 this.model.start();
                 break;
             case ConsoleModel.State.FREEZED:
@@ -72,24 +73,24 @@ var ConsoleView = Backbone.View.extend({
                 this.$buttonStart.html(START);
                 this.$buttonStart.prop('disabled', false);
                 this.$buttonStop.prop('disabled', true);
-                this.$codeElement.prop('disabled', false);
+                this.editor.setOption('readOnly', false);
                 break;
             case ConsoleModel.State.WAITING:
                 this.$buttonStart.prop('disabled', true);
                 this.$buttonStop.prop('disabled', true);
-                this.$codeElement.prop('disabled', true);
+                this.editor.setOption('readOnly', true);
                 break;
             case ConsoleModel.State.RUNNING:
                 this.$buttonStart.html(PAUSE);
                 this.$buttonStart.prop('disabled', false);
                 this.$buttonStop.prop('disabled', false);
-                this.$codeElement.prop('disabled', true);
+                this.editor.setOption('readOnly', true);
                 break;
             case ConsoleModel.State.FREEZED:
                 this.$buttonStart.html(RESUME);
                 this.$buttonStart.prop('disabled', false);
                 this.$buttonStop.prop('disabled', false);
-                this.$codeElement.prop('disabled', true);
+                this.editor.setOption('readOnly', true);
                 break;
         }
         this.$state.html(model.get('state'));
