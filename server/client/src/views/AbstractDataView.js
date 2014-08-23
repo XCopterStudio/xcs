@@ -4,6 +4,8 @@ var AbstractDataView = Backbone.View.extend({
 
     id: 'data-from-onboard',
     
+    privateSettings: {},
+    
     initialize: function(dataId, attrs) {
         // initialize attributes, which can be overriden
         if(!this.template) {
@@ -53,11 +55,18 @@ var AbstractDataView = Backbone.View.extend({
             }
         }
         
+        //set settings
+        this.privateSettings = [];
+        for(var i = 0; i < this.settings.length; ++i) {
+            var setting = this.settings[i];
+            this.privateSettings.push(_.clone(setting));
+        }
+        
         if(this.template != '' && this.sizeX > 0 && this.sizeY > 0) {
             var gridster = $(".gridster > ul").gridster().data('gridster');
             var compiledTemplate = _.template(this.template);
             var hidden = "";
-            if(this.settings.length == 0) {
+            if(this.privateSettings.length == 0) {
                 hidden = " hidden";
             }
             gridster.add_widget('\
@@ -71,7 +80,7 @@ var AbstractDataView = Backbone.View.extend({
                 this.sizeX, this.sizeY);
             
             // set settings
-            if(this.settings.length > 0) {
+            if(this.privateSettings.length > 0) {
                 $('#widget' + this.widgetId + ' .settings').click(this.onSettings);
             }
         }
@@ -81,7 +90,7 @@ var AbstractDataView = Backbone.View.extend({
         
         // load saved settings
         var modul = this.id + (!this.dataId ? '' : "-" + this.dataId);
-        this.settingsModel = new Setting(modul, this.settings, this.setSettings, this.validateSettings, this.resetDefault);
+        this.settingsModel = new Setting(modul, this.privateSettings, this.setSettings, this.validateSettings, this.resetDefault);
         this.settingsModel.load();
     },
     
@@ -101,7 +110,7 @@ var AbstractDataView = Backbone.View.extend({
         for(var i = 0; i < settings.length; ++i) {
             var setting = settings[i];
         
-            var set = _.find(this.settings, function(r) { return r.name == setting.name; })
+            var set = _.find(this.privateSettings, function(r) { return r.name == setting.name; })
             if(set) {
                 set.default = setting.value;
             }
@@ -125,8 +134,10 @@ var AbstractDataView = Backbone.View.extend({
     },
     
     onSettings: function(event){
+        console.log("show settings: " + this.settingsModel.get("modul"));
+        
         // actualize settings model
-        this.settingsModel.set("settings", this.settings);
+        this.settingsModel.set("settings", this.privateSettings);
         
         // show settings modal
         app.SettingView.show(this.settingsModel);
