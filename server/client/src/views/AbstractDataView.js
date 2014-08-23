@@ -78,6 +78,11 @@ var AbstractDataView = Backbone.View.extend({
         
         // custom implementation init
         this.init();
+        
+        // load saved settings
+        var modul = this.id + (!this.dataId ? '' : "-" + this.dataId);
+        this.settingsModel = new Setting(modul, this.settings, this.setSettings, this.validateSettings, this.resetDefault);
+        this.settingsModel.load();
     },
     
     init: function() {
@@ -120,8 +125,10 @@ var AbstractDataView = Backbone.View.extend({
     },
     
     onSettings: function(event){
-        app.SettingView.show(
-            new Setting(this.settings, this.setSettings, this.validateSettings, this.resetDefault)
-        );
+        // actualize settings model
+        this.settingsModel.set("settings", this.settings);
+        
+        // show settings modal
+        app.SettingView.show(this.settingsModel);
     },
 });

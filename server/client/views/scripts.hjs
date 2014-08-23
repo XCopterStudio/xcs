@@ -21,6 +21,8 @@
 <!-- flot -->
 <!--[if lte IE 8]><script type="text/javascript" src="js/flot/excanvas.min.js"></script><![endif]-->
 <script type="text/javascript" src="js/flot/jquery.flot.min.js"></script>
+<!-- cookies -->
+<script type="text/javascript" src="js/jquery-cookie-master/jquery.cookie.js"></script>
 <!-- Custom scripts -->
 <script type="text/javascript" src="js/custom.js"></script>
 <!-- 

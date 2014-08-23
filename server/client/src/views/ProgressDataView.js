@@ -1,4 +1,6 @@
 var ProgressDataView = AbstractDataView.extend({
+    id: 'progress-widget',
+    
     template: '\
         <li class="widget-line">\
             <div class="text-center"><%= name %></div>\

@@ -1,4 +1,6 @@
 var ChartDataView = AbstractDataView.extend({
+    id: 'chart-widget',
+    
     template: '\
     <li class="widget-line">\
         <div class="text-center"><%= name %></div>\

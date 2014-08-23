@@ -1,4 +1,6 @@
 var GaugeDataView = AbstractDataView.extend({
+    id: 'gauge-widget',
+    
     template: '<li class="widget-line"><div class="text-center"><%= name %></div><div id="gauge_<%= widgetId %>_<%= dataId %>" class="widget-gauge"></div></li>',
     
     min: 0,

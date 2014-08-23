@@ -84,6 +84,9 @@ var SettingView = Backbone.View.extend({
                     resetDefaultSettings(settedSettings);
                 }
                 
+                //save to cookies
+                settingModel.save(settedSettings);
+                
                 // close modal
                 $btnCancel.trigger('click');
             }
