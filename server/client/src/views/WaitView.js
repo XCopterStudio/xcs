@@ -46,7 +46,7 @@ var WaitView = Backbone.View.extend({
                             waitAction.get("action")(event);
                         }
                         catch(ex) {
-                            console.log(ex.message);
+                            app.Flash.flashError(ex.message);
                         }
                    });
                 }

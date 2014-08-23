@@ -127,7 +127,6 @@ var DataView = Backbone.View.extend({
         // default value 4 register is true
         register = typeof register !== 'undefined' ? register : true;
         
-        console.log("ADD VIEW: " + viewId);
         for(var view in this.views) {
             if (this.views.hasOwnProperty(view) && this.views[view].name && this.views[view].ctor && view == viewId) {
                 var createdView = this.views[view].ctor(prototypeDataId, dataId, attrs);

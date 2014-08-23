@@ -54,7 +54,6 @@ var SettingView = Backbone.View.extend({
                     $('#widget-settings-input' + i).val(setting.default);
                 }
             }
-            else {console.log("no default value");}
         }
         
         // set ok action

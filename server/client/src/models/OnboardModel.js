@@ -22,7 +22,6 @@ var OnboardModel = Backbone.Model.extend({
         var model = this;
         gSocket.on('data', function(json) {
             if (json.type === "flash") {
-                console.log('>>> Setting flash data');
                 model.set('flash', json.data);
             } else if (json.type === "data") {
                 model.set('data', json.data, {silent: true});

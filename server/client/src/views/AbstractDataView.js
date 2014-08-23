@@ -136,8 +136,6 @@ var AbstractDataView = Backbone.View.extend({
     },
     
     onSettings: function(event){
-        console.log("show settings: " + this.settingsModel.get("modul"));
-        
         // actualize settings model
         this.settingsModel.set("settings", this.privateSettings);
         

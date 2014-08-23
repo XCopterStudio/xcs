@@ -583,9 +583,6 @@ var DataFlowGraphView = Backbone.View.extend({
         var prototypeName = modelPrototype.get("name");
         var prototypeId = this.trimId(prototypeName);
         
-        //DEBUG
-        console.log("onPrototypeRemove " + prototypeName);
-        
         //validation
         if(!this.dfgToolboxNodes[prototypeId]) {
             console.error("ERROR(onPrototypeRemove): " + prototypeName + " was not yet loaded!");
@@ -617,9 +614,6 @@ var DataFlowGraphView = Backbone.View.extend({
         // get prototype name
         var prototypeName = modelPrototype.get("name");
         var prototypeId = this.trimId(prototypeName);
-        
-        //DEBUG
-        //console.log("onPrototypeChange: " + prototypeName);
         
         // add 2 toolbox - show to user
         if(!this.dfgToolboxNodes[prototypeId]) {
@@ -1190,10 +1184,7 @@ var DataFlowGraphView = Backbone.View.extend({
         });
     },
     
-    dfgLoadDfg : function(event, response) {
-        //debug
-        console.log("dfgLoadDfg");
-        
+    dfgLoadDfg : function(event, response) {        
         var dfg = $(event.currentTarget);
         var dfgFilename = dfg.attr("filename");
         
@@ -1222,10 +1213,7 @@ var DataFlowGraphView = Backbone.View.extend({
         });
     },
     
-    dfgRemoveDfg: function(event, response) {
-        //debug
-        console.log("dfgRemoveDfg");
-        
+    dfgRemoveDfg: function(event, response) {        
         var dfg = $(event.currentTarget);
         var dfgFilename = dfg.attr("filename");
         

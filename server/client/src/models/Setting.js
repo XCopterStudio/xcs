@@ -39,7 +39,6 @@ var Setting = Backbone.Model.extend({
             }
         }
         
-        console.log("try load " + modul + " settings: " + JSON.stringify(loadedSettings));
         if(loadedSettings.length > 0) {
             // validate loaded settings
             var validation;
@@ -50,7 +49,6 @@ var Setting = Backbone.Model.extend({
             // set just valid settings
             if(!validation || validation.length == 0) {
                 setSettings(loadedSettings);
-                console.log("load " + modul + " settings: " + JSON.stringify(loadedSettings));
                 
                 if(resetDefaultSettings) {
                     resetDefaultSettings(loadedSettings);
@@ -60,8 +58,6 @@ var Setting = Backbone.Model.extend({
     },
     
     save: function(settings) {
-        console.log("save " + this.get("modul") + " settings: " + JSON.stringify(settings));
-        
         for(var i = 0; i < settings.length; ++i) {
             var setting = settings[i];
 
