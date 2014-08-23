@@ -1,5 +1,5 @@
 var GaugeDataView = AbstractDataView.extend({
-    template: '<li class="widget-line"><div id="gauge_<%= widgetId %>_<%= dataId %>" class="widget-gauge"></div></li>',
+    template: '<li class="widget-line"><div class="text-center"><%= name %></div><div id="gauge_<%= widgetId %>_<%= dataId %>" class="widget-gauge"></div></li>',
     
     min: 0,
     
@@ -26,7 +26,7 @@ var GaugeDataView = AbstractDataView.extend({
             value: this.lastValue, 
             min: this.min,
             max: this.max,
-            title: this.attrs.name
+            title: " ",
         });
     },
         

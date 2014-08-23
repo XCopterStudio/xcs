@@ -63,7 +63,7 @@ var AbstractDataView = Backbone.View.extend({
                 hidden = " hidden";
             }
             gridster.add_widget('\
-                <div id="widget' + this.widgetId + '">\
+                <div id="widget' + this.widgetId + '" class="widget">\
                     <button type="button" class="settings' + hidden + '">\
                         <i class="icon-cogs"></i>\
                         <span class="sr-only">Settings</span>\

@@ -1,7 +1,7 @@
 var VideoDataView = AbstractDataView.extend({
     // TODO: video element position fixed so it can overflow widget [name], rethink CSS styling
-    template: '<li class="widget-line"><div><%= name %></div><video autoplay width="640" height="480" style="margin-top: -60px;"></video></li>',
-    
+    template: '<li class="widget-line"><div class="text-center"><%= name %></div><video autoplay width="640" height="480"></video></li>',
+
     sizeX: 3,
     
     sizeY: 3,

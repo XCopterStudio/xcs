@@ -1,5 +1,12 @@
 var ProgressDataView = AbstractDataView.extend({
-    template: '<li class="widget-line"><div><%= name %></div><div class="progress"><div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%" id="progress_<%= widgetId %>_<%= dataId %>"></div></div></li>',
+    template: '\
+        <li class="widget-line">\
+            <div class="text-center"><%= name %></div>\
+            <br><br>\
+            <div class="progress widget-progress">\
+                <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%" id="progress_<%= widgetId %>_<%= dataId %>"></div>\
+            </div>\
+        </li>',
     
     min: 0,
     

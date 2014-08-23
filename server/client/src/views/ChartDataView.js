@@ -1,6 +1,7 @@
 var ChartDataView = AbstractDataView.extend({
     template: '\
-    <li class="widget-line">                                                            \
+    <li class="widget-line">\
+        <div class="text-center"><%= name %></div>\
         <div class="widget-chart-container">                                            \
 			<div id="chart_<%= widgetId %>_<%= dataId %>" class="widget-chart"></div>   \
 		</div>                                                                          \
@@ -69,7 +70,7 @@ var ChartDataView = AbstractDataView.extend({
         
         this.plot = $.plot(
             plotSelector, 
-            [{data: plotData, label: this.attrs.name, color: "blue"}], {
+            [{data: plotData, color: "blue"}], {
                 series: {
                     shadowSize: 0,	// Drawing is faster without shadows
                     lines: {
