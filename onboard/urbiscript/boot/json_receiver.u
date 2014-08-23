@@ -26,10 +26,6 @@ class JsonReceiver {
             } else {
                 messageBuffer = messageArray;
             };
-
-            if(messageBuffer != "") {
-                XCS_LOG_INFO("Save massage from server to buffer.");
-            };
         };
     };
 
