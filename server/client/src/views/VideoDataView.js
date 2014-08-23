@@ -1,6 +1,10 @@
 var VideoDataView = AbstractDataView.extend({
     // TODO: video element position fixed so it can overflow widget [name], rethink CSS styling
-    template: '<li class="widget-line"><div class="text-center"><%= name %></div><video autoplay width="640" height="480"></video></li>',
+    template: '\
+    <li class="widget-line">\
+        <div class="text-center"><%= name %></div>\
+        <video autoplay width="640" height="480" class="widget-video" id="video_<%= widgetId %>_<%= dataId %>"></video>\
+    </li>',
 
     sizeX: 3,
     
@@ -26,6 +30,9 @@ var VideoDataView = AbstractDataView.extend({
         
 //        this.ms.addEventListener('sourceended', function(e) { console.log('sourceended: ' + this.ms.readyState); });
 //        this.ms.addEventListener('error', function(e) { console.log('error: ' + this.ms.readyState); });
+
+        var videoSelector = "#video_" + this.attrs.widgetId + "_" + this.attrs.dataId;
+        $(videoSelector).bind('contextmenu',  function () { return false; });
     },
     
     setData: function(data) {
