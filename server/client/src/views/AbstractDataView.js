@@ -86,12 +86,23 @@ var AbstractDataView = Backbone.View.extend({
         // prepare for override
     },
     
+    validateSettings: function(settings) {
+        // prepare for override
+    },
+    
     setSettings: function(settings) {
         // prepare for override
     },
     
-    validateSettings: function(settings) {
-        // prepare for override
+    resetDefault: function(settings) {
+        for(var i = 0; i < settings.length; ++i) {
+            var setting = settings[i];
+        
+            var set = _.find(this.settings, function(r) { return r.name == setting.name; })
+            if(set) {
+                set.default = setting.value;
+            }
+        }
     },
     
     remove: function() {
@@ -180,6 +191,7 @@ var AbstractDataView = Backbone.View.extend({
             
             if(!validation || validation.length == 0) {
                 self.setSettings(settings);
+                self.resetDefault(settings);
                 $btnCancel.trigger('click');
             }
             else {
