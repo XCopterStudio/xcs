@@ -39,8 +39,6 @@ var GaugeDataView = AbstractDataView.extend({
     },
         
     setSettings: function(settings) {
-        console.log("set settings: " + JSON.stringify(settings));
-        
         for(var i = 0; i < settings.length; ++i) {
             var setting = settings[i];
 
@@ -58,10 +56,11 @@ var GaugeDataView = AbstractDataView.extend({
     },
     
     validateSettings: function(settings) {
-        console.log("validate settings: " + JSON.stringify(settings));
-        
         var result = [];
         var msg;
+        
+        var min;
+        var max;
         
         for(var i = 0; i < settings.length; ++i) {
             var setting = settings[i];
@@ -70,9 +69,15 @@ var GaugeDataView = AbstractDataView.extend({
             switch(setting.name) {
                 case "minimum value":
                     msg = this.validateNumber(setting.value);
+                    if(!msg) {
+                        min = Number(setting.value);
+                    }
                     break;
                 case "maximum value":
                     msg = this.validateNumber(setting.value);
+                    if(!msg) {
+                        max = Number(setting.value);
+                    }
                     break;
             }
             
@@ -82,6 +87,17 @@ var GaugeDataView = AbstractDataView.extend({
                     msg: msg,
                 });
             }
+        }
+        
+        if(min !== undefined && max !== undefined && min >= max) {
+            result.push({
+                name: "minimum value",
+                msg: "Minimum must be smaller then maximum. ",
+            });
+            result.push({
+                name: "maximum value",
+                msg: "Maximum must be bigger then minimum. ",
+            });
         }
                     
         return result;

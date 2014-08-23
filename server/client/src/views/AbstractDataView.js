@@ -162,10 +162,7 @@ var AbstractDataView = Backbone.View.extend({
         var self = this;
         
         // set ok action
-        $btnOk.on('click', function(e) { 
-            //debug
-            console.log('click ok');
-            
+        $btnOk.on('click', function(e) {
             //get settings
             var settings = [];
             for(var i = 0; i < self.settings.length; ++i) {
