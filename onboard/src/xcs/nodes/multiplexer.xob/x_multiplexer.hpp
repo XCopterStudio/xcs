@@ -42,8 +42,8 @@ namespace multiplexer{
     template<class type>
     Channel<type>::Channel(const unsigned int id, std::atomic<unsigned int> &channel,
         xcs::nodes::XVar<type>& output, std::atomic<bool>& stopped)
-        : XObject(std::string()), id_(id), input("*"), channel_(channel), stopped_(stopped),
-        output_(output){
+        : XObject(std::string()), id_(id), channel_(channel), stopped_(stopped),
+        output_(output), input("*"){
         XBindVarF(input, &Channel<type>::onChangeInput);
     }
 

@@ -105,6 +105,7 @@ bool XciParrot::setDefaultConfiguration() {
             (1 << NAVDATA_ALTITUDE_TAG) |
             (1 << NAVDATA_RAW_MEASURES_TAG) |
             (1 << NAVDATA_MAGNETO_TAG) |
+            (1 << NAVDATA_WIFI_TAG) |
             (1 << NAVDATA_TIME_TAG));
 
     stringstream ndOptionsString;

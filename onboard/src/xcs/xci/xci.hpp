@@ -1,6 +1,3 @@
-/*!
- * \todo Const methods
- */
 #ifndef XCI_H
 #define XCI_H
 
@@ -30,13 +27,17 @@ typedef std::map<std::string, std::string> InformationMap;
 class DataReceiver;
 
 //! Information about sensor
-
 struct Sensor {
-    std::string name; /*!< Unique name in Xci for sensor. */
-    std::string semanticType; /*!< Type of sensor (ACCELEROMETR, CAMERA etc.). */
-    std::string syntacticType; /*! Fully qualified name of data type (e.g. std::string) */
-    InformationMap additionalInformation; /*!< Additional information about sensor in plain text. Example: "Resolution:1280x720,FPS:20" */
+    /// Unique name in Xci for sensor. 
+    std::string name; 
+    /// Semantic type of the sensor (ACCELEROMETR, CAMERA etc.). 
+    std::string semanticType; 
+    /// Fully qualified name of data type (e.g. std::string) 
+    std::string syntacticType; 
+    /// Additional information about sensor in plain text. Example: "Resolution:1280x720,FPS:20" 
+    InformationMap additionalInformation; 
 
+    /// Fill information in variables
     Sensor(const std::string& name, const std::string& semanticType, const std::string& syntacticType, InformationMap additionalInformation = InformationMap()) :
       name(name),
       semanticType(semanticType),
@@ -54,51 +55,46 @@ typedef std::vector<std::string> SpecialCMDList;
 typedef std::string ParameterValueType;
 typedef class Xci* (XciFactoryFunction) (DataReceiver &dataReceiver);
 
-//! Virtual class for unified x-copter interface
-//! Every drone have to set XCI_PARAM_FP_PERSISTENCE configuration parameter 
+//!  Virtual class for unified x-copter interface
 
+//! Every drone have to set XCI_PARAM_FP_PERSISTENCE configuration parameter 
 class Xci {
 protected:
     DataReceiver& dataReceiver_;
 public:
-    //
-    // Bellow are methods that are subject to change based on the discussions and real-world needs.
-    //
 
+    /// Set dataReceiver reference
     Xci(DataReceiver& dataReceiver) : dataReceiver_(dataReceiver) {
     };
 
+    /// Empty virtual destructor
     virtual ~Xci(){};
 
-    //! A pure virtual member returning name of x-copter Xci
+    //! Return name of x-copter Xci
     virtual std::string name() = 0;
 
-    //! A pure virtual member returning list of available sensors on x-copter
+    //! Return list of all available sensors on x-copter with their specification
     virtual SensorList sensorList() = 0;
 
-    //! A pure virtual member returning x-copter's configuration value
+    //! Return  value from x-copter's according to the configuration key
     virtual std::string configuration(const std::string &key) = 0;
 
-    //! A pure virtual member returning x-copter's configuration values
+    //! Return full x-copter's configuration
     virtual InformationMap configuration() = 0;
 
-    //! A pure virtual member returning list of x-copter's special commands 
+    //! Return list of x-copter's special commands 
     virtual SpecialCMDList specialCMD() = 0;
 
-    //! A pure virtual member sets configuration value.
+    //! Sets on an quadricopter configuration value according to the key.
     virtual void configuration(const std::string &key, const std::string &value) = 0;
 
-    //! A pure virtual member taking new x-copter's configuration and send this configuration to the x-copter
+    //! Sets on an quadricopter configuration values according to the InformationMap.
     virtual void configuration(const InformationMap &configuration) = 0;
 
-    //! A pure virtual member taking command from list of x-copter's special commands and sending it to the x-copter
+    //! Take command from list of x-copter's special commands and send it to the x-copter
     virtual void command(const std::string &command) = 0;
 
-    //
-    // Bellow are methods important for simple manually driven skeleton.
-    //
-
-    //! A pure virtual member taking four fly controls and send it to the x-copter
+    //! Take four parameter for fly controls and send it to the quadricopter
     virtual void flyControl(float roll, float pitch, float yaw, float gaz) = 0;
 
     //! Initializing XCI for use. Function must be idempotent.

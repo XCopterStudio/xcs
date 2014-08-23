@@ -22,6 +22,7 @@ class Onboard {
         // load core deps // TODO better onboard paths
         load("boot/logging.u");
         load("boot/adapter.u");
+        load("boot/onboard_sender.u");
         load("boot/dfg_storage.u");
         load("boot/node_container.u");
         load("boot/json_receiver.u");

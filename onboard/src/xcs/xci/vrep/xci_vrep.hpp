@@ -20,6 +20,7 @@ namespace vrep{
     /*! \brief Xci implementation for quadricopter in v-rep simulator.*/
     class XciVrep : public virtual Xci {
         static const float POS_MULTI;
+        static const unsigned int ATTEMPT_COUNT;
 
         std::atomic<bool> inited_;
         int clientID_;

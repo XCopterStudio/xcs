@@ -1,0 +1,62 @@
+class OnboardSender {
+    function init(adapter, json) {
+        var this.adapter = adapter;
+        var this.json = json;
+    };
+
+    function sendMode(mode) {
+        sendData("mode", mode);
+        //var data = [ => ];
+        //data["type"] = "onboard";
+        //data["data"] = [ "mode" => mode ];
+        //this.adapter.send(this.json.encode(data) + "\n");
+    };
+
+    function sendDdfg(ddfg) {
+        sendData("ddfg", ddfg);
+    };
+
+    function sendPrototype(prototypesData) {
+        sendData("prototype", prototypesData);
+    };
+
+    function sendClone(clonesData) {
+        sendData("clone", clonesData);
+    };
+
+    function sendPrototypeClone(prototypeData, cloneData) {
+        sendData(["prototype", "clone"], [prototypeData, cloneData]);
+    };
+
+    function sendResponse(id, responseType, responseData, requestId) {
+        var response = [ => ];
+        response["id"] = id;
+        response["respondType"] = responseType;
+        response["respondData"] = responseData;
+        response["requestId"] = requestId;
+
+        sendData("response", response);
+    };
+
+    function sendData(type, typesData) {
+        //prepare data type
+        var data = [ => ];
+        data["type"] = "onboard";
+
+        // prepare data
+        if(typesData.isA(List) && type.isA(List)) {
+            var maxIndex = Math.max(typesData.size(), type.size());
+            var tData = [ => ];
+            for(var i: maxIndex) {
+                tData[type[i]] = typesData[i];
+            };
+            data["data"] = tData;
+        }
+        else {
+            data["data"] = [ type => typesData ];
+        };
+
+        //send data
+        this.adapter.send(this.json.encode(data) + "\n");
+    };
+}|;
