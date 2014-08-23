@@ -5,62 +5,60 @@ var DataView = Backbone.View.extend({
     views: {
         raw: {
             name: "raw data",
-            ctor: function(dataId) {
+            ctor: function(prototypeDataId, dataId) {
                 //var dataName = dataId.charAt(0).toUpperCase() + dataId.slice(1);
                 var words = dataId.split("__");
                 if(words.length == 2) {
                     var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
                     var portName = words[1];
                     
-                    return new RawDataView(dataId, { name: nodeName + " " + portName });
+                    return new RawDataView(prototypeDataId, dataId, { name: nodeName + " " + portName });
                  }
             }
         },
-        gauge100: {
+        gauge: {
             name: "gauge data",
-            ctor: function(dataId) {
+            ctor: function(prototypeDataId, dataId) {
                 var words = dataId.split("__");
                 if(words.length == 2) {
                     var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
                     var portName = words[1];
                     
-                    return new GaugeDataView(dataId, { 
-                        name: nodeName + " " + portName,
-                    });
+                    return new GaugeDataView(prototypeDataId, dataId, { name: nodeName + " " + portName });
                  }
             }
         },
         progress: {
             name: "progress data",
-            ctor: function(dataId) {
+            ctor: function(prototypeDataId, dataId) {
                 var words = dataId.split("__");
                 if(words.length == 2) {
                     var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
                     var portName = words[1];
                     
-                    return new ProgressDataView(dataId, { name: nodeName + " " + portName });
+                    return new ProgressDataView(prototypeDataId, dataId, { name: nodeName + " " + portName });
                  }
             }
         },
         chart: {
             name: "chart data",
-            ctor: function(dataId) {
+            ctor: function(prototypeDataId, dataId) {
                 var words = dataId.split("__");
                 if(words.length == 2) {
                     var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
                     var portName = words[1];
-                    return new ChartDataView(dataId, { name: nodeName + " " + portName });
+                    return new ChartDataView(prototypeDataId, dataId, { name: nodeName + " " + portName });
                  }
             }
         },
         video: {
             name: "video",
-            ctor: function(dataId) {
+            ctor: function(prototypeDataId, dataId) {
                 var words = dataId.split("__");
                 if(words.length == 2) {
                     var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
                     var portName = words[1];
-                    return new VideoDataView(dataId, { name: nodeName + " " + portName });
+                    return new VideoDataView(prototypeDataId, dataId, { name: nodeName + " " + portName });
                 }
             }
         },
@@ -104,13 +102,13 @@ var DataView = Backbone.View.extend({
         return view;
     },
     
-    addViewByName: function(viewName, dataId, attrs, register) {
+    addViewByName: function(viewName, prototypeDataId, dataId, attrs, register) {
         // default value 4 register is true
         register = typeof register !== 'undefined' ? register : true;
         
         for(var view in this.views) {
             if (this.views.hasOwnProperty(view) && this.views[view].name && this.views[view].ctor && this.views[view].name == viewName) {
-                var createdView = this.views[view].ctor(dataId, attrs);
+                var createdView = this.views[view].ctor(prototypeDataId, dataId, attrs);
                 if(createdView) {
                     createdView.widgetTypeId = view;
                     createdView.widgetTypeName = this.views[view].name;
@@ -125,14 +123,14 @@ var DataView = Backbone.View.extend({
         return -1;
     },
     
-    addView: function(viewId, dataId, attrs, register) {
+    addView: function(viewId, prototypeDataId, dataId, attrs, register) {
         // default value 4 register is true
         register = typeof register !== 'undefined' ? register : true;
         
         console.log("ADD VIEW: " + viewId);
         for(var view in this.views) {
             if (this.views.hasOwnProperty(view) && this.views[view].name && this.views[view].ctor && view == viewId) {
-                var createdView = this.views[view].ctor(dataId, attrs);
+                var createdView = this.views[view].ctor(prototypeDataId, dataId, attrs);
                 if(createdView) {
                     createdView.widgetTypeId = view;
                     createdView.widgetTypeName = this.views[view].name;
@@ -161,13 +159,13 @@ var DataView = Backbone.View.extend({
         for(var i = 0; i < views.length; ++i) {
             var view = views[i];
             
-            if(!view.viewName || !view.dataId) {
+            if(!view.viewName || !view.dataId || !view.prototypeDataId) {
                 throw "bad views format";
             }
             
             var createdView = this.getViewByName(view.viewName, view.dataId);
             if(!createdView) {
-                this.addViewByName(view.viewName, view.dataId);
+                this.addViewByName(view.viewName, view.prototypeDataId, view.dataId);
                 changed = true;
             }
         }

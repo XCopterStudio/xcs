@@ -926,15 +926,11 @@ var DataFlowGraphView = Backbone.View.extend({
                             continue;
                         }
                         
-                        // register xvar methods
-                        var model = modelPrototype.get("registerXVar").findWhere({"name": cell.target.port});
-                        if(model) {
-                            views.push({
-                                viewName: cell.target.port,
-                                dataId: cell.source.id + "__" + cell.source.port,
-                                model: cloneModel
-                            });
-                        }
+                        views.push({
+                            viewName: cell.target.port,
+                            dataId: cell.source.id + "__" + cell.source.port,
+                            prototypeDataId: srcCloneModel.get("origId") + "__" + cell.source.port,
+                        });
                     }
                 }
             }

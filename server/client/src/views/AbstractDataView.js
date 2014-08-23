@@ -6,7 +6,7 @@ var AbstractDataView = Backbone.View.extend({
     
     privateSettings: {},
     
-    initialize: function(dataId, attrs) {
+    initialize: function(prototypeDataId, dataId, attrs) {
         // initialize attributes, which can be overriden
         if(!this.template) {
             this.template = '';
@@ -42,10 +42,12 @@ var AbstractDataView = Backbone.View.extend({
         this.widgetId = ++abstractDataViewFreeId;
         
         // set data id
-        this.dataId = typeof dataId !== 'undefined' ? dataId : '';
+        this.dataId = typeof dataId !== undefined ? dataId : '';
+        this.prototypeDataId = typeof prototypeDataId !== undefined ? prototypeDataId : '';
         
         // set attributes
         this.attrs.dataId = this.dataId;  
+        this.attrs.prototypeDataId = this.prototypeDataId;  
         this.attrs.widgetId = this.widgetId;
         if(attrs) {
             for(var attr in attrs) {
@@ -89,7 +91,7 @@ var AbstractDataView = Backbone.View.extend({
         this.init();
         
         // load saved settings
-        var modul = this.id + (!this.dataId ? '' : "-" + this.dataId);
+        var modul = this.id + (!this.prototypeDataId ? '' : "-" + this.prototypeDataId);
         this.settingsModel = new Setting(modul, this.privateSettings, this.setSettings, this.validateSettings, this.resetDefault);
         this.settingsModel.load();
     },
