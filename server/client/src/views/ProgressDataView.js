@@ -72,7 +72,7 @@ var ProgressDataView = AbstractDataView.extend({
             
             switch(setting.name) {
                 case "maximum value":
-                    msg = this.validateNumber(setting.value);
+                    msg = app.SettingView.validateNumber(setting.value);
                     
                     if(!msg && setting.value <= 0) {
                         msg = "Value must be bigger then 0. "

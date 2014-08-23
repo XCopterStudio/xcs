@@ -68,13 +68,13 @@ var GaugeDataView = AbstractDataView.extend({
             
             switch(setting.name) {
                 case "minimum value":
-                    msg = this.validateNumber(setting.value);
+                    msg = app.SettingView.validateNumber(setting.value);
                     if(!msg) {
                         min = Number(setting.value);
                     }
                     break;
                 case "maximum value":
-                    msg = this.validateNumber(setting.value);
+                    msg = app.SettingView.validateNumber(setting.value);
                     if(!msg) {
                         max = Number(setting.value);
                     }

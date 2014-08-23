@@ -28,6 +28,7 @@ $(function () {
     app.Flash = new FlashMessagesView();
     app.StateView = new StateView();
     app.ModalView = new ModalView();
+    app.SettingView = new SettingView();
     
     app.FlyControlView = new FlyControlView();
     app.DataView = new DataView();

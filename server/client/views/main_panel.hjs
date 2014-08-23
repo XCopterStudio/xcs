@@ -35,7 +35,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modal-widget-settings">
+    <div class="modal fade" id="modal-settings">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">

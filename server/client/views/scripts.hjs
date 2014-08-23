@@ -40,6 +40,7 @@
 <script type="text/javascript" src="src/models/DataFlowGraph.js"></script>
 <script type="text/javascript" src="src/models/DataFlowGraphCloneNode.js"></script>
 <script type="text/javascript" src="src/models/WaitAction.js"></script>
+<script type="text/javascript" src="src/models/Setting.js"></script>
 <script type="text/javascript" src="src/views/KeyboardControllerView.js"></script>
 <script type="text/javascript" src="src/views/MobileControllerView.js"></script>
 <script type="text/javascript" src="src/views/FlyControlView.js"></script>
@@ -58,4 +59,5 @@
 <script type="text/javascript" src="src/views/StateView.js"></script>
 <script type="text/javascript" src="src/views/BottomToolbarView.js"></script>
 <script type="text/javascript" src="src/views/ModalView.js"></script>
+<script type="text/javascript" src="src/views/SettingView.js"></script>
 <script type="text/javascript" src="src/app.js"></script>
