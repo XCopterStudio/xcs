@@ -51,7 +51,7 @@ var ChartDataView = AbstractDataView.extend({
         var self = this;
         $(plotSelector).bind("plothover", function (event, pos, item) {
             if (item) {
-                var y = item.datapoint[1].toFixed(0);
+                var y = item.datapoint[1];
 
                 $(tooltipSelector).html(self.attrs.name + ": " + y)
                     .css({top: item.pageY+5, left: item.pageX+5})
@@ -115,9 +115,10 @@ var ChartDataView = AbstractDataView.extend({
     },
         
     setData: function(data) {
-        var intData = parseInt(data);
-        if(!isNaN(intData)) {            
-            this.addValue(intData);    
+        var number = Number(data);
+        
+        if(!isNaN(number)) {      
+            this.addValue(number);    
         }
     },
         

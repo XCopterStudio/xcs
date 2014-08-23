@@ -33,10 +33,11 @@ var GaugeDataView = AbstractDataView.extend({
     },
         
     setData: function(data) {
-        var intData = parseInt(data);
-        if(!isNaN(intData)) {     
-            this.lastValue = intData;
-            this.gauge.refresh(intData);
+        var number = Number(data);
+        
+        if(!isNaN(number)) {
+            this.lastValue = number;
+            this.gauge.refresh(number);
         }
     },
         

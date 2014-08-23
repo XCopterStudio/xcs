@@ -33,9 +33,10 @@ var ProgressDataView = AbstractDataView.extend({
     },
         
     setData : function(data) {
-        var intData = parseInt(data);
-        if(!isNaN(intData)) {
-            this.setValue(intData);
+        var number = Number(data);
+        
+        if(!isNaN(number)) {
+            this.setValue(number);
         }
     },
         
