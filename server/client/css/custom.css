@@ -1,11 +1,19 @@
 body { 
     background-image: url("../image/first_aid_kit.png"); 
-    padding-bottom: 70px;
+    padding-bottom: 50px;
 }
 
 .hero-unit {
     border: solid darkgrey 1px;
     box-shadow: 0 4px 4px -1px gray;
+}
+
+.container-bottom {
+    margin: 0px;
+}
+
+#bottom-toolbar {
+    height: 50px;
 }
 
 #top-panel {

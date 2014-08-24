@@ -114,114 +114,98 @@
 
 </div>
 
-            
-                    
-        
-            
 
-            
-<!-- Bottom navbar -->
-<nav class="navbar navbar-default navbar-fixed-bottom" role="navigation" id="bottom-toolbar">
-
-    <!--
-        DFG
-    -->
-    <div class="container-fluid" id="dfg">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-xs-3">
-                        <!-- TODO: change style -->
-                        <div class="panel panel-default DFG">
-                            <div class="panel-group panel-body" id="flow-graph-toolbox">
-                                <div class="panel panel-default" id="xnodes">
-                                    <div class="panel-heading">
-                                        <a data-toggle="collapse" href="#xnodes-list">
-                                            DFG nodes
-                                        </a>
-                                        <span id="xnodes-list-count" class="badge  pull-right" data-toggle="tooltip" title="number of DFG nodes">0</span>
-                                    </div>
-                                    <div id="xnodes-list" class="panel-collapse collapse">
-                                    </div>
-                                </div> 
-
-                                <div class="panel panel-default" id="xnodes-special">
-                                    <div class="panel-heading">
-                                        <a data-toggle="collapse" href="#xnodes-special-list">
-                                            DFG special nodes
-                                        </a>
-                                        <span id="xnodes-special-list-count" class="badge  pull-right" data-toggle="tooltip" title="number of DFG special nodes">0</span>
-                                    </div>
-                                    <div id="xnodes-special-list" class="panel-collapse collapse">
-                                    </div>
-                                </div> 
-
-                                <div class="panel panel-default hidden" id="xnodes-private">
-                                    <div class="panel-heading">
-                                        <a data-toggle="collapse" href="#xnodes-private-list">
-                                            DFG private nodes
-                                        </a>
-                                        <span id="xnodes-private-list-count" class="badge  pull-right" data-toggle="tooltip" title="number of DFG private nodes">0</span>
-                                    </div>
-                                    <div id="xnodes-private-list" class="panel-collapse collapse">
-                                    </div>
-                                </div> 
+<!-- DFG -->
+<div id="dfg" class="panel panel-default">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-xs-3">
+                <!-- TODO: change style -->
+                <div class="panel panel-default DFG">
+                    <div class="panel-group panel-body" id="flow-graph-toolbox">
+                        <div class="panel panel-default" id="xnodes">
+                            <div class="panel-heading">
+                                <a data-toggle="collapse" href="#xnodes-list">
+                                    DFG nodes
+                                </a>
+                                <span id="xnodes-list-count" class="badge  pull-right" data-toggle="tooltip" title="number of DFG nodes">0</span>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-xs-9">
-                        <div class="panel panel-default DFG" style="background-color: transparent">
-                            <div class="panel-body">
-                                <div id="flow-graph-screen"></div>
+                            <div id="xnodes-list" class="panel-collapse collapse">
                             </div>
-                        </div>
-                    </div>
+                        </div> 
 
-                    <!-- context menu -->
-                    <ul id="dfg-screen-context-menu" class="dropdown-menu" role="menu" style="display:none" >
-                        <li role="presentation"><a tabindex="-1" action="CREATE">Create node</a></li>
-                        <li role="presentation" class="divider"></li>
-                        <li role="presentation"><a tabindex="-1" action="START">Start flow</a></li>
-                        <li role="presentation"><a tabindex="-1" action="STOP">Stop flow</a></li>
-                        <li role="presentation" class="divider"></li>
-                        <li role="presentation"><a tabindex="-1" action="DESTROY">Destroy node</a></li>
-                        <li role="presentation" class="divider"></li>
-                        <li role="presentation"><a tabindex="-1" action="DELETE">Delete node</a></li>
-                    </ul>
+                        <div class="panel panel-default" id="xnodes-special">
+                            <div class="panel-heading">
+                                <a data-toggle="collapse" href="#xnodes-special-list">
+                                    DFG special nodes
+                                </a>
+                                <span id="xnodes-special-list-count" class="badge  pull-right" data-toggle="tooltip" title="number of DFG special nodes">0</span>
+                            </div>
+                            <div id="xnodes-special-list" class="panel-collapse collapse">
+                            </div>
+                        </div> 
+
+                        <div class="panel panel-default hidden" id="xnodes-private">
+                            <div class="panel-heading">
+                                <a data-toggle="collapse" href="#xnodes-private-list">
+                                    DFG private nodes
+                                </a>
+                                <span id="xnodes-private-list-count" class="badge  pull-right" data-toggle="tooltip" title="number of DFG private nodes">0</span>
+                            </div>
+                            <div id="xnodes-private-list" class="panel-collapse collapse">
+                            </div>
+                        </div> 
+                    </div>
                 </div>
             </div>
+            <div class="col-xs-9">
+                <div class="panel panel-default DFG" style="background-color: transparent">
+                    <div class="panel-body">
+                        <div id="flow-graph-screen"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- context menu -->
+            <ul id="dfg-screen-context-menu" class="dropdown-menu" role="menu" style="display:none" >
+                <li role="presentation"><a tabindex="-1" action="CREATE">Create node</a></li>
+                <li role="presentation" class="divider"></li>
+                <li role="presentation"><a tabindex="-1" action="START">Start flow</a></li>
+                <li role="presentation"><a tabindex="-1" action="STOP">Stop flow</a></li>
+                <li role="presentation" class="divider"></li>
+                <li role="presentation"><a tabindex="-1" action="DESTROY">Destroy node</a></li>
+                <li role="presentation" class="divider"></li>
+                <li role="presentation"><a tabindex="-1" action="DELETE">Delete node</a></li>
+            </ul>
         </div>
     </div>
+</div>
 
-    <!--
-        Console
-    -->
-    <div class="container-fluid" id="console">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <div class="row">
-                    <div class="panel panel-default">
-                        
-                            <textarea id="console-input" rows="8">
+<!-- Console -->
+<div id="console" class="panel panel-default">
+    <div class="panel-body">
+        <div class="row">
+            <div class="panel panel-default">
+                
+                    <textarea id="console-input" rows="8">
 var i = 1;
 while(true) {
 echo(i);
 i += 1;
 sleep(1s);
 }
-                            </textarea>
+                    </textarea>
 
-                            <textarea id="console-output" rows="5" style="width:100%" disabled="disabled"></textarea>
+                    <textarea id="console-output" rows="5" style="width:100%" disabled="disabled"></textarea>
 
-                    </div>
-                </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- 
-        Actual Bottom navbar
-    -->
+
+<!-- Bottom navbar -->
+<nav class="navbar navbar-default navbar-fixed-bottom" role="navigation" id="bottom-toolbar">
     <div class="container-fluid">
         <div class="row">
             <div class="col-xs-1">
