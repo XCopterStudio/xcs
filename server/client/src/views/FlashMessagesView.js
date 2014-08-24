@@ -23,14 +23,17 @@ var FlashMessagesView = Backbone.View.extend({
     },
     
     flashWarning : function(message) {
-        this.flashMessage(message, "warning", "Warning:");
+        this.flashMessage(message, "warning", "Warning:", 10000);
     },
     
     flashError : function(message) {
-        this.flashMessage(message, "danger", "Error:");
+        this.flashMessage(message, "danger", "Error:", 15000);
     },
     
-    flashMessage : function(message, type, head) {
+    flashMessage : function(message, type, head, timeout) {
+        // default value 4 timeout is 5
+        timeout = typeof timeout !== 'undefined' ? timeout : 5000;
+        
         // create flash div
         var flash = 
             '<div class="alert alert-' + type + ' alert-dismissible fade in flash-message" role="alert">  \                                                             \
@@ -48,6 +51,6 @@ var FlashMessagesView = Backbone.View.extend({
         // close flash after 5s
         window.setTimeout(function() {
             elem.alert('close');
-        }, 5000);
+        }, timeout);
     }
 });
