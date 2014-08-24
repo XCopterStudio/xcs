@@ -168,6 +168,8 @@ var DataFlowGraph = Backbone.Model.extend({
         // default value 4 prototypeName is "xprototype"
         prototypeName = typeof prototypeName !== 'undefined' ? prototypeName : "xprototype";
         
+        prototype = _.sortBy(prototype, function(r) { return r.name; });
+        
         for(var j = 0; j < prototype.length; ++j) {
             var p = prototype[j];
             
