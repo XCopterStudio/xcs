@@ -39,8 +39,6 @@ var WaitView = Backbone.View.extend({
                 // set respond action to click
                 if(waitAction.get("actionType") & WaitActionType.Click == WaitActionType.Click) {
                     self.click(function(event) {
-                        event.stopPropagation();
-    
                         // run action
                         try {
                             waitAction.get("action")(event);
