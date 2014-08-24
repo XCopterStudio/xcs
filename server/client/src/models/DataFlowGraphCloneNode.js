@@ -4,7 +4,7 @@ joint.shapes.dfg = {};
 
 joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.extend({}, joint.shapes.basic.PortsModelInterface, {        
     markup: '<g class="rotatable"><g class="scalable"><rect></rect></g><text class="label"></text><g class="inPorts"></g><g class="outPorts"></g></g>',
-    portMarkup: '<g class="port<%= id %> xtooltip" data-toggle="tooltip" title="<%= port.title %>"><circle class="port"></circle><text></text></g>',
+    portMarkup: '<g class="port<%= id %>"><circle class="port port-tooltip" data-toggle="tooltip" data-container="body" data-trigger="hover focus" title="<%= port.title %>"></circle><text></text></g>',
     
     defaults: joint.util.deepSupplement({
         inPortsType: {},
@@ -85,10 +85,10 @@ joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.ex
             dataType = this.get("inPortsType")[portName];
         }
         if(!dataType || !dataType.semType || !dataType.synType) {
-            title = "";
+            title = "" + portName + ": ";
         }
         else {
-            title = "" + dataType.semType + "(" + dataType.synType + ")";
+            title = "" + portName + ": " + dataType.semType + "(" + dataType.synType + ")";
             title = title.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
         }
         

@@ -123,6 +123,7 @@ var DataFlowGraphView = Backbone.View.extend({
         this.listenTo(this.dfgGraph, 'change:source', this.setLink);
 
         this.listenTo(this.dfgGraph, 'remove', this.onRemoveNode);
+        this.listenTo(this.dfgGraph, 'add', this.onAddNode);
 
         this.initializeDfgToolbox4Drop();
            
@@ -167,6 +168,20 @@ var DataFlowGraphView = Backbone.View.extend({
             if(view) {
                 view.render();
             }
+        }
+    },
+    
+    onAddNode : function(model) {
+        var modelId = model.get("id");
+        var modelOrigId = model.get("origId");
+        if(modelId && modelOrigId) {
+            var foo = setInterval(function () {
+                var cloneNode = $('.DataFlowGraphCloneNode[model-id="' + modelId +'"]');
+                if(cloneNode.length > 0) {
+                    cloneNode.find('.port-tooltip').tooltip();
+                    clearInterval(foo);
+                }
+            }, 1000)
         }
     },
     
