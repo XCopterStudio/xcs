@@ -67,8 +67,21 @@ var DataView = Backbone.View.extend({
     createdViews: {},
     
     initialize: function() {
+        this.resetGridster();
+    },
+    
+    resetGridster: function() {
+        // reset previously setted gridster
+        if(this.$gridster) {
+            this.$gridster.removeClass("ready");
+            this.$gridster.html("<ul></ul>");
+        }
+        
+        this.$gridster = $(".gridster");
+        this.$gridsterUl = $(".gridster > ul");
+        
         //set gridster param
-        $(".gridster > ul").gridster({
+        this.$gridsterUl.gridster({
             widget_margins : [ 10, 10 ],
             widget_base_dimensions : [ 270, 150 ]
         });
@@ -194,6 +207,18 @@ var DataView = Backbone.View.extend({
         for(var i = 0; i < viewToRemove.length; ++i) {
             this.removeView(viewToRemove[i]);
             changed = true;
+        }
+        
+        var noView = XMLHttpRequest;
+        for(var viewId in this.createdViews) {
+            if (this.createdViews.hasOwnProperty(viewId)) {
+                noView = false;    
+            }
+        }
+        
+        if(noView) {
+            var gridster = $(".gridster > ul").gridster().data('gridster');
+            this.resetGridster();
         }
         
         return changed;
