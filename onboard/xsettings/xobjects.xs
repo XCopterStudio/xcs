@@ -1,10 +1,11 @@
-XDatalogger { ; this is configuration name
-    ;prototype XDatalogger                  ; (default is configuration name)
+Datalogger { ; this is configuration name
+    prototype XDatalogger                  ; (default is configuration name)
     ;file xdatalogger.u                     ; (default lowecased name of the prototype)
     args "\"experiments/sample3-out.txt\""  ; these are init's arguments (default none)
 }
 
-XDataplayer {
+Dataplayer {
+    prototype XDataplayer
     args "\"experiments/sample3.txt\""   ;TODO: change file name - or file name like xinputport
 }
 
@@ -23,11 +24,13 @@ XciVrep {
     args "\"xci_vrep\""
 }
 
-XControl {
+Control {
+    prototype XControl
     args "xcsPaths.getSettings(\"xcontrol.xs\")"
 }
 
-XCheckpointMovement {
+CheckpointMovement {
+    prototype XCheckpointMovement
     file xcheckpoint_movement
 }
 
@@ -37,7 +40,8 @@ FlyControl {
     args "2"
 }
 
-XLocalization {
+Localization {
+    prototype XLocalization
     args "xcsPaths.getSettings(\"xlocalization.xs\")"
 }
 
@@ -45,6 +49,7 @@ Executor {
     file nodes/executor.u     ; TODO to what is it relative
     args "this"               ; this is the current lobby
 }
+
 Gui {
     prototype SemanticSender
     file nodes/semantic_sender.u 
