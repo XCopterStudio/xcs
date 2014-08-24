@@ -17,8 +17,8 @@
                         left: getLeft(e),
                         top: getTop(e),
                     })
-                    .off('click')
-                    .on('click', function (e) {
+                    .off("click")
+                    .on("click", function (e) {
                         // hide context menu
                         $(this).hide();
                 
@@ -28,7 +28,12 @@
                         
                         // call click action
                         options.menuSelected.call(this, target, selectedMenuItem);
-                });
+                    })
+                    .off("mouseleave")
+                    .on("mouseleave", function() {
+                        // hide context menu
+                        $(this).hide();
+                    });
                 
                 return false;
             });
