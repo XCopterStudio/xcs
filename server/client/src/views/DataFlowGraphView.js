@@ -489,6 +489,7 @@ var DataFlowGraphView = Backbone.View.extend({
             var dfgJson = JSON.parse(dfg);
             if(dfgJson.cells) {
                 var nodes = {};
+                var notValidNodes = [];
                 
                 // nodes
                 for(var i = 0; i < dfgJson.cells.length; ++i) {
@@ -500,9 +501,14 @@ var DataFlowGraphView = Backbone.View.extend({
                             nodes[cell.id] = this.addNodeToGraph(cell.origId, cell.position.x, cell.position.y);
                         }
                         else {
-                            //TODO: what to do?
+                            notValidNodes.push(cell.origId);
                         }
                     }
+                }
+                
+                // show warning
+                if(notValidNodes.length > 0) {
+                    app.Flash.flashWarning("Loaded DFG file " + filename + " is not valid. Some nodes can not be loaded: " + JSON.stringify(notValidNodes) + ".");
                 }
                 
                 // links
@@ -514,9 +520,16 @@ var DataFlowGraphView = Backbone.View.extend({
                         var vertices = ((cell.vertices) ? cell.vertices : []);
                         var sourceSelector = ((cell.source.selector) ? cell.source.selector : "");
                         var targetSelector = ((cell.target.selector) ? cell.target.selector : "");
-                        this.addLinkToGraph(nodes[cell.source.id], cell.source.port, sourceSelector, 
-                                            nodes[cell.target.id], cell.target.port, targetSelector,
-                                            vertices);
+                        
+                        if(cell.source.id && nodes[cell.source.id] && cell.source.port && 
+                           cell.target.id && nodes[cell.target.id] && cell.target.port) {
+                            this.addLinkToGraph(nodes[cell.source.id], cell.source.port, sourceSelector, 
+                                                nodes[cell.target.id], cell.target.port, targetSelector,
+                                                vertices);
+                        }
+                        else if(cell.source.id && cell.target.id && cell.source.port && cell.target.port) {
+                            console.log(cell.source.id + "." + cell.source.port + " >> " + cell.target.id + "." + cell.target.port);
+                        }
                     }
                 }
             }

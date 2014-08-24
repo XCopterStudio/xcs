@@ -31,6 +31,7 @@ var VideoDataView = AbstractDataView.extend({
 //        this.ms.addEventListener('sourceended', function(e) { console.log('sourceended: ' + this.ms.readyState); });
 //        this.ms.addEventListener('error', function(e) { console.log('error: ' + this.ms.readyState); });
 
+        // disable context menu
         var videoSelector = "#video_" + this.attrs.widgetId + "_" + this.attrs.dataId;
         $(videoSelector).bind('contextmenu',  function () { return false; });
     },
