@@ -299,6 +299,9 @@ class Onboard {
         
         dfgStorage_.save(dfg, filename, rewrite);
 
+        // reload default dfg
+        loadDdfg_();
+
         //resend info about saved dfg
         return doSavedDfg_();
     };
