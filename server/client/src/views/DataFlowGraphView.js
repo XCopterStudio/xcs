@@ -512,6 +512,7 @@ var DataFlowGraphView = Backbone.View.extend({
                 }
                 
                 // links
+                var error = false;
                 for(var i = 0; i < dfgJson.cells.length; ++i) {
                     var cell = dfgJson.cells[i];
                     
@@ -520,17 +521,34 @@ var DataFlowGraphView = Backbone.View.extend({
                         var vertices = ((cell.vertices) ? cell.vertices : []);
                         var sourceSelector = ((cell.source.selector) ? cell.source.selector : "");
                         var targetSelector = ((cell.target.selector) ? cell.target.selector : "");
+                        var setted = false;
                         
                         if(cell.source.id && nodes[cell.source.id] && cell.source.port && 
                            cell.target.id && nodes[cell.target.id] && cell.target.port) {
-                            this.addLinkToGraph(nodes[cell.source.id], cell.source.port, sourceSelector, 
-                                                nodes[cell.target.id], cell.target.port, targetSelector,
-                                                vertices);
+                            
+                            var srcModel = this.dfgModels[nodes[cell.source.id]];
+                            var tgtModel = this.dfgModels[nodes[cell.target.id]];
+                            
+                            if(srcModel && srcModel.hasOutputPort(cell.source.port) && 
+                               tgtModel && tgtModel.hasInputPort(cell.target.port)) {
+                                this.addLinkToGraph(
+                                    nodes[cell.source.id], cell.source.port, sourceSelector, 
+                                    nodes[cell.target.id], cell.target.port, targetSelector,
+                                    vertices);
+                                
+                                setted = true;
+                                error = true;
+                            }
                         }
-                        else if(cell.source.id && cell.target.id && cell.source.port && cell.target.port) {
+                        
+                        if(!setted && cell.source.id && cell.target.id && cell.source.port && cell.target.port) {
                             console.log(cell.source.id + "." + cell.source.port + " >> " + cell.target.id + "." + cell.target.port);
                         }
                     }
+                }
+                
+                if(error) {
+                    app.Flash.flashWarning("Loaded DFG file " + filename + " is not valid. Some links can not be loaded.");
                 }
             }
         }

@@ -209,6 +209,14 @@ joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.ex
         this.get("outPortsType")[portId] = {semType: semT, synType: synT};
         this.set('outPorts', outp);
     },
+    
+    hasOutputPort: function(port) {
+        return _.contains(this.get("outPorts"), port);
+    },
+    
+    hasInputPort: function(port) {
+        return _.contains(this.get("inPorts"), port);
+    },
 }));
 
 joint.shapes.dfg.DataFlowGraphCloneNodeView = joint.dia.ElementView.extend(joint.shapes.basic.PortsViewInterface);
