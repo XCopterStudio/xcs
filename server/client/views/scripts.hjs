@@ -4,7 +4,7 @@
 <script type="text/javascript" src="js/bootstrap.js"></script>
 <script type="text/javascript" src="js/underscore.js"></script>
 <script type="text/javascript" src="js/backbone.js"></script>
-<script type="text/javascript" src="js/jquery.gridster.js"></script>
+<script type="text/javascript" src="js/jquery.gridster.min.js"></script>
 <!-- 3D libraries -->
 <script type="text/javascript" src="js/libs/three.min.js"></script>
 <script type="text/javascript" src="js/libs/Detector.js"></script>
