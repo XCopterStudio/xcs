@@ -537,8 +537,11 @@ var DataFlowGraphView = Backbone.View.extend({
                                     vertices);
                                 
                                 setted = true;
-                                error = true;
                             }
+                        }
+                        
+                        if(!setted) {
+                            error = true;
                         }
                         
                         if(!setted && cell.source.id && cell.target.id && cell.source.port && cell.target.port) {
