@@ -1245,14 +1245,9 @@ var DataFlowGraphView = Backbone.View.extend({
             }
             else if(responseType == ResponseType.Done) {
                 if(responseData.DFG && responseData.filename) {
-                    var modelId;
-                    self.dfgDestroy(
-                        function() { 
-                            self.model.setDfgDef("");
-                            self.model.setDfgDef(responseData);
-                            app.Flash.flashSuccess('Saved data flow graph "' + responseData.filename + '" loaded.');
-                        }, 
-                        modelId, false, false);
+                    self.model.setDfgDef("");
+                    self.model.setDfgDef(responseData);
+                    app.Flash.flashSuccess('Saved data flow graph "' + responseData.filename + '" loaded.');
                 }
             }
             
