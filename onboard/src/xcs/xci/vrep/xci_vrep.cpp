@@ -11,8 +11,8 @@ using namespace xcs;
 using namespace xcs::xci;
 using namespace xcs::xci::vrep;
 
-const float XciVrep::POS_MULTI = 10;
-const unsigned int XciVrep::ATTEMPT_COUNT = 20;
+const float XciVrep::POS_MULTI = 1;
+const unsigned int XciVrep::ATTEMPT_COUNT = 100;
 
 void XciVrep::updateSensors() {
     while (!endAll_) {
@@ -33,10 +33,11 @@ void XciVrep::updateSensors() {
             }
 
             if (simxGetObjectOrientation(clientID_, droneHandler_, -1, angle, simx_opmode_buffer) == simx_return_ok) {
-                dataReceiver_.notify("rotation", EulerianVector(angle[0], angle[1], angle[2]));
-                droneRotation_.phi = normAngle(degreesToRadians(angle[0]));
-                droneRotation_.theta = normAngle(degreesToRadians(angle[1]));
-                droneRotation_.psi = normAngle(degreesToRadians(angle[2]));
+                droneRotation_.phi = normAngle(angle[0]);
+                droneRotation_.theta = normAngle(angle[1]);
+                droneRotation_.psi = normAngle(angle[2]);
+                dataReceiver_.notify("rotation", droneRotation_);
+
                 //printf("XciVrep: drone rotation[%f,%f,%f] \n", droneRotation_.phi, droneRotation_.theta, droneRotation_.psi);
             }
         }
@@ -154,8 +155,8 @@ void XciVrep::command(const std::string &command) {
 void XciVrep::flyControl(float roll, float pitch, float yaw, float gaz) {
     if (roll != 0 || pitch != 0){ // set new fly point
         holdPosition_ = false;
-        targetPosition_.x = dronePosition_.x + cos(droneRotation_.psi) * roll * POS_MULTI - sin(droneRotation_.psi) * pitch*POS_MULTI;
-        targetPosition_.y = dronePosition_.y - sin(droneRotation_.psi) * roll * POS_MULTI - cos(droneRotation_.psi) * pitch*POS_MULTI;
+        targetPosition_.x = dronePosition_.x + sin(droneRotation_.psi) * roll * POS_MULTI - cos(droneRotation_.psi) * pitch*POS_MULTI;
+        targetPosition_.y = dronePosition_.y - cos(droneRotation_.psi) * roll * POS_MULTI - sin(droneRotation_.psi) * pitch*POS_MULTI;
     }
     else if (!holdPosition_){
         holdPosition_ = true;
@@ -174,11 +175,11 @@ void XciVrep::flyControl(float roll, float pitch, float yaw, float gaz) {
 
     if (yaw != 0){
         holdYaw_ = false;
-        targetYaw_ = radiansToDegrees(normAngle(droneRotation_.psi + yaw));
+        targetYaw_ = normAngle(droneRotation_.psi - yaw);
     }
     else if (!holdYaw_){
         holdYaw_ = true;
-        targetYaw_ = radiansToDegrees(droneRotation_.psi);
+        targetYaw_ = droneRotation_.psi;
     }
 
     if (simxGetConnectionId(clientID_) != -1) { // we have connection with simulation server 
