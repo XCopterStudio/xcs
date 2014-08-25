@@ -6,11 +6,12 @@ var DataView = Backbone.View.extend({
         raw: {
             name: "raw data",
             ctor: function(prototypeDataId, dataId) {
-                //var dataName = dataId.charAt(0).toUpperCase() + dataId.slice(1);
-                var words = dataId.split("__");
-                if(words.length == 2) {
-                    var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
-                    var portName = words[1];
+                var index = dataId.indexOf("__");
+                if(index > 0) {
+                    var nodeName = dataId.substring(0, dataId.indexOf("__"))
+                    var portName = dataId.substring(dataId.indexOf("__") + 2)
+                
+                    nodeName = nodeName.charAt(0).toUpperCase() + nodeName.slice(1);
                     
                     return new RawDataView(prototypeDataId, dataId, { name: nodeName + " " + portName });
                  }
@@ -19,10 +20,12 @@ var DataView = Backbone.View.extend({
         gauge: {
             name: "gauge data",
             ctor: function(prototypeDataId, dataId) {
-                var words = dataId.split("__");
-                if(words.length == 2) {
-                    var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
-                    var portName = words[1];
+                var index = dataId.indexOf("__");
+                if(index > 0) {
+                    var nodeName = dataId.substring(0, dataId.indexOf("__"))
+                    var portName = dataId.substring(dataId.indexOf("__") + 2)
+                
+                    nodeName = nodeName.charAt(0).toUpperCase() + nodeName.slice(1);
                     
                     return new GaugeDataView(prototypeDataId, dataId, { name: nodeName + " " + portName });
                  }
@@ -31,10 +34,12 @@ var DataView = Backbone.View.extend({
         progress: {
             name: "progress data",
             ctor: function(prototypeDataId, dataId) {
-                var words = dataId.split("__");
-                if(words.length == 2) {
-                    var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
-                    var portName = words[1];
+                var index = dataId.indexOf("__");
+                if(index > 0) {
+                    var nodeName = dataId.substring(0, dataId.indexOf("__"))
+                    var portName = dataId.substring(dataId.indexOf("__") + 2)
+                
+                    nodeName = nodeName.charAt(0).toUpperCase() + nodeName.slice(1);
                     
                     return new ProgressDataView(prototypeDataId, dataId, { name: nodeName + " " + portName });
                  }
@@ -43,10 +48,13 @@ var DataView = Backbone.View.extend({
         chart: {
             name: "chart data",
             ctor: function(prototypeDataId, dataId) {
-                var words = dataId.split("__");
-                if(words.length == 2) {
-                    var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
-                    var portName = words[1];
+                var index = dataId.indexOf("__");
+                if(index > 0) {
+                    var nodeName = dataId.substring(0, dataId.indexOf("__"))
+                    var portName = dataId.substring(dataId.indexOf("__") + 2)
+                
+                    nodeName = nodeName.charAt(0).toUpperCase() + nodeName.slice(1);
+                    
                     return new ChartDataView(prototypeDataId, dataId, { name: nodeName + " " + portName });
                  }
             }
@@ -54,10 +62,13 @@ var DataView = Backbone.View.extend({
         video: {
             name: "video",
             ctor: function(prototypeDataId, dataId) {
-                var words = dataId.split("__");
-                if(words.length == 2) {
-                    var nodeName = words[0].charAt(0).toUpperCase() + words[0].slice(1);;
-                    var portName = words[1];
+                var index = dataId.indexOf("__");
+                if(index > 0) {
+                    var nodeName = dataId.substring(0, dataId.indexOf("__"))
+                    var portName = dataId.substring(dataId.indexOf("__") + 2)
+                
+                    nodeName = nodeName.charAt(0).toUpperCase() + nodeName.slice(1);
+                    
                     return new VideoDataView(prototypeDataId, dataId, { name: nodeName + " " + portName });
                 }
             }
