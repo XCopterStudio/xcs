@@ -1,5 +1,4 @@
 <div id="modals">
-
     <div class="modal fade" id="modal-msg">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -97,14 +96,14 @@
 <div class="container-fluid" id="fc-panel">
     <div class="col-xs-12 panel panel-default">
         <div class="row">
-            <div class="btn-toolbar">
+            <div class="btn-toolbar" xtitle-group="Remote x-copter control">
                 <div class="btn-group">
-                    <button type="button" class="btn btn-large btn-primary" id="fc-panel-take-off">Take off</button>
-                    <button type="button" class="btn btn-large btn-success" id="fc-panel-land">Land</button>
+                    <button type="button" class="btn btn-large btn-primary" id="fc-panel-take-off" xtitle="send Take off command">Take off</button>
+                    <button type="button" class="btn btn-large btn-success" id="fc-panel-land" xtitle="send Land command">Land</button>
                 </div>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-large btn-default" data-fc-controller="off">Off</button>
-                    <button type="button" class="btn btn-large btn-default" data-fc-controller="keyboard">Keyboard</button>
+                    <button type="button" class="btn btn-large btn-default" data-fc-controller="off" xtitle="disable remote control">Off</button>
+                    <button type="button" class="btn btn-large btn-default" data-fc-controller="keyboard" xtitle="enable keyboard remote control">Keyboard</button>
                 </div>
             </div>    
         </div>
@@ -126,7 +125,23 @@
     <div class="panel-body">
         <div class="row">
             <div class="col-xs-3">
-                <!-- TODO: change style -->
+                <h3 class="heading">
+                    <small xtitle-group="Toolbox" xtitle="contains nodes, which can you drag & drop to DFG">
+                        Toolbox
+                    </small>
+                </h3>
+            </div>
+            <div class="col-xs-9">
+                <h3 class="heading">
+                    <small xtitle-group="Data Flow Graph" xtitle="contains graph, which can be executed on x-copter">
+                        Data Flow Graph
+                    </small>
+                </h3>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-xs-3">
                 <div class="panel panel-default DFG">
                     <div class="panel-group panel-body" id="flow-graph-toolbox">
                         <div class="panel panel-default" id="xnodes">
@@ -191,20 +206,36 @@
 <div id="console" class="panel panel-default">
     <div class="panel-body">
         <div class="row">
+            <h3 class="heading">
+                <small xtitle-group="Input Console" xtitle="you can write script there, which can be executed on x-copter">
+                    Input Console
+                </small>
+            </h3>
+        </div>
+        <div class="row">
             <div class="panel panel-default">
-                
-                    <textarea id="console-input" rows="8">
+                <textarea id="console-input" rows="8">
 var i = 1;
 while(true) {
 echo(i);
 i += 1;
 sleep(1s);
 }
-                    </textarea>
-
-                    <textarea id="console-output" rows="5" style="width:100%" disabled="disabled"></textarea>
-
+                </textarea>
             </div>
+        </div>
+        <div class="row">
+            <h3 class="heading">
+                <small xtitle-group="Output Console" xtitle="contains output of executed script">
+                    Output Console
+                </small>
+            </h3>
+        </div>
+        <div class="row">
+            <div class="panel panel-default">
+                <textarea id="console-output" rows="5" style="width:100%" disabled="disabled"></textarea>
+            </div>
+        </div>
         </div>
     </div>
 </div>
@@ -227,16 +258,16 @@ sleep(1s);
             <div class="col-xs-11">
                 <div class="collapse navbar-collapse" id="nb-bottom-toolbar">
                     <!-- DFG navbar -->
-                    <ul class="nav navbar-nav">
+                    <ul class="nav navbar-nav" xtitle="show/hide Data Flow Graph panel">
                         <li><a href="#" id="dfg-trigger"><i class="icon-double-angle-up"></i> DFG</a></li>
                     </ul>
-                    <div class="nav navbar-nav">
-                        <button id="dfgLoad" type="button" class="btn btn-info navbar-btn">Load nodes</button>
+                    <div class="nav navbar-nav" xtitle-group="Data Flow Graph">
+                        <button id="dfgLoad" type="button" class="btn btn-info navbar-btn" xtitle="load information about nodes and fill the Toolbox">Load nodes</button>
                         <div class="btn-group">
-                            <button id="dfgCreate" type="button" class="btn btn-primary navbar-btn">Create DFG</button>
-                            <button id="dfgStart" type="button" class="btn btn-success navbar-btn">Start Flow</button>
-                            <button id="dfgStop" type="button" class="btn btn-warning navbar-btn">Stop Flow</button>
-                            <button id="dfgDestroy" type="button" class="btn btn-danger navbar-btn">Destroy DFG</button>
+                            <button id="dfgCreate" type="button" class="btn btn-primary navbar-btn" xtitle="send DFG to x-copter and create it">Create DFG</button>
+                            <button id="dfgStart" type="button" class="btn btn-success navbar-btn" xtitle="start data flow for created nodes">Start Flow</button>
+                            <button id="dfgStop" type="button" class="btn btn-warning navbar-btn" xtitle="stop data flow for created nodes">Stop Flow</button>
+                            <button id="dfgDestroy" type="button" class="btn btn-danger navbar-btn" xtitle="destroy created DFG on x-copter">Destroy DFG</button>
                         </div>
                         <div class="btn-group dropup">
                             <button id="dfgOtherAction" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
@@ -244,13 +275,13 @@ sleep(1s);
                             </button>
                             <ul class="dropdown-menu" role="menu">
                                 <!--li role="presentation" class="dropdown-header">Actions</li-->
-                                <li role="presentation">
+                                <li role="presentation" xtitle="destroy created DFG on x-copter and load default DFG">
                                     <a id="dfgReset" role="menuitem" tabindex="-1" href="#">
                                         Reset DFG
                                     </a>
                                 </li>
                                 <li role="presentation" class="divider"></li>
-                                <li role="presentation" id="dfgSaveDfgPresentation" class="disabled">
+                                <li role="presentation" id="dfgSaveDfgPresentation" class="disabled" xtitle="save current DFG">
                                     <a id="dfgSaveDfg" role="menuitem" tabindex="-1" href="#">
                                         Save DFG 
                                         <div class="filename small" style="display:inline;"></div>
@@ -258,7 +289,7 @@ sleep(1s);
                                 </li>
                                 <li role="presentation">
                                     <div class="input-group navbar-form">
-                                        <span class="input-group-btn">
+                                        <span class="input-group-btn" xtitle="save current DFG with custom name">
                                             <button id="dfgSaveAsDfg" class="btn btn-default" type="button">Save as</button>
                                         </span>
                                         <input id="dfgSaveAsDfg-filename" type="text" class="form-control" placeholder="filename">
@@ -267,8 +298,8 @@ sleep(1s);
                                 <li role="presentation" class="divider"></li>
                                 <!--li role="presentation" class="dropdown-header">Files</li-->
                                 <li role="presentation" class="sub-menu">
-                                    <a id="dfgLoadDfg" data-toggle="dropdown" href="#">
-                                        Load DFG
+                                    <a id="dfgLoadDfg" data-toggle="dropdown" href="#" xtitle="show list of saved DFG (provide actions like Load, Remove)">
+                                        Manage DFG
                                     </a>
                                 </li>
                                 <li role="presentation" class="divider"></li>
@@ -285,19 +316,19 @@ sleep(1s);
                         &nbsp;&nbsp;&nbsp;&nbsp;
                     </span>
                     <!-- Console navbar -->
-                    <ul class="nav navbar-nav">
+                    <ul class="nav navbar-nav" xtitle="show/hide Consol panel">
                         <li><a href="#" id="console-trigger"><i class="icon-double-angle-up"></i> Console</a></li>
                     </ul>
-                    <div class="nav navbar-nav">
+                    <div class="nav navbar-nav" xtitle-group="Console">
                         <div class="btn-group">
-                            <button type="button" class="btn btn-default navbar-btn" id="console-start">Start</button>
-                            <button type="button" class="btn btn-default navbar-btn" id="console-stop">Stop</button>
+                            <button type="button" class="btn btn-default navbar-btn" id="console-start" xtitle="start script written in Input Console">Start</button>
+                            <button type="button" class="btn btn-default navbar-btn" id="console-stop" xtitle="stop started script">Stop</button>
                         </div>
                         <div class="btn-group">
-                            <span class="label label-default" id="console-state"></span>
+                            <span class="label label-default" id="console-state" xtitle="console state"></span>
                         </div>
                         <div class="btn-group">
-                            <button type="button" class="btn btn-default navbar-btn" id="console-clear">Clear</button>
+                            <button type="button" class="btn btn-default navbar-btn" id="console-clear" xtitle="clear Output Console">Clear</button>
                         </div>
                     </div>
                 </div><!-- /.navbar-collapse -->
