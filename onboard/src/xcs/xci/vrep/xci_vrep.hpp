@@ -38,6 +38,13 @@ namespace vrep{
 
         InformationMap configuration_;
 
+        bool holdPosition_;
+        bool holdAltitude_; 
+        bool holdYaw_;
+
+        xcs::CartesianVector targetPosition_;
+        float targetYaw_;
+
         xcs::CartesianVector dronePosition_;
         xcs::EulerianVector droneRotation_;
 

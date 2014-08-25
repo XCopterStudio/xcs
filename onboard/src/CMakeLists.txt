@@ -48,6 +48,7 @@ add_subdirectory(xcs/nodes/localization.xob)
 add_subdirectory(xcs/nodes/xci.xob)
 add_subdirectory(xcs/nodes/xobject)
 add_subdirectory(xcs/nodes/settings.xob)
+add_subdirectory(xcs/nodes/red_dot.xob)
 add_subdirectory(xcs/nodes/json.xob)
 
 
