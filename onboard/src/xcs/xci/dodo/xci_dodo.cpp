@@ -51,6 +51,7 @@ const SpecialCMDList XciDodo::specialCommands_({
 XciDodo::XciDodo(DataReceiver& dataReceiver) :
   Xci(dataReceiver),
   inited_(false),
+  runAll_(true),
   videoFps_(0),
   videoStatus_(VIDEO_UNLOADED) {
 
@@ -58,6 +59,16 @@ XciDodo::XciDodo(DataReceiver& dataReceiver) :
 }
 
 XciDodo::~XciDodo() {
+    runAll_ = false;
+
+    // wait for all thread ends and then clear memory
+    if (sensorThread_.joinable()) {
+        sensorThread_.join();
+    }
+
+    if (videoThread_.joinable()) {
+        videoThread_.join();
+    }
 }
 
 void XciDodo::init() {
@@ -152,7 +163,7 @@ void XciDodo::flyControl(float roll, float pitch, float yaw, float gaz) {
 
 void XciDodo::sensorGenerator() {
     size_t clock = 0;
-    while (1) {
+    while (runAll_) {
         if (clock % (1000 / ALIVE_FREQ_) == 0) {
             dataReceiver_.notify("alive", true);
         }
@@ -168,7 +179,7 @@ void XciDodo::sensorGenerator() {
 }
 
 void XciDodo::videoPlayer() {
-    while (1) {
+    while (runAll_) {
         if (videoStatus_ == VIDEO_PLAYING) {
             renderFrame();
             auto fps = stoi(configuration(CONFIG_VIDEO_FPS));
