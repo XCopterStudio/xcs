@@ -34,14 +34,26 @@ XDatalogger::XDatalogger(const std::string& name) :
 }
 
 XDatalogger::~XDatalogger() {
+    context_.file.flush();
     context_.file.close();
 }
 
 void XDatalogger::stateChanged(XObject::State state) {
     switch (state) {
         case XObject::STATE_STARTED:
-            closeHeader();
+            if (!inited_) {
+                context_.file.open(filename_.c_str());
+
+                if (!context_.file.is_open()) {
+                    send("throw \"Datalogger cannot open file: " + filename_ + "\";");
+                    return;
+                }
+                inited_ = true;
+                headerClosed_ = false;
+            }
+
             context_.enabled = true;
+            closeHeader();
             break;
         case XObject::STATE_STOPPED:
             context_.file.flush();
@@ -51,15 +63,7 @@ void XDatalogger::stateChanged(XObject::State state) {
 }
 
 void XDatalogger::init(const std::string &file) {
-    context_.file.open(file.c_str());
-
-    if (!context_.file.is_open()) {
-        send("throw \"Datalogger cannot open file: " + file + "\";");
-        return;
-    }
     filename_ = file;
-    inited_ = true;
-    headerClosed_ = false;
 }
 
 void XDatalogger::registerXVar(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar) {
@@ -92,10 +96,6 @@ void XDatalogger::unregisterXVar(const std::string& name) {
 }
 
 void XDatalogger::registerData(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar) {
-    if (!inited_ || !validRegister()) {
-        return;
-    }
-
     if (!XDataplayer::isChannelNameValid(name)) {
         XCS_LOG_WARN("Invalid channel name '" << name << "'.");
         return;
@@ -129,15 +129,11 @@ void XDatalogger::registerData(const std::string &name, const std::string &seman
             break;
     }
 
-    xVarToWriterMap_.emplace(uvar.get_name(), writer);
+    xVarToWriterMap_.emplace(name, writer);
     xVarToNameMap_.emplace(uvar.get_name(), name);
 }
 
 void XDatalogger::registerVideo(int width, int height, const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar) {
-    if (!inited_ || !validRegister()) {
-        return;
-    }
-
     if (!XDataplayer::isChannelNameValid(name)) {
         XCS_LOG_WARN("Invalid channel name '" << name << "'.");
         return;
@@ -159,7 +155,7 @@ void XDatalogger::registerVideo(int width, int height, const std::string &name, 
     writer->init(videoFile.string(), width, height, name, context_, uvar);
     videoWriterList_.push_back(std::unique_ptr<VideoWriter>(writer));
 
-    xVarToWriterMap_.emplace(uvar.get_name(), writer);
+    xVarToWriterMap_.emplace(name, writer);
     xVarToNameMap_.emplace(uvar.get_name(), name);
 }
 

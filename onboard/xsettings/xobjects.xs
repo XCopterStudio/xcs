@@ -1,12 +1,12 @@
 Datalogger { ; this is configuration name
     prototype XDatalogger                  ; (default is configuration name)
     ;file xdatalogger.u                     ; (default lowecased name of the prototype)
-    args "\"experiments/sample3-out.txt\""  ; these are init's arguments (default none)
+    args "\"logs/defaulLog.txt\""  ; these are init's arguments (default none)
 }
 
 Dataplayer {
     prototype XDataplayer
-    args "\"experiments/sample3.txt\""   ;TODO: change file name - or file name like xinputport
+    args "\"logs/defaulLog.txt\""
 }
 
 XciDodo {
