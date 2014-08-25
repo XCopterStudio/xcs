@@ -12,7 +12,7 @@ using namespace xcs::xci;
 using namespace xcs::xci::vrep;
 
 const float XciVrep::POS_MULTI = 10;
-const unsigned int XciVrep::ATTEMPT_COUNT = 5;
+const unsigned int XciVrep::ATTEMPT_COUNT = 20;
 
 void XciVrep::updateSensors() {
     while (!endAll_) {
@@ -152,17 +152,46 @@ void XciVrep::command(const std::string &command) {
 }
 
 void XciVrep::flyControl(float roll, float pitch, float yaw, float gaz) {
+    if (roll != 0 || pitch != 0){ // set new fly point
+        holdPosition_ = false;
+        targetPosition_.x = dronePosition_.x + cos(droneRotation_.psi) * roll * POS_MULTI - sin(droneRotation_.psi) * pitch*POS_MULTI;
+        targetPosition_.y = dronePosition_.y - sin(droneRotation_.psi) * roll * POS_MULTI - cos(droneRotation_.psi) * pitch*POS_MULTI;
+    }
+    else if (!holdPosition_){
+        holdPosition_ = true;
+        targetPosition_.x = dronePosition_.x;
+        targetPosition_.y = dronePosition_.y;
+    }
+
+    if (gaz != 0){
+        holdAltitude_ = false;
+        targetPosition_.z = dronePosition_.z + gaz*POS_MULTI;
+    }
+    else if (!holdAltitude_){
+        holdAltitude_ = true;
+        targetPosition_.z = dronePosition_.z;
+    }
+
+    if (yaw != 0){
+        holdYaw_ = false;
+        targetYaw_ = radiansToDegrees(normAngle(droneRotation_.psi + yaw));
+    }
+    else if (!holdYaw_){
+        holdYaw_ = true;
+        targetYaw_ = radiansToDegrees(droneRotation_.psi);
+    }
+
     if (simxGetConnectionId(clientID_) != -1) { // we have connection with simulation server 
         float position[3];
-        position[0] = dronePosition_.x + cos(droneRotation_.psi) * roll * POS_MULTI - sin(droneRotation_.psi) * pitch*POS_MULTI;
-        position[1] = dronePosition_.y - sin(droneRotation_.psi) * roll * POS_MULTI - cos(droneRotation_.psi) * pitch*POS_MULTI;
-        position[2] = dronePosition_.z + gaz*POS_MULTI;
+        position[0] = targetPosition_.x;
+        position[1] = targetPosition_.y;
+        position[2] = targetPosition_.z;
         simxSetObjectPosition(clientID_, targetHandler_, -1, position, simx_opmode_oneshot);
 
         float angle[3];
         angle[0] = 0;
         angle[1] = 0;
-        angle[2] = radiansToDegrees(normAngle(droneRotation_.psi + yaw));
+        angle[2] = targetYaw_;
         simxSetObjectOrientation(clientID_, targetHandler_, -1, angle, simx_opmode_oneshot);
     }
     else{
@@ -190,7 +219,7 @@ void XciVrep::init() {
         int counter = 0;
         do{
             error = simxGetObjectHandle(clientID_, droneName_.c_str(), &droneHandler_, simx_opmode_oneshot_wait);
-        } while (error != 0 && counter < ATTEMPT_COUNT);
+        } while (error != 0 && counter++ < ATTEMPT_COUNT);
 
         if (error == 0){
             simxGetObjectPosition(clientID_, droneHandler_, -1, NULL, simx_opmode_streaming);
@@ -205,7 +234,7 @@ void XciVrep::init() {
         counter = 0;
         do{
             error = simxGetObjectHandle(clientID_, targetName_.c_str(), &targetHandler_, simx_opmode_oneshot_wait);
-        } while (error != 0 && counter < ATTEMPT_COUNT);
+        } while (error != 0 && counter++ < ATTEMPT_COUNT);
         if (error == 0){
             
         }
@@ -217,7 +246,7 @@ void XciVrep::init() {
         counter = 0;
         do{
             error = simxGetObjectHandle(clientID_, frontCameraName_.c_str(), &frontCameraHandler_, simx_opmode_oneshot_wait);
-        } while (error != 0 && counter < ATTEMPT_COUNT);
+        } while (error != 0 && counter++ < ATTEMPT_COUNT);
         if (error == 0){
             simxGetVisionSensorImage(clientID_, frontCameraHandler_, NULL, NULL, 0, simx_opmode_streaming_split + 4000);
             camera = true;
@@ -229,7 +258,7 @@ void XciVrep::init() {
         counter = 0;
         do{
             error = simxGetObjectHandle(clientID_, bottomCameraName_.c_str(), &bottomCameraHandler_, simx_opmode_oneshot_wait);
-        } while (error != 0 && counter < ATTEMPT_COUNT);
+        } while (error != 0 && counter++ < ATTEMPT_COUNT);
         if (error == 0){
             simxGetVisionSensorImage(clientID_, bottomCameraHandler_, NULL, NULL, 0, simx_opmode_streaming_split + 4000);
             camera = true;
