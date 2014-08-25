@@ -8,6 +8,9 @@ var ConsoleModel = Backbone.Model.extend({
         timeoutRef: null,
         error: null,
         output: null,
+        scriptModified: false,
+        scriptName: null,
+        allScripts: null
     },
     initialize: function() {
         this.set('state', ConsoleModel.State.IDLE); // cannot be in default because of ConsoleModel.State "visibility"
@@ -33,10 +36,10 @@ var ConsoleModel = Backbone.Model.extend({
         // trigger on update, not only change (output may stay same)
         this.set('output', value, {silent: true});
         this.trigger('change:output', this);
-    },    
+    },
     onNodeStop: function(model) {
         var prototypeName = model.get('origId');
-        if(prototypeName === 'Executor') {
+        if (prototypeName === 'Executor') {
             this.set('state', ConsoleModel.State.IDLE);
         }
     },
@@ -69,6 +72,26 @@ var ConsoleModel = Backbone.Model.extend({
         controlData[this.get('channelControl')] = 'unfreeze';
         app.Onboard.sendData(controlData);
         this.wait_();
+    },
+    saveScript: function(script, name) {
+        this.set('scriptName', name);
+        this.set('scriptChanged', false);
+    },
+    loadScript: function(name) {
+        return '+++';
+    },
+    deleteScript: function(name) {
+
+    },
+    loadScripts: function(onFinished) {
+        if (this.get('allScripts') !== null) {
+            return;
+        }
+        console.log('Loading scripts');
+        this.set('allScripts', [
+            {name: 'foo', code: 'echo("A");'},
+            {name: 'bar', code: 'echo("A");'}
+        ]);
     },
     wait_: function() {
         this.set('state', ConsoleModel.State.WAITING);

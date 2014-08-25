@@ -9,7 +9,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-yes" data-dismiss="modal">Yes</button>
                     <button type="button" class="btn btn-default btn-no" data-dismiss="modal">No</button>
-                    <button type="button" class="btn btn-default btn-ok" data-dismiss="modal">Ok</button>
+                    <button type="button" class="btn btn-default btn-ok" data-dismiss="modal">OK</button>
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
@@ -47,6 +47,24 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default btn-ok">Ok</button>
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-console-scripts">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Saved scripts</h4>
+                </div>
+            <div class="modal-body">
+                <table class="table table-hover">
+                    <thead><tr><th>Unloaded</th></tr></thead>
+                </table>
+            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -290,7 +308,7 @@ sleep(1s);
                                 <li role="presentation">
                                     <div class="input-group navbar-form">
                                         <span class="input-group-btn" xtitle="save current DFG with custom name">
-                                            <button id="dfgSaveAsDfg" class="btn btn-default" type="button">Save as</button>
+                                            <button id="dfgSaveAsDfg" class="btn btn-default" disabled="disabled" type="button">Save as</button>
                                         </span>
                                         <input id="dfgSaveAsDfg-filename" type="text" class="form-control" placeholder="filename">
                                     </div>
@@ -320,6 +338,42 @@ sleep(1s);
                         <li><a href="#" id="console-trigger"><i class="icon-double-angle-up"></i> Console</a></li>
                     </ul>
                     <div class="nav navbar-nav" xtitle-group="Console">
+                        <div class="btn-group dropup">
+                            <button id="console-script-menu" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <i class="icon-reorder"></i>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <!--li role="presentation" class="dropdown-header">Actions</li-->
+                                <li role="presentation" xtitle="delete the script from editor">
+                                    <a id="console-script-delete" role="menuitem" tabindex="-1" href="#">
+                                        Delete
+                                    </a>
+                                </li>
+                                <li role="presentation" class="divider"></li>
+                                <li role="presentation" id="console-script-save-presentation" class="disabled" xtitle="save current script">
+                                    <a id="console-script-save" role="menuitem" tabindex="-1" href="#">
+                                        Save script
+                                        <div class="filename small" style="display:inline;"></div>
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <div class="input-group navbar-form">
+                                        <span class="input-group-btn" xtitle="save current script with custom name">
+                                            <button id="console-script-save-as" class="btn btn-default" disabled="disabled" type="button">Save as</button>
+                                        </span>
+                                        <input id="console-script-save-as-name" type="text" class="form-control" placeholder="name">
+                                    </div>
+                                </li>
+                                <li role="presentation" class="divider"></li>
+                                <li role="presentation" class="sub-menu">
+                                    <a id="console-script-manage" data-toggle="dropdown" href="#" xtitle="show list of saved scripts and actions (Load, Remove)">
+                                        Manage scripts
+                                    </a>
+                                </li>
+                                <li role="presentation" class="divider"></li>
+                            </ul>
+                        </div>
+                        
                         <div class="btn-group">
                             <button type="button" class="btn btn-default navbar-btn" id="console-start" xtitle="start script written in Input Console">Start</button>
                             <button type="button" class="btn btn-default navbar-btn" id="console-stop" xtitle="stop started script">Stop</button>
