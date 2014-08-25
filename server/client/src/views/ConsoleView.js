@@ -1,9 +1,9 @@
 var ConsoleView = Backbone.View.extend({
     el: 'body',
     events: {
-        "click #console-start": "onClickStart",
-        "click #console-stop": "onClickStop",
-        "click #console-clear": "onClickClear"
+        "click #consoleStart": "onClickStart",
+        "click #consoleStop": "onClickStop",
+        "click #consoleClear": "onClickClear"
     },
     initialize: function() {
         this.model = new ConsoleModel();
@@ -13,11 +13,11 @@ var ConsoleView = Backbone.View.extend({
         this.listenTo(this.model, 'change:output', this.onChangeOutput);
         
 
-        this.$buttonStart = this.$('#console-start');
-        this.$buttonStop = this.$('#console-stop');
-        this.$state = this.$('#console-state');
-        this.$codeElement = this.$('#console-input');
-        this.$outputElement = this.$('#console-output');
+        this.$buttonStart = this.$('#consoleStart');
+        this.$buttonStop = this.$('#consoleStop');
+        this.$state = this.$('#consoleState');
+        this.$codeElement = this.$('#consoleInput');
+        this.$outputElement = this.$('#consoleOutput');
 
         this.editor = CodeMirror.fromTextArea(this.$codeElement.get(0), {
             //theme: "night",
