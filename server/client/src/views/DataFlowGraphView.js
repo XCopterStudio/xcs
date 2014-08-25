@@ -10,7 +10,8 @@ var DataFlowGraphView = Backbone.View.extend({
     el : 'body',
     
     events : {
-        "click #dfgLoadDfg": "dfgShowFiles"
+        "click #dfgLoadDfg": "dfgShowFiles",
+        "keyup #dfgSaveAsDfg-filename": "onChangeDfgSaveAsDfgFilename"
     },
         
     dfgGraph : {},
@@ -57,6 +58,10 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgCounter : [],
         
     initialize : function() {
+        /* GUI elements */
+        this.$dfgSaveAs = this.$('#dfgSaveAsDfg');
+        this.$dfgSaveAsFilename = this.$('#dfgSaveAsDfg-filename');
+        
         this.model = new DataFlowGraph();
         
         this.onInputChange(app.Onboard);      
@@ -1159,10 +1164,7 @@ var DataFlowGraphView = Backbone.View.extend({
     
             // validate filename
             var errorMsg = '';
-            if(filename == '') {
-                errorMsg += 'You must set the filename first! ';    
-            }
-            else if(this.model.dfgExist(filename)) {
+            if(this.model.dfgExist(filename)) {
                 var self = this;
                 
                 // show question: rewrite
@@ -1285,4 +1287,9 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgShowFiles: function() {
         app.ModalView.showModal("#modal-dfg-files");
     },
+    
+    onChangeDfgSaveAsDfgFilename: function() {
+        var filename = this.$dfgSaveAsFilename.val();
+        this.$dfgSaveAs.prop('disabled', !filename);
+    }
 });
