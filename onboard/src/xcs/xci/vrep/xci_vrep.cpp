@@ -73,9 +73,9 @@ void XciVrep::updateImages() {
 
 XciVrep::XciVrep(DataReceiver& dataReceiver,
         std::string droneName,
-        std::string targetName,
         std::string frontCameraName,
         std::string bottomCameraName,
+        std::string targetName,
         std::string address,
         int portNumber) :
   Xci(dataReceiver),
