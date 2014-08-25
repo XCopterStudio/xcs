@@ -11,6 +11,7 @@ var ConsoleView = Backbone.View.extend({
         this.listenTo(this.model, 'change:state', this.onChangeState);
         this.listenTo(this.model, 'change:error', this.onChangeError);
         this.listenTo(this.model, 'change:output', this.onChangeOutput);
+        
 
         this.$buttonStart = this.$('#console-start');
         this.$buttonStop = this.$('#console-stop');
@@ -107,7 +108,7 @@ var ConsoleView = Backbone.View.extend({
     onChangeOutput: function(model) {
         var output = model.get('output');
         this.printOutput_(output);
-    },
+    },    
     printOutput_: function(string) {
         this.$outputElement.append(document.createTextNode(string));
         this.$outputElement.get(0).scrollTop = this.$outputElement.get(0).scrollHeight;

@@ -14,6 +14,7 @@ var ConsoleModel = Backbone.Model.extend({
         this.listenTo(app.Onboard, "sem_update:EXECUTION_STATE", this.onStateChange);
         this.listenTo(app.Onboard, "sem_update:EXECUTION_ERROR", this.onErrorChange);
         this.listenTo(app.Onboard, "sem_update:EXECUTION_OUTPUT", this.onOutputChange);
+        this.listenTo(app.DataFlowGraph.model, 'nodeStop', this.onNodeStop);
     },
     onStateChange: function(value) {
         if (this.get('timeoutRef')) {
@@ -32,6 +33,12 @@ var ConsoleModel = Backbone.Model.extend({
         // trigger on update, not only change (output may stay same)
         this.set('output', value, {silent: true});
         this.trigger('change:output', this);
+    },    
+    onNodeStop: function(model) {
+        var prototypeName = model.get('origId');
+        if(prototypeName === 'Executor') {
+            this.set('state', ConsoleModel.State.IDLE);
+        }
     },
     /* Executive functions */
     start: function() {

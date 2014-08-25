@@ -1003,6 +1003,7 @@ var DataFlowGraphView = Backbone.View.extend({
                     var model = self.dfgModels[responseData[i]];
                     if(model) {
                         model.setState(NodeState.STARTED);
+                        self.model.trigger('nodeStart', model);
                         ++successCount;
                     }
                 }
@@ -1034,6 +1035,7 @@ var DataFlowGraphView = Backbone.View.extend({
                     var model = self.dfgModels[responseData[i]];
                     if(model) {
                         model.setState(NodeState.STOPPED);
+                        self.model.trigger('nodeStop', model);
                         ++successCount;
                     }
                 }
