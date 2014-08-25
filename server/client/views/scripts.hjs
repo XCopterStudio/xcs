@@ -13,7 +13,6 @@
 <script type="text/javascript" src="js/codemirror/codemirror.js"></script>
 <script type="text/javascript" src="js/codemirror/xcsMode.js"></script>
 <!-- jointJS -->
-<!-- TODO: this version should contain own version of backbone and underscore - change version -->
 <script type="text/javascript" src="js/jointjs/joint.nojquery.js"></script>
 <!-- gauge library -->
 <script src="js/justgage/raphael.2.1.0.min.js"></script>
