@@ -103,7 +103,32 @@
                 </div>
                 <div class="btn-group">
                     <button type="button" class="btn btn-large btn-default" data-fc-controller="off" xtitle="disable remote control">Off</button>
-                    <button type="button" class="btn btn-large btn-default" data-fc-controller="keyboard" xtitle="enable keyboard remote control">Keyboard</button>
+                    <button type="button" class="btn btn-large btn-default" data-fc-controller="keyboard" 
+                        xtitle='
+                            enable keyboard remote control
+                            <div panel panel-default">
+                                <span class="light-keys">
+                                    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+                                </span> 
+                                move fortward, left, backward, right
+                            </div>
+                            <div panel panel-default">
+                                <span class="light-keys">
+                                    <kbd><i class="icon-arrow-up"></i></kbd>
+                                    <kbd><i class="icon-arrow-down"></i></kbd>
+                                </span> 
+                                move up, down
+                            </div>
+                            <div panel panel-default">
+                                <span class="light-keys">
+                                    <kbd><i class="icon-arrow-left"></i></kbd>
+                                    <kbd><i class="icon-arrow-right"></i></kbd>
+                                </span> 
+                                turn left, right
+                            </div>
+                        '>
+                        Keyboard
+                    </button>
                 </div>
             </div>    
         </div>
