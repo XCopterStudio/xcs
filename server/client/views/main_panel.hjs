@@ -45,7 +45,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default btn-ok">OK</button>
+                    <button type="button" class="btn btn-default btn-ok">Ok</button>
                     <button type="button" class="btn btn-default btn-cancel" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
@@ -214,7 +214,7 @@
         </div>
         <div class="row">
             <div class="panel panel-default">
-                <textarea id="consoleInput" rows="8">
+                <textarea id="console-input" rows="8">
 var i = 1;
 while(true) {
 echo(i);
@@ -233,7 +233,7 @@ sleep(1s);
         </div>
         <div class="row">
             <div class="panel panel-default">
-                <textarea id="consoleOutput" rows="5" style="width:100%" disabled="disabled"></textarea>
+                <textarea id="console-output" rows="5" style="width:100%" disabled="disabled"></textarea>
             </div>
         </div>
         </div>
@@ -317,21 +317,19 @@ sleep(1s);
                     </span>
                     <!-- Console navbar -->
                     <ul class="nav navbar-nav" xtitle="show/hide Consol panel">
-                        <li><a href="#" id="consoleTrigger"><i class="icon-double-angle-up"></i> Console</a></li>
+                        <li><a href="#" id="console-trigger"><i class="icon-double-angle-up"></i> Console</a></li>
                     </ul>
                     <div class="nav navbar-nav" xtitle-group="Console">
                         <div class="btn-group">
-                            <button type="button" class="btn btn-default navbar-btn" id="consoleStart" xtitle="start script written in Input Console">Start</button>
-                            <button type="button" class="btn btn-default navbar-btn" id="consoleStop" xtitle="stop started script">Stop</button>
+                            <button type="button" class="btn btn-default navbar-btn" id="console-start" xtitle="start script written in Input Console">Start</button>
+                            <button type="button" class="btn btn-default navbar-btn" id="console-stop" xtitle="stop started script">Stop</button>
                         </div>
                         <div class="btn-group">
-                            <span class="label label-default" id="consoleState" xtitle="console state"></span>
+                            <span class="label label-default" id="console-state" xtitle="console state"></span>
                         </div>
                         <div class="btn-group">
-                            <button type="button" class="btn btn-default navbar-btn" id="consoleClear" xtitle="clear Output Console">Clear</button>
+                            <button type="button" class="btn btn-default navbar-btn" id="console-clear" xtitle="clear Output Console">Clear</button>
                         </div>
-                        
-                        
                     </div>
                 </div><!-- /.navbar-collapse -->
             </div>
