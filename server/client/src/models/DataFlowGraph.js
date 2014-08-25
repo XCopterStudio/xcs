@@ -55,7 +55,7 @@ var DataFlowGraph = Backbone.Model.extend({
     },
 
     setData: function(data) {
-        if(data.response) {
+        if(data.response) {       
             if(data.response.id && data.response.respondType && (data.response.respondData || data.response.respondData == "") && data.response.requestId) {
                 var id = data.response.id 
                 var responseTypeText = data.response.respondType;

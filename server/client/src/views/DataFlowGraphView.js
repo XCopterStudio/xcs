@@ -172,6 +172,10 @@ var DataFlowGraphView = Backbone.View.extend({
     },
     
     onAddNode : function(model) {
+        this.refreshTooltips(model);
+    },
+    
+    refreshTooltips : function(model) {
         var modelId = model.get("id");
         var modelOrigId = model.get("origId");
         if(modelId && modelOrigId) {
@@ -339,6 +343,8 @@ var DataFlowGraphView = Backbone.View.extend({
         
         this.dfgGraph.addCell(m);
         this.dfgModels.addModel(modelId, m);
+        var self = this;
+        m.on('change:nodeState', function(){ self.refreshTooltips(m); });
         
         //set context menu
         var self = this;
