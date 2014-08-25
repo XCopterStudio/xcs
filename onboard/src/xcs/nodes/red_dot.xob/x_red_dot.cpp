@@ -7,26 +7,44 @@ using namespace xcs;
 using namespace xcs::nodes::reddot;
 
 void XRedDot::onChangeVideo(::urbi::UImage image){
-    cv::Mat imageCV(image.height, image.width, CV_8UC3, image.data);
-    ImagePosition position = redDot_.findRedDot(imageCV);
+    if (image.height != lastImage.rows || image.width != lastImage.cols){
+        lastImage.create(image.height, image.width, CV_8UC3);
+    }
+    //cv::Mat imageCV(image.height, image.width, CV_8UC3, image.data);
+    memcpy(lastImage.data, image.data, image.height*image.width * 3);
 
-    if (position.x >= 0 && position.y >= 0){
-        errorX = position.x;
-        errorY = position.y;
+    Mat out;
+    ImagePosition circle = redDot_.findRedDot(lastImage, out);
+
+    urbi::UImage bin;
+    bin.width = image.width;
+    bin.height = image.height;
+    bin.size = image.width * image.height * 3;
+    bin.imageFormat = urbi::IMAGE_RGB;
+    bin.data = out.data;
+    enhancedVideo = bin;
+
+    if (circle.x >= 0 && circle.y >= 0){
         found = true;
     }
     else{
         found = false;
     }
+
+    errorX = image.width - circle.x;
+    errorY = image.height - circle.y;
 }
 
 //=============== public functions ===============
 
 XRedDot::XRedDot(const std::string &name) : XObject(name),
-    video("CAMERA"), found("DECISION"), errorX("PID_ERROR"),
+    video("CAMERA"), enhancedVideo("CAMERA"), found("DECISION"), errorX("PID_ERROR"),
     errorY("PID_ERROR"){
-    XBindVarF(video, &XRedDot::onChangeVideo);
 
+    XBindVar(video);
+    UNotifyThreadedChange(video.data(), &XRedDot::onChangeVideo, urbi::LOCK_FUNCTION_DROP);
+
+    XBindVar(enhancedVideo);
     XBindVar(found);
     XBindVar(errorX);
     XBindVar(errorY);

@@ -18,8 +18,7 @@ namespace reddot{
     class RedDot{
         void getRedMask(const cv::Mat &image, cv::Mat &redMask);
     public:
-        RedDot(){};
-        ImagePosition findRedDot(const cv::Mat image);
+        ImagePosition findRedDot(const cv::Mat &image, cv::Mat &out);
     };
 
 }}}

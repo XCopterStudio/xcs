@@ -57,6 +57,10 @@ Gui {
     special true
 }
 
+RedDot {
+    prototype XRedDot
+}
+
 SemanticReceiver {
     file nodes/semantic_receiver.u
     args "["\
