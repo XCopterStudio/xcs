@@ -38,6 +38,10 @@ body {
 
 .inline-middle { display: inline-block; vertical-align: middle; }
 
+.heading {
+    margin-top: 0px;
+}
+
 /*** GRIDSTER AND WIDGETS ***/
 .widget { 
     border-radius: 3px;
