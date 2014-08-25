@@ -476,8 +476,7 @@ var DataFlowGraphView = Backbone.View.extend({
         }
     },
     
-    onDfgDefChange : function(model) {
-        // TODO: show some question?        
+    onDfgDefChange : function(model) {    
         var graph = model.get("dfgDef");
         if(graph && graph.DFG && graph.filename) {
             this.loadGraph(graph.filename, graph.DFG);
@@ -485,7 +484,6 @@ var DataFlowGraphView = Backbone.View.extend({
     },
      
     onDdfgChange : function(model) {
-        // TODO: show some question? 
         var graph = model.get("ddfg");       
         this.loadGraph("default", graph);
     },
@@ -822,7 +820,6 @@ var DataFlowGraphView = Backbone.View.extend({
                             return;
                         }
                         
-                        //TODO: rename port to xvar/xinputPort/registerXVar
                         var model = modelPrototype.get("registerXVar").findWhere({"name": cell.target.port});
                         if(model) {
                             var targetPort = cell.target.port;
