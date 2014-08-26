@@ -17,7 +17,6 @@ var OnboardModel = Backbone.Model.extend({
         },
     },
     defaults: {
-        "connection": "Disconnected",
         "flash": "",
         "data": "",
         "onboard": ""
@@ -33,6 +32,7 @@ var OnboardModel = Backbone.Model.extend({
     },
     initialize: function() {
         var that = this;
+
         gSocket.on('data', function(json) {
             if (json.type === "flash") {
                 that.set('flash', json.data);

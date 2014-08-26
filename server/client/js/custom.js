@@ -99,11 +99,6 @@ $.fn.toggleClick = function () {
 
 
 $(function() {
-    // status led
-    var ledSize = 32;
-    $('#status-led').height(ledSize).width(ledSize)
-            .css({borderRadius: ledSize / 2, backgroundColor: "#5bb75b"});
-
     /***
     
     // sidepanels init

@@ -95,14 +95,7 @@
                     </div>
                 </li>
             </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li>
-                    <p class="navbar-text">
-                    <span>Disconnected<span>
-                    <span>&nbsp&nbsp&nbsp</span>
-                    <i class="icon-circle"></i>
-                </li>
-            </ul>
+            <div class="container-fluid" id="connection"></div>
         </div>
     </div> <!-- /.container-fluid -->
 </nav>

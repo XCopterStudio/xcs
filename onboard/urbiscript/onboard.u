@@ -14,6 +14,7 @@ class Onboard {
     var onboardSettings_;
     var dfgStorage_;
     var scriptStorage_;
+    var pingReflector_;
     
     var sender_;
     var receiver_;
@@ -29,6 +30,7 @@ class Onboard {
         load("boot/script_storage.u");
         load("boot/node_container.u");
         load("boot/json_receiver.u");
+        load("boot/ping_reflector.u");
         load("settings_collection.u");
         
         System.loadModule("xsettings");
@@ -62,10 +64,12 @@ class Onboard {
         // start communication
         context.adapter.start(onboardSettings_.get("serverHost"), onboardSettings_.get("serverPort"));
         
+        pingReflector_ = PingReflector.new(context.adapter, json);
         sender_ = OnboardSender.new(context.adapter, json);
         
         // initialize onboard receiver 4 communication with server
         context.jsonReceiver.addReceiver("onboard", this);
+        context.jsonReceiver.addReceiver("ping", pingReflector_);
         
     };
       

@@ -1,9 +1,11 @@
-function OnboardConnection(application) {
+function OnboardConnection(application, pingInterval) {
     
     var app = application,
         net = require('net'),
         onboard = null,
-        com = net.createServer(handleNewConnection);
+        com = net.createServer(handleNewConnection),
+        ping_ = require('./ping_monitor.js'),
+        connected_ = false;
     
     /*
      * Methods
@@ -28,7 +30,7 @@ function OnboardConnection(application) {
         });
 
         server.bind(port, host);
-    }
+    };
 
     function send(data) {
         if (onboard) {
@@ -36,6 +38,13 @@ function OnboardConnection(application) {
         }
     };
     
+    function isConnected() {
+        return connected_;
+    };
+    
+    /*
+     * Handlers
+     */
     function handleNewConnection(socket) {
         if (onboard) {
             console.log('Attempting onboard connect. There\'s one connection already!');
@@ -44,11 +53,18 @@ function OnboardConnection(application) {
         onboard = socket;
         socket.on('end', handleEnd);
         socket.on('data', handleData);
+        // set ping monitor
+        ping_.startHeartbeat(function (payload) {
+            var chunk = { type: 'ping', data: payload };
+            send(JSON.stringify(chunk));
+        });
+        connected_ = true;
+        notifyClient(connected_);
         console.log('Onboard connected.');
     };
     
     var bufferData = '';
-    function handleData(data) {    
+    function handleData(data) {
         try {
             var parsed = JSON.parse(data);
             bufferData = '';
@@ -65,22 +81,35 @@ function OnboardConnection(application) {
         }
 
         if (parsed) {
+            if (parsed['type'] == 'pong') {
+                ping_.setEcho(parsed['data']);
+                return;
+            }
             console.log('<<<<<<<<<<<<<<<< JSON from onboard parsed and relaying:');
-            app.Client.send(parsed);
+            app.Client.send(parsed, 'data');
             console.log(parsed);
         }
     };
 
     function handleEnd() {
         onboard = null;
+        ping_.stopHeartbeat();
+        connected_ = false
+        notifyClient(connected_);
         console.log('Onboard disconnected.');
+    };
+    
+    function notifyClient(connected) {
+        app.Client.send({ connected: connected }, 'onboard');   
     };
     
     return {
         start: start,
         startVideo: startVideo,
         send: send,
-    }
+        ping: ping_,
+        isConnected: isConnected,
+    };
 }
 
 module.exports = OnboardConnection;
