@@ -5,7 +5,7 @@
 #include <xcs/types/cartesian_vector.hpp>
 #include <xcs/types/eulerian_vector.hpp>
 #include <xcs/types/velocity_control.hpp>
-#include "pid.hpp"
+#include <xcs/pid.hpp>
 
 namespace xcs{
 namespace nodes{
