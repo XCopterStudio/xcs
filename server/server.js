@@ -30,7 +30,7 @@ app.Client = require('./client_connection.js')(app);
 
 app.Client.start(app.Config.clientPort);
 app.Onboard.start(app.Config.onboardPort);
-app.Onboard.startVideo(app.Config.onboardVideoHost, app.Config.onboardVideoPort);
+app.Onboard.startVideo(app.Config.onboardVideoPort);
 
 
 
