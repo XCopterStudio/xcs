@@ -1,6 +1,6 @@
-body { 
-    background-image: url("../image/first_aid_kit.png"); 
-    padding-bottom: 50px;
+body {
+    background-image: url("../image/first_aid_kit.png");
+    padding-bottom: 100px;
 }
 
 .hero-unit {
@@ -10,10 +10,6 @@ body {
 
 .container-bottom {
     margin: 0px;
-}
-
-#bottom-toolbar {
-    height: 50px;
 }
 
 #top-panel {
@@ -43,7 +39,7 @@ body {
 }
 
 /*** GRIDSTER AND WIDGETS ***/
-.widget { 
+.widget {
     border-radius: 3px;
     padding: 0px 10px 0px 10px;
     overflow: auto;
@@ -57,12 +53,12 @@ body {
     text-align: center;
 }
 
-.widget-line { 
-    font-size: 120%; 
-    line-height: 1.5em; 
-    height:100%; 
-    width:100%; 
-    text-align: center; 
+.widget-line {
+    font-size: 120%;
+    line-height: 1.5em;
+    height:100%;
+    width:100%;
+    text-align: center;
 }
 
 .widget-gauge {
@@ -106,7 +102,7 @@ body {
     opacity: .5;
 }
 
-.gridster { 
+.gridster {
     margin: auto 50px;;
     height: 100%;
 }
@@ -234,11 +230,11 @@ body {
 
 /*** FLASH ***/
 #flash-messages {
-    float: right; 
-    position: fixed; 
-    top: 5px; 
-    right: 5px; 
-    z-index: 999; 
+    float: right;
+    position: fixed;
+    top: 5px;
+    right: 5px;
+    z-index: 999;
     opacity: 0.75;
 }
 
