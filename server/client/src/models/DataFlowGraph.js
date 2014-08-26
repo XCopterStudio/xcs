@@ -126,8 +126,7 @@ var DataFlowGraph = Backbone.Model.extend({
                 var oldProt = this.get(prototypeName).findWhere({"name": p.name});
                 if (oldProt) {
                     prot = oldProt;
-                }
-                else {
+                } else {
                     //create new prototype node
                     prot = new DataFlowGraphPrototypeNode();
                     prot.set("name", p.name);
@@ -202,8 +201,7 @@ var DataFlowGraph = Backbone.Model.extend({
                                     semType: "",
                                     realName: p.registerXVar[i].realName,
                                 }));
-                            }
-                            else {
+                            } else {
                                 prot.get("registerXVar").add(new DataFlowGraphPrototypeNodeIO({
                                     name: p.registerXVar[i],
                                     synType: "",

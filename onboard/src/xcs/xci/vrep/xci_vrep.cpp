@@ -40,8 +40,7 @@ void XciVrep::updateSensors() {
 
                 //printf("XciVrep: drone rotation[%f,%f,%f] \n", droneRotation_.phi, droneRotation_.theta, droneRotation_.psi);
             }
-        }
-        else{
+        } else {
             XCS_LOG_WARN("Lost connection with v-rep simulator.");
         }
 
@@ -157,8 +156,7 @@ void XciVrep::flyControl(float roll, float pitch, float yaw, float gaz) {
         holdPosition_ = false;
         targetPosition_.x = dronePosition_.x + sin(droneRotation_.psi) * roll * POS_MULTI - cos(droneRotation_.psi) * pitch*POS_MULTI;
         targetPosition_.y = dronePosition_.y - cos(droneRotation_.psi) * roll * POS_MULTI - sin(droneRotation_.psi) * pitch*POS_MULTI;
-    }
-    else if (!holdPosition_){
+    } else if (!holdPosition_){
         holdPosition_ = true;
         targetPosition_.x = dronePosition_.x;
         targetPosition_.y = dronePosition_.y;
@@ -167,8 +165,7 @@ void XciVrep::flyControl(float roll, float pitch, float yaw, float gaz) {
     if (gaz != 0){
         holdAltitude_ = false;
         targetPosition_.z = dronePosition_.z + gaz*POS_MULTI;
-    }
-    else if (!holdAltitude_){
+    } else if (!holdAltitude_){
         holdAltitude_ = true;
         targetPosition_.z = dronePosition_.z;
     }
@@ -176,8 +173,7 @@ void XciVrep::flyControl(float roll, float pitch, float yaw, float gaz) {
     if (yaw != 0){
         holdYaw_ = false;
         targetYaw_ = normAngle(droneRotation_.psi - yaw);
-    }
-    else if (!holdYaw_){
+    } else if (!holdYaw_){
         holdYaw_ = true;
         targetYaw_ = droneRotation_.psi;
     }
@@ -194,8 +190,7 @@ void XciVrep::flyControl(float roll, float pitch, float yaw, float gaz) {
         angle[1] = 0;
         angle[2] = targetYaw_;
         simxSetObjectOrientation(clientID_, targetHandler_, -1, angle, simx_opmode_oneshot);
-    }
-    else{
+    } else {
         XCS_LOG_WARN("New fly control without connected client.");
     }
 }
@@ -227,8 +222,7 @@ void XciVrep::init() {
             simxGetObjectVelocity(clientID_, droneHandler_, NULL, NULL, simx_opmode_streaming);
             simxGetObjectOrientation(clientID_, droneHandler_, -1, NULL, simx_opmode_streaming);
             updateThread_ = std::thread(&XciVrep::updateSensors, this);
-        }
-        else{
+        } else {
             XCS_LOG_ERROR("Cannot get handle on drone. With error: " << error);
         }
 
@@ -238,8 +232,7 @@ void XciVrep::init() {
         } while (error != 0 && counter++ < ATTEMPT_COUNT);
         if (error == 0){
             
-        }
-        else{
+        } else {
             XCS_LOG_ERROR("Cannot get handle on target. With error: " << error);
         }
 
@@ -252,7 +245,7 @@ void XciVrep::init() {
             simxGetVisionSensorImage(clientID_, frontCameraHandler_, NULL, NULL, 0, simx_opmode_streaming_split + 4000);
             camera = true;
         }
-        else{
+        else {
             XCS_LOG_WARN("Cannot get handle on front Camera. With error: " << error);
         }
 
@@ -263,7 +256,7 @@ void XciVrep::init() {
         if (error == 0){
             simxGetVisionSensorImage(clientID_, bottomCameraHandler_, NULL, NULL, 0, simx_opmode_streaming_split + 4000);
             camera = true;
-        }else{
+        }else {
             XCS_LOG_WARN("Cannot get handle on bottom Camera. With error: " << error);
         }
         

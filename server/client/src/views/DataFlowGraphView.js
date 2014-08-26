@@ -300,8 +300,7 @@ var DataFlowGraphView = Backbone.View.extend({
         if(this.dfgCounter[nodeId] == 1) {
             cloneName = modelPrototype.get("name");
             modelId = nodeId;   
-        }
-        else {
+        } else {
             cloneName = modelPrototype.get("name") + " " + this.dfgCounter[nodeId];
             modelId = nodeId + this.dfgCounter[nodeId];
         }
@@ -406,8 +405,7 @@ var DataFlowGraphView = Backbone.View.extend({
         //determine if link is pin to some port on both sides
         if(link.attributes.target.x || link.attributes.source.x){
             this.setBadLink(link);
-        }
-        else {
+        } else {
             this.setWellLink(link);
         }
     },
@@ -436,8 +434,7 @@ var DataFlowGraphView = Backbone.View.extend({
             //NOTE: there should be no need to unregister old click events - jquery should handle it yourself
             modalDfgItems.html('<thead><tr><th>#</th><th>File Name</th><th>Actions</th></tr></thead><tbody></tbody>');
             modalDfgItems = modalDfgItems.find("tbody");
-        }
-        else {
+        } else {
             modalDfgItems.html('<thead><tr><th>No DFG for load...</th></tr></thead>');
         }
         
@@ -524,8 +521,7 @@ var DataFlowGraphView = Backbone.View.extend({
                     if(cell.origId) {
                         if(this.dfgToolboxNodes[cell.origId]) {
                             nodes[cell.id] = this.addNodeToGraph(cell.origId, cell.position.x, cell.position.y);
-                        }
-                        else {
+                        } else {
                             notValidNodes.push(cell.origId);
                         }
                     }
@@ -926,8 +922,7 @@ var DataFlowGraphView = Backbone.View.extend({
                     }
                 });
             }
-        }
-        catch(ex) {
+        } catch(ex) {
             // show error
             app.Flash.flashError("Error when try to create nodes: " + ex + "!");
             
@@ -1118,8 +1113,7 @@ var DataFlowGraphView = Backbone.View.extend({
                         // show result
                         if(successCount > 0) {
                             app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " destroyed.");
-                        }
-                        else if(checkDestroyed) {
+                        } else if(checkDestroyed) {
                             app.Flash.flashError("Error when try to destroy nodes: nothing to destroy.");
                         }
                     }
@@ -1129,8 +1123,7 @@ var DataFlowGraphView = Backbone.View.extend({
                     response();
                 }
             });
-        }
-        catch(ex) {
+        } catch(ex) {
             //response action
             if(response) {
                 response();
@@ -1152,8 +1145,7 @@ var DataFlowGraphView = Backbone.View.extend({
             var modelId;
             this.dfgDestroy(response, modelId, true, false);
             app.Flash.flashSuccess("Data flow graph is resetted.");
-        }
-        else if(response) {
+        } else if(response) {
             app.Flash.flashSuccess("Data flow graph is resetted.");
             response();
         }
@@ -1250,8 +1242,7 @@ var DataFlowGraphView = Backbone.View.extend({
             //show error
             if(responseType == ResponseType.Error) {
                 app.Flash.flashError("Error when try to load saved data flow graph: " + responseData + ".");
-            }
-            else if(responseType == ResponseType.Done) {
+            } else if(responseType == ResponseType.Done) {
                 if(responseData.DFG && responseData.filename) {
                     self.model.setDfgDef("");
                     self.model.setDfgDef(responseData);
@@ -1274,8 +1265,7 @@ var DataFlowGraphView = Backbone.View.extend({
             //show error
             if(responseType == ResponseType.Error) {
                 app.Flash.flashError("Error when try to remove saved data flow graph: " + responseData + ".");
-            }
-            else if(responseType == ResponseType.Done) {
+            } else if(responseType == ResponseType.Done) {
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
                 }

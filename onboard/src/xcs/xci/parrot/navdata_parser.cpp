@@ -169,7 +169,7 @@ std::vector<OptionAcceptor*> NavdataProcess::parse(xcs::xci::parrot::Navdata* na
                     delete option;
 
                 options.clear();
-            }else{
+            }else {
                 options.push_back(cks);
             }}break;
         default:

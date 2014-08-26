@@ -24,13 +24,11 @@ void VideoReceiver::handleConnectedVideo(const boost::system::error_code& ec){
     if (!socketVideo_.is_open()){
         XCS_LOG_WARN("Connect video socket timed out.");
         connect();
-    }
-    else if (ec){
+    } else if (ec){
         XCS_LOG_WARN("Receive video error: " + ec.message());
         socketVideo_.close();
         connect();
-    }
-    else{
+    } else {
         XCS_LOG_INFO("Video receive connected");
         receiveVideo();
     }
@@ -47,8 +45,7 @@ void VideoReceiver::receiveVideo(){
     if (!receivedHeader_){
         int index = sizeof(parrot_t)-receiveSize_;
         socketVideo_.async_receive(boost::asio::buffer(&((uint8_t *)&parrotPave_)[index], receiveSize_), boost::bind(&VideoReceiver::handleReceivedVideo, this, _1, _2));
-    }
-    else{
+    } else {
         int index = lastFrame_->payload_size - receiveSize_;
         socketVideo_.async_receive(boost::asio::buffer(&lastFrame_->data[index], receiveSize_), boost::bind(&VideoReceiver::handleReceivedVideo, this, _1, _2));
     }
@@ -67,8 +64,7 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
         XCS_LOG_WARN("Receive video data error: " + ec.message());
         socketVideo_.close();
         connect();
-    }
-    else{
+    } else {
         deadlineVideo_.expires_at(boost::posix_time::pos_infin);
 
         receiveSize_ -= bytes_transferred;
@@ -92,8 +88,7 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
                 //lastFrame_->data = new uint8_t[lastFrame_->payload_size];
 
                 receiveSize_ = lastFrame_->payload_size;
-            }
-            else{ // received videoFrame
+            } else { // received videoFrame
                 receivedHeader_ = false;
                 receiveSize_ = sizeof(parrot_t);
 
@@ -112,7 +107,7 @@ void VideoReceiver::handleReceivedVideo(const boost::system::error_code& ec, std
                         //cerr << "Push video frame" << endl;
                         videoFrames_.push(lastFrame_);
                     }
-                    else{
+                    else {
                         //delete lastFrame_;
                     }
                     lastFrame_ = nullptr;

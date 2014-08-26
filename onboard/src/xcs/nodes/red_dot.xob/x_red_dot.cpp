@@ -26,8 +26,7 @@ void XRedDot::onChangeVideo(::urbi::UImage image){
 
     if (circle.x >= 0 && circle.y >= 0){
         found = true;
-    }
-    else{
+    } else {
         found = false;
     }
 

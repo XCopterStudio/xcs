@@ -68,8 +68,7 @@ bool Settings::contains(const string& key) const {
     try  {
         settings_.get_child(key);
         return true;
-    }
-    catch (boost::property_tree::ptree_bad_path ex) {
+    } catch (boost::property_tree::ptree_bad_path ex) {
         return false;
     }
 }

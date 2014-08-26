@@ -8,24 +8,21 @@ var DataFlowGraphPrototypeNode = Backbone.Model.extend({
         // init property xvar
         if(this.has("xvar")) {
             this.set("xvar", this.get("xvar").clone());
-        }
-        else {
+        } else {
             this.set("xvar", new Backbone.Collection([], { model : DataFlowGraphPrototypeNodeIO }));
         }
         
         // init property xinputPort
         if(this.has("xinputPort")) {
             this.set("xinputPort", this.get("xinputPort").clone());
-        }
-        else {
+        } else {
             this.set("xinputPort", new Backbone.Collection([], { model : DataFlowGraphPrototypeNodeIO }));
         }
         
         // init property xinputPort
         if(this.has("registerXVar")) {
             this.set("registerXVar", this.get("registerXVar").clone());
-        }
-        else {
+        } else {
             this.set("registerXVar", new Backbone.Collection([], { model : DataFlowGraphPrototypeNodeIO }));
         }
         

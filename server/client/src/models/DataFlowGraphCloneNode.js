@@ -82,8 +82,7 @@ joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.ex
         }
         if(!dataType || !dataType.semType || !dataType.synType) {
             title = "" + portName + ": ";
-        }
-        else {
+        } else {
             title = "" + portName + ": " + dataType.semType + "(" + dataType.synType + ")";
             title = title.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
         }

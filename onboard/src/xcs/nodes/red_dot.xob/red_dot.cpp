@@ -42,7 +42,7 @@ ImagePosition RedDot::findRedDot(const cv::Mat &image, cv::Mat &out){
     if (!circles.empty()){
         Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
         return ImagePosition(center.x,center.y);
-    } else{
+    } else {
         return ImagePosition(-1, -1);
     }
 }

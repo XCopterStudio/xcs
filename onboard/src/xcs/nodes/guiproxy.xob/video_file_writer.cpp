@@ -320,8 +320,7 @@ void VideoFileWriter::writeVideoFrame(const AVFrame& frame){
 
             /* write the compressed frame in the media file */
             returnSize = av_interleaved_write_frame(formatContext_, &packet);
-        }
-        else {
+        } else {
             returnSize = 0;
         }
     }

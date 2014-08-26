@@ -42,16 +42,14 @@ var WaitView = Backbone.View.extend({
                         // run action
                         try {
                             waitAction.get("action")(event);
-                        }
-                        catch(ex) {
+                        } catch(ex) {
                             app.Flash.flashError(ex.message);
                             throw ex;
                         }
                    });
                 }
             });            
-        }
-        else { 
+        } else { 
         }
     },
     
@@ -74,8 +72,7 @@ var WaitView = Backbone.View.extend({
                 // disable element
                 self.disable();
             });
-        }
-        else if(waitAction.get("actionState") == WaitActionState.Stopped) {
+        } else if(waitAction.get("actionState") == WaitActionState.Stopped) {
             $(waitAction.get("selector")).each(function() { 
                 var self = $(this);
                 
@@ -160,8 +157,7 @@ var setDisabled_ = function(self, disabled) {
         if(disabled) {
             events._click = events.click;
             events.click = null;
-        }
-        else {
+        } else {
             events.click = events._click;
             events._click = null;
         }
