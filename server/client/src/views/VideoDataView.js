@@ -8,8 +8,10 @@ var VideoDataView = AbstractDataView.extend({
             <canvas id="canvas_<%= widgetId %>_<%= dataId %>"></canvas>\
         </div>\
     </li>',
-    sizeX: 640,
-    sizeY: 360,
+    sizeX: 3,
+    sizeY: 3,
+    width: 640,
+    height: 360,
     init: function() {
 
         window.MediaSource = window.MediaSource || window.WebKitMediaSource;
@@ -27,8 +29,8 @@ var VideoDataView = AbstractDataView.extend({
         this.$video = $('#' + idVideo);
         this.elVideo = this.$video.get(0);
         this.elVideo.src = window.URL.createObjectURL(this.ms);
-        this.elVideo.width = this.sizeX;
-        this.elVideo.height = this.sizeY;
+        this.elVideo.width = this.width;
+        this.elVideo.height = this.height;
         this.$video.css({top: 0, left: 0});
 
         this.$canvas = $('#' + idCanvas);

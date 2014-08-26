@@ -85,9 +85,10 @@ body {
 
 .widget-video-container {
     position:relative;
+    margin: 0 auto;
 }
 .widget-video-container video, .widget-video-container canvas {
-    position:absolute;
+    position: absolute;
 }
 
 .settings {
