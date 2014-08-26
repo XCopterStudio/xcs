@@ -14,19 +14,22 @@ var ConsoleModel = Backbone.Model.extend({
         allScripts: null
     },
     initialize: function() {
-        this.set('state', ConsoleModel.State.IDLE); // cannot be in default because of ConsoleModel.State "visibility"
+        this.set('state', ConsoleModel.State.INACTIVE); // cannot be in default because of ConsoleModel.State "visibility"
         this.listenTo(app.Onboard, "sem_update:EXECUTION_STATE", this.onStateChange);
         this.listenTo(app.Onboard, "sem_update:EXECUTION_ERROR", this.onErrorChange);
         this.listenTo(app.Onboard, "sem_update:EXECUTION_OUTPUT", this.onOutputChange);
+        this.listenTo(app.DataFlowGraph.model, 'nodeStart', this.onNodeStart);
         this.listenTo(app.DataFlowGraph.model, 'nodeStop', this.onNodeStop);
     },
     onStateChange: function(value) {
         if (this.get('timeoutRef')) {
             window.clearTimeout(this.get('timeoutRef'));
         }
-        // trigger on update, not only change
-        this.set('state', value, {silent: true});
-        this.trigger('change:state', this);
+        if (this.get('state') !== ConsoleModel.State.INACTIVE) {
+            // trigger on update, not only change
+            this.set('state', value, {silent: true});
+            this.trigger('change:state', this);
+        }
     },
     onErrorChange: function(value) {
         // trigger on update, not only change (error may stay same)
@@ -38,10 +41,16 @@ var ConsoleModel = Backbone.Model.extend({
         this.set('output', value, {silent: true});
         this.trigger('change:output', this);
     },
-    onNodeStop: function(model) {
+    onNodeStart: function(model) {
         var prototypeName = model.get('origId');
         if (prototypeName === 'Executor') {
             this.set('state', ConsoleModel.State.IDLE);
+        }
+    },
+    onNodeStop: function(model) {
+        var prototypeName = model.get('origId');
+        if (prototypeName === 'Executor') {
+            this.set('state', ConsoleModel.State.INACTIVE);
         }
     },
     /* Executive functions */
@@ -173,6 +182,7 @@ var ConsoleModel = Backbone.Model.extend({
 });
 
 ConsoleModel.State = {
+    INACTIVE: 'inactive',
     IDLE: 'idle',
     WAITING: 'waiting',
     RUNNING: 'running',

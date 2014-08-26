@@ -133,12 +133,18 @@ var ConsoleView = Backbone.View.extend({
         var PAUSE = 'Pause';
 
         switch (model.get('state')) {
+            case ConsoleModel.State.INACTIVE:
+                this.$buttonStart.html(START);
+                this.$buttonStart.prop('disabled', true);
+                this.$buttonStop.prop('disabled', true);
+                this.editor.setOption('readOnly', false);
+                break;
             case ConsoleModel.State.IDLE:
                 this.$buttonStart.html(START);
                 this.$buttonStart.prop('disabled', false);
                 this.$buttonStop.prop('disabled', true);
                 this.editor.setOption('readOnly', false);
-                break;
+                break;                
             case ConsoleModel.State.WAITING:
                 this.$buttonStart.prop('disabled', true);
                 this.$buttonStop.prop('disabled', true);
