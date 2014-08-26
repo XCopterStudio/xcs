@@ -31,7 +31,9 @@ XDataplayer::XDataplayer(const std::string& name) :
     fillTypeCategories(syntacticCategoryMap_);
 
     XBindFunction(XDataplayer, init);
-    XBindVarF(command, &XDataplayer::onCommand);
+    
+    //TODO: there should be usefull to add command REPLAY...
+    //XBindVarF(command, &XDataplayer::onCommand);
 
     XBindVar(finished);
 
