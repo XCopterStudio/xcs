@@ -69,7 +69,6 @@ var VideoDataView = AbstractDataView.extend({
             return false;
         });
 
-        this.drawCross(0, 0, 0);
     },
     setData: function(data) {
         // empty, data retrieved directly from websocket
@@ -91,7 +90,7 @@ var VideoDataView = AbstractDataView.extend({
 //        this.sourceBuffer.addEventListener('abort', function(e) { console.log('abort: ' + this.ms.readyState); });
 
         gSocket.on('video', this.processVideoSegments);
-        gSocket.emit('relay', JSON.stringify({ type: "onboard", data: "init-video" }));
+        gSocket.emit('relay', JSON.stringify({type: "onboard", data: "init-video"}));
     },
     resetSourceBuffer: function() {
         // TODO: listener should also be removed on DFG destroy action, 
@@ -126,31 +125,32 @@ var VideoDataView = AbstractDataView.extend({
      */
     onRotationChange: function(data) {
         this.drawCross(0, 0, 0, true);
-        this.drawCross(data.phi, 20 * Math.sin(data.theta), 0, false);
+        this.drawCross(data.phi, 0, 300 * Math.sin(data.theta), false);
         //console.log(data);
     },
     /*
      * Utility
      */
-    drawCross: function(rotation, shiftY, shiftX, clear) {
+    drawCross: function(rotation, shiftX, shiftY, clear) {
         var context = this.canvasContext;
+        var w2 = this.elCanvas.width / 2;
+        var h2 = this.elCanvas.height / 2;
 
         context.setTransform(1, 0, 0, 1, 0, 0);
-        context.rotate(rotation);
-        context.translate(Math.sin(rotation) * shiftY + Math.cos(rotation) * shiftX, -Math.sin(rotation) * shiftX + Math.cos(rotation) * shiftY);
-
-        var w = this.elCanvas.width;
-        var h = this.elCanvas.height;
-
         if (clear) {
-            context.clearRect(0, 0, w, h);
+            context.clearRect(0, 0, 2 * w2, 2 * h2);
         }
 
+        context.translate(w2, h2);
+        context.rotate(rotation);
+        context.translate(shiftX, shiftY);
+
+
         context.beginPath();
-        context.moveTo(0, h / 2);
-        context.lineTo(w, h / 2);
-        context.moveTo(w / 2, 0);
-        context.lineTo(w / 2, h);
+        context.moveTo(-w2, 0);
+        context.lineTo(w2, 0);
+        context.moveTo(0, -h2);
+        context.lineTo(0, h2);
         context.stroke();
     }
 
