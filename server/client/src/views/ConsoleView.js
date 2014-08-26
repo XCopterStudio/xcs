@@ -5,7 +5,6 @@ var ConsoleView = Backbone.View.extend({
         "click #console-stop": "onClickStop",
         "click #console-clear": "onClickClear",
         "click #console-script-delete": "onClickScriptDelete",
-        "click #console-script-save-as": "onClickScriptSaveAs",
         "keyup #console-script-save-as-name": "onChangeScriptSaveAsName",
     },
     initialize: function() {
@@ -16,6 +15,7 @@ var ConsoleView = Backbone.View.extend({
         this.$codeElement = this.$('#console-input');
         this.$outputElement = this.$('#console-output');
 
+        this.$scriptModified = this.$('#console-script-modified');
         this.$scriptSave = this.$('#console-script-save');
         this.$scriptSaveAs = this.$('#console-script-save-as');
         this.$scriptSaveAsName = this.$('#console-script-save-as-name');
@@ -46,32 +46,41 @@ var ConsoleView = Backbone.View.extend({
 
         var that = this;
         this.editor.doc.on("change", function() {
-            model.set('scriptModified', !!that.editor.doc.getValue());
+            model.set('scriptModified', true);
         });
 
         /* Actions */
         var saveAsAction = new WaitAction("#console-script-save-as", WaitActionType.Click);
         saveAsAction.set("action", function() {
             saveAsAction.start();
-            model.saveScript(that.editor.doc.getValue(), that.$scriptSaveAsName.val());
-            saveAsAction.stop();
+            model.saveScript(that.editor.doc.getValue(), that.$scriptSaveAsName.val(), function() {
+                that.$scriptSaveAsName.val('');
+                that.$scriptSaveAsName.trigger('change');
+                saveAsAction.stop();
+            });
+
         });
         app.Wait.setWaitAction(saveAsAction);
 
         var saveAction = new WaitAction("#console-script-save", WaitActionType.Click);
         saveAction.set("action", function() {
+            if (that.$scriptSave.parent().hasClass('disabled')) {
+                return;
+            }
             saveAction.start();
-            model.saveScript(that.editor.doc.getValue(), model.get('scriptName'));
-            saveAction.stop();
+            model.saveScript(that.editor.doc.getValue(), model.get('scriptName'), function() {
+                saveAction.stop();
+            });
         });
         app.Wait.setWaitAction(saveAction);
 
         var manageAction = new WaitAction("#console-script-manage", WaitActionType.Click);
         manageAction.set("action", function() {
             manageAction.start();
-            model.loadScripts();
-            manageAction.stop();
-            app.ModalView.showModal("#modal-console-scripts");
+            model.loadScripts(function() {
+                manageAction.stop();
+                app.ModalView.showModal("#modal-console-scripts");
+            });
         });
         app.Wait.setWaitAction(manageAction);
 
@@ -112,9 +121,6 @@ var ConsoleView = Backbone.View.extend({
     onClickScriptDelete: function() {
         // Confirm?
         this.editor.doc.setValue('');
-    },
-    onClickScriptSaveAs: function() {
-        console.log("Save as clicked");
     },
     onChangeScriptSaveAsName: function() {
         var scriptName = this.$scriptSaveAsName.val();
@@ -172,7 +178,8 @@ var ConsoleView = Backbone.View.extend({
     },
     onChangeScriptModified: function(model) {
         var modified = model.get('scriptModified');
-        this.$scriptSave.parent().toggleClass('disabled', modified);
+        this.$scriptSave.parent().toggleClass('disabled', !(modified && model.get('scriptName')));
+        this.$scriptModified.text(modified ? '*' : '');
     },
     /* Utility functions */
     printOutput_: function(string) {
@@ -181,10 +188,7 @@ var ConsoleView = Backbone.View.extend({
     },
     updateScriptsList: function() {
         var scripts = this.model.get('allScripts');
-        console.log("updateScriptsList");
-
         var modalItems = $('#modal-console-scripts .modal-body table');
-
         if (scripts.length === 0) {
             modalItems.html('<thead><tr><th>No saved scripts.</th></tr></thead>');
             return;
@@ -192,16 +196,14 @@ var ConsoleView = Backbone.View.extend({
 
         modalItems.html('<thead><tr><th>Script name</th><th>Actions</th></tr></thead><tbody></tbody>');
         modalItems = modalItems.find("tbody");
-
-
         var that = this;
-
+        scripts.sort(function(a, b) {
+            return a.name.localeCompare(b.name);
+        });
         for (var i in scripts) {
             var scriptName = scripts[i].name;
             var idLoad = "console-load-" + i;
             var idRemove = "console-remove-" + i;
-
-
             modalItems.append(
                     '<tr>\
                     <td>' + scriptName + '</td>\
@@ -213,23 +215,33 @@ var ConsoleView = Backbone.View.extend({
 
             // set load action
             var loadAction = new WaitAction("#" + idLoad, WaitActionType.Click);
-            loadAction.set("action", function() {
-                loadAction.start();
-                var script = that.model.loadScript(scriptName);
-                that.editor.doc.setValue(script);
-                loadAction.stop();
-                app.ModalView.showModal();
-            });
+            loadAction.set("action", (function() {
+                var localScriptName = scriptName;
+                var localAction = loadAction;
+                return function() {
+                    localAction.start();
+                    var script = that.model.loadScript(localScriptName);
+                    that.editor.doc.setValue(script);
+                    that.model.set('scriptModified', false); // NOTE: override unintentional onChange event
+                    localAction.stop();
+                    app.ModalView.showModal(); // TODO hide modal
+                };
+            })());
             app.Wait.setWaitAction(loadAction);
 
             // set remove action
             var removeAction = new WaitAction("#" + idRemove, WaitActionType.Click);
-            removeAction.set("action", function() {
-                removeAction.start();
-                that.model.deleteScript(scriptName);
-                app.Flash.flashSuccess('Script "' + scriptName + '" was successfully removed.');
-                removeAction.stop();
-            });
+            removeAction.set("action", (function() {
+                var localScriptName = scriptName;
+                var localAction = removeAction;
+                return function() {
+                    localAction.start();
+                    that.model.deleteScript(localScriptName, function() {
+                        localAction.stop();
+                    });
+
+                };
+            })());
             app.Wait.setWaitAction(removeAction);
         }
     }

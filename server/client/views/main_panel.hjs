@@ -227,6 +227,7 @@
             <h3 class="heading">
                 <small xtitle-group="Input Console" xtitle="you can write script there, which can be executed on x-copter">
                     Input Console
+                    <span id="console-script-modified"></span>
                 </small>
             </h3>
         </div>

@@ -1,0 +1,6 @@
+var i = 1;
+while(true) {
+  echo(i);
+  i += 1;
+  sleep(1s);
+}

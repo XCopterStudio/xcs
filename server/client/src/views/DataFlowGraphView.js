@@ -59,6 +59,7 @@ var DataFlowGraphView = Backbone.View.extend({
         
     initialize : function() {
         /* GUI elements */
+        this.$dfgSave = this.$('#dfgSaveDfg');
         this.$dfgSaveAs = this.$('#dfgSaveAsDfg');
         this.$dfgSaveAsFilename = this.$('#dfgSaveAsDfg-filename');
         
@@ -120,7 +121,7 @@ var DataFlowGraphView = Backbone.View.extend({
         app.Wait.setWaitAction(saveDfgAsAction);
         
         var saveDfgAction = new WaitAction("#dfgSaveDfg", WaitActionType.Click)
-        saveDfgAction.set("action", function() { saveDfgAction.start(); self.dfgSaveAsDfg(self.lastFileName, function() { saveDfgAction.stop() }); });
+        saveDfgAction.set("action", function() { if(self.$dfgSave.parent().hasClass('disabled')) {return;} saveDfgAction.start(); self.dfgSaveAsDfg(self.lastFileName, function() { saveDfgAction.stop() }); });
         app.Wait.setWaitAction(saveDfgAction);
         
         this.dfgGraph = new joint.dia.Graph;

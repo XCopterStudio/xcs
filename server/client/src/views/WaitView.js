@@ -33,7 +33,7 @@ var WaitView = Backbone.View.extend({
                 // wrap content to div
                 self.html('<div class="contentDiv">' + self.html() + '</div>');
                 
-                // appent spinner
+                // append spinner
                 self.append('<div class="wait-container"><i class="icon-spinner wait-icon"></i><div class="wait-text">Wait...</div></div>');
                 
                 // set respond action to click
@@ -45,6 +45,7 @@ var WaitView = Backbone.View.extend({
                         }
                         catch(ex) {
                             app.Flash.flashError(ex.message);
+                            throw ex;
                         }
                    });
                 }

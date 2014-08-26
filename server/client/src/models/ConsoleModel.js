@@ -1,6 +1,7 @@
 /* global gSocket */
 
 var ConsoleModel = Backbone.Model.extend({
+    allScriptsMap_: {},
     defaults: {
         channelUrbiscript: 'execUrbiscript',
         channelControl: 'execControl',
@@ -73,25 +74,93 @@ var ConsoleModel = Backbone.Model.extend({
         app.Onboard.sendData(controlData);
         this.wait_();
     },
-    saveScript: function(script, name) {
-        this.set('scriptName', name);
-        this.set('scriptChanged', false);
+    saveScript: function(script, name, onFinished) {
+        var data = {
+            name: name,
+            code: script
+        };
+        var that = this;
+        // TODO check rename (or in view?)
+        app.Onboard.sendOnboardRequest("SCRIPT_SAVE", data, function(id, responseType, responseData) {
+            if (responseType === ResponseType.Error) {
+                app.Flash.flashError('Could not save script "' + name + '".');
+            } else if (responseType === ResponseType.Done) {
+                that.set('scriptName', name);
+                that.set('scriptModified', false);
+
+                var scripts = that.get('allScripts');
+                if (scripts !== null) {
+                    scripts.push(data);
+                    that.setScripts_(scripts);
+                }
+                app.Flash.flashSuccess('Saved script "' + name + '".');
+            }
+            onFinished();
+        });
     },
     loadScript: function(name) {
-        return '+++';
+        if (!name in this.allScriptsMap_) {
+            throw ('Unknown script name "' + name + '".');
+        }
+        this.set('scriptName', name);
+        this.set('scriptModified', false);
+        return this.allScriptsMap_[name].code;
     },
-    deleteScript: function(name) {
+    deleteScript: function(name, onFinished) {
+        var data = {
+            name: name,
+        };
+        var that = this;
+        app.Onboard.sendOnboardRequest("SCRIPT_DELETE", data, function(id, responseType, responseData) {
+            if (responseType === ResponseType.Error) {
+                app.Flash.flashError('Could not delete script "' + name + '".');
+                onFinished();
+            } else if (responseType === ResponseType.Done) {
+                var scripts = that.get('allScripts');
+                var idx = null;
+                for (var i in scripts) {
+                    if (scripts[i].name === name) {
+                        idx = i;
+                        break;
+                    }
+                }
 
+                onFinished(); // must be called prior setScripts_
+                if (idx !== null) {
+                    scripts.splice(idx, 1);
+                    that.setScripts_(scripts);
+                }
+
+                app.Flash.flashSuccess('Deleted script "' + name + '".');
+            }
+
+        });
     },
     loadScripts: function(onFinished) {
         if (this.get('allScripts') !== null) {
+            onFinished();
             return;
         }
-        console.log('Loading scripts');
-        this.set('allScripts', [
-            {name: 'foo', code: 'echo("A");'},
-            {name: 'bar', code: 'echo("A");'}
-        ]);
+        var that = this;
+        app.Onboard.sendOnboardRequest("SCRIPTS_LOAD", null, function(id, responseType, responseData) {
+            if (responseType === ResponseType.Error) {
+                app.Flash.flashError('Could not load scripts.');
+            } else if (responseType === ResponseType.Done) {
+                that.setScripts_(responseData);
+                app.Flash.flashInfo('Loaded stored scripts.');
+            }
+            onFinished();
+        });
+
+    },
+    setScripts_: function(allScripts) {
+        this.allScriptsMap_ = {};
+        for (var i in allScripts) {
+            var item = allScripts[i];
+            this.allScriptsMap_[item.name] = item;
+        }
+        this.set('allScripts', allScripts);
+        this.trigger('change:allScripts', this);
     },
     wait_: function() {
         this.set('state', ConsoleModel.State.WAITING);

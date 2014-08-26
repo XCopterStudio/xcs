@@ -1,0 +1,36 @@
+class ScriptStorage {
+    var baseDir_;
+    
+    function init(baseDir) {
+        baseDir_ = baseDir;
+    };
+    
+    function getScripts() {
+        var that = this;
+        /* return */ Directory.new(baseDir_).asList().map(function(it) {
+            [
+                "name" => it.basename,
+                "code" => that.load_(it.basename)
+            ];
+        });
+    };
+    
+    function save(scriptName, code) {
+        var path = baseDir_ / scriptName;
+        File.save(path, code);
+    };
+    
+    function load_(filename) {        
+        var path = baseDir_ / filename;
+        /* return */ File.new(path).content.data.asString();
+    };
+    
+    function deleteScript(scriptName) {
+        var path = baseDir_ / scriptName;
+        if(path.exists) {
+            var file = File.new(path);
+            file.remove();
+        };
+    };
+};
+

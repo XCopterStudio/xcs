@@ -96,7 +96,7 @@ var OnboardModel = Backbone.Model.extend({
     },
     receiveOnboardData: function(data) {
         if (data.response) {
-            if (data.response.id && data.response.respondType && (data.response.respondData || data.response.respondData == "") && data.response.requestId) {
+            if (data.response.id && data.response.respondType && data.response.requestId) {
                 var id = data.response.id
                 var responseTypeText = data.response.respondType;
                 var responseData = data.response.respondData;
