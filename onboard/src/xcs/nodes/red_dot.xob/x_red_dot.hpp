@@ -24,8 +24,8 @@ namespace reddot{
 
         XVar<::urbi::UImage> enhancedVideo;
         XVar<bool> found;
-        XVar<int> errorX;
-        XVar<int> errorY;
+        XVar<double> errorX;
+        XVar<double> errorY;
 
         XRedDot(const std::string &name);
     };

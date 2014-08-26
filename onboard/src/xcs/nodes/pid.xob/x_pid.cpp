@@ -27,7 +27,7 @@ void XPID::onChangeDesireValue(const double desireValue){
 
 XPID::XPID(const std::string& name) : XObject(name),
     P("PID_PARAM"), I("PID_PARAM"), D("PID_PARAM"), 
-    actualValue("PID_VALUE"), desireValue("PID_VALUE"), control("PID_CONTROL"){
+    actualValue("*"), desireValue("*"), control("PID_CONTROL"){
     
     desireValue_ = 0;
 

@@ -12,13 +12,15 @@ namespace reddot{
         int x;
         int y;
 
-        ImagePosition(const int x, const int y) : x(x), y(y) {};
+        ImagePosition(const int x=0, const int y=0) : x(x), y(y) {};
     };
 
     class RedDot{
+        ImagePosition lastPosition_;
         void getRedMask(const cv::Mat &image, cv::Mat &redMask);
     public:
-        ImagePosition findRedDot(const cv::Mat &image, cv::Mat &out);
+        bool findRedDot(const cv::Mat &image, cv::Mat &out);
+        ImagePosition lastPosition(){ return lastPosition_; };
     };
 
 }}}

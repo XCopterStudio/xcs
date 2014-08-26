@@ -26,7 +26,7 @@ void XFlyControlAggregator::onChangeGaz(const double gaz){
 //==================== public function ===================
 
 XFlyControlAggregator::XFlyControlAggregator(const std::string& name) : 
-    XObject(name), roll("ROLL"), pitch("PITCH"), yaw("YAW"), gaz("GAZ"),
+    XObject(name), roll("*"), pitch("*"), yaw("*"), gaz("*"),
     flyControl("FLY_CONTROL"){
 
     XBindVarF(roll,&XFlyControlAggregator::onChangeRoll);
