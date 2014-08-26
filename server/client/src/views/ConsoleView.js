@@ -34,6 +34,7 @@ var ConsoleView = Backbone.View.extend({
             autoFocus: false,
         });
 
+
         /* Event handlers */
         var model = this.model = new ConsoleModel();
 
@@ -73,6 +74,11 @@ var ConsoleView = Backbone.View.extend({
             });
         });
         app.Wait.setWaitAction(saveAction);
+
+        CodeMirror.commands.save = function(editor) {
+            saveAction.get('action')({});
+        };
+
 
         var manageAction = new WaitAction("#console-script-manage", WaitActionType.Click);
         manageAction.set("action", function() {
@@ -144,7 +150,7 @@ var ConsoleView = Backbone.View.extend({
                 this.$buttonStart.prop('disabled', false);
                 this.$buttonStop.prop('disabled', true);
                 this.editor.setOption('readOnly', false);
-                break;                
+                break;
             case ConsoleModel.State.WAITING:
                 this.$buttonStart.prop('disabled', true);
                 this.$buttonStop.prop('disabled', true);
