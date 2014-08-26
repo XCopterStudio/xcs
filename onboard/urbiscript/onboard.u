@@ -62,6 +62,11 @@ class Onboard {
         
         
         // start communication
+        at (context.adapter.connected->changed?) {
+            if (context.adapter.connected == false) {
+                onDisconnect_();
+            };
+        };
         context.adapter.start(onboardSettings_.get("serverHost"), onboardSettings_.get("serverPort"));
         
         pingReflector_ = PingReflector.new(context.adapter, json);
@@ -86,6 +91,11 @@ class Onboard {
             if (Global.hasSlot("guiProxy")) {
                 Global.guiProxy.initVideo();
             };
+            return;
+        };
+        // handle client disconnected state
+        if (request == "client-disconnected") {
+            onDisconnect_();
             return;
         };
 
@@ -367,6 +377,14 @@ class Onboard {
     function doScriptsLoad() {
         /* return */ scriptStorage_.getScripts();
     };
+
+    /*
+     * Handle onboard's disconnected state
+     */
+    function onDisconnect_() {
+        // TODO: implement onboard's safe state
+        XCS_LOG_INFO("Network disconnection: moving onboard to it's safe state.");
+    }
 }|;
 
 
