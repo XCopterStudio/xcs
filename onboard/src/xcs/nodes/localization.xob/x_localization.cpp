@@ -145,7 +145,6 @@ void XLocalization::onChangePtamEnabled(const bool ptamEnabled) {
     ptamEnabled_ = ptamEnabled;
 }
 
-//TODO: implement
 void XLocalization::onChangeSetPosition(xcs::CartesianVector position){
     ekf_.setPosition(position, timeFromStart());
 }

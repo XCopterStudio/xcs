@@ -13,6 +13,8 @@ using namespace std;
 using namespace xcs;
 using namespace xcs::nodes::localization;
 
+const unsigned int Ekf::HISTORY = 5;
+
 template <typename Deque>
 void Ekf::clearUpToTime(Deque &deque, const double &time) {
     int index = findNearest(deque, time);
@@ -553,8 +555,10 @@ void Ekf::measurementCam(const CameraMeasurement &measurement, const double time
     XCS_LOG_INFO("Inserted new camera measurement with timestamp: " << timestamp);
     int index = findNearest(droneStates_, timestamp);
     DroneStateDistributionChronologic newState = droneStates_[index];
-    //delete all old droneStates
-    droneStates_.clear();
+    //delete all old droneStates newer than timestamp
+    while (droneStates_.back().second >= timestamp){
+        droneStates_.pop_back();
+    }
 
     // create new droneStates up to the time of last imuMeasurements
     newState = predict(newState, timestamp);
@@ -567,15 +571,22 @@ void Ekf::measurementCam(const CameraMeasurement &measurement, const double time
     predictAndUpdateFromImu(newState, imuMeasurements_.back().second, true);
 
     // clear old imuMeasurements and flyControls
-    clearUpToTime(imuMeasurements_, timestamp);
-    clearUpToTime(flyControls_, timestamp);
+    clearUpToTime(imuMeasurements_, timestamp - HISTORY);
+    clearUpToTime(flyControls_, timestamp - HISTORY);
 }
 
 DroneState Ekf::computeState(const double time) {
     shared_lock<shared_mutex> lock(bigSharedMtx_);
     int index = findNearest(droneStates_, time);
-    DroneStateDistributionChronologic state = droneStates_[index];
-    return predict(state, time).first.first;
+
+    if (index >= 0){
+        DroneStateDistributionChronologic state = droneStates_[index];
+        return predict(state, time).first.first;
+    }
+    else{
+        XCS_LOG_ERROR("Request on state in past where ekf do not have data! " << time << "\n First possible time is " << droneStates_.front().second);
+        return DroneState();
+    }
 }
 
 void Ekf::setPosition(const xcs::CartesianVector position, const double timestamp){
