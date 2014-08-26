@@ -37,7 +37,7 @@ CheckpointMovement {
 FlyControl {
     prototype XMultiplexerFlyControl
     file xmultiplexer
-    args "2"
+    args "2, true"
 }
 
 Localization {
