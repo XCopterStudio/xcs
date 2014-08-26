@@ -87,7 +87,7 @@ class Executor : XObject {
         if(tag.frozen) { // tag.stop() does leave the code freezed
             tag.unfreeze();
         };
-        if(job) {
+        if(!job.isVoid && job) {
             job.terminate();
         };
         // NOTE: state will be set in event handler for tag leave        
