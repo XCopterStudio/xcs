@@ -1,7 +1,6 @@
 var KeyboardControllerView = Backbone.View.extend({
     //el: 'body', // is this correct?
     events: {
-
     },
     initialize: function(model, name) {
         this.model = model;
@@ -26,13 +25,13 @@ var KeyboardControllerView = Backbone.View.extend({
     },
     keydown: function(e) {
         var that = e.data;
-        if (that.keyMap[e.which] === undefined) {
+        if (that.model.get('activeController') !== 'keyboard' || that.keyMap[e.which] === undefined) {
             return;
         }
-        
+
         //disable scrolling etc. 
         e.preventDefault();
-        
+
         // comment condition for repeated sending of fly params
         if (that.down[e.which]) {
             return;
