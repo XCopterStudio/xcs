@@ -258,14 +258,7 @@
         </div>
         <div class="row">
             <div class="panel panel-default">
-                <textarea id="console-input" rows="8">
-var i = 1;
-while(true) {
-echo(i);
-i += 1;
-sleep(1s);
-}
-                </textarea>
+                <textarea id="console-input" rows="8"></textarea>
             </div>
         </div>
         <div class="row">
