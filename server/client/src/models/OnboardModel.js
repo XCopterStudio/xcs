@@ -51,7 +51,7 @@ var OnboardModel = Backbone.Model.extend({
     },
     sendData: function(data) {
         var message = {type: 'data', data: data};
-        gSocket.emit('resend', JSON.stringify(message));
+        gSocket.emit('relay', JSON.stringify(message));
     },
     sendOnboardRequest: function(request, data, response) {
         if (!data) {
@@ -82,7 +82,7 @@ var OnboardModel = Backbone.Model.extend({
         };
 
         try {
-            gSocket.emit('resend', JSON.stringify(requestData));
+            gSocket.emit('relay', JSON.stringify(requestData));
         }
         catch (ex) {
             // log

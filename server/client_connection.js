@@ -54,7 +54,7 @@ function ClientConnection(application, pingInterval) {
         client = socket;
         // set event handlers
         socket.on('disconnect', handleDisconnect);
-        socket.on('resend', handleRelay); // TODO: refactor event name resend -> relay
+        socket.on('relay', handleRelay);
         socket.on('call', handleCall);
         // set ping monitor
         socket.on('ping echo', function (payload) {
