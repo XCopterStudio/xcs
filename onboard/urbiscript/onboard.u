@@ -382,8 +382,9 @@ class Onboard {
      * Handle onboard's disconnected state
      */
     function onDisconnect_() {
-        // TODO: implement onboard's safe state
-        XCS_LOG_INFO("Network disconnection: moving onboard to it's safe state.");
+        XCS_LOG_INFO("Network disconnection: moving onboard to its safe state...");
+        doDfgReset_(false);
+        XCS_LOG_INFO("DFG stopped and destroyed.");
     }
 }|;
 
