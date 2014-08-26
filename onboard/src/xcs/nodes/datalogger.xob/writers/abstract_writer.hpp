@@ -24,7 +24,8 @@ protected:
     void writeRecordBegin();
 public:
 
-    AbstractWriter(const std::string &name) : urbi::UObject(name) {
+    AbstractWriter(const std::string &name) : urbi::UObject(name),
+        enabled_(true) {
     }
 
     virtual ~AbstractWriter() {

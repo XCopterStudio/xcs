@@ -36,7 +36,7 @@ var ChartDataView = AbstractDataView.extend({
         this.setPlot();
 
         var tooltipId = "tooltip_" + this.attrs.widgetId + "_" + this.attrs.dataId;    
-        var tooltipSelector = "#" + tooltipId;    
+        var tooltipSelector = "#" + tooltipId;   
     
         $("<div id='"+tooltipId+"'></div>").css({
 			position: "absolute",
@@ -48,18 +48,24 @@ var ChartDataView = AbstractDataView.extend({
             "z-index": 998
 		}).appendTo("body");
     
+        this.$tooltip = $(tooltipSelector);
+    
         var self = this;
         $(plotSelector).bind("plothover", function (event, pos, item) {
             if (item) {
                 var y = item.datapoint[1];
 
-                $(tooltipSelector).html(self.attrs.name + ": " + y)
+                self.$tooltip.html(self.attrs.name + ": " + y)
                     .css({top: item.pageY+5, left: item.pageX+5})
                     .fadeIn(200);
             } else {
-                $(tooltipSelector).hide();
+                self.$tooltip.hide();
             }
 		});
+    },
+        
+    removeCustom: function() {
+        this.$tooltip.remove();
     },
         
     setPlot: function() {

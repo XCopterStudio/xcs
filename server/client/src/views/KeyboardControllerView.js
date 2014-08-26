@@ -29,6 +29,10 @@ var KeyboardControllerView = Backbone.View.extend({
         if (that.keyMap[e.which] === undefined) {
             return;
         }
+        
+        //disable scrolling etc. 
+        e.preventDefault();
+        
         // comment condition for repeated sending of fly params
         if (that.down[e.which]) {
             return;

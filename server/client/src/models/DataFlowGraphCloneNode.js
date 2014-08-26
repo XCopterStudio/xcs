@@ -57,10 +57,6 @@ joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.ex
                 fill: '#E74C3C',
                 type: 'in',
             },
-            // this attrs is not use in standard way - it is use in addRegisterXVar method
-            '.inPorts circle.registerXVar': { 
-                fill: '#A01507',
-            },
             '.outPorts circle': { 
                 fill: '#16A085', 
                 type: 'out',
@@ -188,12 +184,6 @@ joint.shapes.dfg.DataFlowGraphCloneNode = joint.shapes.basic.Generic.extend(_.ex
         
         // add registerXVar class to input port
         this.attr('circle[port="' + portId + '"]/class', "registerXVar");
-
-        // set special style
-        var css = this.attr('.inPorts circle.registerXVar');
-        for(var key in css) {
-            this.attr('circle[port="' + portId + '"]/' + key, css[key]);
-        }
     },
     
     addInputPort : function(portId, semT, synT) {

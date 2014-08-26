@@ -3,6 +3,7 @@
 
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <mutex>
 #include <atomic>
 #include <map>
@@ -40,14 +41,20 @@ class XDatalogger : public xcs::nodes::XObject {
 
     datalogger::LoggerContext context_;
     std::string filename_;
+    std::stringstream buffer_;
 
     inline void registerHeader(const std::string &name, const std::string &semanticType, const std::string &syntacticType) {
-        context_.file << REGISTER << " " << name << " " << semanticType << " " << syntacticType << std::endl;
+        if (inited_) {
+            context_.file << REGISTER << " " << name << " " << semanticType << " " << syntacticType << std::endl;
+        }
+        else {
+            buffer_ << REGISTER << " " << name << " " << semanticType << " " << syntacticType << std::endl;
+        }
     }
 
     inline void closeHeader() {
-        if(!headerClosed_) {
-            context_.file << std::endl;
+        if(inited_ && !headerClosed_) {
+            context_.file << buffer_.str() << std::endl;
             headerClosed_ = true;
         }        
     }

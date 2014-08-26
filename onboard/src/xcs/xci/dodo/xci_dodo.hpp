@@ -10,6 +10,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <thread>
+#include <atomic>
 
 #include "video_player.hpp"
 
@@ -99,6 +100,9 @@ private:
     bool inited_;
     std::thread sensorThread_;
     std::thread videoThread_;
+
+    //! Indicate closing of the xci_parrot -> threads use for its end
+    std::atomic<bool> runAll_;
 
     //! Video FPS
     size_t videoFps_;

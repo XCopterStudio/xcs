@@ -108,6 +108,10 @@ var AbstractDataView = Backbone.View.extend({
         // prepare for override
     },
     
+    removeCustom: function() {
+        // prepare for override
+    },
+    
     resetDefault: function(settings) {
         for(var i = 0; i < settings.length; ++i) {
             var setting = settings[i];
@@ -120,6 +124,8 @@ var AbstractDataView = Backbone.View.extend({
     },
     
     remove: function() {
+        this.removeCustom();
+        
         var gridster = $(".gridster > ul").gridster().data('gridster');
         gridster.remove_widget($("#widget" + this.widgetId));
     },

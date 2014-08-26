@@ -81,12 +81,13 @@ var OnboardModel = Backbone.Model.extend({
             }
         };
 
-        // try send request
         try {
             gSocket.emit('resend', JSON.stringify(requestData));
         }
         catch (ex) {
-            // TODO: log exception
+            // log
+            var errorMsg = "Error when try send request: " + ex + "!";
+            app.Flash.flashError(errorMsg);
 
             // remove response action
             this.responses.getAndRemoveResponse(rId);
@@ -96,33 +97,44 @@ var OnboardModel = Backbone.Model.extend({
     },
     receiveOnboardData: function(data) {
         if (data.response) {
-            if (data.response.id && data.response.respondType && data.response.requestId) {
-                var id = data.response.id
-                var responseTypeText = data.response.respondType;
-                var responseData = data.response.respondData;
-                var requestId = data.response.requestId;
+            var errorMsg;
+            try {
+                if (data.response.id && data.response.respondType && data.response.requestId) {
+                    var id = data.response.id
+                    var responseTypeText = data.response.respondType;
+                    var responseData = data.response.respondData;
+                    var requestId = data.response.requestId;
 
-                var responseType;
-                switch (responseTypeText) {
-                    case "Done":
-                        responseType = ResponseType.Done;
-                        break;
-                    case "Error":
-                        responseType = ResponseType.Error;
-                        break;
-                    default:
-                        responseType = ResponseType.None;
-                        break;
+                    var responseType;
+                    switch (responseTypeText) {
+                        case "Done":
+                            responseType = ResponseType.Done;
+                            break;
+                        case "Error":
+                            responseType = ResponseType.Error;
+                            break;
+                        default:
+                            responseType = ResponseType.None;
+                            break;
+                    }
+
+                    // run response action
+                    var responseAction = this.responses.getAndRemoveResponse(requestId);
+                    if (responseAction) {
+                        responseAction(id, responseType, responseData);
+                    }
                 }
-
-                // run response action
-                var responseAction = this.responses.getAndRemoveResponse(requestId);
-                if (responseAction) {
-                    responseAction(id, responseType, responseData);
+                else {
+                    errorMsg = "Incomming response has bad format: " + JSON.stringify(data.response) + "!";
                 }
             }
-            else {
-                //TODO: bad format data  - what to do?
+            catch (ex) {
+                errorMsg = "Error when process incomming response: " + ex + "!";
+            }
+
+            if (errorMsg) {
+                console.log(errorMsg);
+                app.Flash.flashError(errorMsg);
             }
         }
         this.set('onboard', data);
