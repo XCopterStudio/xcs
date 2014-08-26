@@ -10,8 +10,6 @@ var VideoDataView = AbstractDataView.extend({
     </li>',
     sizeX: 3,
     sizeY: 3,
-    width: 640,
-    height: 360,
     init: function() {
 
         window.MediaSource = window.MediaSource || window.WebKitMediaSource;
@@ -23,26 +21,20 @@ var VideoDataView = AbstractDataView.extend({
         this.sourceBuffer = {};
         this.ms = new MediaSource();
 
+        this.createDefaultSettings();
         /*
          * GUI elements
          */
         this.$video = $('#' + idVideo);
         this.elVideo = this.$video.get(0);
         this.elVideo.src = window.URL.createObjectURL(this.ms);
-        this.elVideo.width = this.width;
-        this.elVideo.height = this.height;
-        this.$video.css({top: 0, left: 0});
 
         this.$canvas = $('#' + idCanvas);
         this.elCanvas = this.$canvas.get(0);
-        this.elCanvas.width = this.elVideo.width;
-        this.elCanvas.height = this.elVideo.height;
-        this.$canvas.css({top: 0, left: 0});
+
         this.canvasContext = this.elCanvas.getContext('2d');
 
-        var $container = this.$canvas.parent();
-        $container.width(this.elVideo.width);
-        $container.height(this.elVideo.height);
+        this.setDimensions(this.width, this.height);
 
         /*
          * Events
@@ -124,14 +116,21 @@ var VideoDataView = AbstractDataView.extend({
      * Events
      */
     onRotationChange: function(data) {
-        this.drawCross(0, 0, 0, true);
-        this.drawCross(data.phi, 0, 300 * Math.sin(data.theta), false);
-        //console.log(data);
+        var clear = true;
+        if(this.showCentral) {
+            this.drawCross(0, 0, 0, clear, '#444444');
+            clear = false;
+        }
+        if(this.showAttitude) {
+            this.drawCross(-data.phi, 0, this.pitchFactor * Math.sin(data.theta), clear);
+        }
     },
     /*
      * Utility
      */
-    drawCross: function(rotation, shiftX, shiftY, clear) {
+    drawCross: function(rotation, shiftX, shiftY, clear, strokeStyle) {
+        strokeStyle = (strokeStyle === undefined) ? '#000000' : strokeStyle;
+
         var context = this.canvasContext;
         var w2 = this.elCanvas.width / 2;
         var h2 = this.elCanvas.height / 2;
@@ -151,8 +150,52 @@ var VideoDataView = AbstractDataView.extend({
         context.lineTo(w2, 0);
         context.moveTo(0, -h2);
         context.lineTo(0, h2);
+        context.strokeStyle = strokeStyle;
         context.stroke();
-    }
+    },
+    setDimensions: function(width, height) {
+        // preserve original values when dimension not set
+        width = (width === null) ? this.elVideo.width : width;
+        height = (height === null) ? this.elVideo.height : height;
 
+        var $container = this.$canvas.parent();
 
+        this.elVideo.width = width;
+        this.elCanvas.width = this.elVideo.width;
+        $container.width(this.elVideo.width);
+
+        this.elVideo.height = height;
+        this.elCanvas.height = this.elVideo.height;
+        $container.height(this.elVideo.height);
+
+        this.$video.css({top: 0, left: 0});
+        this.$canvas.css({top: 0, left: 0});
+    },
+    /*
+     * Settings
+     */
+    settings: {
+        width: {name: "width (pixels)", type: SettingType.NUMBER, default: 640},
+        height: {name: "height (pixels)", type: SettingType.NUMBER, default: 360},
+        showCentral: {name: "show central cross", type: SettingType.BOOLEAN, default: true},
+        showAttitude: {name: "show attitude cross", type: SettingType.BOOLEAN, default: true},
+        pitchFactor: {name: "pitch factor", type: SettingType.NUMBER, default: 300},
+    },
+    validateSettings: function(settings) {
+        var result = [];
+        return result; // TODO validation
+    },
+    setSettings: function(settings) {
+        for(var i in settings) {
+            var setting = settings[i];
+            for(var key in this.settings) {
+                var metaSettings = this.settings[key];
+                if(metaSettings.name === setting.name) {
+                    this[key] = setting.value;
+                }
+            }
+        }
+        
+        this.setDimensions(this.width, this.height);
+    },
 });

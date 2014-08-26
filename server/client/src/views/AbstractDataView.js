@@ -59,7 +59,7 @@ var AbstractDataView = Backbone.View.extend({
         
         //set settings
         this.privateSettings = [];
-        for(var i = 0; i < this.settings.length; ++i) {
+        for(var i in this.settings) {
             var setting = this.settings[i];
             this.privateSettings.push(_.clone(setting));
         }
@@ -97,19 +97,26 @@ var AbstractDataView = Backbone.View.extend({
     },
     
     init: function() {
-        // prepare for override
+        // prepared for override
     },
     
     validateSettings: function(settings) {
-        // prepare for override
+        // prepared for override
     },
     
     setSettings: function(settings) {
-        // prepare for override
+        // prepared for override
+    },
+    
+    createDefaultSettings: function() {
+        // read default settings and create variables for them
+        for(var i in this.settings) {
+            this[i] = this.settings[i].default;
+        }
     },
     
     removeCustom: function() {
-        // prepare for override
+        // prepared for override
     },
     
     resetDefault: function(settings) {
