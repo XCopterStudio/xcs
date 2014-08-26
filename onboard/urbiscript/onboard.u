@@ -134,7 +134,6 @@ class Onboard {
                     responseType = "Error";
             };
         } catch(var ex) {
-            //TODO: what to do with errors? send to client? + send current state (all created/started/stopped nodes)
             echo("ERROR(" + id + "): " + ex.asString());
             responseData = ex.message();
             responseType = "Error";

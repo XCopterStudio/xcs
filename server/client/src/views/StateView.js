@@ -1,19 +1,18 @@
 var StateView = Backbone.View.extend({
     id : 'state',
-    
+
     el : 'body',
-    
+
     initialize : function() {
         window.onbeforeunload = function() {
-            //TODO: return context text by x-copter state?
             return "X-copter plan execution will be stopped!"; //Are you sure you want to navigate away?
         }
-        
+
         window.onunload = function() {
             //TODO: send message to onboard?
             console.log("DISCONNECTING FROM ONBOARD!");
         }
-        
+
         window.onload = function() {
             // show all x-copter tooltips
             $("[xtitle]").xtooltip();
@@ -22,7 +21,7 @@ var StateView = Backbone.View.extend({
 });
 
 (function ($) {
-    $.fn.xtooltip = function () {   
+    $.fn.xtooltip = function () {
         return this.each(function () {
             // prepare content
             var content = '';
@@ -34,14 +33,14 @@ var StateView = Backbone.View.extend({
             if(title) {
                 content += '<p>' + title + '</p>'
             }
-            
+
             // prepare placement: top/bottom
             var offsetTop = getOffsetTop($(this));
             var placement = 'top';
             if(offsetTop < 150) {
-                placement = 'bottom';    
+                placement = 'bottom';
             }
-            
+
             // set tooltip
             if(content) {
                 $(this).tooltip({
@@ -53,7 +52,7 @@ var StateView = Backbone.View.extend({
             }
         });
     };
-    
+
     function getOffsetTop($el) {
         var $current = $el;
         while(true) {
@@ -61,15 +60,15 @@ var StateView = Backbone.View.extend({
             if(offset && offset.top > 0) {
                 break;
             }
-                
+
             $current = $current.parent();
-            
+
             if($current.length == 0) {
                 $current = $el;
                 break;
             }
         }
-        
+
         return $current.offset().top;
     }
 })(jQuery);

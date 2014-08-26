@@ -78,7 +78,6 @@ void XDatalogger::registerXVar(const std::string &name, const std::string &seman
     SyntacticCategoryType syntacticCategory = syntacticCategoryMap_.at(syntacticType);
     switch (syntacticCategory) {
         case CATEGORY_VIDEO:
-            // TODO: set default video size
             registerVideo(640, 360, name, semanticType, syntacticType, uvar);
             break;
         default:

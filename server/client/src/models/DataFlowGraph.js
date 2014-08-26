@@ -37,14 +37,13 @@ var DataFlowGraph = Backbone.Model.extend({
             this.setDfgDef(data.dfgDef);
         }
 
-        // set availabel dfg for load 
+        // set availabel dfg for load
         if (data.savedDfg) {
             this.setSavedDfg(data.savedDfg);
         }
 
         // set default dataFlowGraph
         if (data.ddfg) {
-            //TODO: merge current dataFlowGtraph with recieved data.ddfg
             this.set("ddfg", data.ddfg);
         }
 
