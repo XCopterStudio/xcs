@@ -49,10 +49,11 @@ XXci::XXci(const std::string& name) :
 
     XBindVarF(flyControl, &XXci::onChangeFly);
 
-    XBindVarF(roll, &XXci::onChangeRoll);
-    XBindVarF(pitch, &XXci::onChangePitch);
-    XBindVarF(yaw, &XXci::onChangeYaw);
-    XBindVarF(gaz, &XXci::onChangeGaz);
+    XBindPrivateVarF(roll, &XXci::onChangeRoll);
+    XBindPrivateVarF(pitch, &XXci::onChangePitch);
+    XBindPrivateVarF(yaw, &XXci::onChangeYaw);
+    XBindPrivateVarF(gaz, &XXci::onChangeGaz);
+    
     XBindVarF(command, &XXci::onChangeCommand);
 
 }

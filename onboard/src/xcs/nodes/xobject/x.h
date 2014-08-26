@@ -16,6 +16,10 @@ GD_CATEGORY(Test.All);
     XBindVar(x);			\
     UNotifyChange(x.data(), f)
 
+# define XBindPrivateVarF(x, f)	\
+    XBindPrivateVar(x);			\
+    UNotifyChange(x.data(), f)
+
 # define XBindFunction(xObj, f) UBindFunction(xObj, f)
 
 # define XNotifyChange(x, f) UNotifyChange(x.data(), f)
