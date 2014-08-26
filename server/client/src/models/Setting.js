@@ -62,7 +62,7 @@ var Setting = Backbone.Model.extend({
             var setting = settings[i];
 
             // save and set 4 weeks expiration
-            $.cookie(this.get("modul") + "__" + setting.name, setting.value, {expires: 28});
+            $.cookie(this.get("modul") + "__" + setting.name, setting.value, {expires: 365});
         }
     },
 });
