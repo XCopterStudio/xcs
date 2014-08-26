@@ -28,7 +28,8 @@ var OnboardModel = Backbone.Model.extend({
     notifiedSemanticTypes_: {
         'EXECUTION_STATE': true,
         'EXECUTION_ERROR': true,
-        'EXECUTION_OUTPUT': true
+        'EXECUTION_OUTPUT': true,
+        'ROTATION': true
     },
     initialize: function() {
         var that = this;

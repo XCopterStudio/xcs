@@ -83,6 +83,13 @@ body {
 	line-height: 1.2em;
 }
 
+.widget-video-container {
+    position:relative;
+}
+.widget-video-container video, .widget-video-container canvas {
+    position:absolute;
+}
+
 .settings {
     -webkit-appearance: none;
     padding: 0;
