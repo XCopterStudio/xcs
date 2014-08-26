@@ -1,12 +1,12 @@
 Datalogger { ; this is configuration name
     prototype XDatalogger                  ; (default is configuration name)
     ;file xdatalogger.u                     ; (default lowecased name of the prototype)
-    args "\"logs/defaulLog.txt\""  ; these are init's arguments (default none)
+    args "\"logs/default_log.txt\""  ; these are init's arguments (default none)
 }
 
 Dataplayer {
     prototype XDataplayer
-    args "\"logs/defaulLog.txt\""
+    args "\"logs/default_log.txt\""
 }
 
 XciDodo {
@@ -55,6 +55,10 @@ Gui {
     file nodes/semantic_sender.u 
     args "adapter, XJson, 8"
     special true
+}
+
+RedDot {
+    prototype XRedDot
 }
 
 SemanticReceiver {

@@ -33,6 +33,7 @@
  -->
 <script type="text/javascript" src="socket.io/socket.io.js"></script>
 
+<script type="text/javascript" src="src/models/Connection.js"></script>
 <script type="text/javascript" src="src/models/FlyControlModel.js"></script>
 <script type="text/javascript" src="src/models/OnboardModel.js"></script>
 <script type="text/javascript" src="src/models/ConsoleModel.js"></script>
@@ -61,4 +62,5 @@
 <script type="text/javascript" src="src/views/BottomToolbarView.js"></script>
 <script type="text/javascript" src="src/views/ModalView.js"></script>
 <script type="text/javascript" src="src/views/SettingView.js"></script>
+<script type="text/javascript" src="src/views/ConnectionView.js"></script>
 <script type="text/javascript" src="src/app.js"></script>

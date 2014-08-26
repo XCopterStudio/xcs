@@ -84,7 +84,7 @@ DroneStateDistributionChronologic Ekf::predict(const DroneStateDistributionChron
         if (controlIndex >= 0){
             newState.first = predict(newState.first, flyControls_[controlIndex].first, delta);
         }
-        else{
+        else {
             newState.first = predict(newState.first, xcs::FlyControl(), delta);
         }
 

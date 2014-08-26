@@ -3,6 +3,7 @@ class Onboard {
     class XcsPaths {
         var settings = { if("XCS_SETTINGS_PATH" in System.env) Path.new(System.env["XCS_SETTINGS_PATH"]) else Path.cwd / "xsettings" };
         var dfgs = { if("XCS_DFGS_PATH" in System.env) Path.new(System.env["XCS_DFGS_PATH"]) else Path.cwd / "dfgs" };
+        var scripts = { if("XCS_USER_SCRIPTS_PATH" in System.env) Path.new(System.env["XCS_USER_SCRIPTS_PATH"]) else Path.cwd / "urbiscript/user" };
 
         function getSettings(filename) {
             (settings / filename).asString();
@@ -12,6 +13,8 @@ class Onboard {
     var nodeContainer_;
     var onboardSettings_;
     var dfgStorage_;
+    var scriptStorage_;
+    var pingReflector_;
     
     var sender_;
     var receiver_;
@@ -24,8 +27,10 @@ class Onboard {
         load("boot/adapter.u");
         load("boot/onboard_sender.u");
         load("boot/dfg_storage.u");
+        load("boot/script_storage.u");
         load("boot/node_container.u");
         load("boot/json_receiver.u");
+        load("boot/ping_reflector.u");
         load("settings_collection.u");
         
         System.loadModule("xsettings");
@@ -50,17 +55,21 @@ class Onboard {
         var settingsCollection = SettingsCollection.new([XcsPaths.getSettings("xobjects.xs")]);
         nodeContainer_ = NodeContainer.new(settingsCollection, context);
         
-        // prepare storage
+        // prepare storages
+        scriptStorage_ = ScriptStorage.new(XcsPaths.scripts);
         dfgStorage_ = DfgStorage.new(XcsPaths.dfgs);
         loadDdfg_();
+        
         
         // start communication
         context.adapter.start(onboardSettings_.get("serverHost"), onboardSettings_.get("serverPort"));
         
+        pingReflector_ = PingReflector.new(context.adapter, json);
         sender_ = OnboardSender.new(context.adapter, json);
         
         // initialize onboard receiver 4 communication with server
         context.jsonReceiver.addReceiver("onboard", this);
+        context.jsonReceiver.addReceiver("ping", pingReflector_);
         
     };
       
@@ -113,6 +122,12 @@ class Onboard {
                     responseData = doLoadDfg_(requestData);
                 case "DFG_REMOVE":
                     responseData = doRemoveDfg_(requestData);
+                case "SCRIPT_SAVE":
+                    responseData = doScriptSave(requestData);
+                case "SCRIPT_DELETE":
+                    responseData = doScriptDelete(requestData);
+                case "SCRIPTS_LOAD":
+                    responseData = doScriptsLoad();
                 default:
                     echo("...unknown request");
                     responseData = "Unknown request: " + id + ".";
@@ -334,6 +349,24 @@ class Onboard {
     
     function loadDdfg_() {
         this.ddfg_ = dfgStorage_.load(onboardSettings_.get("defaultDfg"));
+    };
+    
+    /*
+     * User scripts load & save
+     */
+    function doScriptSave(requestData) {
+        var scriptName = requestData["name"];
+        var code = requestData["code"];
+        scriptStorage_.save(scriptName, code);
+        /* return */ nil;
+    };
+    function doScriptDelete(requestData) {
+        var scriptName = requestData["name"];
+        scriptStorage_.deleteScript(scriptName);
+        /* return */ nil;
+    };
+    function doScriptsLoad() {
+        /* return */ scriptStorage_.getScripts();
     };
 }|;
 

@@ -88,8 +88,7 @@ var SettingView = Backbone.View.extend({
                 
                 // close modal
                 $btnCancel.trigger('click');
-            }
-            else {
+            } else {
                 for(var i = 0; i < settings.length; ++i) {
                     var setting = settings[i];
                     
@@ -104,8 +103,7 @@ var SettingView = Backbone.View.extend({
                     if(error) {
                         $settingGroup.addClass("has-error");
                         $msg.text(error.msg);
-                    }
-                    else {
+                    } else {
                         $settingGroup.addClass("has-success");
                         $msg.text("");
                     }

@@ -10,7 +10,8 @@ var DataFlowGraphView = Backbone.View.extend({
     el : 'body',
     
     events : {
-        "click #dfgLoadDfg": "dfgShowFiles"
+        "click #dfgLoadDfg": "dfgShowFiles",
+        "keyup #dfgSaveAsDfg-filename": "onChangeDfgSaveAsDfgFilename"
     },
         
     dfgGraph : {},
@@ -57,6 +58,11 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgCounter : [],
         
     initialize : function() {
+        /* GUI elements */
+        this.$dfgSave = this.$('#dfgSaveDfg');
+        this.$dfgSaveAs = this.$('#dfgSaveAsDfg');
+        this.$dfgSaveAsFilename = this.$('#dfgSaveAsDfg-filename');
+        
         this.model = new DataFlowGraph();
         
         this.onInputChange(app.Onboard);      
@@ -115,7 +121,7 @@ var DataFlowGraphView = Backbone.View.extend({
         app.Wait.setWaitAction(saveDfgAsAction);
         
         var saveDfgAction = new WaitAction("#dfgSaveDfg", WaitActionType.Click)
-        saveDfgAction.set("action", function() { saveDfgAction.start(); self.dfgSaveAsDfg(self.lastFileName, function() { saveDfgAction.stop() }); });
+        saveDfgAction.set("action", function() { if(self.$dfgSave.parent().hasClass('disabled')) {return;} saveDfgAction.start(); self.dfgSaveAsDfg(self.lastFileName, function() { saveDfgAction.stop() }); });
         app.Wait.setWaitAction(saveDfgAction);
         
         this.dfgGraph = new joint.dia.Graph;
@@ -294,8 +300,7 @@ var DataFlowGraphView = Backbone.View.extend({
         if(this.dfgCounter[nodeId] == 1) {
             cloneName = modelPrototype.get("name");
             modelId = nodeId;   
-        }
-        else {
+        } else {
             cloneName = modelPrototype.get("name") + " " + this.dfgCounter[nodeId];
             modelId = nodeId + this.dfgCounter[nodeId];
         }
@@ -400,8 +405,7 @@ var DataFlowGraphView = Backbone.View.extend({
         //determine if link is pin to some port on both sides
         if(link.attributes.target.x || link.attributes.source.x){
             this.setBadLink(link);
-        }
-        else {
+        } else {
             this.setWellLink(link);
         }
     },
@@ -430,8 +434,7 @@ var DataFlowGraphView = Backbone.View.extend({
             //NOTE: there should be no need to unregister old click events - jquery should handle it yourself
             modalDfgItems.html('<thead><tr><th>#</th><th>File Name</th><th>Actions</th></tr></thead><tbody></tbody>');
             modalDfgItems = modalDfgItems.find("tbody");
-        }
-        else {
+        } else {
             modalDfgItems.html('<thead><tr><th>No DFG for load...</th></tr></thead>');
         }
         
@@ -518,8 +521,7 @@ var DataFlowGraphView = Backbone.View.extend({
                     if(cell.origId) {
                         if(this.dfgToolboxNodes[cell.origId]) {
                             nodes[cell.id] = this.addNodeToGraph(cell.origId, cell.position.x, cell.position.y);
-                        }
-                        else {
+                        } else {
                             notValidNodes.push(cell.origId);
                         }
                     }
@@ -920,8 +922,7 @@ var DataFlowGraphView = Backbone.View.extend({
                     }
                 });
             }
-        }
-        catch(ex) {
+        } catch(ex) {
             // show error
             app.Flash.flashError("Error when try to create nodes: " + ex + "!");
             
@@ -1006,6 +1007,7 @@ var DataFlowGraphView = Backbone.View.extend({
                     var model = self.dfgModels[responseData[i]];
                     if(model) {
                         model.setState(NodeState.STARTED);
+                        self.model.trigger('nodeStart', model);
                         ++successCount;
                     }
                 }
@@ -1037,6 +1039,7 @@ var DataFlowGraphView = Backbone.View.extend({
                     var model = self.dfgModels[responseData[i]];
                     if(model) {
                         model.setState(NodeState.STOPPED);
+                        self.model.trigger('nodeStop', model);
                         ++successCount;
                     }
                 }
@@ -1110,8 +1113,7 @@ var DataFlowGraphView = Backbone.View.extend({
                         // show result
                         if(successCount > 0) {
                             app.Flash.flashSuccess("" + successCount + " " + (successCount <= 1 ? "node is" : "nodes are") + " destroyed.");
-                        }
-                        else if(checkDestroyed) {
+                        } else if(checkDestroyed) {
                             app.Flash.flashError("Error when try to destroy nodes: nothing to destroy.");
                         }
                     }
@@ -1121,8 +1123,7 @@ var DataFlowGraphView = Backbone.View.extend({
                     response();
                 }
             });
-        }
-        catch(ex) {
+        } catch(ex) {
             //response action
             if(response) {
                 response();
@@ -1144,8 +1145,7 @@ var DataFlowGraphView = Backbone.View.extend({
             var modelId;
             this.dfgDestroy(response, modelId, true, false);
             app.Flash.flashSuccess("Data flow graph is resetted.");
-        }
-        else if(response) {
+        } else if(response) {
             app.Flash.flashSuccess("Data flow graph is resetted.");
             response();
         }
@@ -1160,10 +1160,7 @@ var DataFlowGraphView = Backbone.View.extend({
     
             // validate filename
             var errorMsg = '';
-            if(filename == '') {
-                errorMsg += 'You must set the filename first! ';    
-            }
-            else if(this.model.dfgExist(filename)) {
+            if(this.model.dfgExist(filename)) {
                 var self = this;
                 
                 // show question: rewrite
@@ -1245,8 +1242,7 @@ var DataFlowGraphView = Backbone.View.extend({
             //show error
             if(responseType == ResponseType.Error) {
                 app.Flash.flashError("Error when try to load saved data flow graph: " + responseData + ".");
-            }
-            else if(responseType == ResponseType.Done) {
+            } else if(responseType == ResponseType.Done) {
                 if(responseData.DFG && responseData.filename) {
                     self.model.setDfgDef("");
                     self.model.setDfgDef(responseData);
@@ -1269,8 +1265,7 @@ var DataFlowGraphView = Backbone.View.extend({
             //show error
             if(responseType == ResponseType.Error) {
                 app.Flash.flashError("Error when try to remove saved data flow graph: " + responseData + ".");
-            }
-            else if(responseType == ResponseType.Done) {
+            } else if(responseType == ResponseType.Done) {
                 if(responseData.savedDfg) {
                     self.model.setSavedDfg(responseData.savedDfg);
                 }
@@ -1286,4 +1281,9 @@ var DataFlowGraphView = Backbone.View.extend({
     dfgShowFiles: function() {
         app.ModalView.showModal("#modal-dfg-files");
     },
+    
+    onChangeDfgSaveAsDfgFilename: function() {
+        var filename = this.$dfgSaveAsFilename.val();
+        this.$dfgSaveAs.prop('disabled', !filename);
+    }
 });

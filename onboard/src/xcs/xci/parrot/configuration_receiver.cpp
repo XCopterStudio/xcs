@@ -38,13 +38,11 @@ void ConfigurationReceiver::handleConnectedConfiguration(const boost::system::er
     if (!socket_.is_open()) {
         XCS_LOG_WARN("Connect configuration socket timed out.");
         connect();
-    }
-    else if (ec){
+    } else if (ec){
         XCS_LOG_WARN("Connect configuration socket error : " + ec.message());
         socket_.close();
         connect();
-    }
-    else{
+    } else {
         XCS_LOG_INFO("Configuration receiver connected.");
         receiveConfiguration();
     }
@@ -68,8 +66,7 @@ void ConfigurationReceiver::handleReceivedConfiguration(const boost::system::err
         XCS_LOG_WARN("Configuration receive error : " + ec.message());
         socket_.close();
         connect();
-    }
-    else{
+    } else {
         
         //cout << buffer_ << endl;
         parseBuffer();
@@ -94,7 +91,7 @@ void ConfigurationReceiver::checkDeadlineConfiguration(){
         // infinity so that the actor takes no action until a new deadline is set.
         deadline_.expires_at(boost::posix_time::pos_infin);
     }
-    else{
+    else {
         deadline_.async_wait(boost::bind(&ConfigurationReceiver::checkDeadlineConfiguration, this));
     }
 };

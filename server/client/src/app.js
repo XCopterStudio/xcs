@@ -2,8 +2,6 @@
 /*jshint unused:false */
 var app = app || {};
 
-gSocket = io.connect('http://' + location.host);
-
 var router = Backbone.Router.extend({
     routes : {
         "manual": "manual"
@@ -20,7 +18,8 @@ $(function () {
     //create app
     app = new AppView();
     
-    //set models 
+    //set models
+    app.Connection = new Connection();
     app.Onboard = new OnboardModel();
     
     //initialize views
@@ -29,6 +28,7 @@ $(function () {
     app.StateView = new StateView();
     app.ModalView = new ModalView();
     app.SettingView = new SettingView();
+    app.ConnectionView = new ConnectionView();
     
     app.FlyControlView = new FlyControlView();
     app.DataView = new DataView();

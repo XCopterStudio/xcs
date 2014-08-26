@@ -80,26 +80,22 @@ var ModalView = Backbone.View.extend({
                     }
                     if(((request.buttons & ModalButtonType.YES) == ModalButtonType.YES)) {
                         this.$btnYes.removeClass("hidden");
-                    }
-                    else {
+                    } else {
                         this.$btnYes.addClass("hidden");
                     }
                     if(((request.buttons & ModalButtonType.NO) == ModalButtonType.NO)) {
                         this.$btnNo.removeClass("hidden");
-                    }
-                    else {
+                    } else {
                         this.$btnNo.addClass("hidden");
                     }
                     if(((request.buttons & ModalButtonType.OK) == ModalButtonType.OK)) {
                         this.$btnOk.removeClass("hidden");
-                    }
-                    else {
+                    } else {
                         this.$btnOk.addClass("hidden");
                     }
                     if(((request.buttons & ModalButtonType.CANCEL) == ModalButtonType.CANCEL)) {
                         this.$btnCancel.removeClass("hidden");
-                    }
-                    else {
+                    } else {
                         this.$btnCancel.addClass("hidden");
                     }
                     

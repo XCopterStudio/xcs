@@ -30,8 +30,7 @@ void AtCommandSender::handleConnectedAtCommand(const boost::system::error_code& 
         XCS_LOG_WARN("Connect atCommand socket error: " + ec.message());
         socket_.close();
         connect();
-    }
-    else{
+    } else {
         XCS_LOG_INFO("atCommand sender connected");
         sendAtCommand();
     }
@@ -44,8 +43,7 @@ void AtCommandSender::sendAtCommand(){
 
         deadline_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
         socket_.async_send(boost::asio::buffer(lastAtcommand_, lastAtcommand_.length()), boost::bind(&AtCommandSender::handleWritedAtCommand, this, _1));
-    }
-    else{
+    } else {
         wait_.expires_from_now(boost::posix_time::milliseconds(1));
         wait_.async_wait(boost::bind(&AtCommandSender::sendAtCommand, this));
     }
@@ -64,7 +62,7 @@ void AtCommandSender::handleWritedAtCommand(const boost::system::error_code& ec)
         socket_.close();
         connect();
     }
-    else{
+    else {
         sendAtCommand();
     }
 }

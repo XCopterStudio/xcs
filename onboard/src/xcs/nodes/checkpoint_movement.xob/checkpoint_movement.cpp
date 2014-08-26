@@ -114,8 +114,7 @@ xcs::VelocityControl CheckpointMovement::flyOnCheckpoint(const double &speed){
             if (reachedCallback_ != nullptr){
                 reachedCallback_(true);
             }
-        }
-        else{
+        } else {
             //double norm = boundSpeed / std::max(std::abs(deltaX), std::max(std::abs(deltaY), std::abs(deltaZ)));
             //return VelocityControl(norm*deltaX, norm*deltaY, norm*deltaZ, 0);
 

@@ -54,7 +54,7 @@ var VideoDataView = AbstractDataView.extend({
 //        this.sourceBuffer.addEventListener('abort', function(e) { console.log('abort: ' + this.ms.readyState); });
 
         gSocket.on('video', this.processVideoSegments);
-        gSocket.emit('resend', JSON.stringify({ type: "onboard", data: "init-video" }));
+        gSocket.emit('relay', JSON.stringify({ type: "onboard", data: "init-video" }));
     },
     
     resetSourceBuffer: function () {

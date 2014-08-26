@@ -5,23 +5,44 @@ using namespace cv;
 using namespace xcs::nodes::reddot;
 
 void RedDot::getRedMask(const cv::Mat &image, cv::Mat &redMask){
-    Scalar lower_red(190,0,0);
-    Scalar upper_red(256,256,256);
+    Mat mask;
+
+    Scalar lower_red(115, 100, 100);
+    Scalar upper_red(125, 200, 200);
     inRange(image, lower_red, upper_red, redMask);
 }
 
 //================ public functions =========
 
-ImagePosition RedDot::findRedDot(const cv::Mat image){
+ImagePosition RedDot::findRedDot(const cv::Mat &image, cv::Mat &out){
     Mat imageHSV;
-
     cvtColor(image, imageHSV, CV_RGB2HSV);
-    imshow("Original image", image);
 
     Mat redMask;
-    getRedMask(image,redMask);
+    //cvtColor(image, redMask, CV_RGB2GRAY);
+    getRedMask(imageHSV,redMask);
+    GaussianBlur(redMask, redMask, Size(9, 9), 2, 2);
+    //cvtColor(redMask, out, CV_GRAY2RGB);
 
-    imshow("Red mask", redMask);
+    vector<Vec3f> circles;
+    HoughCircles(redMask, circles, CV_HOUGH_GRADIENT,
+        4, redMask.cols, 200, 100, 8);
 
-    return ImagePosition(-1, -1);
+    image.copyTo(out);
+    for (size_t i = 0; i < circles.size(); i++)
+    {
+        Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+        int radius = cvRound(circles[i][2]);
+        // draw the circle center
+        circle(out, center, 3, Scalar(0, 255, 0), -1, 8, 0);
+        // draw the circle outline
+        circle(out, center, radius, Scalar(0, 0, 255), 3, 8, 0);
+    }
+
+    if (!circles.empty()){
+        Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
+        return ImagePosition(center.x,center.y);
+    } else {
+        return ImagePosition(-1, -1);
+    }
 }

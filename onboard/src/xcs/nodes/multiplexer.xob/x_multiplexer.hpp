@@ -125,8 +125,7 @@ namespace multiplexer{
     void XMultiplexer<type>::onChangeChannel(unsigned int channel){
         if (channel < channelCount_){
             channel_ = channel;
-        }
-        else{
+        } else {
             XCS_LOG_WARN("Channel number out of range");
         }
     }
@@ -164,8 +163,7 @@ namespace multiplexer{
         if (channelCount < 1){
             channelCount_ = 1;
             XCS_LOG_WARN("None input channel is not allowed. Multiplexer have been created with one.");
-        }
-        else{
+        } else {
             channelCount_ = channelCount;
         }
 

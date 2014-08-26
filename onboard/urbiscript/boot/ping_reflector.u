@@ -1,0 +1,20 @@
+class PingReflector {
+
+    function init(adapter, json) {
+        var this.adapter = adapter;
+        var this.json = json;
+    };
+
+    function receive(data) {
+        // reflect immediately
+        this.send(data);
+    };
+
+    function send(data) {
+        var response = [ => ];
+        response["type"] = "pong";
+        response["data"] = data;
+        this.adapter.send(this.json.encode(response) + "\n");
+    };
+
+}|;

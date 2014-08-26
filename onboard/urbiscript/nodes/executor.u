@@ -13,8 +13,6 @@ class Executor : XObject {
         "error" => Pair.new(String, "EXECUTION_ERROR"),
         "output" => Pair.new(String, "EXECUTION_OUTPUT"),
     ];
-    var state_ = 0; // NOTE: this is necessary to do in every clone of the XObject prototype
-    // NOTE no. 2: it's different from 'state' output port related to executed code
     
     function init(lobby) {
         // Inputs
@@ -25,6 +23,7 @@ class Executor : XObject {
         var this.error = nil;
         var this.output = nil;
 
+        var this.state_ = 0; // NOTE: it's different from 'state' output port related to executed code
         var this.lobby_ = lobby;
         var this.tag = Tag.new();
         var this.job;
@@ -32,6 +31,13 @@ class Executor : XObject {
         
         at(this.tag.leave?) {
             that.state = that.State.IDLE;
+        };
+        
+        at(this.state_->changed?) {
+            switch(that.state_) {
+                case 2: // stopped
+                    that.terminateExecution_();
+            };
         };
         
         /*
@@ -71,14 +77,20 @@ class Executor : XObject {
                 that.state = that.State.RUNNING;
                 that.tag.unfreeze();
             } else if(that.control == "stop") {
-                that.tag.stop();
-                if(that.tag.frozen) { // tag.stop() doesn't leaves the code freezed
-                    that.tag.unfreeze();
-                };
-                that.job.terminate();
-                // NOTE: state will be set in event handler for tag leave
+                that.terminateExecution_();
             }
         });
     }|;
+    
+    function terminateExecution_() {
+        tag.stop();
+        if(tag.frozen) { // tag.stop() does leave the code freezed
+            tag.unfreeze();
+        };
+        if(job) {
+            job.terminate();
+        };
+        // NOTE: state will be set in event handler for tag leave        
+    };
     
 }|;

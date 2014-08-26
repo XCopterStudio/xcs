@@ -46,8 +46,7 @@ class XDatalogger : public xcs::nodes::XObject {
     inline void registerHeader(const std::string &name, const std::string &semanticType, const std::string &syntacticType) {
         if (inited_) {
             context_.file << REGISTER << " " << name << " " << semanticType << " " << syntacticType << std::endl;
-        }
-        else {
+        } else {
             buffer_ << REGISTER << " " << name << " " << semanticType << " " << syntacticType << std::endl;
         }
     }

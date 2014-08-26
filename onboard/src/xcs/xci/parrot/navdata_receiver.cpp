@@ -22,12 +22,11 @@ void NavdataReceiver::handleConnectedNavdata(const boost::system::error_code& ec
     if (!socketNavdata_.is_open()) {
         XCS_LOG_WARN("Connect Navdata socket timed out.");
         connect();
-    }
-    else if (ec){
+    } else if (ec){
         XCS_LOG_WARN("Connect Navdata socket error: " + ec.message());
         socketNavdata_.close();
         connect();
-    }else{
+    }else {
         XCS_LOG_INFO("Navdata socket connected.");
         int32_t flag = 1; // 1 - unicast, 2 - multicast
         deadlineNavdata_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
@@ -44,12 +43,11 @@ void NavdataReceiver::receiveNavdata(const boost::system::error_code& ec) {
     if (!socketNavdata_.is_open()) {
         XCS_LOG_WARN("Navdata receive error connection closed.");
         connect();
-    }
-    else if (ec){
+    } else if (ec){
         XCS_LOG_WARN("Navdata receive error: " + ec.message());
         socketNavdata_.close();
         connect();
-    }else{
+    }else {
         deadlineNavdata_.expires_from_now(boost::posix_time::milliseconds(TIMEOUT));
         socketNavdata_.async_receive(boost::asio::buffer(navdataBuffer, NAVDATA_MAX_SIZE), boost::bind(&NavdataReceiver::handleReceivedNavdata, this, _1, _2));
     }
@@ -67,7 +65,7 @@ void NavdataReceiver::handleReceivedNavdata(const boost::system::error_code& ec,
         XCS_LOG_WARN("Navdata receive error: " + ec.message());
         socketNavdata_.close();
         connect();
-    }else{
+    }else {
         deadlineNavdata_.expires_at(boost::posix_time::pos_infin);
 
         Navdata* navdata = (Navdata*)& navdataBuffer[0];
@@ -124,7 +122,7 @@ void NavdataReceiver::processState(uint32_t parrotState) {
     // parrot is in state in which can not fly
     if (parrotState_.getState(FLAG_ARDRONE_MOTORS_MASK) || parrotState_.getState(FLAG_ARDRONE_SOFTWARE_FAULT) || parrotState_.getState(FLAG_ARDRONE_VBAT_LOW)){
         dataReceiver_.notify("alive", 0);
-    }else{
+    }else {
         dataReceiver_.notify("alive", 1);
     }
 }
