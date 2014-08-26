@@ -130,6 +130,9 @@ var DataFlowGraphView = Backbone.View.extend({
 
         this.listenTo(this.dfgGraph, 'remove', this.onRemoveNode);
         this.listenTo(this.dfgGraph, 'add', this.onAddNode);
+        this.listenTo(this.dfgGraph, 'add', this.onResizeNeed);
+        this.listenTo(this.dfgGraph, 'change:position', this.onResizeNeed);
+
 
         this.initializeDfgToolbox4Drop();
            
@@ -179,6 +182,10 @@ var DataFlowGraphView = Backbone.View.extend({
     
     onAddNode : function(model) {
         this.refreshTooltips(model);
+    },
+    
+    onResizeNeed: function(model) {
+        this.dfgPaper.fitToContent(1024, 500, 50);
     },
     
     refreshTooltips : function(model) {
