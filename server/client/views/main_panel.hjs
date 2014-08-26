@@ -93,7 +93,7 @@
                     </div>
                 </li>
             </ul>
-            <div class="container-fluid" id="connection"></div>
+            <div class="container-fluid" id="connection" xtitle-group="Connection"></div>
         </div>
     </div> <!-- /.container-fluid -->
 </nav>

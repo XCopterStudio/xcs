@@ -8,8 +8,8 @@ var ConnectionView = Backbone.View.extend({
                     <i class="icon-circle" id="led"></i>\
                 </div>\
                 <div class="nav navbar-nav navbar-right">\
-                        <span class="navbar-text">\
-                            <span id="lag">LAG:\
+                        <span class="navbar-text" xtitle="Sum of latencies between client–server and server–onboard.">\
+                            <span id="lag">Lag:\
                                 <span class="value" style="padding-left: 10px;"></span>\
                             ms</span>\
                         </span>\
@@ -68,11 +68,11 @@ var ConnectionView = Backbone.View.extend({
         console.log('server connected');
         if (!model.get('serverConnected')) {
             this.blinkRed();
-            app.Flash.flashError('Server disconnected.');
-        }
-        else {
+            this.$lag.hide();
+            app.Flash.flashError(this.setLedTitle('Server disconnected.'));
+        } else {
             this.shineRed();
-            app.Flash.flashInfo('Server connected.')
+            app.Flash.flashInfo(this.setLedTitle('Server connected.'))
         }
     },
     
@@ -80,11 +80,10 @@ var ConnectionView = Backbone.View.extend({
         console.log('onboard connected');
         if (model.get('onboardConnected')) {
             this.shineGreen();
-            app.Flash.flashInfo('Onboard connected.');
-        }
-        else {
+            app.Flash.flashInfo(this.setLedTitle('Onboard connected.'));
+        } else {
             this.shineRed();
-            app.Flash.flashError('Onboard disconnected.');
+            app.Flash.flashError(this.setLedTitle('Onboard disconnected.'));            
         }
     },
     
@@ -92,8 +91,7 @@ var ConnectionView = Backbone.View.extend({
         var latency = model.get('latency');
         if (latency == -1) {
             this.$lag.hide();   
-        }
-        else {
+        } else {
             this.$lag.show();
             $('.value', this.$lag).html(latency);
         }
@@ -106,6 +104,11 @@ var ConnectionView = Backbone.View.extend({
         if (color in this.colors) {
             this.$led.css({ color: this.colors[color] });
         }
+    },
+    
+    setLedTitle: function(title) {
+        this.$led.attr('xtitle', title).xtooltip();
+        return title; // NOTE: this is hack to co-implementation with flash message
     },
     
     blink: function () {
