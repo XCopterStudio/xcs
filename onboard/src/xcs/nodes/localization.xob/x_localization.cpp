@@ -78,7 +78,6 @@ void XLocalization::onChangeVideo(urbi::UImage image) {
     lock_guard<mutex> lock(lastFrameMtx_);
     // store image until onChangeVideoTime
     lastFrame_ = image;
-    lastFrameTime_ = clock_.now();
 }
 
 void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
