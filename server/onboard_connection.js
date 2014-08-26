@@ -1,9 +1,9 @@
 function OnboardConnection(application, pingInterval) {
     
-    var app = application,
-        net = require('net'),
-        onboard = null,
-        com = net.createServer(handleNewConnection),
+    var app_ = application,
+        net_ = require('net'),
+        onboard_ = null,
+        com_ = net_.createServer(handleNewConnection),
         ping_ = require('./ping_monitor.js'),
         connected_ = false;
     
@@ -11,7 +11,7 @@ function OnboardConnection(application, pingInterval) {
      * Methods
      */
     function start(port) {
-        com.listen(port, function () {
+        com_.listen(port, function () {
             console.log('XCS onboard service running on port ' + port);
         });
     };
@@ -26,15 +26,15 @@ function OnboardConnection(application, pingInterval) {
         });
 
         server.on('message', function (message, remote) {
-            app.Client.send(message, 'video');
+            app_.Client.send(message, 'video');
         });
 
         server.bind(port, host);
     };
 
     function send(data) {
-        if (onboard) {
-            onboard.write(data);
+        if (onboard_) {
+            onboard_.write(data);
         }
     };
     
@@ -46,11 +46,11 @@ function OnboardConnection(application, pingInterval) {
      * Handlers
      */
     function handleNewConnection(socket) {
-        if (onboard) {
+        if (onboard_) {
             console.log('Attempting onboard connect. There\'s one connection already!');
             return;
         }
-        onboard = socket;
+        onboard_ = socket;
         socket.on('end', handleEnd);
         socket.on('data', handleData);
         // set ping monitor
@@ -63,17 +63,17 @@ function OnboardConnection(application, pingInterval) {
         console.log('Onboard connected.');
     };
     
-    var bufferData = '';
+    var bufferData_ = '';
     function handleData(data) {
         try {
             var parsed = JSON.parse(data);
-            bufferData = '';
+            bufferData_ = '';
         } catch(e1) {
             try {
                 console.log('JSON from onboard - try use buffered data.');
-                bufferData += data;
-                parsed = JSON.parse(bufferData);
-                bufferData = '';
+                bufferData_ += data;
+                parsed = JSON.parse(bufferData_);
+                bufferData_ = '';
             } catch (e2) {
                 parsed = null;
                 console.log('ERROR (parse incoming data)' + e1.message);
@@ -86,13 +86,13 @@ function OnboardConnection(application, pingInterval) {
                 return;
             }
             console.log('<<<<<<<<<<<<<<<< JSON from onboard parsed and relaying:');
-            app.Client.send(parsed, 'data');
+            app_.Client.send(parsed, 'data');
             console.log(parsed);
         }
     };
 
     function handleEnd() {
-        onboard = null;
+        onboard_ = null;
         ping_.stopHeartbeat();
         connected_ = false
         notifyClient(connected_);
@@ -100,7 +100,7 @@ function OnboardConnection(application, pingInterval) {
     };
     
     function notifyClient(connected) {
-        app.Client.send({ connected: connected }, 'onboard');   
+        app_.Client.send({ connected: connected }, 'onboard');
     };
     
     return {
