@@ -18,7 +18,7 @@ GD_CATEGORY(Test.All);
 
 # define XBindFunction(xObj, f) UBindFunction(xObj, f)
 
-//# define XNotifyChange(x, f) UNotifyChange(x.data(), f)
+# define XNotifyChange(x, f) UNotifyChange(x.data(), f)
 
 # define XStart(type) UStart(type)
 
