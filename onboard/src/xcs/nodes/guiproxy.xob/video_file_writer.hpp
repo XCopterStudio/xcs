@@ -39,7 +39,7 @@ class VideoFileWriter{
     AVFrame* allocPicture(const PixelFormat pixelFormat, const int width, const int height);
 
 public:
-    VideoFileWriter(const std::string &fileName, const std::string &mimetype, const unsigned int &width = 640, const unsigned int &height = 480, const unsigned int &bitrate = 400000);
+    VideoFileWriter(const std::string &fileName, const std::string &mimetype, const unsigned int &width = 640, const unsigned int &height = 360, const unsigned int &bitrate = 400000);
     ~VideoFileWriter();
     void openVideo();
     void freeResources();

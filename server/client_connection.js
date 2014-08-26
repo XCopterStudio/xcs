@@ -3,29 +3,29 @@ function ClientConnection(application, pingInterval) {
         io_ = require('socket.io')(application.Http),
         client_ = null,
         ping_ = require('./ping_monitor.js');
-    
+
     io_.on('connection', handleNewConnection);
-    
+
     /*
      * Client's interface for RPC-like calls
      */
     var clientIface = {
-     
+
         getLatency: function () {
             var onbLatency = app_.Onboard.ping.getLatency(),
                 srvLatency = ping_.getLatency();
             if (!app_.Onboard.isConnected() || onbLatency == -1 || srvLatency == -1) {
-                return -1;   
+                return -1;
             }
             return srvLatency + onbLatency;
         },
-        
+
         isOnboardConnected: function () {
             return app_.Onboard.isConnected();
         },
-        
+
     }
-    
+
     /*
      * Methods
      */
@@ -34,7 +34,7 @@ function ClientConnection(application, pingInterval) {
             console.log('XCS client service running on port ' + port);
         });
     }
-    
+
     function send(data, eventName) {
         if (client_) {
             if (eventName) {
@@ -45,7 +45,7 @@ function ClientConnection(application, pingInterval) {
             }
         }
     }
-    
+
     /*
      * Handlers
      */
@@ -65,19 +65,21 @@ function ClientConnection(application, pingInterval) {
         });
         console.log('Client connected.');
     }
-    
+
     function handleDisconnect() {
         client_ = null;
         ping_.stopHeartbeat();
+        var data = { type: 'onboard', data: 'client-disconnected' };
+        app_.Onboard.send(JSON.stringify(data) + '\n'); // TODO: remove need to append '\n'
         console.log('Client disconnected.');
     }
-    
+
     function handleRelay(data) {
         console.log('>>>>>>>>>>>>>>>> Client relaying data: ');
         console.log(data);
         app_.Onboard.send(data + '\n');
     }
-    
+
     function handleCall(methodName) {
         if (methodName in clientIface) {
             var returned = clientIface[methodName]();
@@ -85,7 +87,7 @@ function ClientConnection(application, pingInterval) {
             send(data, 'call return');
         }
     }
-    
+
     return {
         start: start,
         send: send,

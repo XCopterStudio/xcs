@@ -30,7 +30,7 @@ class VideoFileWriter{
     AVStream* createVideoStream(const CodecID codecId, const unsigned int &width, const unsigned int &height, const unsigned int &bitrate);
     AVFrame* allocPicture(const PixelFormat pixelFormat, const int width, const int height);
 public:
-    VideoFileWriter(const std::string &fileName, const unsigned int &width = 640, const unsigned int &height = 480, const unsigned int &bitrate = 400000);
+    VideoFileWriter(const std::string &fileName, const unsigned int &width = 640, const unsigned int &height = 360, const unsigned int &bitrate = 400000);
     ~VideoFileWriter();
     void writeVideoFrame(const AVFrame& frame);
 };

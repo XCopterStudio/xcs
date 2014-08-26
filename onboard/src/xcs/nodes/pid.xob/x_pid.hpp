@@ -12,7 +12,7 @@ namespace nodes{
 namespace pid{
 
     class XPID : public XObject{
-        typedef int PidType;
+        typedef double PidType;
         PID<PidType,double> pid_;
         double desireValue_;
 

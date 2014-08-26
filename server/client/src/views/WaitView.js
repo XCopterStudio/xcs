@@ -133,7 +133,7 @@ var WaitView = Backbone.View.extend({
     },
 });
 
-
+// TODO: remove from global scope or put into common.js
 var setDisabled_ = function(self, disabled) {
     if (typeof self.disabled != "undefined") {
         var newDisabled = disabled;

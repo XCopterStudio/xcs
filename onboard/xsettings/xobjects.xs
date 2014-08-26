@@ -9,6 +9,11 @@ Dataplayer {
     args "\"logs/default_log.txt\""
 }
 
+FlyControlAggregator {
+    prototype XFlyControlAggregator
+    file xflycontrol_aggregator
+}
+
 XciDodo {
     prototype XXci
     args "\"xci_dodo\""
@@ -38,6 +43,10 @@ FlyControl {
     prototype XMultiplexerFlyControl
     file xmultiplexer
     args "2, true"
+}
+
+PID {
+    prototype XPID
 }
 
 Localization {

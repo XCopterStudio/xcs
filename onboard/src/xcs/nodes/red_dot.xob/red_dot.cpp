@@ -14,7 +14,7 @@ void RedDot::getRedMask(const cv::Mat &image, cv::Mat &redMask){
 
 //================ public functions =========
 
-ImagePosition RedDot::findRedDot(const cv::Mat &image, cv::Mat &out){
+bool RedDot::findRedDot(const cv::Mat &image, cv::Mat &out){
     Mat imageHSV;
     cvtColor(image, imageHSV, CV_RGB2HSV);
 
@@ -41,8 +41,10 @@ ImagePosition RedDot::findRedDot(const cv::Mat &image, cv::Mat &out){
 
     if (!circles.empty()){
         Point center(cvRound(circles[0][0]), cvRound(circles[0][1]));
-        return ImagePosition(center.x,center.y);
-    } else {
-        return ImagePosition(-1, -1);
-    }
+        lastPosition_ = ImagePosition(center.x, center.y);
+        return true;
+    } 
+
+
+    return false;
 }

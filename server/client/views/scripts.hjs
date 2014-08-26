@@ -22,16 +22,16 @@
 <script type="text/javascript" src="js/flot/jquery.flot.min.js"></script>
 <!-- cookies -->
 <script type="text/javascript" src="js/jquery-cookie-master/jquery.cookie.js"></script>
-<!-- Custom scripts -->
-<script type="text/javascript" src="js/custom.js"></script>
-<!-- 
+<!--
 <script type="text/javascript" src="js/widgets/map.js"></script>
 <script type="text/javascript" src="js/widgets/video.js"></script>
 -->
-<!-- 
+<!--
 	XCS Client logic
  -->
 <script type="text/javascript" src="socket.io/socket.io.js"></script>
+
+<script type="text/javascript" src="src/common.js"></script>
 
 <script type="text/javascript" src="src/models/Connection.js"></script>
 <script type="text/javascript" src="src/models/FlyControlModel.js"></script>

@@ -1,23 +1,35 @@
 class Adapter {
-    var _socket;
+    var socket_;
     var output;
 
     function init() {
-        output = Object.clone();
+        output = Object.clone(); // needs to be assigned for the output->changed? to work
+        var this.connected = false; // alternative for Object.clone() above with initialization
     };
 
     function start(server, port) {
-        _socket = Socket.new();
-        _socket.connect(server, port);
+        socket_ = Socket.new();
+        at (socket_.connected?) {
+            XCS_LOG_INFO("Connected to server %s:%s." % [server, port]);
+            this.connected = true;
+        };
+        at (socket_.disconnected?) {
+            XCS_LOG_WARN("Disconnected from server.");
+            this.connected = false;
+        };
+        at (socket_.error?(var message)) {
+            XCS_LOG_ERROR(message);
+        };
         var receiveMtx = Mutex.new();
-        at (_socket.received?(var data)) receiveMtx: {
+        at (socket_.received?(var data)) receiveMtx: {
             output = data;
         };
-        clog << "Started adapter %s:%s." % [server, port];
+
+        socket_.connect(server, port);
     };
 
     function send(data) {
-        assert(_socket != nil);
-        _socket.write(data);
+        assert(socket_ != nil);
+        socket_.write(data);
     };
 }|;

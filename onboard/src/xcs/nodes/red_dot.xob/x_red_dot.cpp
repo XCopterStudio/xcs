@@ -14,7 +14,8 @@ void XRedDot::onChangeVideo(::urbi::UImage image){
     memcpy(lastImage.data, image.data, image.height*image.width * 3);
 
     Mat out;
-    ImagePosition circle = redDot_.findRedDot(lastImage, out);
+    bool foundDot = redDot_.findRedDot(lastImage, out);
+    found = foundDot;
 
     urbi::UImage bin;
     bin.width = image.width;
@@ -24,14 +25,11 @@ void XRedDot::onChangeVideo(::urbi::UImage image){
     bin.data = out.data;
     enhancedVideo = bin;
 
-    if (circle.x >= 0 && circle.y >= 0){
-        found = true;
-    } else {
-        found = false;
-    }
-
-    errorX = image.width - circle.x;
-    errorY = image.height - circle.y;
+    if(foundDot){
+        ImagePosition center = redDot_.lastPosition();
+        errorX = (image.width / 2.0) - center.x;
+        errorY = center.y - (image.height/2.0);
+    } 
 }
 
 //=============== public functions ===============

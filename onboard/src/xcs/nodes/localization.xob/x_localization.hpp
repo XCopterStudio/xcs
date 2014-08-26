@@ -58,7 +58,6 @@ class XLocalization : public XObject {
     double flyControlSendTime_;
     ::urbi::UImage lastFrame_;
     std::mutex lastFrameMtx_;
-    TimePoint lastFrameTime_;
     std::atomic<bool> ptamEnabled_;
 
     void onChangeVelocity(xcs::CartesianVector measuredVelocity);

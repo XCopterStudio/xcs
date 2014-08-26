@@ -1,12 +1,12 @@
 function OnboardConnection(application, pingInterval) {
-    
+
     var app_ = application,
         net_ = require('net'),
         onboard_ = null,
         com_ = net_.createServer(handleNewConnection),
         ping_ = require('./ping_monitor.js'),
         connected_ = false;
-    
+
     /*
      * Methods
      */
@@ -16,20 +16,20 @@ function OnboardConnection(application, pingInterval) {
         });
     };
 
-    function startVideo(host, port) {
+    function startVideo(port) {
         var dgram = require('dgram'),
             server = dgram.createSocket('udp4');
 
         server.on('listening', function () {
             var address = server.address();
-            console.log('XCS video UDP Server listening on ' + address.address + ":" + address.port);
+            console.log('XCS video UDP Server listening on port ' + address.port);
         });
 
         server.on('message', function (message, remote) {
             app_.Client.send(message, 'video');
         });
 
-        server.bind(port, host);
+        server.bind(port);
     };
 
     function send(data) {
@@ -37,11 +37,11 @@ function OnboardConnection(application, pingInterval) {
             onboard_.write(data);
         }
     };
-    
+
     function isConnected() {
         return connected_;
     };
-    
+
     /*
      * Handlers
      */
@@ -62,7 +62,7 @@ function OnboardConnection(application, pingInterval) {
         notifyClient(connected_);
         console.log('Onboard connected.');
     };
-    
+
     var bufferData_ = '';
     function handleData(data) {
         try {
@@ -98,11 +98,11 @@ function OnboardConnection(application, pingInterval) {
         notifyClient(connected_);
         console.log('Onboard disconnected.');
     };
-    
+
     function notifyClient(connected) {
         app_.Client.send({ connected: connected }, 'onboard');
     };
-    
+
     return {
         start: start,
         startVideo: startVideo,

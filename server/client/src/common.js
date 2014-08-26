@@ -6,7 +6,7 @@
 /* CONTEXT MENU */
 /****************/
 (function ($, window) {
-    $.fn.contextMenu = function (options) {   
+    $.fn.contextMenu = function (options) {
         return this.each(function () {
             $(this).on("contextmenu", function (e) {
                 // show context menu
@@ -21,11 +21,11 @@
                     .on("click", function (e) {
                         // hide context menu
                         $(this).hide();
-                
+
                         // get information about click action
                         var target = $(this).data("contextMenuTarget");
                         var selectedMenuItem = $(e.target);
-                        
+
                         // call click action
                         options.menuSelected.call(this, target, selectedMenuItem);
                     })
@@ -34,20 +34,20 @@
                         // hide context menu
                         $(this).hide();
                     });
-                
+
                 return false;
             });
-    
+
             //make sure menu closes on any click
             $(options.parentSelector).click(function () {
                 $(options.menuSelector).hide();
             });
         });
-    
+
         function getLeft(e) {
             // select parent element - bordet for context menu
             var parent = $(options.parentSelector);
-            
+
             // get coordinates
             var mouseX = e.pageX - parent.offset().left;
             var parentWidth = parent.width(); //$(window).width();
@@ -56,35 +56,86 @@
             // determine if the menu will drop left/right
             if (mouseX + menuWidth > parentWidth && menuWidth < mouseX) {
                 return e.pageX - menuWidth;
-            } 
-            
+            }
+
             return e.pageX;
-        }        
-        
+        }
+
         function getTop(e) {
             // select parent element - bordet for context menu
             var parent = $(options.parentSelector);
-            
+
             // get coordinates
             var mouseY = e.pageY - parent.offset().top;
             var parentHeight = parent.height();
             var menuHeight = $(options.menuSelector).height();
-            
+
             // determine if the menu will drop up/down
             if (mouseY + menuHeight > parentHeight && menuHeight < mouseY) {
                 return e.pageY - menuHeight;
-            } 
-            
+            }
+
             return e.pageY;
         }
-    
+
     };
+
+    $.fn.xtooltip = function () {
+        return this.each(function () {
+            // prepare content
+            var content = '';
+            var title = $(this).attr("xtitle");
+            var group = $(this).closest("[xtitle-group]").attr("xtitle-group");
+            if(group) {
+                content = '<strong>' + group + ': </strong>';
+            }
+            if(title) {
+                content += '<p>' + title + '</p>'
+            }
+
+            // prepare placement: top/bottom
+            var offsetTop = getOffsetTop($(this));
+            var placement = 'top';
+            if(offsetTop < 150) {
+                placement = 'bottom';
+            }
+
+            // set tooltip
+            if(content) {
+                $(this).tooltip({
+                    title: content,
+                    placement: placement,
+                    delay: { show: 1000, hide: 0 },
+                    html: true,
+                });
+            }
+        });
+    };
+
+    function getOffsetTop($el) {
+        var $current = $el;
+        while(true) {
+            var offset = $current.offset();
+            if(offset && offset.top > 0) {
+                break;
+            }
+
+            $current = $current.parent();
+
+            if($current.length == 0) {
+                $current = $el;
+                break;
+            }
+        }
+
+        return $current.offset().top;
+    }
 })(jQuery, window);
 
 $.fn.toggleClick = function () {
     'use strict';
     var methods = arguments, // store the passed arguments for future reference
-        count = methods.length; // cache the number of methods 
+        count = methods.length; // cache the number of methods
 
     //use return this to maintain jQuery chainability
     return this.each(function (i, item) {
@@ -97,74 +148,22 @@ $.fn.toggleClick = function () {
     });
 };
 
-
-$(function() {
-    /***
-    
-    // sidepanels init
-    //$("#left-menu").css("float", "left").css("background", "whitesmoke").css("overflow", "hidden").css("width", "50px").css("z-index", "1001");
-    
-    initSidepanels();
-    
-    sampleRun();
-    
-    ***/
-    
-    // Setup drop down menu (4 input)
-    $('.dropdown-toggle').dropdown();
-    $('.dropdown-menu input, .dropdown-menu label, .dropdown-menu .dropdown-header').click(function(e) {
-        e.stopPropagation();
-    });
-});
-
-function initSidepanels() {
-    var startWidth = 70;
-    var endWidth = 300;
-    
-    $('.sidepanel').width(startWidth);
-    $('.sidepanel li > a > h3').hide();
-    
-    $('.sidepanel-left-trigger').toggleClick(function () {
-        $('.sidepanel-left').animate({
-            width: endWidth
-        }, 0);
-        $('.sidepanel-left li > a > h3').show();
-    }, function () {
-        $(".sidepanel-left").animate({
-            width: startWidth
-        }, 0);
-        $('.sidepanel-left li > a > h3').hide();
-    });
-    
-    $('.sidepanel-right-trigger').toggleClick(function () {
-        $('.sidepanel-right').animate({
-            width: endWidth
-        }, 0);
-        $('.sidepanel-right li > a > h3').show();
-    }, function () {
-        $(".sidepanel-right").animate({
-            width: startWidth
-        }, 0);
-        $('.sidepanel-right li > a > h3').hide();
-    });
-}
-
 // create enum
 var ENUM = function() {
     var self = {};
-    
+
     // vars 4 enum mask
     var maskValue = 1;
     self.mask = {};
-    
+
     // add enum values from arguments
     for (var arg in arguments) {
         self[arguments[arg]] = maskValue;
-        
+
         self.mask[arguments[arg]] = maskValue;
         maskValue *= 2;
     }
-    
+
     // add enum value for nothing
     var noneKey = "None";
     if(!self[noneKey]){
@@ -174,7 +173,7 @@ var ENUM = function() {
     else {
         noneKey = "";
     }
-    
+
     // add enum value for everithing
     var allKey = "All";
     if(!self[allKey]) {
@@ -184,14 +183,14 @@ var ENUM = function() {
                 maskValue |= self.mask[m];
             }
         }
-        
+
         self[allKey] = maskValue;
         self.mask[allKey] = maskValue;
     }
     else {
         allKey = "";
     }
-    
+
     // find single name for value
     self.getName = function(value) {
         for(var p in self.mask) {
@@ -200,7 +199,7 @@ var ENUM = function() {
             }
         }
     };
-    
+
     // find array of all names for value
     self.getNames = function(value) {
         var names = [];
@@ -212,18 +211,18 @@ var ENUM = function() {
                 }
             }
         }
-        
+
         return names;
     };
-       
+
     // freeze the enum
     if (Object.freeze) {
         try {
-            Object.freeze(self);   
+            Object.freeze(self);
         }
         catch(ex){
         }
     }
-    
+
     return self;
 };
