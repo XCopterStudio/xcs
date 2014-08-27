@@ -242,13 +242,6 @@
                 <li><a href="#" id="dfg-trigger"><i class="icon-double-angle-up"></i> DFG</a></li>
             </ul>
             <div class="nav navbar-nav" xtitle-group="Data Flow Graph">
-                <button id="dfgLoad" type="button" class="btn btn-info navbar-btn" xtitle="load information about nodes and fill the Toolbox">Load nodes</button>
-                <div class="btn-group">
-                    <button id="dfgCreate" type="button" class="btn btn-primary navbar-btn" xtitle="send DFG to x-copter and create it">Create DFG</button>
-                    <button id="dfgStart" type="button" class="btn btn-success navbar-btn" xtitle="start data flow for created nodes">Start Flow</button>
-                    <button id="dfgStop" type="button" class="btn btn-warning navbar-btn" xtitle="stop data flow for created nodes">Stop Flow</button>
-                    <button id="dfgDestroy" type="button" class="btn btn-danger navbar-btn" xtitle="destroy created DFG on x-copter">Destroy DFG</button>
-                </div>
                 <div class="btn-group dropup">
                     <button id="dfgOtherAction" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                         <i class="icon-reorder"></i>
@@ -284,6 +277,13 @@
                         </li>
                         <li role="presentation" class="divider"></li>
                     </ul>
+                </div>
+                <button id="dfgLoad" type="button" class="btn btn-info navbar-btn" xtitle="load information about nodes and fill the Toolbox">Load nodes</button>
+                <div class="btn-group">
+                    <button id="dfgCreate" type="button" class="btn btn-primary navbar-btn" xtitle="send DFG to x-copter and create it">Create DFG</button>
+                    <button id="dfgStart" type="button" class="btn btn-success navbar-btn" xtitle="start data flow for created nodes">Start Flow</button>
+                    <button id="dfgStop" type="button" class="btn btn-warning navbar-btn" xtitle="stop data flow for created nodes">Stop Flow</button>
+                    <button id="dfgDestroy" type="button" class="btn btn-danger navbar-btn" xtitle="destroy created DFG on x-copter">Destroy DFG</button>
                 </div>
             </div>
 
