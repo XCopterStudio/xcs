@@ -38,7 +38,7 @@ build-arch:
 
 binary: binary-arch binary-indep
 
-binary-indep:
+binary-indep: bin-xcs-onboard
 
 binary-arch: bin-xcs-core bin-xcs-core-dev\
   $(addprefix bin-driver-, $(DRIVERS)) bin-driver-dev\
@@ -48,7 +48,7 @@ clean: $(addprefix clean-driver-, $(DRIVERS))\
   $(addprefix clean-node-, $(NODES))
 	rm -f build-arch binary-arch prepare_binary
 	rm -rf $(ONBOARD_BUILD_DIR) $(ONBOARGD_INS_DIR)
-	rm -rf $(MK_DIR)/xcs-core $(MK_DIR)/xcs-core-dev $(MK_DIR)/xcs-driver-dev
+	rm -rf $(MK_DIR)/xcs-core $(MK_DIR)/xcs-core-dev $(MK_DIR)/xcs-driver-dev $(MK_DIR)/xcs-onboard
 
 #
 # Implementation
@@ -85,6 +85,11 @@ bin-xcs-core-dev: prepare_binary
 	dpkg-gencontrol -pxcs-core-dev -P$(MK_DIR)/xcs-core-dev
 	dpkg-deb -b $(MK_DIR)/xcs-core-dev ..
 
+bin-xcs-onboard: prepare_binary
+	mkdir -p $(MK_DIR)/xcs-onboard/DEBIAN
+	rm -rf $(MK_DIR)/files
+	dpkg-gencontrol -pxcs-onboard -P$(MK_DIR)/xcs-onboard
+	dpkg-deb -b $(MK_DIR)/xcs-onboard ..
 
 clean-driver-%:
 	rm -rf $(MK_DIR)/xcs-driver-$*
