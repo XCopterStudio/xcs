@@ -1,13 +1,18 @@
 class Onboard {
 
     class XcsPaths {
-        var settings = { if("XCS_SETTINGS_PATH" in System.env) Path.new(System.env["XCS_SETTINGS_PATH"]) else Path.cwd / "xsettings" };
-        var dfgs = { if("XCS_DFGS_PATH" in System.env) Path.new(System.env["XCS_DFGS_PATH"]) else Path.cwd / "dfgs" };
-        var scripts = { if("XCS_USER_SCRIPTS_PATH" in System.env) Path.new(System.env["XCS_USER_SCRIPTS_PATH"]) else Path.cwd / "urbiscript/user" };
+        var settings = { if("XCS_SETTINGS_PATH" in System.env) Path.new(System.env["XCS_SETTINGS_PATH"]) else Path.cwd / "data/settings" };
+        var dfgs = { if("XCS_DFGS_PATH" in System.env) Path.new(System.env["XCS_DFGS_PATH"]) else Path.cwd / "data/dfgs" };
+        var scripts = { if("XCS_USER_SCRIPTS_PATH" in System.env) Path.new(System.env["XCS_USER_SCRIPTS_PATH"]) else Path.cwd / "data/scripts" };
+        var logs = { if("XCS_LOGS_PATH" in System.env) Path.new(System.env["XCS_LOGS_PATH"]) else Path.cwd / "data/logs" };
 
         function getSettings(filename) {
             (settings / filename).asString();
-        }|;
+        };
+        
+        function getLog(filename) {
+            (logs / filename).asString();
+        };
     };
 
     var nodeContainer_;
@@ -52,7 +57,7 @@ class Onboard {
 
         
         // load nodes settings
-        var settingsCollection = SettingsCollection.new([XcsPaths.getSettings("xobjects.xs")]);
+        var settingsCollection = SettingsCollection.new([XcsPaths.getSettings(onboardSettings_.get("nodesSettings"))]);
         nodeContainer_ = NodeContainer.new(settingsCollection, context);
         
         // prepare storages

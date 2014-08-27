@@ -1,12 +1,12 @@
 Datalogger { ; this is configuration name
-    prototype XDatalogger                  ; (default is configuration name)
-    ;file xdatalogger.u                     ; (default lowecased name of the prototype)
-    args "\"logs/default_log.txt\""  ; these are init's arguments (default none)
+    prototype XDatalogger                               ; (default is configuration name)
+    ;file xdatalogger.u                                 ; (default lowecased name of the prototype)
+    args "xcsPaths.getLog(\"default_log.txt\")"    ; these are init's arguments (default none)
 }
 
 Dataplayer {
     prototype XDataplayer
-    args "\"logs/default_log.txt\""
+    args "xcsPaths.getLog(\"default_log.txt\")"
 }
 
 FlyControlAggregator {
