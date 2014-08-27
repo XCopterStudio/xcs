@@ -99,7 +99,7 @@
 </nav>
 
 <!-- Flash messages -->
-<div id="flash-messages">
+<div id="flash-messages" style="top: 60px;">
 </div>
 
 <div class="container-fluid" id="data-from-onboard">
