@@ -81,3 +81,9 @@ SemanticReceiver {
     "]"
     receiver true
 }
+
+FlyControlMultiplexer {
+    prototype XMultiplexerFlyControl
+    file xmultiplexer
+    args "2 , false"
+}

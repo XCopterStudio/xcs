@@ -67,7 +67,7 @@ namespace multiplexer{
     template<class type>
     void Channel<type>::onChangeInput(const type data){
         if (defaultSetChannel_) {
-            if (id_ <= minChannel_) {
+            if (id_ <= minChannel_ && !stopped_) {
                 output_ = data;
                 minChannel_ = id_;
             }
@@ -116,7 +116,7 @@ namespace multiplexer{
         
             Bind output and setChannel in Urbi and set notifier onChangeChannel on setChannel input port.
             \param channelCount how much input channel will be created
-            \param defaultSetChannel flag if default set channle should be used
+            \param defaultSetChannel flag if default set channel should be used
         */
         void init(const unsigned int channelCount, const bool defaultSetChannel);
     };
