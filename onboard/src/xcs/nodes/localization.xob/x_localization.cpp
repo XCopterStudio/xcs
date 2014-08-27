@@ -81,6 +81,10 @@ void XLocalization::onChangeVideo(urbi::UImage image) {
 }
 
 void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
+    if (lastFrame_.data == nullptr){
+        return;
+    }
+
     if (!ptamEnabled_) {
         ptamStatus = static_cast<int> (PTAM_DISABLED);
         return;
@@ -174,6 +178,7 @@ XLocalization::XLocalization(const std::string &name) :
   rotation("ROTATION"),
   velocityPsi("ROTATION_VELOCITY_ABS"),
   ptamStatus("PTAM_STATUS") {
+    lastFrame_.data = nullptr;
     startTime_ = clock_.now();
     lastMeasurementTime_ = 0;
     flyControlSendTime_ = FLY_CONTROL_SEND_TIME;

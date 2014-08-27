@@ -335,7 +335,7 @@ class NodeContainer {
                     load(kvp.second, lobby_); // NOTE: we're loading it in the context of this (the container)
                     loadedXObjects_[kvp.first] = SourceFiles.URBISCRIPT;
                 } catch(var e) {
-                     XCS_LOG_ERROR("Cannot load '" + kvp.second + "'.\nCause:\n" + e + "\n");
+                     XCS_LOG_ERROR("Cannot load '" + kvp.second + "'.\nCause:\n" + e.asString().asPrintable() + "\n");
                      continue;
                 };
             };
