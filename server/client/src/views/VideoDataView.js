@@ -8,8 +8,11 @@ var VideoDataView = AbstractDataView.extend({
             <canvas id="canvas_<%= widgetId %>_<%= dataId %>"></canvas>\
         </div>\
     </li>',
+
     sizeX: 3,
+
     sizeY: 3,
+
     init: function() {
 
         window.MediaSource = window.MediaSource || window.WebKitMediaSource;
@@ -47,11 +50,7 @@ var VideoDataView = AbstractDataView.extend({
         this.ms.addEventListener('sourceopen', this.initSourceBuffer, false);
         this.ms.addEventListener('sourceclose', this.resetSourceBuffer, false);
 
-//        this.ms.addEventListener('sourceended', function(e) { console.log('sourceended: ' + this.ms.readyState); });
-//        this.ms.addEventListener('error', function(e) { console.log('error: ' + this.ms.readyState); });
-
         this.listenTo(app.Onboard, "sem_update:ROTATION", this.onRotationChange);
-
 
         /*
          * Initialization
@@ -62,56 +61,43 @@ var VideoDataView = AbstractDataView.extend({
         });
 
     },
+
     setData: function(data) {
         // empty, data retrieved directly from websocket
     },
     /*
      * Buffer handling
      */
+
     initSourceBuffer: function() {
-        console.log("MediaSource OPENED.");
+        console.log('MediaSource element initiated.');
         this.queue = [];
-        //sourceBuffer = ms.addSourceBuffer('video/mp4;codecs="avc1.4D401F"');
         this.sourceBuffer = this.ms.addSourceBuffer('video/webm;codecs="vp8"');
         this.sourceBuffer.addEventListener('update', this.appendSourceBuffer); // Note: Have tried 'updateend'
-        // debugging
-//        this.sourceBuffer.addEventListener('updatestart', function(e) { console.log('updatestart: ' + this.ms.readyState); });
-//        this.sourceBuffer.addEventListener('update', function(e) { console.log('update: ' + this.ms.readyState); });
-//        this.sourceBuffer.addEventListener('updateend', function(e) { console.log('updateend: ' + this.ms.readyState); });
-//        this.sourceBuffer.addEventListener('error', function(e) { console.log('error: ' + this.ms.readyState); });
-//        this.sourceBuffer.addEventListener('abort', function(e) { console.log('abort: ' + this.ms.readyState); });
 
         gSocket.on('video', this.processVideoSegments);
         gSocket.emit('relay', JSON.stringify({type: "onboard", data: "init-video"}));
     },
+
     resetSourceBuffer: function() {
-        // TODO: listener should also be removed on DFG destroy action, 
+        // TODO: listener should also be removed on DFG destroy action,
         // which leads to methods onDestroy, onCreate, onStart, onStop on DataViews for similar purposes
         // onStop method shuould fire this method for live camera view to proceed correctly on next start
         gSocket.removeListener('video', this.processVideoSegments);
         this.elVideo.src = window.URL.createObjectURL(this.ms);
     },
+
     processVideoSegments: function(data) {
         this.queue.push(new Uint8Array(data));
         this.appendSourceBuffer();
-        //  debugging
-//        var i,
-//            len,
-//            ranges = sourceBuffer.buffered;
-//
-//        console.log("--STATUS-------");
-//        console.log("CURRENT TIME: " + video.currentTime);
-//        console.log("BUFFERED RANGES: " + ranges.length);
-//        for (i = 0, len = ranges.length; i < len; i += 1) {
-//            console.log("RANGE: " + ranges.start(i) + " - " + ranges.end(i));
-//        }
-//        console.log("---------------");
     },
+
     appendSourceBuffer: function() {
         if (this.queue.length > 0 && !this.sourceBuffer.updating) {
             this.sourceBuffer.appendBuffer(this.queue.shift());
         }
     },
+
     /*
      * Events
      */
@@ -125,6 +111,7 @@ var VideoDataView = AbstractDataView.extend({
             this.drawCross(-data.phi, 0, this.pitchFactor * Math.sin(data.theta), clear);
         }
     },
+
     /*
      * Utility
      */
@@ -153,6 +140,7 @@ var VideoDataView = AbstractDataView.extend({
         context.strokeStyle = strokeStyle;
         context.stroke();
     },
+
     setDimensions: function(width, height) {
         // preserve original values when dimension not set
         width = (width === null) ? this.elVideo.width : width;
@@ -171,6 +159,7 @@ var VideoDataView = AbstractDataView.extend({
         this.$video.css({top: 0, left: 0});
         this.$canvas.css({top: 0, left: 0});
     },
+
     /*
      * Settings
      */
@@ -181,10 +170,12 @@ var VideoDataView = AbstractDataView.extend({
         showAttitude: {name: "show attitude cross", type: SettingType.BOOLEAN, default: true},
         pitchFactor: {name: "pitch factor", type: SettingType.NUMBER, default: 300},
     },
+
     validateSettings: function(settings) {
         var result = [];
         return result; // TODO validation
     },
+
     setSettings: function(settings) {
         for(var i in settings) {
             var setting = settings[i];
@@ -195,7 +186,7 @@ var VideoDataView = AbstractDataView.extend({
                 }
             }
         }
-        
+
         this.setDimensions(this.width, this.height);
     },
 });

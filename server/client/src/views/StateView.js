@@ -9,8 +9,7 @@ var StateView = Backbone.View.extend({
         }
 
         window.onunload = function() {
-            //TODO: send message to onboard?
-            console.log("DISCONNECTING FROM ONBOARD!");
+            // empty... possible actions for leaving GUI
         }
 
         window.onload = function() {
