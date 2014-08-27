@@ -3,12 +3,7 @@ nbproject
 build/*
 !build/.placeholder
 */CMakeLists.txt.user
-urbiscript/log
-urbiscript/_log.bat
-urbiscript/_run.bat
-urbiscript/pokus.txt
+experiments
 urbiscript/debug.u
 doc/html/*
 doc/latex/*
-tmp
-xsettings/userdata
