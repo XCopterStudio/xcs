@@ -38,7 +38,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Widget settings</h4>
+                    <h4 class="modal-title">Settings</h4>
                 </div>
                 <div class="modal-body">
                     <form class="form-horizontal" role="form">
@@ -89,7 +89,7 @@
             <ul class="nav navbar-nav">
                 <li>
                     <div class="btn-group">
-                        <button class="disabled btn navbar-btn btn-large">Settings</button>
+                        <button class="btn navbar-btn btn-large" id="settings">Settings</button>
                     </div>
                 </li>
             </ul>
