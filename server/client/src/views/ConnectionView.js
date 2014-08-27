@@ -92,6 +92,10 @@ var ConnectionView = Backbone.View.extend({
         } else {
             this.$lag.show();
             $('.value', this.$lag).html(latency);
+            // notify user
+            if (latency >= app.settings.latencyTreshold.value) {
+                app.Flash.flashWarning('Latency treshold exceeded.');
+            }
         }
     },
 
