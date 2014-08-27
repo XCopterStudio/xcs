@@ -68,9 +68,11 @@ var ConnectionView = Backbone.View.extend({
         if (!model.get('serverConnected')) {
             this.blinkRed();
             this.$lag.hide();
+            app.setEnabledOnboard(false);
             app.Flash.flashError(this.setLedTitle('Server disconnected.'));
         } else {
             this.shineRed();
+            app.setEnabledOnboard(false);
             app.Flash.flashInfo(this.setLedTitle('Server connected.'))
         }
     },
@@ -78,9 +80,11 @@ var ConnectionView = Backbone.View.extend({
     handleOnboardConnected: function (model) {
         if (model.get('onboardConnected')) {
             this.shineGreen();
+            app.setEnabledOnboard(true);
             app.Flash.flashInfo(this.setLedTitle('Onboard connected.'));
         } else {
             this.shineRed();
+            app.setEnabledOnboard(false);
             app.Flash.flashError(this.setLedTitle('Onboard disconnected.'));
         }
     },

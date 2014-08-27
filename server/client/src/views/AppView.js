@@ -62,6 +62,15 @@ var AppView = Backbone.View.extend({
             }
         }
         return error;
+    },
+
+    setEnabledOnboard: function (enabled) {
+        if (enabled) {
+            $('#bottom-toolbar button').removeClass('disabled');
+        }
+        else {
+            $('#bottom-toolbar button').addClass('disabled');
+        }
     }
 
 });
