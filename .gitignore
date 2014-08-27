@@ -11,16 +11,6 @@ onboard/compute_parameters
 onboard/octave/
 onboard/src/xcs/xci/vrep/vrep/
 
-# ondrap files
-onboard/logs/display_ang_phi.sh
-onboard/logs/display_ang_theta.sh
-onboard/logs/display_position_xy.sh
-onboard/logs/display_position_z.sh
-onboard/logs/display_rotation_psi.sh
-onboard/logs/display_vel_x.sh
-onboard/logs/display_vel_y.sh
-onboard/logs/display_vel_z.sh
-
 # it's site-specific symlink
 3rd-party/armadillo
 3rd-party/blas
