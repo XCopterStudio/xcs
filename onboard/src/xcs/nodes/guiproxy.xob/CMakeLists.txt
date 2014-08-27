@@ -1,4 +1,4 @@
-set(PROJECT_NAME guiproxy)
+set(PROJECT_NAME xguiproxy)
 project(${PROJECT_NAME})
 
 file(GLOB SOURCES *.cpp)

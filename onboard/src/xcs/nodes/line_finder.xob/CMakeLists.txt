@@ -7,7 +7,7 @@ file(GLOB HEADERS *.hpp)
 add_x_object(${PROJECT_NAME} MODULE ${SOURCES} ${HEADERS})
 
 x_target_link_libraries(${PROJECT_NAME} xcs)
-x_target_link_libraries(${PROJECT_NAME} xlinedrawer)
+x_target_link_libraries(${PROJECT_NAME} xline_drawer)
 
 # opencv
 find_package( OpenCV REQUIRED )

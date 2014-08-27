@@ -1,4 +1,4 @@
-set(PROJECT_NAME xreddot)
+set(PROJECT_NAME xred_dot)
 project(${PROJECT_NAME})
 
 file(GLOB SOURCES *.cpp)

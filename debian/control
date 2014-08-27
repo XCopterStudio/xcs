@@ -127,17 +127,17 @@ Description: SDK for robotics
 
 Package: xcs-driver-parrot
 Architecture: any
-Depends: ${shlibs-driver:Depends}
+Depends: ${shlibs-driver-parrot:Depends}
 Description: SDK for robotics
 
 Package: xcs-driver-dodo
 Architecture: any
-Depends: ${shlibs-driver:Depends}
+Depends: ${shlibs-driver-dodo:Depends}
 Description: SDK for robotics
 
 Package: xcs-driver-vrep
 Architecture: any
-Depends: ${shlibs-driver:Depends}
+Depends: ${shlibs-driver-vrep:Depends}
 Description: SDK for robotics
 
 #
@@ -160,6 +160,11 @@ Description: Development files for Urbi SDK
 #
 # Nodes
 #
+Package: xcs-node-checkpoint-movement
+Architecture: all
+Depends: ${shlibs-node-checkpoint-movement:Depends}
+Description: XCS node checkpoint-movement...
+
 Package: xcs-node-control
 Architecture: all
 Depends: ${shlibs-node-control:Depends}
@@ -175,20 +180,25 @@ Architecture: all
 Depends: ${shlibs-node-dataplayer:Depends}
 Description: XCS node dataplayer...
 
-Package: xcs-node-hermit-movement
+Package: xcs-node-flycontrol-aggregator
 Architecture: all
-Depends: ${shlibs-node-hermit-movement:Depends}
-Description: XCS node hermit-movement...
+Depends: ${shlibs-node-flycontrol-aggregator:Depends}
+Description: XCS node flycontrol-aggregator...
+
+Package: xcs-node-guiproxy
+Architecture: all
+Depends: ${shlibs-node-guiproxy:Depends}
+Description: XCS node guiproxy...
 
 Package: xcs-node-json
 Architecture: all
 Depends: ${shlibs-node-json:Depends}
 Description: XCS node json...
 
-Package: xcs-node-line-drawer
-Architecture: all
-Depends: ${shlibs-node-line-drawer:Depends}
-Description: XCS node line-drawer...
+#Package: xcs-node-line-drawer
+#Architecture: all
+#Depends: ${shlibs-node-line-drawer:Depends}
+#Description: XCS node line-drawer...
 
 Package: xcs-node-line-finder
 Architecture: all
@@ -210,6 +220,16 @@ Architecture: all
 Depends: ${shlibs-node-multiplexer:Depends}
 Description: XCS node multiplexer...
 
+Package: xcs-node-pid
+Architecture: all
+Depends: ${shlibs-node-pid:Depends}
+Description: XCS node pid...
+
+Package: xcs-node-red-dot
+Architecture: all
+Depends: ${shlibs-node-red-dot:Depends}
+Description: XCS node red-dot...
+
 Package: xcs-node-settings
 Architecture: all
 Depends: ${shlibs-node-settings:Depends}
@@ -220,4 +240,24 @@ Architecture: all
 Depends: ${shlibs-node-xci:Depends}
 Recommends: xcs-driver-parrot, xcs-driver-vrep
 Description: XCS node xci...
+
+Package: xcs-nodes-all
+Architecture: all
+Depends: xcs-node-checkpoint-movement,
+  xcs-node-control,
+  xcs-node-datalogger,
+  xcs-node-dataplayer,
+  xcs-node-flycontrol-aggregator,
+  xcs-node-guiproxy,
+  xcs-node-json,
+  xcs-node-line-drawer,
+  xcs-node-line-finder,
+  xcs-node-line-keeper,
+  xcs-node-localization,
+  xcs-node-multiplexer,
+  xcs-node-pid,
+  xcs-node-red-dot,
+  xcs-node-settings,
+  xcs-node-xci
+Description: Metapackage of all XCS nodes
 

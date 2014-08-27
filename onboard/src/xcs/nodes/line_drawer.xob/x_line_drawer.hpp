@@ -10,13 +10,13 @@
 
 #include <opencv2/opencv.hpp>
 #include <xcs/nodes/line_finder.xob/line_utils.hpp>
-#include <xcs/nodes/line_drawer.xob/xlinedrawer_export.h>
+#include <xcs/nodes/line_drawer.xob/xline_drawer_export.h>
 
 
 namespace xcs {
 namespace nodes {
 
-class XLINEDRAWER_EXPORT XLineDrawer : public XObject {
+class XLINE_DRAWER_EXPORT XLineDrawer : public XObject {
 public:
     /*!
      * Inputs

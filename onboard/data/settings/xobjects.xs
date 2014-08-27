@@ -68,6 +68,7 @@ Gui {
 
 RedDot {
     prototype XRedDot
+    file xred_dot
 }
 
 SemanticReceiver {

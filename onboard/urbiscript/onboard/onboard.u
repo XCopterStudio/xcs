@@ -40,7 +40,7 @@ class Onboard {
         
         System.loadModule("xsettings");
         System.loadModule("xjson");
-        System.loadModule("guiproxy");
+        System.loadModule("xguiproxy");
         
         // load onboard settings
         onboardSettings_ = XSettings.new(XcsPaths.getSettings("onboard.xs"), false);

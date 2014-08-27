@@ -16,10 +16,21 @@ ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
     MAKEFLAGS += -j$(NUMJOBS)
 endif
 
-NODES=control datalogger dataplayer hermit-movement\
-  json\
-  localization multiplexer settings xci
-# line-drawer line-finder line-keeper
+NODES=checkpoint-movement\
+control\
+datalogger\
+dataplayer\
+flycontrol-aggregator\
+guiproxy\
+json\
+line-finder\
+line-keeper\
+localization\
+multiplexer\
+pid\
+red-dot\
+settings\
+xci
 
 DRIVERS=dodo parrot vrep
 

@@ -1,4 +1,4 @@
-set(PROJECT_NAME xlinedrawer)
+set(PROJECT_NAME xline_drawer)
 project(${PROJECT_NAME})
 
 file(GLOB SOURCES *.cpp)
