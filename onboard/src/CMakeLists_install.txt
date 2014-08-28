@@ -25,4 +25,5 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 #
 # Subprojects (nodes)
 #
+add_subdirectory(xcs/examples/nodes/pid.xob/)
 add_subdirectory(xcs/examples/nodes/Multiplexer.xob/)
