@@ -92,18 +92,12 @@ void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
     double ekfTime = internalTime - imuTimeShift_;
 
     // convert image to grayscale for PTAM
-    urbi::UImage bwImage;
-    bwImage.imageFormat = urbi::IMAGE_GREY8;
-    bwImage.data = nullptr;
-    bwImage.size = 0;
-    bwImage.width = 0;
-    bwImage.height = 0;
     {
         lock_guard<mutex> lock(lastFrameMtx_);
-        urbi::convert(lastFrame_, bwImage);
+        urbi::convert(lastFrame_, lastFrameBw_);
     }
-    ptam_->handleFrame(bwImage, ekfTime); // this will do update EKF
-
+    ptam_->handleFrame(lastFrameBw_, ekfTime); // this will do update EKF
+    
     // update PTAM status
     ptamStatus = static_cast<int> (ptam_->ptamStatus());
 
@@ -178,12 +172,17 @@ XLocalization::XLocalization(const std::string &name) :
   rotation("ROTATION"),
   velocityPsi("ROTATION_VELOCITY_ABS"),
   ptamStatus("PTAM_STATUS") {
-    lastFrame_.data = nullptr;
     startTime_ = clock_.now();
     lastMeasurementTime_ = 0;
     flyControlSendTime_ = FLY_CONTROL_SEND_TIME;
     imuTimeShift_ = std::numeric_limits<double>::max();
     ptamEnabled_ = true;
+    lastFrame_.data = nullptr;
+    lastFrameBw_.imageFormat = urbi::IMAGE_GREY8;
+    lastFrameBw_.data = nullptr;
+    lastFrameBw_.size = 0;
+    lastFrameBw_.width = 0;
+    lastFrameBw_.height = 0;
 
     XBindVarF(measuredVelocity, &XLocalization::onChangeVelocity);
     XBindVarF(measuredRotation, &XLocalization::onChangeRotation);

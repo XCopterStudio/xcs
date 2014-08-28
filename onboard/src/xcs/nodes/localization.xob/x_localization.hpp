@@ -57,6 +57,8 @@ class XLocalization : public XObject {
     double imuTimeShift_;
     double flyControlSendTime_;
     ::urbi::UImage lastFrame_;
+    //! Grayscale representation of the last frame (for PTAM).)
+    ::urbi::UImage lastFrameBw_;
     std::mutex lastFrameMtx_;
     std::atomic<bool> ptamEnabled_;
 
