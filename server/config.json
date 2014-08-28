@@ -1,10 +1,5 @@
 {
-	// Port to which Client is connected.
     "clientPort": 3000,
-
-	// Port to which Onboard is connected.
     "onboardPort": 1234,
-
-	// UDP port to which video data from Onboard are sent.
     "onboardVideoPort": 1235
 }
