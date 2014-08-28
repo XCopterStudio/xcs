@@ -42,7 +42,7 @@ command("COMMAND"),
 checkpoint("CHECKPOINT"),
 dronePosition("POSITION_ABS"),
 droneRotation("ROTATION"),
-velocityControl("SPEED_CONTROL_ABS"),
+velocityControl("VELOCITY_CONTROL_ABS"),
 reachedCheckpoint("BOOL")
 {
     XBindVarF(command, &XCheckpointMovement::onChangeCommand);

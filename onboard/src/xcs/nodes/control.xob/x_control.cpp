@@ -53,7 +53,7 @@ void XControl::stateChanged(XObject::State state) {
 XControl::XControl(const std::string& name) : XObject(name),
 velocity("VELOCITY_ABS"),
 rotation("ROTATION"),
-desireVelocity("SPEED_CONTROL_ABS"),
+desireVelocity("VELOCITY_CONTROL_ABS"),
 flyControl("FLY_CONTROL")
 {
     stopped_ = true;
