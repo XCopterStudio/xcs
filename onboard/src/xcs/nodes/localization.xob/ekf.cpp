@@ -13,8 +13,6 @@ using namespace std;
 using namespace xcs;
 using namespace xcs::nodes::localization;
 
-const unsigned int Ekf::HISTORY = 5;
-
 template <typename Deque>
 void Ekf::clearUpToTime(Deque &deque, const double &time) {
     int index = findNearest(deque, time);
@@ -546,14 +544,24 @@ void Ekf::measurementImu(const DroneStateMeasurement &measurement, const double 
     XCS_LOG_INFO("Inserted new imu measurement with timestamp: " << timestamp);
     imuMeasurements_.push_back(copyMeasurement);
     int index = findNearest(droneStates_, timestamp); // TODO: check -1 when findNearest cannot find any state which we can update
-    droneStates_.push_back(predictAndUpdateFromImu(droneStates_[index], timestamp));
-    XCS_LOG_INFO("PTAM (imu): " << droneStates_.back().first.first.position.x << " " << droneStates_.back().first.first.position.y << " " << droneStates_.back().first.first.position.z << " " << droneStates_.back().first.first.rotation.phi << " " << droneStates_.back().first.first.rotation.theta << " " << droneStates_.back().first.first.rotation.psi << " " << timestamp);
+    if (index >= 0){
+        droneStates_.push_back(predictAndUpdateFromImu(droneStates_[index], timestamp));
+        XCS_LOG_INFO("PTAM (imu): " << droneStates_.back().first.first.position.x << " " << droneStates_.back().first.first.position.y << " " << droneStates_.back().first.first.position.z << " " << droneStates_.back().first.first.rotation.phi << " " << droneStates_.back().first.first.rotation.theta << " " << droneStates_.back().first.first.rotation.psi << " " << timestamp);
+    }
+    else{
+        XCS_LOG_WARN("We have not any state which We can update with imu measurement in time" << timestamp);
+    }
 };
 
 void Ekf::measurementCam(const CameraMeasurement &measurement, const double timestamp) {
     unique_lock<shared_mutex> lock(bigSharedMtx_); // Note: Maybe upgradable lock could be used, but this is not a conditinal writer.
     XCS_LOG_INFO("Inserted new camera measurement with timestamp: " << timestamp);
     int index = findNearest(droneStates_, timestamp);
+    if (index < 0){
+        XCS_LOG_WARN("We have not any state which We can update with PTAM camera measurement in time" << timestamp);
+        return;
+    }
+
     DroneStateDistributionChronologic newState = droneStates_[index];
     //delete all old droneStates newer than timestamp
     while (droneStates_.back().second >= timestamp){
@@ -569,10 +577,6 @@ void Ekf::measurementCam(const CameraMeasurement &measurement, const double time
     droneStates_.push_back(newState);
     // update up to the last imu measurements
     predictAndUpdateFromImu(newState, imuMeasurements_.back().second, true);
-
-    // clear old imuMeasurements and flyControls
-    clearUpToTime(imuMeasurements_, timestamp - HISTORY);
-    clearUpToTime(flyControls_, timestamp - HISTORY);
 }
 
 DroneState Ekf::computeState(const double time) {
@@ -584,7 +588,7 @@ DroneState Ekf::computeState(const double time) {
         return predict(state, time).first.first;
     }
     else{
-        XCS_LOG_ERROR("Request on state in past where ekf do not have data! " << time << "\n First possible time is " << droneStates_.front().second);
+        XCS_LOG_WARN("Request on state in past where ekf do not have data! " << time << "\n First possible time is " << droneStates_.front().second);
         return DroneState();
     }
 }

@@ -55,6 +55,7 @@ class XLocalization : public XObject {
     Clock clock_;
     TimePoint startTime_;
     double imuTimeShift_;
+    double camTimeShift_;
     double flyControlSendTime_;
     ::urbi::UImage lastFrame_;
     //! Grayscale representation of the last frame (for PTAM).)

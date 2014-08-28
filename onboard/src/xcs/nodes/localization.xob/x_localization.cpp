@@ -15,7 +15,7 @@ using namespace xcs::nodes::localization;
 
 const double XLocalization::IMU_DELAY = 0.030; // 40ms
 const double XLocalization::FLY_CONTROL_SEND_TIME = 0.030; // 75ms
-const double XLocalization::CAM_DELAY = 0.100; // 
+const double XLocalization::CAM_DELAY = 0.250; // 
 
 const std::string XLocalization::CTRL_INIT_KF = "init";
 const std::string XLocalization::CTRL_TAKE_KF = "keyframe";
@@ -62,8 +62,8 @@ void XLocalization::onChangeTimeImu(double internalTime) {
 
         // update future position of drone
         DroneState state = ekf_.computeState(timeFromStart() + flyControlSendTime_);
-        // update actual position of drone
-        //DroneState state = ekf_.computeState(timeFromStart());
+        //// update actual position of drone
+        ////DroneState state = ekf_.computeState(timeFromStart());
         position = state.position;
         velocity = state.velocity;
         rotation = state.rotation;
@@ -81,6 +81,10 @@ void XLocalization::onChangeVideo(urbi::UImage image) {
 }
 
 void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
+    if (camTimeShift_ == std::numeric_limits<double>::max()) {
+        camTimeShift_ = internalTime + CAM_DELAY - timeFromStart();
+    }
+
     if (lastFrame_.data == nullptr){
         return;
     }
@@ -89,7 +93,7 @@ void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
         ptamStatus = static_cast<int> (PTAM_DISABLED);
         return;
     }
-    double ekfTime = internalTime - imuTimeShift_;
+    double ekfTime = internalTime - camTimeShift_;
 
     // convert image to grayscale for PTAM
     {
@@ -106,6 +110,7 @@ void XLocalization::onChangeVideoTime(xcs::Timestamp internalTime) {
     position = state.position;
     velocity = state.velocity;
     rotation = state.rotation;
+    velocityPsi = state.velocityPsi;
 }
 
 void XLocalization::onChangeFlyControl(const xcs::FlyControl flyControl) {
@@ -176,6 +181,7 @@ XLocalization::XLocalization(const std::string &name) :
     lastMeasurementTime_ = 0;
     flyControlSendTime_ = FLY_CONTROL_SEND_TIME;
     imuTimeShift_ = std::numeric_limits<double>::max();
+    camTimeShift_ = std::numeric_limits<double>::max();
     ptamEnabled_ = true;
     lastFrame_.data = nullptr;
     lastFrameBw_.imageFormat = urbi::IMAGE_GREY8;

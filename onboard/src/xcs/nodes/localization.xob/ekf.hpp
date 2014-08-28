@@ -37,8 +37,6 @@ typedef std::mt19937 Generator;
 typedef std::normal_distribution<double> NormalDistribution;
 
 class Ekf {
-    static const unsigned int HISTORY;
-
     /*! Used to control access to all of droneStates_, imuMeasurements_ and flyControls_. */
     boost::shared_mutex bigSharedMtx_;
 
