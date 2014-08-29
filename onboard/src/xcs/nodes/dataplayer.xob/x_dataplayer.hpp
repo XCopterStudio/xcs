@@ -32,7 +32,7 @@ public:
     XDataplayer(const std::string& name);
     virtual ~XDataplayer();
 
-    xcs::nodes::XInputPort<std::string> command;
+    /*xcs::nodes::XInputPort<std::string> command;*/
 
     xcs::nodes::XVar<bool> finished;
 
@@ -129,7 +129,7 @@ private:
      */
     void videoDecoder();
 
-    void onCommand(const std::string &command);
+    /*void onCommand(const std::string &command);*/
     
     void play();
     

@@ -24,8 +24,8 @@ xcs::SyntacticCategoryMap XDataplayer::syntacticCategoryMap_;
 
 XDataplayer::XDataplayer(const std::string& name) :
   xcs::nodes::XObject(name),
-  command("COMMAND"),
-  finished("ENABLED"),
+  /*command("COMMAND"),*/
+  finished("EVENT"),
   isPlaying_(false),
   endAll_(false) {
     fillTypeCategories(syntacticCategoryMap_);
@@ -216,9 +216,9 @@ void XDataplayer::videoDecoder() {
     }
 }
 
-void XDataplayer::onCommand(const std::string &command) {
-    XCS_LOG_WARN("No dataplayer commands implemented."); // NOTE: possible reset of the player
-}
+//void XDataplayer::onCommand(const std::string &command) {
+//    XCS_LOG_WARN("No dataplayer commands implemented."); // NOTE: possible reset of the player
+//}
 
 void XDataplayer::play() {
     if (!paused) {
