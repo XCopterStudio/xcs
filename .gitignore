@@ -24,11 +24,3 @@ onboard/src/xcs/xci/vrep/vrep/
 3rd-party/urbi
 3rd-party/urbi_d
 
-# Debian build process
-debian/*.log
-debian/tmp
-debian/substvars
-debian/files
-prepare_binary
-build-arch
-build_*

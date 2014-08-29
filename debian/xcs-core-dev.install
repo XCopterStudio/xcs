@@ -1,2 +1,0 @@
-include/xcs/*.hpp usr/include/xcs
-include/xcs/nodes/xobject/*.hpp include/xcs/nodes/xobject/*.h include/xcs/nodes/xobject
