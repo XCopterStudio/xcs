@@ -146,7 +146,7 @@ Description: SDK for robotics
 Package: xcs-onboard
 Architecture: all
 Depends: urbi
-Recommends: xcs-node-all
+Recommends: xcs-nodes-all
 Description: X-copter onboard for Urbi SDK
 
 #

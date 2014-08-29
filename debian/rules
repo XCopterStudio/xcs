@@ -34,6 +34,8 @@ xci
 
 DRIVERS=dodo parrot vrep
 
+SIMPLE=xcs-onboard xcs-nodes-all xcs-core-dev
+
 build: build-arch build-indep
 
 build-indep:
@@ -49,25 +51,29 @@ build-arch:
 
 binary: binary-arch binary-indep
 
-binary-indep: bin-xcs-onboard
+binary-indep: $(addprefix bin-simple-, $(SIMPLE))
 
 binary-arch: bin-xcs-core bin-xcs-core-dev\
   $(addprefix bin-driver-, $(DRIVERS)) bin-driver-dev\
   $(addprefix bin-node-, $(NODES))
 
 clean: $(addprefix clean-driver-, $(DRIVERS))\
-  $(addprefix clean-node-, $(NODES))
+  $(addprefix clean-node-, $(NODES))\
+  $(addprefix clean-simple-, $(SIMPLE))
 	rm -f build-arch binary-arch prepare_binary
 	rm -rf $(ONBOARD_BUILD_DIR) $(ONBOARGD_INS_DIR)
-	rm -rf $(MK_DIR)/xcs-core $(MK_DIR)/xcs-core-dev $(MK_DIR)/xcs-driver-dev $(MK_DIR)/xcs-onboard
+	rm -rf $(MK_DIR)/xcs-core $(MK_DIR)/xcs-driver-dev 
 
 #
 # Implementation
 #
 
-prepare_binary:
+prepare_binary: fix_permissions
 	dh_install --sourcedir=$(MK_DIR)/tmp
 	touch $@
+
+fix_permissions:
+	chmod 755 $(MK_DIR)/../onboard/bin/*
 
 bin-driver-%: prepare_binary
 	mkdir -p $(MK_DIR)/xcs-driver-$*/DEBIAN
@@ -90,21 +96,18 @@ bin-xcs-core: prepare_binary
 	dpkg-gencontrol -pxcs-core -P$(MK_DIR)/xcs-core
 	dpkg-deb -b $(MK_DIR)/xcs-core ..
 
-bin-xcs-core-dev: prepare_binary
-	mkdir -p $(MK_DIR)/xcs-core-dev/DEBIAN
+bin-simple-%: prepare_binary
+	mkdir -p $(MK_DIR)/$*/DEBIAN
 	rm -rf $(MK_DIR)/files
-	dpkg-gencontrol -pxcs-core-dev -P$(MK_DIR)/xcs-core-dev
-	dpkg-deb -b $(MK_DIR)/xcs-core-dev ..
-
-bin-xcs-onboard: prepare_binary
-	mkdir -p $(MK_DIR)/xcs-onboard/DEBIAN
-	rm -rf $(MK_DIR)/files
-	dpkg-gencontrol -pxcs-onboard -P$(MK_DIR)/xcs-onboard
-	dpkg-deb -b $(MK_DIR)/xcs-onboard ..
+	dpkg-gencontrol -p$* -P$(MK_DIR)/$*
+	dpkg-deb -b $(MK_DIR)/$* ..
 
 clean-driver-%:
 	rm -rf $(MK_DIR)/xcs-driver-$*
 
 clean-node-%:
 	rm -rf $(MK_DIR)/xcs-node-$*
+
+clean-simple-%:
+	rm -rf $(MK_DIR)/$*
 
