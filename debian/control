@@ -97,6 +97,7 @@ Build-Depends: debhelper (>= 8.0.0),
   make,
   urbi,
   urbi-dev,
+  xcs-ptam-dev,
   zlib1g
 Standards-Version: 3.9.4
 Homepage: http://drones.ms.mff.cuni.cz/xcs
@@ -145,7 +146,7 @@ Description: XCI implementation for V-REP simulator
 #
 Package: xcs-onboard
 Architecture: all
-Depends: urbi
+Depends: urbi, xcs-node-settings, xcs-node-json, xcs-core, xcs-node-guiproxy
 Recommends: xcs-nodes-all
 Description: X-Copter Studio onboard component
 
@@ -212,7 +213,7 @@ Description: XCS node line-keeper...
 
 Package: xcs-node-localization
 Architecture: any
-Depends: ${shlibs-node-localization:Depends}
+Depends: ${shlibs-node-localization:Depends}, xcs-ptam-dev
 Description: XCS node localization...
 
 Package: xcs-node-multiplexer

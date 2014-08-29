@@ -44,6 +44,7 @@ build-arch:
 	mkdir -p $(ONBOARD_BUILD_DIR)
 	cd $(ONBOARD_BUILD_DIR) && cmake $(ONBOARD_SRC_DIR)\
 		-DUSE_SYSTEM_LIBRARIES=1\
+		-DCMAKE_BUILD_TYPE=Release\
 		-DCMAKE_INSTALL_PREFIX=$(ONBOARD_INS_DIR)
 	$(MAKE) $(MAKEFLAGS) -C $(ONBOARD_BUILD_DIR) install
 	touch $@
@@ -70,6 +71,7 @@ clean: $(addprefix clean-driver-, $(DRIVERS))\
 
 prepare_binary: fix_permissions
 	dh_install --sourcedir=$(MK_DIR)/tmp
+	dh_installdeb
 	touch $@
 
 fix_permissions:

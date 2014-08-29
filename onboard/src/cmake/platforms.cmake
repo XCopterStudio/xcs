@@ -29,6 +29,7 @@ elseif(X_LIN)
     set(CMAKE_MODULE_LINKER_FLAGS "-Wl,--no-undefined") # show unresolved symbols during link time
     set(CMAKE_CXX_FLAGS "-std=c++11 -Wreorder") # initializers list match fields declaration
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
     set(PATH_SEPARATOR ":")
     set(OpenCV_DIR "${OPENCV_ROOT}/share/OpenCV")
     set(VREP_REMOTE_ROOT ${VREP_REMOTE_ROOT}/linux)

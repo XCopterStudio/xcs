@@ -26,6 +26,7 @@ while [ "x$1" != "x" ] ; do
 	shift
 done
 
+export LD_LIBRARY_PATH="/opt/xcs/xcs-ptam/lib:$LD_LIBRARY_PATH"
 export URBI_UOBJECT_PATH="/usr/lib/xcs/xobjects"
 export URBI_PATH="/usr/share/xcs/urbiscript/onboard"
 
