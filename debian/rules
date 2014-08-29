@@ -80,28 +80,24 @@ fix_permissions:
 
 bin-driver-%: prepare_binary
 	mkdir -p $(MK_DIR)/xcs-driver-$*/DEBIAN
-	rm -rf $(MK_DIR)/files
 	dpkg-shlibdeps -pshlibs-driver-$* $(ONBOARD_INS_DIR)/lib/xci_$*.so 2>/dev/null
 	dpkg-gencontrol -pxcs-driver-$* -P$(MK_DIR)/xcs-driver-$*
 	dpkg-deb -b $(MK_DIR)/xcs-driver-$* ..
 
 bin-node-%: prepare_binary
 	mkdir -p $(MK_DIR)/xcs-node-$*/DEBIAN
-	rm -rf $(MK_DIR)/files
 	dpkg-shlibdeps -pshlibs-node-$* $(ONBOARD_INS_DIR)/lib/xcs/xobjects/x$(subst -,_,$*).so 2>/dev/null
 	dpkg-gencontrol -pxcs-node-$* -P$(MK_DIR)/xcs-node-$*
 	dpkg-deb -b $(MK_DIR)/xcs-node-$* ..
 
 bin-xcs-core: prepare_binary
 	mkdir -p $(MK_DIR)/xcs-core/DEBIAN
-	rm -rf $(MK_DIR)/files
 	dpkg-shlibdeps -pshlibs-core -e$(ONBOARD_INS_DIR)/lib/libxcs.so -e$(ONBOARD_INS_DIR)/lib/libxobject.so 2>/dev/null
 	dpkg-gencontrol -pxcs-core -P$(MK_DIR)/xcs-core
 	dpkg-deb -b $(MK_DIR)/xcs-core ..
 
 bin-simple-%: prepare_binary
 	mkdir -p $(MK_DIR)/$*/DEBIAN
-	rm -rf $(MK_DIR)/files
 	dpkg-gencontrol -p$* -P$(MK_DIR)/$*
 	dpkg-deb -b $(MK_DIR)/$* ..
 
