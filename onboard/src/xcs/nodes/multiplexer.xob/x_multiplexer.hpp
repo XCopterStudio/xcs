@@ -105,7 +105,7 @@ namespace multiplexer{
         virtual void stateChanged(XObject::State state);
     public:
         /// Set which channel will be redirected to the output_
-        xcs::nodes::XInputPort<unsigned int> setChannel;
+        xcs::nodes::XInputPort<unsigned int> chooseInput;
         /// Redirected data from selected input channel
         xcs::nodes::XVar<type> output;
 
@@ -114,7 +114,7 @@ namespace multiplexer{
 
         /*! Create input channels according to the channelCount and register they in Urbi as XMultiplexer inputs.
         
-            Bind output and setChannel in Urbi and set notifier onChangeChannel on setChannel input port.
+            Bind output and chooseInput in Urbi and set notifier onChangeChannel on chooseInput input port.
             \param channelCount how much input channel will be created
             \param defaultSetChannel flag if default set channel should be used
         */
@@ -149,7 +149,7 @@ namespace multiplexer{
 
     template<class type>
     XMultiplexer<type>::XMultiplexer(const std::string& name) : XObject(name),
-    setChannel("CHANNEL"),
+    chooseInput("CHANNEL"),
     output("*"){
         stopped_ = true;
 
@@ -170,7 +170,7 @@ namespace multiplexer{
 
         defaultSetChannel_ = defaultSetChannel;
         if (!defaultSetChannel_) {
-            XBindVarF(setChannel, &XMultiplexer<type>::onChangeChannel);
+            XBindVarF(chooseInput, &XMultiplexer<type>::onChangeChannel);
         }
 
         minChannel_ = channelCount_ - 1;
