@@ -1,5 +1,11 @@
+xcs (0.1-19-gf06f98a) unstable; urgency=low
+
+  * Automatic changelog entry.
+
+ -- Michal Koutný  <xm.koutny@gmail.com> Fri, 29 Aug 2014 18:42:16 +0200
+
 xcs (0.1) unstable; urgency=low
 
-  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+  * Version for Windows installer.
 
  -- Michal Koutný <xm.koutny@gmail.com>  Sun, 10 Aug 2014 11:51:52 +0200
