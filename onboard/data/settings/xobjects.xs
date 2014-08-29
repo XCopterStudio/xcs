@@ -42,7 +42,7 @@ CheckpointMovement {
 FlyControl {
     prototype XMultiplexerFlyControl
     file xmultiplexer
-    args "2, true"
+    args "2, true, \"FLY_CONTROL\""
 }
 
 PID {
@@ -82,8 +82,14 @@ SemanticReceiver {
     receiver true
 }
 
-FlyControlMultiplexer {
+FlyControlDual {
     prototype XMultiplexerFlyControl
     file xmultiplexer
-    args "2 , false"
+    args "2 , false, \"FLY_CONTROL\""
+}
+
+FlyControlTriple {
+    prototype XMultiplexerFlyControl
+    file xmultiplexer
+    args "3 , false, \"FLY_CONTROL\""
 }

@@ -118,7 +118,7 @@ namespace multiplexer{
             \param channelCount how much input channel will be created
             \param defaultSetChannel flag if default set channel should be used
         */
-        void init(const unsigned int channelCount, const bool defaultSetChannel);
+        void init(const unsigned int channelCount, const bool defaultSetChannel, const std::string semanticType = "*");
     };
 
     template<class type>
@@ -159,7 +159,8 @@ namespace multiplexer{
     }
 
     template<class type>
-    void XMultiplexer<type>::init(const unsigned int channelCount, const bool defaultSetChannel) {
+    void XMultiplexer<type>::init(const unsigned int channelCount, const bool defaultSetChannel, const std::string semanticType) {
+        
         if (channelCount < 1){
             channelCount_ = 1;
             XCS_LOG_WARN("None input channel is not allowed. Multiplexer have been created with one.");
@@ -175,7 +176,7 @@ namespace multiplexer{
         minChannel_ = channelCount_ - 1;
 
         for (int i = 0; i < channelCount_; ++i){
-            std::shared_ptr< xcs::nodes::XInputPort<type> > input = std::shared_ptr< xcs::nodes::XInputPort<type> >(new xcs::nodes::XInputPort<type>("*"));
+            std::shared_ptr< xcs::nodes::XInputPort<type> > input = std::shared_ptr< xcs::nodes::XInputPort<type> >(new xcs::nodes::XInputPort<type>(semanticType));
             inputs_.push_back(input);
 
             std::stringstream name;
