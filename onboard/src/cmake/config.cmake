@@ -4,7 +4,7 @@
 
 # Paths
 if(USE_SYSTEM_LIBRARIES)
-    set(PTAM_ROOT /opt/xcs-ptam)
+    set(PTAM_ROOT /opt/xcs/xcs-ptam)
 else()
     set(BLAS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/blas)
     set(LAPACK_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../3rd-party/lapack)

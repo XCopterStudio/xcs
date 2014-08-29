@@ -12,7 +12,7 @@ for node in `find $DIR/../onboard/src/xcs/nodes -type d -name "*.xob" | sort` ; 
   $pkg_name"
 	cat <<EOD
 Package: $pkg_name
-Architecture: all
+Architecture: any
 Depends: \${shlibs-node-$node:Depends}
 Description: XCS node ${node}...
 

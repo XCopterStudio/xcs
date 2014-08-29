@@ -1,0 +1,4 @@
+../../server/xcs-server usr/bin
+../../server/*.js ../../server/*.json opt/xcs/server
+../../server/client/* opt/xcs/server/client
+

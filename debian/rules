@@ -34,7 +34,7 @@ xci
 
 DRIVERS=dodo parrot vrep
 
-SIMPLE=xcs-onboard xcs-nodes-all xcs-core-dev
+SIMPLE=xcs-onboard xcs-nodes-all xcs-core-dev xcs-server
 
 build: build-arch build-indep
 
@@ -53,7 +53,7 @@ binary: binary-arch binary-indep
 
 binary-indep: $(addprefix bin-simple-, $(SIMPLE))
 
-binary-arch: bin-xcs-core bin-xcs-core-dev\
+binary-arch: bin-xcs-core\
   $(addprefix bin-driver-, $(DRIVERS)) bin-driver-dev\
   $(addprefix bin-node-, $(NODES))
 
@@ -74,6 +74,7 @@ prepare_binary: fix_permissions
 
 fix_permissions:
 	chmod 755 $(MK_DIR)/../onboard/bin/*
+	chmod 755 $(MK_DIR)/../server/xcs-server
 
 bin-driver-%: prepare_binary
 	mkdir -p $(MK_DIR)/xcs-driver-$*/DEBIAN
