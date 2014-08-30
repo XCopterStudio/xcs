@@ -70,6 +70,18 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modal-session-occupied">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">X-Copter Studio</h4>
+                </div>
+                <div class="modal-body">Sorry captain, session is currently being occupied by other client.</div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- Main X-copter Panel -->

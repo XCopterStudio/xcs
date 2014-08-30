@@ -1,29 +1,37 @@
 var gSocket;
 
 var Connection = Backbone.Model.extend({
-    
+
     defaults: {
+        "sessionOccupied": false,
         "serverConnected": false,
         "onboardConnected" : false,
         "latency": -1,
     },
-    
+
     responseCallbacks: {},
-    
+
     latencyMonitor: null,
-    
+
     latencyMonitorInterval: 3000, //ms
-    
+
     initialize: function () {
         var model = this;
-        
+
         _.bindAll(this, 'setLatency');
-        
+
         // connect to server
         gSocket = io.connect('http://' + location.host);
-        
+
         // set event handlers
         gSocket.on('connect', function () {
+            // empty
+        });
+        gSocket.on('disconnect', function () {
+            clearInterval(model.latencyMonitor);
+            model.set('serverConnected', false);
+        });
+        gSocket.on('session acquired', function () {
             model.set('serverConnected', true);
             // init latency monitoring
             clearInterval(model.latencyMonitor);
@@ -35,9 +43,8 @@ var Connection = Backbone.Model.extend({
                 model.set('onboardConnected', connected);
             });
         });
-        gSocket.on('disconnect', function () {
-            clearInterval(model.latencyMonitor);
-            model.set('serverConnected', false);
+        gSocket.on('session occupied',  function () {
+            model.set('sessionOccupied', true);
         });
         // reflect server's ping
         gSocket.on('ping', function(payload) {
@@ -52,7 +59,7 @@ var Connection = Backbone.Model.extend({
                 delete model.responseCallbacks[methodName];
             }
             else {
-                console.warn('Unknown method: ' + methodName);   
+                console.warn('Unknown method: ' + methodName);
             }
         });
         // handle push notificaions from server's OnboardConnection
@@ -62,7 +69,7 @@ var Connection = Backbone.Model.extend({
             }
         });
     },
-    
+
     call: function (methodName, responseCallback) {
         // register callback
         this.responseCallbacks[methodName] = responseCallback;
@@ -70,6 +77,6 @@ var Connection = Backbone.Model.extend({
     },
 
     setLatency: function (latency) {
-        this.set('latency', latency);  
+        this.set('latency', latency);
     },
 });

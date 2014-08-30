@@ -50,20 +50,30 @@ function ClientConnection(application, pingInterval) {
      * Handlers
      */
     function handleNewConnection(socket) {
-        // overwrite client's socket => last initiated connection is the ACTIVE one
-        client_ = socket;
-        // set event handlers
-        socket.on('disconnect', handleDisconnect);
-        socket.on('relay', handleRelay);
-        socket.on('call', handleCall);
-        // set ping monitor
-        socket.on('ping echo', function (payload) {
-            ping_.setEcho(payload);
-        });
-        ping_.startHeartbeat(function (payload) {
-            send(payload, 'ping');
-        });
-        console.log('Client connected.');
+        // only one session for client is allowed
+        if (client_) {
+            socket.emit('session occupied');
+            socket.disconnect();
+            return;
+        }
+        else {
+            // set current client's socket
+            client_ = socket;
+            // set event handlers
+            socket.on('disconnect', handleDisconnect);
+            socket.on('relay', handleRelay);
+            socket.on('call', handleCall);
+            // set ping monitor
+            socket.on('ping echo', function (payload) {
+                ping_.setEcho(payload);
+            });
+            ping_.startHeartbeat(function (payload) {
+                send(payload, 'ping');
+            });
+            // inform client about acquiring session
+            socket.emit('session acquired');
+            console.log('Client connected.');
+        }
     }
 
     function handleDisconnect() {

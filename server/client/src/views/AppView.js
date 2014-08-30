@@ -15,6 +15,27 @@ var AppView = Backbone.View.extend({
     ],
 
     initialize: function() {
+        var app = this;
+
+        // create models
+        app.Connection = new Connection();
+        app.Onboard = new OnboardModel();
+
+        // disable app if session with server is occupied
+        this.listenTo(app.Connection, 'change:sessionOccupied', function (model) {
+            if (model.get('sessionOccupied')) {
+                app.ModalView.showModal('#modal-session-occupied', { backdrop: 'static', keyboard: false });
+                window.onbeforeunload = null;
+            } else {
+                $('#modal-sesion-occupied').modal('hide');
+            }
+        });
+
+        // set warning dialog on refreshing or leaving page
+        window.onbeforeunload = function() {
+            return "X-copter plan execution will be stopped!"; //Are you sure you want to navigate away?
+        }
+
         // init dropdowns
         this.$('.dropdown-toggle').dropdown();
         this.$('.dropdown-menu input, .dropdown-menu label, .dropdown-menu .dropdown-header').click(function(e) {
@@ -34,6 +55,27 @@ var AppView = Backbone.View.extend({
             that.SettingView.show(model);
         });
 
+    },
+
+    initViews: function () {
+        var app = this;
+
+        //initialize views
+        app.Wait = new WaitView();
+        app.Flash = new FlashMessagesView();
+        app.StateView = new StateView();
+        app.ModalView = new ModalView();
+        app.SettingView = new SettingView();
+        app.ConnectionView = new ConnectionView();
+
+        app.FlyControlView = new FlyControlView();
+        app.DataView = new DataView();
+        app.DataFlowGraph = new DataFlowGraphView();
+        app.ConsoleView = new ConsoleView();
+
+        app.BottomToolbarView = new BottomToolBarView();
+        app.BottomToolbarView.addView("dfg-trigger", "dfg", app.DataFlowGraph);
+        app.BottomToolbarView.addView("console-trigger", "console");
     },
 
     setSettings: function (data) {
