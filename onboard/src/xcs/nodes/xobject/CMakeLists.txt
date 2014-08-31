@@ -20,5 +20,5 @@ install(TARGETS ${PROJECT_NAME}
         DESTINATION lib)
 
 install(FILES ${HEADERS} DESTINATION include/xcs/nodes/xobject)
-
+install(FILES ${PROJECT_BINARY_DIR}/${PROJECT_NAME}_export.h DESTINATION include/xcs/nodes/xobject)
 

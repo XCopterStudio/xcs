@@ -21,5 +21,6 @@ install(TARGETS ${PROJECT_NAME}
         DESTINATION lib)
 
 install(FILES ${HEADERS} DESTINATION include/xcs)
+install(FILES ${PROJECT_BINARY_DIR}/${PROJECT_NAME}_export.h DESTINATION include/xcs)
 
 install(EXPORT ${PROJECT_NAME} DESTINATION share)
