@@ -218,7 +218,7 @@ void XciParrot::command(const std::string &command) {
         atCommandQueue_.push(AtCommandPtr(new AtCommandRef(STATE_TAKEOFF)));
     } else if (command == "Land") {
         atCommandQueue_.push(AtCommandPtr(new AtCommandRef(STATE_LAND)));
-    } else if (command == "EmegrencyStop") {
+    } else if (command == "EmergencyStop") {
         if (!state_.getState(FLAG_ARDRONE_EMERGENCY_MASK)) {
             atCommandQueue_.push(AtCommandPtr(new AtCommandRef(STATE_EMERGENCY)));
         }
