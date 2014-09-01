@@ -92,6 +92,7 @@ void XciDodo::init() {
 }
 
 void XciDodo::stop() {
+    videoStatus_ = VIDEO_PAUSED;
     dataReceiver_.enabled(false);
 }
 
