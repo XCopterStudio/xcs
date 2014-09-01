@@ -41,10 +41,10 @@ if [ $SYSTEM_PATHS -eq 0 -a ! -d $XCS_SETTINGS_PATH ] ; then
 fi
 
 if [ $SYSTEM_PATHS -eq 1 ] ; then
-	export XCS_SETTINGS_PATH="/usr/share/xcs/settings"
-	export XCS_DFGS_PATH="/usr/share/xcs/dfgs"
-	export XCS_USER_SCRIPTS_PATH="/usr/share/xcs/scripts"
-	export XCS_LOGS_PATH="/usr/share/xcs/logs" # read-only sample logs
+	export XCS_SETTINGS_PATH="/usr/share/xcs/data/settings"
+	export XCS_DFGS_PATH="/usr/share/xcs/data/dfgs"
+	export XCS_USER_SCRIPTS_PATH="/usr/share/xcs/data/scripts"
+	export XCS_LOGS_PATH="/usr/share/xcs/data/logs" # read-only sample logs
 fi
 
 urbi-launch -s -- -f onboard.u
