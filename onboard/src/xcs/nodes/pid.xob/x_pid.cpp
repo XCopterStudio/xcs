@@ -43,7 +43,7 @@ void XPID::stateChanged(XObject::State state){
 // define XInputPorts and XVar Semantic type, call base class constructor with name parameter
 XPID::XPID(const std::string& name) : XObject(name),
     P("PID_PARAM"), I("PID_PARAM"), D("PID_PARAM"), 
-    actualValue("*"), desireValue("*"), control("PID_CONTROL"){
+    desireValue("*"), actualValue("*"), control("PID_CONTROL"){
     
     desireValue_ = 0;
 
