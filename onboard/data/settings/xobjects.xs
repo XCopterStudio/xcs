@@ -1,7 +1,10 @@
+; This first node configuration explains what are possible configuration options.
 Datalogger { ; this is configuration name
     prototype XDatalogger                               ; (default is configuration name)
     ;file xdatalogger.u                                 ; (default lowecased name of the prototype)
-    args "xcsPaths.getLog(\"default_log.txt\")"    ; these are init's arguments (default none)
+    args "xcsPaths.getLog(\"default_log.txt\")"         ; these are init's arguments (default none)
+    ; special true                                      ; special nodes are handled specially (default false)
+    ; receiver true                                     ; node is able to receive data from GUI (default false), only last created node with this flag is receiving
 }
 
 Dataplayer {
