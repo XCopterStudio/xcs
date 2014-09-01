@@ -1,31 +1,33 @@
-<!-- ...and bit of javascript -->
-<script type="text/javascript" src="js/jquery-1.10.2.js"></script>
-<script type="text/javascript" src="js/jquery-ui-1.10.4.custom.js"></script>
-<script type="text/javascript" src="js/bootstrap.js"></script>
-<script type="text/javascript" src="js/underscore.js"></script>
-<script type="text/javascript" src="js/backbone.js"></script>
-<script type="text/javascript" src="js/jquery.gridster.min.js"></script>
-<!-- 3D libraries -->
-<script type="text/javascript" src="js/libs/three.min.js"></script>
-<script type="text/javascript" src="js/libs/Detector.js"></script>
-<script type="text/javascript" src="js/libs/stats.min.js"></script>
-<!-- code mirror -->
-<script type="text/javascript" src="js/codemirror/codemirror.js"></script>
-<script type="text/javascript" src="js/codemirror/xcsMode.js"></script>
-<!-- jointJS -->
-<script type="text/javascript" src="js/jointjs/joint.nojquery.js"></script>
-<!-- gauge library -->
-<script src="js/justgage/raphael.2.1.0.min.js"></script>
-<script src="js/justgage/justgage.1.0.1.min.js"></script>
-<!-- flot -->
-<!--[if lte IE 8]><script type="text/javascript" src="js/flot/excanvas.min.js"></script><![endif]-->
-<script type="text/javascript" src="js/flot/jquery.flot.min.js"></script>
-<!-- cookies -->
-<script type="text/javascript" src="js/jquery-cookie-master/jquery.cookie.js"></script>
 <!--
-<script type="text/javascript" src="js/widgets/map.js"></script>
-<script type="text/javascript" src="js/widgets/video.js"></script>
+    ...and bit of javascript
 -->
+<!-- JQuery -->
+<script type="text/javascript" src="js/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
+<!-- Bootstrap -->
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<!-- Underscore.js -->
+<script type="text/javascript" src="js/underscore-min.js"></script>
+<!-- Backbone.js -->
+<script type="text/javascript" src="js/backbone-min.js"></script>
+<!-- CodeMirror -->
+<script type="text/javascript" src="js/codemirror.js"></script>
+<script type="text/javascript" src="js/codemirror-urbiscript.js"></script>
+<!-- JointJS -->
+<script type="text/javascript" src="js/joint.nojquery.js"></script>
+<!-- gauge library -->
+<script type="text/javascript" src="js/raphael.2.1.0.min.js"></script>
+<script type="text/javascript" src="js/justgage.1.0.1.min.js"></script>
+
+<!-- JQuery plugins -->
+<!-- Gridster -->
+<script type="text/javascript" src="js/jquery.gridster.min.js"></script>
+<!-- Flot -->
+<!--[if lte IE 8]><script type="text/javascript" src="js/excanvas.min.js"></script><![endif]-->
+<script type="text/javascript" src="js/jquery.flot.min.js"></script>
+<!-- Cookies -->
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
+
 <!--
 	XCS Client logic
  -->

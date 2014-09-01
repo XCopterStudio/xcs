@@ -1,14 +1,24 @@
-<!-- Libraries -->
-<link href="css/bootstrap.css" rel="stylesheet" media="screen">
-<link href="css/bootstrap-theme.css" rel="stylesheet" media="screen">
-<link href="css/font-awesome.css" rel="stylesheet">
-<link href="css/keys.css" rel="stylesheet">
+<!--
+    Libraries
+-->
+<!-- JQuery UI -->
+<link href="css/jquery-ui-1.10.4.custom.min.css" rel="stylesheet">
+<!-- Bootstrap -->
+<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="css/bootstrap-theme.min.css" rel="stylesheet" media="screen">
+<!-- Font Awesome -->
+<link href="css/font-awesome.min.css" rel="stylesheet">
+<!-- Gridster -->
 <link href="css/jquery.gridster.min.css" rel="stylesheet">
-<link href="css/jquery-ui-1.10.4.custom.css" rel="stylesheet">
-<!-- Custom styles -->
+<!-- CodeMirror -->
+<link href="css/codemirror.css" rel="stylesheet">
+<link href="css/night.css" rel="stylesheet">
+<!-- JointJS -->
+<link href="css/joint.nojquery.css" rel="stylesheet">
+<!-- Keyboard keys -->
+<link href="css/keys.css" rel="stylesheet">
+
+<!--
+    Custom styles
+-->
 <link href="css/custom.css" rel="stylesheet">
-<!-- code mirror -->
-<link href="css/codemirror/codemirror.css" rel="stylesheet">
-<link href="css/codemirror/night.css" rel="stylesheet">
-<!-- jointJS -->
-<link href="css/jointjs/joint.nojquery.css" rel="stylesheet">
