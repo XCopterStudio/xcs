@@ -21,7 +21,7 @@ if(X_WIN)
   set(CMAKE_MODULE_PATH "${XCS_ROOT}/share/cmake/xcs")
   
   INCLUDE_DIRECTORIES("${XCS_ROOT}/include")
-  find_package(Boost REQUIRED COMPONENTS Date_Time)
+  find_package(Boost REQUIRED COMPONENTS Date_Time) # workaround
 elseif(X_LIN)
   add_definitions("--std=c++11")
   set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -36,7 +36,6 @@ file(GLOB HEADERS *.hpp)   # and headers
 
 # Find paths to libraries
 find_library(XOBJECT_LIBRARIES xobject PATHS "${XCS_ROOT}/bin")
-find_package(Boost REQUIRED COMPONENTS Date_Time) # workaround
 find_package(UrbiAll)
 
 # Nodes are compiled as MODULE libraries (for dynamic loading)
