@@ -1,3 +1,9 @@
+cmake_minimum_required(VERSION 2.8)
+
+set(PROJECT_NAME xpopid) # fill node name
+project(${PROJECT_NAME})
+
+# Detect platform
 if(WIN32)
     set(X_WIN true)
     set(X_LIN false)
@@ -15,28 +21,33 @@ if(X_WIN)
   set(CMAKE_MODULE_PATH "${XCS_ROOT}/share/cmake/xcs")
   
   INCLUDE_DIRECTORIES("${XCS_ROOT}/include")
+  find_package(Boost REQUIRED COMPONENTS Date_Time)
 elseif(X_LIN)
-    
+  add_definitions("--std=c++11")
+  set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
+  set(USE_SYSTEM_LIBRARIES 1) # this is for FindUrbiAll
 endif()
 
 set(Boost_USE_STATIC_LIBS false)
 add_definitions(-DBOOST_ALL_NO_LIB) # disable autolinking (causing problems in MS VS)
 
-set(PROJECT_NAME xpid) # fill node name
-project(${PROJECT_NAME})
-
 file(GLOB SOURCES *.cpp)   # include sources
-file(GLOB HEADERS *.hpp)   # …and headers
+file(GLOB HEADERS *.hpp)   # and headers
 
-FIND_LIBRARY(XOBJECT_LIBRARIES xobject PATHS "${XCS_ROOT}/bin")
-find_package(Boost 1.55 REQUIRED COMPONENTS Date_Time)
+# Find paths to libraries
+find_library(XOBJECT_LIBRARIES xobject PATHS "${XCS_ROOT}/bin")
+find_package(Boost REQUIRED COMPONENTS Date_Time) # workaround
 find_package(UrbiAll)
 
-# nodes are compiled as MODULE libraries
+# Nodes are compiled as MODULE libraries (for dynamic loading)
 add_library(${PROJECT_NAME} MODULE ${SOURCES} ${HEADERS})
 
+# effectively target_link_libraries with Urbi SDK
 use_urbi(${PROJECT_NAME})
 
-# link with X-Copter Studio library
+# create files without lib prefix
+set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
+
+# link with X-Copter Studio library and Boost
 target_link_libraries(${PROJECT_NAME} ${XOBJECT_LIBRARIES} ${Boost_LIBRARIES})
 
