@@ -1,17 +1,19 @@
+//! Define XCS binding macros as XBindVar(...)
 #include "x_pid.hpp"
+
 #include <xcs/nodes/xobject/x.h>
 
 using namespace xcs::nodes::pid;
 
-void XPID::onChangeP(const PidType p){
+void XPID::onChangeP(const PIDType p){
     pid_.P(p);
 }
 
-void XPID::onChangeI(const PidType i){
+void XPID::onChangeI(const PIDType i){
     pid_.I(i);
 }
 
-void XPID::onChangeD(const PidType d){
+void XPID::onChangeD(const PIDType d){
     pid_.D(d);
 }
 
@@ -38,20 +40,24 @@ void XPID::stateChanged(XObject::State state){
 
 //==== public function =======
 
+// define XInputPorts and XVar Semantic type, call base class constructor with name parameter
 XPID::XPID(const std::string& name) : XObject(name),
     P("PID_PARAM"), I("PID_PARAM"), D("PID_PARAM"), 
     actualValue("*"), desireValue("*"), control("PID_CONTROL"){
     
     desireValue_ = 0;
 
+    // Bind callback method on XInputPorts and register XInputPort on the node
     XBindVarF(P, &XPID::onChangeP);
     XBindVarF(I, &XPID::onChangeI);
     XBindVarF(D, &XPID::onChangeD);
     XBindVarF(actualValue, &XPID::onChangeActualValue);
     XBindVarF(desireValue, &XPID::onChangeDesireValue);
 
+    // Register XVar on the node
     XBindVar(control);
 
 }
 
+// Register node in to the XCS
 XStart(XPID);
