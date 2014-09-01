@@ -16,11 +16,24 @@ void XPID::onChangeD(const PidType d){
 }
 
 void XPID::onChangeActualValue(const double actualValue){
-    control = pid_.getCorrection(actualValue,desireValue_);
+    if (!stopped_){
+        control = pid_.getCorrection(actualValue, desireValue_);
+    }
 }
 
 void XPID::onChangeDesireValue(const double desireValue){
     desireValue_ = desireValue;
+}
+
+void XPID::stateChanged(XObject::State state){
+    switch (state) {
+    case XObject::STATE_STARTED:
+        stopped_ = false;
+        break;
+    case XObject::STATE_STOPPED:
+        stopped_ = true;
+        break;
+    }
 }
 
 //==== public function =======

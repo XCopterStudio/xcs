@@ -7,16 +7,23 @@
 
 #include <xcs/types/fly_control.hpp>
 
+#include <atomic>
+
 namespace xcs{
 namespace nodes{
 namespace aggregator{
 
     class XFlyControlAggregator : public XObject{
         FlyControl flyControl_;
+
+        std::atomic<bool> stopped_;
+
         void onChangeRoll(const double roll);
         void onChangePitch(const double pitch);
         void onChangeYaw(const double yaw);
         void onChangeGaz(const double gaz);
+    protected:
+        virtual void stateChanged(XObject::State state);
     public:
         XInputPort<double> roll;
         XInputPort<double> pitch;

@@ -7,6 +7,8 @@
 
 #include <xcs/pid.hpp>
 
+#include <atomic>
+
 namespace xcs{
 namespace nodes{
 namespace pid{
@@ -16,11 +18,15 @@ namespace pid{
         PID<PidType,double> pid_;
         double desireValue_;
 
+        std::atomic<bool> stopped_;
+
         void onChangeP(const PidType p);
         void onChangeI(const PidType i);
         void onChangeD(const PidType d);
         void onChangeActualValue(const double actualValue);
         void onChangeDesireValue(const double desireValue);
+    protected:
+        virtual void stateChanged(XObject::State state);
     public:
         XInputPort<PidType> P;
         XInputPort<PidType> I;

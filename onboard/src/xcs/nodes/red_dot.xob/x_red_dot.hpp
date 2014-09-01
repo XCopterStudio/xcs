@@ -10,6 +10,8 @@
 
 #include "red_dot.hpp"
 
+#include <atomic>
+
 namespace xcs{
 namespace nodes{
 namespace reddot{
@@ -18,7 +20,11 @@ namespace reddot{
         cv::Mat lastImage;
         RedDot redDot_;
 
+        std::atomic<bool> stopped_;
+
         void onChangeVideo(::urbi::UImage image);
+    protected:
+        virtual void stateChanged(XObject::State state);
     public:
         XInputPort<::urbi::UImage> video;
 

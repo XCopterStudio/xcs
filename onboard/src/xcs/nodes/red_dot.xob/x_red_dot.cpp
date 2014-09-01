@@ -7,6 +7,10 @@ using namespace xcs;
 using namespace xcs::nodes::reddot;
 
 void XRedDot::onChangeVideo(::urbi::UImage image){
+    if (stopped_){
+        return;
+    }
+
     if (image.height != lastImage.rows || image.width != lastImage.cols){
         lastImage.create(image.height, image.width, CV_8UC3);
     }
@@ -30,6 +34,17 @@ void XRedDot::onChangeVideo(::urbi::UImage image){
         errorX = (image.width / 2.0) - center.x;
         errorY = center.y - (image.height/2.0);
     } 
+}
+
+void XRedDot::stateChanged(XObject::State state){
+    switch (state) {
+    case XObject::STATE_STARTED:
+        stopped_ = false;
+        break;
+    case XObject::STATE_STOPPED:
+        stopped_ = true;
+        break;
+    }
 }
 
 //=============== public functions ===============
