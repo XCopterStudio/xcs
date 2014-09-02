@@ -50,7 +50,7 @@ namespace xcs{
     PID<pid_type,value_type>::PID(const pid_type p, const pid_type i, const pid_type d) : 
         P_(p),
         I_(i),
-        D_(d),
+        D_(d)
     {
     }
 
