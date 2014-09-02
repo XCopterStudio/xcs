@@ -41,5 +41,4 @@ set(URBIALL_LIBRARIES ${PORT_LIBRARIES};${QIJPEG_LIBRARIES};${SCHED_LIBRARIES};$
 function(use_urbi TARGET_NAME)
 include_directories(${URBIALL_INCLUDE_DIRS})
 target_link_libraries(${TARGET_NAME} ${URBIALL_LIBRARIES})
-#link_directories(${URBI_ROOT}/bin) # I think this is unnecessary. (Michal)
 endfunction(use_urbi)

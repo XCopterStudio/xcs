@@ -1,0 +1,10 @@
+/*
+  Preconditions:
+  1) Add XciDodo to graph and connect its video output to GUI node.
+  2) Change configuration value to absolute path to some video file.
+  
+  You should se the video being played.
+*/
+xciDodo.setConfiguration("video:filename", "/home/michal/school/swproj/media/MOV_0258.mp4");
+xciDodo.command = "Load";
+xciDodo.command = "Play";
