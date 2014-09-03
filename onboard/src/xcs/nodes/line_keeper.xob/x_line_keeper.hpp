@@ -20,8 +20,8 @@ public:
      * Inputs
      */
     XInputPort<xcs::CartesianVector> velocity;
-    XVar<double> altitude; // intentionally XVar
-    XVar<xcs::EulerianVector> rotation; // intentionally XVar
+    XInputPort<double> altitude; // intentionally XVar
+    XInputPort<xcs::EulerianVector> rotation; // intentionally XVar
 
     /*!
      * Image processing params
@@ -31,8 +31,8 @@ public:
     /*!
      * Output params
      */
-    ::urbi::UVar distanceUVar;
-    ::urbi::UVar deviationUVar;
+    XVar<double> distance;
+    XVar<double> deviation;
 
     XLineKeeper(const std::string &);
     
@@ -40,7 +40,7 @@ public:
 
     void reset(double distance, double deviation);
     
-    void stop();
+    /*void stop();*/
 
     /*!
      * Urbi period handler
@@ -72,10 +72,15 @@ private:
     double initialDistance_;
     double initialDeviation_;
     double initialDevOffset_;
+
+    double altitude_;
+    xcs::EulerianVector rotation_;
     
     bool isKeeping_;
 
     void onChangeVelocity(const xcs::CartesianVector v);
+    void onChangeAltitude(const double altitude){ altitude_ = altitude; };
+    void onChangeRotation(const xcs::EulerianVector rotation){ rotation_ = rotation; };
 
 };
 

@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <xcs/nodes/xobject/x_object.hpp>
 #include <xcs/nodes/xobject/x_var.hpp>
+#include <xcs/nodes/xobject/x_input_port.hpp>
 #include <xcs/types/eulerian_vector.hpp>
 
 #include <opencv2/opencv.hpp>
@@ -23,10 +24,10 @@ public:
     /*
      * Inputs
      */
-    ::urbi::InputPort video;
-    XVar<xcs::EulerianVector> rotation;
-    ::urbi::UVar expectedDistanceUVar; // intentionally UVar
-    ::urbi::UVar expectedDeviationUVar; // intentionally UVar
+    XInputPort<::urbi::UImage> video;
+    XInputPort<xcs::EulerianVector> rotation;
+    XInputPort<double> expectedDistance; // intentionally UVar
+    XInputPort<double> expectedDeviation; // intentionally UVar
 
     /*
      * Image processing params
@@ -58,20 +59,14 @@ public:
     /*!
      * Output params
      */
-    ::urbi::UVar distanceUVar;
-    ::urbi::UVar deviationUVar;
-    ::urbi::UVar hasLine;
-    ::urbi::UVar curvatureUVar;
+    XVar<double> distance;
+    XVar<double> deviation;
+    XVar<double> hasLine;
+    XVar<double> curvature;
+    XVar<::urbi::UImage> enhancedVideo;
 
     XLineFinder(const std::string &);
     void init();
-
-    /*!
-     * Urbi period handler
-     */
-    virtual int update();
-
-    void setLineDrawer(UObject *drawer);
 private:
 
     enum LineType {
@@ -82,17 +77,15 @@ private:
     static const size_t REFRESH_PERIOD;
     static const size_t STUCK_TOLERANCE;
 
-
-    xcs::nodes::XLineDrawer *lineDrawer_;
-
-    bool hasFrame_;
-    ::urbi::UImage lastFrame_;
-    size_t lastReceivedFrameNo_;
+    cv::Mat lastFrame_;
     size_t lastProcessedFrameNo_;
-    size_t stuckCounter_;
     double distance_;
     double deviation_;
     double curvature_;
+
+    xcs::EulerianVector rotation_;
+    double expectedDistance_;
+    double expectedDeviation_;
 
     // processing results
     LineType lineType_;
@@ -102,18 +95,23 @@ private:
         return lineType == LINE_VISUAL;
     }
 
-    void onChangeVideo(::urbi::UVar &uvar);
-
+    void onChangeVideo(::urbi::UImage &frame);
+    void onChangeRotation(xcs::EulerianVector &rotation){ rotation_ = rotation; };
+    void onChangeExpectedDistance(double distance){ distance_ = distance; };
+    void onChangeExpectedDeviation(double deviation){ deviation_ = deviation; };
+    
     void adjustValueRange(cv::Mat image);
-
-    void processFrame();
 
     void useOnlyGoodLines(cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType> lines, cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType> & goodLines, cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType> & curvatureLines);
     
     double calculateCurvature(xcs::nodes::line_finder::LineUtils::RawLineType meanLine, cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType>& curvatureLines, cv::Mat image);
 
-    void drawDebugLines(const cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType>& lines, const cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType>& filteredLines);
+    void drawDebugLines(cv::Mat& canvas, const cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType>& lines, const cv::vector<xcs::nodes::line_finder::LineUtils::RawLineType>& filteredLines);
 
+    /*!
+    * Very ugly geometry.
+    */
+    void drawFullLine(cv::Mat& canvas, double distance, double deviation, cv::Scalar color, size_t width = 3, bool withCircle = false);
 };
 
 }

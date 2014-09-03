@@ -52,6 +52,16 @@ PID {
     prototype XPID
 }
 
+LineFinder {
+  prototype XLineFinder
+  file xline_finder
+}
+
+LineKeeper {
+  prototype XLineKeeper
+  file xline_keeper
+}
+
 Localization {
     prototype XLocalization
     args "xcsPaths.getSettings(\"xlocalization.xs\")"

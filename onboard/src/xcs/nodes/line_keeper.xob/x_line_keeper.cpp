@@ -16,30 +16,26 @@ XLineKeeper::XLineKeeper(const string& name) :
   velocity("VELOCITY_LOC"),
   altitude("ALTITUDE"),
   rotation("ROTATION"),
+  distance("DISTANCE"),
+  deviation("DEVIATION"),
   isKeeping_(false) {
-    UBindFunction(XLineKeeper, init);
-    UBindFunction(XLineKeeper, setLineDrawer);
-    UBindFunction(XLineKeeper, reset);
-    UBindFunction(XLineKeeper, stop);
+    XBindFunction(XLineKeeper, init);
+    XBindFunction(XLineKeeper, setLineDrawer);
+    XBindFunction(XLineKeeper, reset);
+    /*XBindFunction(XLineKeeper, stop);*/
 
     XBindVarF(velocity, &XLineKeeper::onChangeVelocity);
 
-    XBindVar(altitude);
-    XBindVar(rotation);
+    XBindVarF(altitude, &XLineKeeper::onChangeAltitude);
+    XBindVarF(rotation, &XLineKeeper::onChangeRotation);
 
     UBindVar(XLineKeeper, cameraScale);
 
-    UBindVarRename(XLineKeeper, distanceUVar, "distance");
-    UBindVarRename(XLineKeeper, deviationUVar, "deviation");
+    XBindVar(distance);
+    XBindVar(deviation);
 }
 
 void XLineKeeper::init() {
-    /*
-     * Output vars
-     */
-    distanceUVar = 0;
-    deviationUVar = 0;
-
     USetUpdate(REFRESH_PERIOD);
 }
 
@@ -50,9 +46,8 @@ int XLineKeeper::update() {
     /*
      * Calculate distance
      */
-    double distance = 0;
     VectorType deviationVector(cos(initialDeviation_), sin(initialDeviation_));
-    auto scale = static_cast<double> (cameraScale) / (static_cast<double> (altitude.data()) + 1e-9);
+    auto scale = static_cast<double> (cameraScale) / (altitude_ + 1e-9);
     VectorType scaledPositionShift;
     /*
      * drone coordinates: x (forward), y (leftward)
@@ -67,18 +62,14 @@ int XLineKeeper::update() {
     /*
      * Calculate deviation
      */
-    auto deviation = -static_cast<EulerianVector> (rotation.data()).psi + initialDevOffset_; // beware: psi has opposite sign
-
-    /*
-     * Notify
-     */
-    distanceUVar = distance;
-    deviationUVar = deviation;
+    deviation = -rotation_.psi + initialDevOffset_; // beware: psi has opposite sign
 
     /*
      * Debug draw
      */
-    lineDrawer_->drawFullLine(distance, deviation, cv::Scalar(0, 255, 255), 3);
+    if (lineDrawer_ != nullptr){
+        lineDrawer_->drawFullLine(distance.data(), deviation.data(), cv::Scalar(0, 255, 255), 3);
+    }
 
     return 0; // Urbi undocumented, return value probably doesn't matter
 }
@@ -91,7 +82,7 @@ void XLineKeeper::setLineDrawer(UObject *drawer) {
 void XLineKeeper::reset(double distance, double deviation) {
     initialDistance_ = distance;
     initialDeviation_ = deviation;
-    initialDevOffset_ = deviation + static_cast<EulerianVector> (rotation.data()).psi; // beware: psi has opposite sign, this is difference
+    initialDevOffset_ = deviation + rotation_.psi; // beware: psi has opposite sign, this is difference
 
     positionShift_.x = 0;
     positionShift_.y = 0;
@@ -100,9 +91,9 @@ void XLineKeeper::reset(double distance, double deviation) {
     isKeeping_ = true;
 }
 
-void XLineKeeper::stop() {
-    isKeeping_ = false;
-}
+//void XLineKeeper::stop() {
+//    isKeeping_ = false;
+//}
 
 void XLineKeeper::onChangeVelocity(const xcs::CartesianVector v) {
     auto now = high_resolution_clock::now();
