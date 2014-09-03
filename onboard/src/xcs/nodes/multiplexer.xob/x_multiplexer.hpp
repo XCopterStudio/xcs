@@ -87,6 +87,7 @@ namespace multiplexer{
     class XMultiplexer : public XObject{
         typedef std::list<std::shared_ptr<Channel<type> > > Channels;
         typedef std::list< std::shared_ptr< xcs::nodes::XInputPort<type> > > InputPorts;
+        typedef std::unique_ptr< xcs::nodes::XVar<type> > XVarPtr;
 
         unsigned int channelCount_;
         std::atomic<unsigned int> channel_;
@@ -107,7 +108,7 @@ namespace multiplexer{
         /// Set which channel will be redirected to the output_
         xcs::nodes::XInputPort<unsigned int> chooseInput;
         /// Redirected data from selected input channel
-        xcs::nodes::XVar<type> output;
+        XVarPtr output;
 
         //! Initialize private variables.
         XMultiplexer(const std::string& name);
@@ -149,11 +150,8 @@ namespace multiplexer{
 
     template<class type>
     XMultiplexer<type>::XMultiplexer(const std::string& name) : XObject(name),
-    chooseInput("CHANNEL"),
-    output("*"){
+    chooseInput("CHANNEL"){
         stopped_ = true;
-
-        XBindVar(output);
 
         XBindFunction(XMultiplexer<type>, init);
     }
@@ -168,10 +166,11 @@ namespace multiplexer{
             channelCount_ = channelCount;
         }
 
+        output = XVarPtr(new xcs::nodes::XVar<type>(semanticType));
+        XBindVarRename((*output),"output");
+
         defaultSetChannel_ = defaultSetChannel;
-        if (!defaultSetChannel_) {
-            XBindVarF(chooseInput, &XMultiplexer<type>::onChangeChannel);
-        }
+        XBindVarF(chooseInput, &XMultiplexer<type>::onChangeChannel);
 
         minChannel_ = channelCount_ - 1;
 
@@ -181,20 +180,15 @@ namespace multiplexer{
 
             std::stringstream name;
             name << "input";
-            name << i + 1;
+            name << i;
 
             XBindVarRename((*input), name.str());
 
             std::shared_ptr<Channel<type> > channel = std::shared_ptr<Channel<type> >(
-                new Channel<type>(i, channel_, output, stopped_, defaultSetChannel_, minChannel_, input));
+                new Channel<type>(i, channel_, *output, stopped_, defaultSetChannel_, minChannel_, input));
 
             channels_.push_back(channel); 
         }
-    }
-
-    template<class type>
-    void XMultiplexer<type>::onChangeInput(const type data) {
-        XCS_LOG_WARN("input changed");
     }
 
 }}}
