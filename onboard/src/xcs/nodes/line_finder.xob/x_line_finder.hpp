@@ -96,7 +96,7 @@ private:
     }
 
     void onChangeVideo(::urbi::UImage &frame);
-    void onChangeRotation(xcs::EulerianVector &rotation){ rotation_ = rotation; };
+    void onChangeRotation(xcs::EulerianVector rotation){ rotation_ = rotation; };
     void onChangeExpectedDistance(double distance){ distance_ = distance; };
     void onChangeExpectedDeviation(double deviation){ deviation_ = deviation; };
     

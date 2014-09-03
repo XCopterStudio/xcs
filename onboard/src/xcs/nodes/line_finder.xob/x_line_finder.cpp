@@ -18,15 +18,15 @@ video("CAMERA"),
 rotation("ROTATION"),
 expectedDistance("DISTANCE"),
 expectedDeviation("DEVIATION"),
-lastProcessedFrameNo_(0),
-distance_(0),
-deviation_(0),
-lineType_(LINE_NONE),
 distance("DISTANCE"),
 deviation("DEVIATION"),
 hasLine("DECISION"),
 curvature("CURVATURE"),
-enhancedVideo("CAMERA")
+enhancedVideo("CAMERA"),
+lastProcessedFrameNo_(0),
+distance_(0),
+deviation_(0),
+lineType_(LINE_NONE)
   {
     XBindFunction(XLineFinder, init);
 
