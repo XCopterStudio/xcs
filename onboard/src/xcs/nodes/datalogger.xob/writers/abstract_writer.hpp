@@ -4,6 +4,8 @@
 #include <string>
 #include <atomic>
 #include <urbi/uobject.hh>
+#include <clocale>
+#include <xcs/logging.hpp>
 
 #include "../logger_context.hpp"
 
@@ -26,6 +28,10 @@ public:
 
     AbstractWriter(const std::string &name) : urbi::UObject(name),
         enabled_(true) {
+        //! decimal dot will be US .
+        if (std::setlocale(LC_NUMERIC, "C") == NULL){
+            XCS_LOG_WARN("Writer cannot load POSIX locale.");
+        }
     }
 
     virtual ~AbstractWriter() {

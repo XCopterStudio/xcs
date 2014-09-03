@@ -5,6 +5,7 @@
 #include <xcs/nodes/xobject/x_type.hpp>
 
 #include <boost/filesystem/path.hpp>
+#include <clocale>
 
 #include <sstream>
 #include <thread>
@@ -28,6 +29,11 @@ XDataplayer::XDataplayer(const std::string& name) :
   finished("EVENT"),
   isPlaying_(false),
   endAll_(false) {
+    //! decimal dot will be US .
+    if (std::setlocale(LC_NUMERIC, "C") == NULL){
+        XCS_LOG_WARN("XDataplayer cannot load POSIX locale.");
+    }
+
     fillTypeCategories(syntacticCategoryMap_);
 
     XBindFunction(XDataplayer, init);
