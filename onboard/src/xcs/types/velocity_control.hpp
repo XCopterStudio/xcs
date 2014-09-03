@@ -24,7 +24,7 @@ struct VelocityControl {
             static VelocityControl deserialize(T &stream) {
         double vx, vy, vz, psi;
         stream >> vx >> vy >> vz >> psi;
-        return VelocityControl(vx, vy, vz);
+        return VelocityControl(vx, vy, vz, psi);
     }
 };
 }
