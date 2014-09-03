@@ -217,8 +217,10 @@ void XciDodo::configuration(const std::string& key, const std::string & value) {
     configuration_[key] = value;
 }
 
-void XciDodo::configuration(const InformationMap & configuration) { //TODO: change only part of configuration_
-    configuration_ = configuration;
+void XciDodo::configuration(const InformationMap & configuration) {
+    for (auto element : configuration) {
+        configuration_[element.first] = element.second;
+    }
 }
 
 SpecialCMDList XciDodo::specialCMD() {

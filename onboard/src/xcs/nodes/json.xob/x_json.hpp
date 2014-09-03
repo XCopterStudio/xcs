@@ -18,7 +18,7 @@ public:
     bool tryDecode(const std::string &json);
     std::string encode(const ::urbi::UValue &data);
 
-    //TODO: code 2 one xvar
+    //NOTE: Instead of returning a list, we have two output variables.
     XVar<::urbi::UValue> outJson;
     XVar<std::string> outRest;    
 private:

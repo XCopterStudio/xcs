@@ -43,7 +43,7 @@ typedef std::pair<DroneStateMeasurement, double> ImuMeasurementChronologic;
 }
 
 
-class Predictor { // TODO wrap class in xcs::nodes::localization
+class Predictor { 
 public:
 
     // xyz-position is center of drone CS in global coordinates.

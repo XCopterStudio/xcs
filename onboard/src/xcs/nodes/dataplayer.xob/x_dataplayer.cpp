@@ -25,7 +25,6 @@ xcs::SyntacticCategoryMap XDataplayer::syntacticCategoryMap_;
 
 XDataplayer::XDataplayer(const std::string& name) :
   xcs::nodes::XObject(name),
-  /*command("COMMAND"),*/
   finished("EVENT"),
   isPlaying_(false),
   endAll_(false) {
@@ -38,9 +37,6 @@ XDataplayer::XDataplayer(const std::string& name) :
 
     XBindFunction(XDataplayer, init);
     
-    //TODO: there should be usefull to add command REPLAY...
-    //XBindVarF(command, &XDataplayer::onCommand);
-
     XBindVar(finished);
 
     finished = false;
@@ -162,7 +158,6 @@ void XDataplayer::processLogLine(const std::string &channel, const Timestamp tim
     try {
         synType = channelTypes_.at(channel);
     } catch (out_of_range &e) {
-        // TODO only read the line and continue on the next one, with warning and not breaking
         XCS_LOG_ERROR("Unknown channel " << channel << ".");
     }
     auto categoryType = syntacticCategoryMap_.at(synType);
@@ -221,10 +216,6 @@ void XDataplayer::videoDecoder() {
         videoResults_.at(channel)->push(videoPlayers_.at(channel)->getFrame());
     }
 }
-
-//void XDataplayer::onCommand(const std::string &command) {
-//    XCS_LOG_WARN("No dataplayer commands implemented."); // NOTE: possible reset of the player
-//}
 
 void XDataplayer::play() {
     if (!paused) {

@@ -8,6 +8,7 @@
 #include "x_xci.hpp"
 
 #include <iostream>
+#include <mutex>
 
 #include <xcs/logging.hpp>
 #include <xcs/nodes/xobject/x.h>
@@ -53,7 +54,7 @@ XXci::XXci(const std::string& name) :
     XBindPrivateVarF(pitch, &XXci::onChangePitch);
     XBindPrivateVarF(yaw, &XXci::onChangeYaw);
     XBindPrivateVarF(gaz, &XXci::onChangeGaz);
-    
+
     XBindVarF(command, &XXci::onChangeCommand);
 
 }
@@ -90,7 +91,7 @@ void XXci::xciStart() {
         onChangeFlyControlPersistence(stoi(controlPersistence));
         flyControlAlive_ = true;
         flyControlThread_ = move(thread(&XXci::keepFlyControl, this));
-        xciInited_ = true; // TODO check this variable in all commands to the drone
+        xciInited_ = true;
     }
 }
 
@@ -116,11 +117,15 @@ void XXci::setConfiguration(const std::string& key, const std::string& value) {
 }
 
 void XXci::onChangeFly(FlyControl fp) {
-    //TODO here should be lock to atomic update of RPYG
-    roll_ = fp.roll;
-    pitch_ = fp.pitch;
-    yaw_ = fp.yaw;
-    gaz_ = fp.gaz;
+    {
+        mutex mtx;
+        unique_lock<mutex>lock(mtx);
+
+        roll_ = fp.roll;
+        pitch_ = fp.pitch;
+        yaw_ = fp.yaw;
+        gaz_ = fp.gaz;
+    }
     sendFlyControl();
     setFlyControlActive();
 }
@@ -151,10 +156,15 @@ void XXci::onChangeGaz(double gaz) {
 
 void XXci::onChangeCommand(const std::string& command) {
     setFlyControlActive(false);
-    roll_ = 0;
-    pitch_ = 0;
-    yaw_ = 0;
-    gaz_ = 0;
+    {
+        mutex mtx;
+        unique_lock<mutex>lock(mtx);
+
+        roll_ = 0;
+        pitch_ = 0;
+        yaw_ = 0;
+        gaz_ = 0;
+    }
     xci_->command(command);
 }
 
@@ -217,7 +227,7 @@ void XXci::sendFlyControl() {
 
 XXci::~XXci() {
     stopFlyControlsThread();
-    if (xci_ != nullptr){
+    if (xci_ != nullptr) {
         delete xci_;
     }
 }

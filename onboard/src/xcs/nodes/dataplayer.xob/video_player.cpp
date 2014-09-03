@@ -239,7 +239,7 @@ void VideoPlayer::initFilters(const std::string &filterDescription) {
     inputs->pad_idx = 0;
     inputs->next = NULL;
 
-    //TODO don't know why .get() instead of .release() doesn't work... (segfaults at the end)
+    //NOTE: don't know why .get() instead of .release() doesn't work... (segfaults at the end)
     if (avfilter_graph_parse(filterGraph_.get(), filterDescription.c_str(), inputs.release(), outputs.release(), NULL) < 0) {
         throw runtime_error("Cannot parse.");
     }

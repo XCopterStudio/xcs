@@ -39,7 +39,6 @@ class XCS_EXPORT LibraryLoader : public Multiton<LibraryLoader, std::string> {
     friend class Multiton<LibraryLoader, std::string>;
 public:
 #ifdef _WIN32
-    //TODO check this weird macro in MS VC++
     typedef HMODULE HandleType;
 #else
     typedef void* HandleType;

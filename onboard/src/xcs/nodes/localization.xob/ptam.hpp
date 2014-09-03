@@ -108,7 +108,10 @@ private:
 
     localization::ScaleEstimation scaleEstimation_;
 
-    Predictor predIMUOnlyForScale_; // used for scale calculation. needs to be updated with every new navinfo..., // TODO navdata should be fed to this predictor
+    /*!
+     * Used only for scale calculation.
+     */
+    Predictor predIMUOnlyForScale_; 
     /*!
      * >= 0 no. of succesfully tracked frames in a row
      * <= 0 no. of unsuccesfully tracked frames in a row

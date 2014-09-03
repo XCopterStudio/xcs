@@ -60,7 +60,7 @@ class XDatalogger : public xcs::nodes::XObject {
 
     inline bool validRegister() {
         if (context_.enabled) {
-            send("throw \"Cannot register input in enabled logger.\";"); // TODO use XCS_LOG_
+            XCS_LOG_ERROR("Cannot register input in enabled logger.");
         }
         return !context_.enabled;
     }

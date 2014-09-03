@@ -31,7 +31,8 @@ private:
     nodes::SimpleXVar &getSensorXVar(const std::string& sensorName) const {
         auto it = outputs_.find(sensorName);
         if (it == outputs_.end()) {
-            throw std::runtime_error("Unregistered sensor '" + sensorName + "'."); // TODO is it necessary to link with libxcs, therefore std::runtime_error?
+            // NOTE: xcs::Exception might be better
+            throw std::runtime_error("Unregistered sensor '" + sensorName + "'.");
         }
         return *(it->second);
     }

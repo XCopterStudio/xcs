@@ -32,8 +32,6 @@ public:
     XDataplayer(const std::string& name);
     virtual ~XDataplayer();
 
-    /*xcs::nodes::XInputPort<std::string> command;*/
-
     xcs::nodes::XVar<bool> finished;
 
     void init(const std::string &file);

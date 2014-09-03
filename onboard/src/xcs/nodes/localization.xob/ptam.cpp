@@ -44,7 +44,7 @@ Ptam::~Ptam() {
 }
 
 void Ptam::cameraParameters(const CameraParameters& values) {
-    cameraParameters_ = values; // TODO refresh camera?
+    cameraParameters_ = values;
 }
 
 void Ptam::parameters(const Parameters& values) {
@@ -104,7 +104,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
     ptamTracker_->setPredictedCamFromW(ptamToCamPPred);
 
-    ptamTracker_->setLastFrameLost((goodCount_ < -20), (frameNo_ % 3 == 0)); // TODO (Michal): What is this?
+    ptamTracker_->setLastFrameLost((goodCount_ < -20), (frameNo_ % 3 == 0)); // NOTE: This is some workaround from original TUM.
 
     // track
     ptamTracker_->TrackFrame(frame_, showWindow_);
@@ -134,7 +134,7 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
 
         XCS_LOG_INFO("PTAM initialized with initial scale " << scaleEstimation_.scale() << ".");
         framesForScaleInterval_ = -1;
-        updateFixpoint_ = true; // TODO what is this
+        updateFixpoint_ = true;
     }
     if (ptamTracker_->lastStepResult == ptamTracker_->I_FIRST) {
         XCS_LOG_INFO("PTAM initialization started (took first KF)");
@@ -302,7 +302,6 @@ void Ptam::handleFrame(::urbi::UImage &bwImage, Timestamp timestamp) {
     if (updateFixpoint_ && isGood) {
         scaleEstimation_.scalingFixpoint(scalingFixpoint);
         updateFixpoint_ = false;
-        // TODO: (Michal) I don't know whether to use or not the fixpoint
 
         XCS_LOG_INFO("Locking scale fixpoint to " << scalingFixpoint[0] << " " << scalingFixpoint[1] << " " << scalingFixpoint[2]);
     }
@@ -399,12 +398,10 @@ TooN::Vector<3> Ptam::evalNavQue(Timestamp from, Timestamp to, bool* zCorrupted,
         }
 
     }
-    cout << from << ";" << to << " " << firstAdded << ";" << lastAdded << " " << samples << endl;
-    //printf("QueEval: before: %i; skipped: %i, used: %i, left: %i\n", totSize, skipped, used, navInfoQueue.size());
     predIMUOnlyForScale_.z -= firstZ; // make height to height-diff
 
     *zCorrupted = predIMUOnlyForScale_.zCorrupted;
-    *allCorrupted = std::abs(firstAdded - from) + std::abs(lastAdded - to) > 0.08; // 80 ms //TODO check this abs'es are correct
+    *allCorrupted = std::abs(firstAdded - from) + std::abs(lastAdded - to) > 0.08; // 80 ms
 
     return TooN::makeVector(predIMUOnlyForScale_.x, predIMUOnlyForScale_.y, predIMUOnlyForScale_.z);
 }
