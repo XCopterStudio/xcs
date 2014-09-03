@@ -96,7 +96,7 @@ void XLineFinder::init() {
     USetUpdate(REFRESH_PERIOD);
 }
 
-void XLineFinder::onChangeVideo(::urbi::UImage &frame) {
+void XLineFinder::onChangeVideo(::urbi::UImage frame) {
     lastProcessedFrameNo_++;
 
     if (frame.height != lastFrame_.rows || frame.width != lastFrame_.cols){
@@ -374,4 +374,4 @@ void XLineFinder::drawFullLine(cv::Mat& canvas, double distance, double deviatio
 
 }
 
-UStart(XLineFinder);
+XStart(XLineFinder);
