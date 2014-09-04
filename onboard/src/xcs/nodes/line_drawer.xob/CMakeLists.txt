@@ -16,3 +16,7 @@ use_urbi(${PROJECT_NAME})
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} )
+
+# installation
+install(TARGETS ${PROJECT_NAME}
+        DESTINATION lib/xcs/xobjects)
