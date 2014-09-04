@@ -72,8 +72,28 @@ public:
     XDatalogger(const std::string& name);
     virtual ~XDatalogger();
 
+    /*!
+     * Urbi object initializer.
+     * 
+     * \param file Name of the file where the log should be stored.
+     */
     void init(const std::string &file);
+    
+    /*!
+     * Starts listening to changes of given UVar and writes them to the log.
+     * 
+     * \param name Equivalent to XInputPort's name, however here the named input is created dynamically and virtually.
+     * \param semanticType Semantic type of logged input.
+     * \param syntacticType Syntactic type of logged input (fully qualified type name).
+     * \param uvar UVar that represents output that is virtually connected to the input.
+     */
     void registerXVar(const std::string &name, const std::string &semanticType, const std::string &syntacticType, ::urbi::UVar &uvar);
+    
+    /*!
+     * Stops logging data that are being written to UVar previously registered with given name.
+     * 
+     * \param name Name under which an UVar was registered.
+     */
     void unregisterXVar(const std::string &name);
 };
 
