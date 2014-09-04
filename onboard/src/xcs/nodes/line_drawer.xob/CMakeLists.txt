@@ -19,4 +19,4 @@ target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} )
 
 # installation
 install(TARGETS ${PROJECT_NAME}
-        DESTINATION lib/xcs/xobjects)
+        DESTINATION lib)
