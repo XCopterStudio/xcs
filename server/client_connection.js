@@ -2,7 +2,7 @@ function ClientConnection(application, pingInterval) {
     var app_ = application,
         io_ = require('socket.io')(application.Http),
         client_ = null,
-        ping_ = require('./ping_monitor.js');
+        ping_ = require('./ping_monitor.js')();
 
     io_.on('connection', handleNewConnection);
 
