@@ -4,7 +4,7 @@ function OnboardConnection(application, pingInterval) {
         net_ = require('net'),
         onboard_ = null,
         com_ = net_.createServer(handleNewConnection),
-        ping_ = require('./ping_monitor.js'),
+        ping_ = require('./ping_monitor.js')(),
         connected_ = false;
 
     /*
