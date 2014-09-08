@@ -6,7 +6,7 @@ var RawDataView = AbstractDataView.extend({
     },
     
     setData : function(data) {
-        if (data && typeof data == 'object') {
+        if (typeof data == 'object') {
             var parts = [];
             for(var key in data) {
                 if(key === '$sn') { // TODO must be ingored, process data differently?
@@ -15,7 +15,7 @@ var RawDataView = AbstractDataView.extend({
                 parts.push(key + ': ' + data[key]);                
             }
             this.$raw.html(parts.join('<br>'));
-        } else if(data) {
+        } else {
             this.$raw.html(data);
         }
     },
