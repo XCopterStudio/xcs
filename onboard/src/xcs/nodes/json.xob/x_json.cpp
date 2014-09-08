@@ -75,7 +75,7 @@ bool XJson::tryDecode(const std::string &json) {
     vector<string> rests;
     Document doc;
     string text, rest;
-    unsigned foundPosition;
+    size_t foundPosition;
 
     // try find valid part of json
     do {
