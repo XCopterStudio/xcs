@@ -72,9 +72,17 @@ class Onboard {
         at (context.adapter.connected->changed?) {
             if (context.adapter.connected == false) {
                 onDisconnect_();
+                if(onboardSettings_.get("needsServer")) {
+                    System.shutdown();
+                };
             };
         };
-        context.adapter.start(onboardSettings_.get("serverHost"), onboardSettings_.get("serverPort"));
+        try {
+            context.adapter.start(onboardSettings_.get("serverHost"), onboardSettings_.get("serverPort"));
+        } catch(var e) {
+            XCS_LOG_FATAL("Cannot connect to server. " + e.message);
+            System.shutdown();
+        };
         
         pingReflector_ = PingReflector.new(context.adapter, json);
         sender_ = OnboardSender.new(context.adapter, json);

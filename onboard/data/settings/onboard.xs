@@ -7,6 +7,9 @@ serverPort 1234
 ; Relay host video port
 serverVideoPort 1235
 
+; Shuts onboard down when server is disconnected.
+needsServer true
+
 ; (File)name of DFG that is loaded by default
 defaultDfg default
 
