@@ -59,6 +59,20 @@ var DataView = Backbone.View.extend({
                  }
             }
         },
+        chart2D: {
+            name: "chart 2D data",
+            ctor: function(prototypeDataId, dataId) {
+                var index = dataId.indexOf("__");
+                if(index > 0) {
+                    var nodeName = dataId.substring(0, dataId.indexOf("__"))
+                    var portName = dataId.substring(dataId.indexOf("__") + 2)
+                
+                    nodeName = nodeName.charAt(0).toUpperCase() + nodeName.slice(1);
+                    
+                    return new Chart2DDataView(prototypeDataId, dataId, { name: nodeName + " " + portName });
+                 }
+            }
+        },
         video: {
             name: "video",
             ctor: function(prototypeDataId, dataId) {

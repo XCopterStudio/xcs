@@ -55,6 +55,7 @@
 <script type="text/javascript" src="src/views/GaugeDataView.js"></script>
 <script type="text/javascript" src="src/views/ProgressDataView.js"></script>
 <script type="text/javascript" src="src/views/ChartDataView.js"></script>
+<script type="text/javascript" src="src/views/Chart2DDataView.js"></script>
 <script type="text/javascript" src="src/views/VideoDataView.js"></script>
 <script type="text/javascript" src="src/views/AppView.js"></script>
 <script type="text/javascript" src="src/views/DataFlowGraphView.js"></script>
