@@ -142,8 +142,7 @@ var AbstractDataView = Backbone.View.extend({
         
         if(this.dataId == '') {
             this.setData(data);
-        }
-        else if(data[this.dataId]) {
+        } else if(data[this.dataId] !== null) {
             this.setData(data[this.dataId]);
         }
     },
