@@ -4,12 +4,12 @@
 using namespace cv;
 using namespace xcs::nodes::reddot;
 
-void RedDot::getRedMask(const cv::Mat &image, cv::Mat &redMask){
+void RedDot::getMask(const cv::Mat &image, cv::Mat &redMask){
     Mat mask;
 
-    Scalar lower_red(115, 100, 100);
-    Scalar upper_red(125, 200, 200);
-    inRange(image, lower_red, upper_red, redMask);
+    Scalar lower(lowerH_, lowerS_, lowerV_);
+    Scalar upper(upperH_, upperS_, upperV_);
+    inRange(image, lower, upper, redMask);
 }
 
 //================ public functions =========
@@ -20,15 +20,17 @@ bool RedDot::findRedDot(const cv::Mat &image, cv::Mat &out){
 
     Mat redMask;
     //cvtColor(image, redMask, CV_RGB2GRAY);
-    getRedMask(imageHSV,redMask);
+    getMask(imageHSV,redMask);
     GaussianBlur(redMask, redMask, Size(9, 9), 2, 2);
     //cvtColor(redMask, out, CV_GRAY2RGB);
 
     vector<Vec3f> circles;
     HoughCircles(redMask, circles, CV_HOUGH_GRADIENT,
-        4, redMask.cols, 200, 100, 8);
+        4, redMask.cols/2, 200, 100, 0, 60);
 
-    image.copyTo(out);
+    //image.copyTo(out);
+    cvtColor(redMask, out, CV_GRAY2BGR);
+    cv::bitwise_and(out, image, out);
     for (size_t i = 0; i < circles.size(); i++)
     {
         Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));

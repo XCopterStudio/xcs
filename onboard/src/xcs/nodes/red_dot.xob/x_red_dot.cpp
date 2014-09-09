@@ -50,11 +50,27 @@ void XRedDot::stateChanged(XObject::State state){
 //=============== public functions ===============
 
 XRedDot::XRedDot(const std::string &name) : XObject(name),
-    video("CAMERA"), enhancedVideo("CAMERA"), found("DECISION"), errorX("PID_ERROR"),
-    errorY("PID_ERROR"){
+    video("CAMERA"), lowerH("SETTING"), upperH("SETING"),
+    lowerS("SETTING"), upperS("SETING"),
+    lowerV("SETTING"), upperV("SETING"),
+    enhancedVideo("CAMERA"), found("DECISION"),
+    errorX("PID_ERROR"), errorY("PID_ERROR"){
+
+    redDot_.lowerH(125);
+    redDot_.upperH(140);
+    redDot_.lowerS(100);
+    redDot_.upperS(255);
+    redDot_.lowerV(100);
+    redDot_.upperV(255);
 
     XBindVar(video);
     UNotifyThreadedChange(video.data(), &XRedDot::onChangeVideo, urbi::LOCK_FUNCTION_DROP);
+    XBindVarF(lowerH, &XRedDot::onChangeLowerH);
+    XBindVarF(upperH, &XRedDot::onChangeUpperH);
+    XBindVarF(lowerS, &XRedDot::onChangeLowerS);
+    XBindVarF(upperS, &XRedDot::onChangeUpperS);
+    XBindVarF(lowerV, &XRedDot::onChangeLowerV);
+    XBindVarF(upperV, &XRedDot::onChangeUpperV);
 
     XBindVar(enhancedVideo);
     XBindVar(found);
