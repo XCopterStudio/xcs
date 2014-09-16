@@ -48,7 +48,7 @@ class Executor : XObject {
          * NOTE: doesn't work for channels (cout <<, etc.)
          */
         var myEcho = function(string) {
-            that.output = string.asString() + "\n"; // TODO test on windows, define some built dependent constant
+            that.output = string.asString() + "\n"; // NOTE: works even on Windows
         };
         
         if(lobby_.hasLocalSlot("echo")) { // NOTE: this will modify global lobby once for all :-(
@@ -67,7 +67,7 @@ class Executor : XObject {
                     try {
                         System.eval("{" + that.code + "}", that.lobby_); // we run the code in a separate scope
                     } catch(var e) {
-                        that.error = e.asString();
+                        that.error = e.asString() + "\n"; // NOTE: works even on Windows
                     };
                 }}); // run in background                
             } else if(that.control == "freeze") {
