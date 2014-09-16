@@ -10,6 +10,7 @@ var Chart2DDataView = AbstractDataView.extend({
     </li>',
     
     sizeX: 2,
+    sizeY: 3,
     
     totalPoints: 100,
         
