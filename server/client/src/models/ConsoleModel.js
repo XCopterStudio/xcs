@@ -20,6 +20,7 @@ var ConsoleModel = Backbone.Model.extend({
         this.listenTo(app.Onboard, "sem_update:EXECUTION_OUTPUT", this.onOutputChange);
         this.listenTo(app.DataFlowGraph.model, 'nodeStart', this.onNodeStart);
         this.listenTo(app.DataFlowGraph.model, 'nodeStop', this.onNodeStop);
+        this.listenTo(app.DataFlowGraph.model, 'nodeDestroy', this.onNodeStop);
     },
     onStateChange: function(value) {
         if (this.get('timeoutRef')) {
@@ -175,7 +176,7 @@ var ConsoleModel = Backbone.Model.extend({
         this.set('state', ConsoleModel.State.WAITING);
         var that = this;
         this.set('timeoutRef', window.setTimeout(function() {
-            app.Flash.flashError('Onboard console is not responding. Check that you have an Executor node created and it\'s running.');
+            app.Flash.flashError('Onboard console is not responding. Check that you have a running Executor node correctly connected to GUI.');
             that.set('state', ConsoleModel.State.IDLE);
         }, this.get('responseTimeout')));
     }

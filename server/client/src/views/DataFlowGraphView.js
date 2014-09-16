@@ -1107,6 +1107,7 @@ var DataFlowGraphView = Backbone.View.extend({
                             var model = self.dfgModels[responseData.destroyed[i]];
                             if(model) {
                                 model.setState(NodeState.NOTCREATED);
+                                self.model.trigger('nodeDestroy', model);
                                 ++successCount;
                             }
                         }
