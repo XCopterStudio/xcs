@@ -54,8 +54,11 @@ lineType_(LINE_NONE)
     UBindVar(XLineFinder, houghMinLength);
     UBindVar(XLineFinder, houghMaxGap);
     UBindVar(XLineFinder, hystDeviationThr);
+    UBindVar(XLineFinder, hystDeviationThrBase);
+    UBindVar(XLineFinder, hystDeviationThrRate);
     UBindVar(XLineFinder, hystDistanceThr);
     UBindVar(XLineFinder, curvatureTolerance);
+    
 
     XBindVar(distance);
     XBindVar(deviation);
@@ -168,6 +171,7 @@ void XLineFinder::onChangeVideo(::urbi::UImage frame) {
             deviation_ = LineUtils::lineDirection(avg);
 
             curvature_ = calculateCurvature(avg, curvatureLines, mid);
+            hystDeviationThr = static_cast<double>(hystDeviationThrBase) + abs(curvature_) * static_cast<double>(hystDeviationThrRate); // TODO this may need smoothing
         }
 
     }

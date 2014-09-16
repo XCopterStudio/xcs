@@ -1,0 +1,160 @@
+class FrontierAligner : XObject {
+    class SimplePid {
+        function init() {
+            var this.p = 0.0;
+            var this.i = 0.0;
+            var this.d = 0.0;
+            
+            var this.sumI = 0.0;
+            var this.lastValue = 0.0;
+            var this.lastDerivation = 0.0;
+            var this.timeDelay = 0.0;
+        };
+        
+        function iter(value) {
+            if(value.isNil()){
+                return 0;
+            };
+            var correctedValue = value + lastDerivation * timeDelay;
+
+            sumI += correctedValue;
+            var derivation = correctedValue - lastValue;
+            lastValue = correctedValue;
+            lastDerivation = derivation;
+
+            return p*correctedValue + i*sumI + d*derivation; 
+        };
+    };
+    
+    // parameters
+    var ygInterval = 200ms;
+    var rpInterval = 500ms;
+    var gazAltitude = 1.5;
+    
+    var forward = 0;
+    var forwardMax = 1;
+    var rpSleep = 200ms;
+    var rpSleepMax = 400ms;
+    var fullCurv = 0.01;
+    var safeCurv = 0.001;
+    
+    // NOTE also pidRoll.p, pidRoll.i, etc. (nested parameters)
+    
+    var inputs_ = [
+        "curvature" => Pair.new(Float, "CURVATURE"),
+        "distance" => Pair.new(Float, "DISTANCE"),
+        "deviation" => Pair.new(Float, "DEVIATION"),
+        "hasVisualLine" => Pair.new(Float, "DECISION"), // TODO really?
+        "altitude" => Pair.new(Float, "ALTITUDE"),
+        "rollEnabled" => Pair.new(Float, "ENABLED"),
+        "pitchEnabled" => Pair.new(Float, "ENABLED"),
+        "yawEnabled" => Pair.new(Float, "ENABLED"),
+        "gazEnabled" => Pair.new(Float, "ENABLED"),
+    ];
+    var outputs_ = [
+        "roll" => Pair.new(Float, "ROLL"),
+        "pitch" => Pair.new(Float, "PITCH"),
+        "yaw" => Pair.new(Float, "YAW"),
+        "gaz" => Pair.new(Float, "GAZ"),
+    ];
+    
+    function init() {
+        // Inputs
+        var this.curvature = 0;
+        var this.distance = 0;
+        var this.deviation = 0;
+        var this.hasVisualLine = false;
+        var this.altitude = 0;
+        
+        var this.rollEnabled = nil;
+        var this.pitchEnabled = nil;
+        var this.yawEnabled = nil;
+        var this.gazEnabled = nil;
+        
+        
+        // Outputs
+        var this.roll = 0;
+        var this.pitch = 0;
+        var this.yaw = 0;
+        var this.gaz = 0;
+        
+        
+        // XObject impl
+        var this.state_ = 0;
+        
+        var that = this;
+        
+        at(this.state_->changed?) {
+            switch(that.state_) {
+                case 2: // stopped
+                    //TODO
+            };
+        };
+        
+        // prepare PIDs
+        var this.pidRoll = SimplePid.new();
+        var this.pidPitch = SimplePid.new();
+        var this.pidYaw = SimplePid.new();
+        var this.pidGaz = SimplePid.new();
+
+        
+        // adjust YG
+        var this.ygJob = disown({every(this.ygInterval){
+            // +/- pi (hopefully unnecessary)
+            var yaw = this.pidYaw.iter(this.deviation);
+            yaw = {if(yawEnabled) yaw else 0};
+            this.yaw = yaw; 
+            
+            var altDif = gazAltitude - this.altitude;
+            var gaz = this.pidGaz.iter(altDif);
+            gaz = {if(gazEnabled) gaz else 0}; 
+            this.gaz = gaz;
+            //echo("yaw:\t\t" + yaw + "\tgaz\t\t\t\t" + gaz);
+        };});
+        
+        var this.rpJob = disown({every(this.rpInterval){
+            var distance = this.distance;
+            var deviation = this.deviation;
+            var forwardRange = 0.max(forwardMax - forward);
+            var sleepRange = 0.max(rpSleepMax - rpSleep);
+            
+            var coeff = forwardRange / (fullCurv - safeCurv + 0.00000001); //  not divide by zero
+            var curvForward = forwardMax + (this.curvature.abs() - fullCurv) * coeff;
+            curvForward = forward.max(forwardMax.min(curvForward));
+            
+            var coeffSleep = sleepRange / (fullCurv - safeCurv + 0.00000001); //  not divide by zero
+            var curvSleep = rpSleepMax + (this.curvature.abs() - fullCurv) * coeffSleep;
+            curvSleep = rpSleep.max(rpSleepMax.min(curvSleep));
+            
+            if(!this.hasVisualLine) {
+                curvForward = forward;
+                curvSleep = rpSleep;
+            };
+            
+            //echo("CurvForward:\t" + curvForward + "\t" + curvSleep + "\t" + this.curvature);
+            
+            /* ROLL */
+            var rollError = distance * deviation.cos() + curvForward * deviation.sin();
+            var roll = this.pidRoll.iter(rollError);
+            
+            /* PITCH */
+            var pitchError = distance * deviation.sin() - curvForward * deviation.cos();
+            var pitch = this.pidPitch.iter(pitchError);
+
+
+            /* Common control */            
+            pitch = {if(pitchEnabled) pitch else 0}; 
+            roll = {if(rollEnabled) roll else 0}; 
+            //echo("roll: " + roll + "\t\t pitch:\t\t" + pitch);
+            this.pitch = pitch; 
+            this.roll = roll; 
+            sleep(curvSleep);
+            this.pitch = 0;
+            this.roll = 0;
+            //echo("RP released");
+        };});
+
+    };
+    
+
+}|;

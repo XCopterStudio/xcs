@@ -8,26 +8,28 @@ using namespace xcs::nodes;
 using namespace std;
 using namespace std::chrono;
 
-const size_t XLineKeeper::REFRESH_PERIOD = 20; // ms
 
 //TODO remove static_cast<EulerianVector> (rotation.data()).psi in favor of static_cast<EulerianVector> (rotation).psi
+
 XLineKeeper::XLineKeeper(const string& name) :
   XObject(name),
   velocity("VELOCITY_LOC"),
   altitude("ALTITUDE"),
   rotation("ROTATION"),
+  initialDistance("DISTANCE"),
+  initialDeviation("DEVIATION"),
   distance("DISTANCE"),
   deviation("DEVIATION"),
   isKeeping_(false) {
     XBindFunction(XLineKeeper, init);
-    XBindFunction(XLineKeeper, setLineDrawer);
-    XBindFunction(XLineKeeper, reset);
-    /*XBindFunction(XLineKeeper, stop);*/
+
 
     XBindVarF(velocity, &XLineKeeper::onChangeVelocity);
-
     XBindVarF(altitude, &XLineKeeper::onChangeAltitude);
     XBindVarF(rotation, &XLineKeeper::onChangeRotation);
+
+    XBindVarF(initialDistance, &XLineKeeper::onChangeInitialDistance);
+    XBindVarF(initialDeviation, &XLineKeeper::onChangeInitialDeviation);
 
     UBindVar(XLineKeeper, cameraScale);
 
@@ -36,13 +38,35 @@ XLineKeeper::XLineKeeper(const string& name) :
 }
 
 void XLineKeeper::init() {
-    USetUpdate(REFRESH_PERIOD);
+
 }
 
-int XLineKeeper::update() {
-    if (!isKeeping_) {
-        return 0;
+void XLineKeeper::stateChanged(XObject::State state) {
+    switch (state) {
+        case STATE_STARTED:
+            isKeeping_ = true;
+            break;
+        case STATE_STOPPED:
+            isKeeping_ = false;
+            break;
     }
+}
+
+void XLineKeeper::onChangeVelocity(const xcs::CartesianVector v) {
+    auto now = high_resolution_clock::now();
+    // TODO refactor nicer
+    auto elapsedX = duration<double, seconds::period>(now - lastTimeVx_).count();
+    auto elapsedY = duration<double, seconds::period>(now - lastTimeVy_).count();
+    positionShift_.x += v.x * elapsedX;
+    positionShift_.y += v.y * elapsedY;
+    lastTimeVy_ = lastTimeVx_ = now;
+
+    if (isKeeping_) {
+        updateOutput();
+    }
+}
+
+void XLineKeeper::updateOutput() {
     /*
      * Calculate distance
      */
@@ -51,7 +75,7 @@ int XLineKeeper::update() {
     VectorType scaledPositionShift;
     /*
      * drone coordinates: x (forward), y (leftward)
-     * image coordinates: x (rightward), y (upward) //TODO check
+     * image coordinates: x (rightward), y (upward)
      */
     scaledPositionShift.x = scale * -positionShift_.y;
     scaledPositionShift.y = scale * positionShift_.x;
@@ -63,23 +87,9 @@ int XLineKeeper::update() {
      * Calculate deviation
      */
     deviation = -rotation_.psi + initialDevOffset_; // beware: psi has opposite sign
-
-    /*
-     * Debug draw
-     */
-    if (lineDrawer_ != nullptr){
-        lineDrawer_->drawFullLine(distance.data(), deviation.data(), cv::Scalar(0, 255, 255), 3);
-    }
-
-    return 0; // Urbi undocumented, return value probably doesn't matter
 }
 
-void XLineKeeper::setLineDrawer(UObject *drawer) {
-    //lineDrawer_ = dynamic_cast<XLineDrawer *>(drawer);
-    lineDrawer_ = (XLineDrawer *) (drawer); //TODO missing typeinfo when linking
-}
-
-void XLineKeeper::reset(double distance, double deviation) {
+void XLineKeeper::reset(const double distance, const double deviation) {
     initialDistance_ = distance;
     initialDeviation_ = deviation;
     initialDevOffset_ = deviation + rotation_.psi; // beware: psi has opposite sign, this is difference
@@ -91,19 +101,6 @@ void XLineKeeper::reset(double distance, double deviation) {
     isKeeping_ = true;
 }
 
-//void XLineKeeper::stop() {
-//    isKeeping_ = false;
-//}
-
-void XLineKeeper::onChangeVelocity(const xcs::CartesianVector v) {
-    auto now = high_resolution_clock::now();
-    // TODO refactor nicer
-    auto elapsedX = duration<double, seconds::period>(now - lastTimeVx_).count();
-    auto elapsedY = duration<double, seconds::period>(now - lastTimeVy_).count();
-    positionShift_.x += v.x * elapsedX;
-    positionShift_.y += v.y * elapsedY;
-    lastTimeVy_ = lastTimeVx_ = now;
-}
 
 
-UStart(XLineKeeper);
+XStart(XLineKeeper);

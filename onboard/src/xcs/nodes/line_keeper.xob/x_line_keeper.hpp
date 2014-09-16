@@ -20,8 +20,11 @@ public:
      * Inputs
      */
     XInputPort<xcs::CartesianVector> velocity;
-    XInputPort<double> altitude; // intentionally XVar
-    XInputPort<xcs::EulerianVector> rotation; // intentionally XVar
+    XInputPort<double> altitude;
+    XInputPort<xcs::EulerianVector> rotation;
+
+    XInputPort<double> initialDistance;
+    XInputPort<double> initialDeviation;
 
     /*!
      * Image processing params
@@ -35,19 +38,10 @@ public:
     XVar<double> deviation;
 
     XLineKeeper(const std::string &);
-    
+
     void init();
-
-    void reset(double distance, double deviation);
-    
-    /*void stop();*/
-
-    /*!
-     * Urbi period handler
-     */
-    virtual int update();
-
-    void setLineDrawer(UObject *drawer);
+protected:
+    virtual void stateChanged(XObject::State state);
 private:
 
     struct Point2f {
@@ -61,13 +55,11 @@ private:
     typedef Point2f VectorType; // TODO replace with OpenCV type or own syntactic type
 
 
-    const static size_t REFRESH_PERIOD;
-
-    xcs::nodes::XLineDrawer *lineDrawer_;
-
     VectorType positionShift_;
     TimePoint lastTimeVx_;
     TimePoint lastTimeVy_;
+
+    double initialDistCache_;
 
     double initialDistance_;
     double initialDeviation_;
@@ -75,13 +67,29 @@ private:
 
     double altitude_;
     xcs::EulerianVector rotation_;
-    
+
     bool isKeeping_;
 
     void onChangeVelocity(const xcs::CartesianVector v);
-    void onChangeAltitude(const double altitude){ altitude_ = altitude; };
-    void onChangeRotation(const xcs::EulerianVector rotation){ rotation_ = rotation; };
 
+    void onChangeAltitude(const double altitude) {
+        altitude_ = altitude;
+    }
+
+    void onChangeRotation(const xcs::EulerianVector rotation) {
+        rotation_ = rotation;
+    }
+
+    void onChangeInitialDistance(const double value) {
+        initialDistCache_ = value;
+    }
+
+    void onChangeInitialDeviation(const double value) {
+        reset(initialDistCache_, value);
+    }
+
+    void updateOutput();
+    void reset(const double distance, const double deviation);
 };
 
 }

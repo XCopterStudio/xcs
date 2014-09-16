@@ -1,0 +1,104 @@
+class LineMaster : XObject {
+    
+    class Smoother {
+        function angleLinComb(alpha, beta, a, b) {
+            var x = a * alpha.cos() + b * beta.cos();
+            var y = a * alpha.sin() + b * beta.sin();
+            y.atan2(x); // result
+        };
+        
+        function init(initValue) {
+            var this.value = initValue;
+        };
+        function smooth(newValue, aging) {
+            this.value = this.value * aging + (1 - aging) * newValue;
+        };
+        function smoothAngle(newValue, aging) {
+            this.value = angleLinComb(this.value, newValue, aging, 1-aging);
+        };
+    };
+    
+    // parameters
+    var imuWeight = 0.5;
+    var distanceAging = 0.5;
+    var deviationAging = 0.5;
+    var curvatureAging = 0.5;
+    
+    var inputs_ = [
+        "keeperDistance" => Pair.new(Float, "DISTANCE"),
+        "keeperDeviation" => Pair.new(Float, "DEVIATION"),
+        "finderCurvature" => Pair.new(Float, "CURVATURE"),
+        "finderDistance" => Pair.new(Float, "DISTANCE"),
+        "finderDeviation" => Pair.new(Float, "DEVIATION"),
+        "finderHasLine" => Pair.new(Float, "DECISION"), // TODO really?
+    ];
+    var outputs_ = [
+        "curvature" => Pair.new(Float, "CURVATURE"),
+        "distance" => Pair.new(Float, "DISTANCE"),
+        "deviation" => Pair.new(Float, "DEVIATION"),
+        "hasVisualLine" => Pair.new(Float, "DECISION"), // TODO really?
+        "initialDistance" => Pair.new(Float, "DISTANCE"),
+        "initialDeviation" => Pair.new(Float, "DEVIATION"),        
+    ];
+    
+    function init() {
+        // Inputs
+        var this.keeperDistance = nil;
+        var this.keeperDeviation = nil;
+        var this.finderCurvature = nil;
+        var this.finderDistance = nil;
+        var this.finderDeviation = nil;
+        var this.finderHasLine = nil;
+        // Outputs
+        var this.curvature = 0;
+        var this.distance = 0;
+        var this.deviation = 0;
+        var this.hasVisualLine = false;
+        var this.initialDistance = 0;
+        var this.initialDeviation = 0;                
+        
+        // XObject impl
+        var this.state_ = 0;
+        
+        var that = this;
+        
+        at(this.state_->changed?) {
+            switch(that.state_) {
+                case 2: // stopped
+                    //TODO
+            };
+        };
+        
+        this.&keeperDistance >> this.&distance;
+        this.&keeperDeviation >> this.&deviation;
+        
+        var distanceSmoother = Smoother.new(0);
+        var deviationSmoother = Smoother.new(0);
+        var curvatureSmoother = Smoother.new(0);
+        
+        this.&finderDeviation.notifyChange(function() {
+            // simply combine via averaging
+            var imuWeight = that.imuWeight;
+            if(!that.finderHasLine) {
+                imuWeight = 1;
+            };
+            
+            var distance = distanceSmoother.smooth(that.finderDistance, that.distanceAging);
+            var deviation = deviationSmoother.smoothAngle(that.finderDeviation, that.deviationAging);
+            var curvature = curvatureSmoother.smooth(that.finderCurvature, that.curvatureAging);
+            
+            that.distance = (1 - imuWeight) * distance + imuWeight * that.distance;
+            that.deviation = that.Smoother.angleLinComb(deviation, that.deviation, 1 - imuWeight, imuWeight);
+            that.curvature = curvature;
+            that.hasVisualLine = that.finderHasLine;
+            
+            // recalibrate IMU keeper
+            if(that.finderHasLine) {
+                that.initialDistance = that.distance;
+                that.initialDeviation = that.deviation;
+            };
+        });
+    };
+    
+
+}|;

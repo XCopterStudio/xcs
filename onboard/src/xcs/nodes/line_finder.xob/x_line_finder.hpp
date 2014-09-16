@@ -52,6 +52,8 @@ public:
      */
     ::urbi::UVar hystDistanceThr;
     ::urbi::UVar hystDeviationThr;
+    ::urbi::UVar hystDeviationThrBase;
+    ::urbi::UVar hystDeviationThrRate;
     ::urbi::UVar curvatureTolerance;
 
     ::urbi::UVar cameraParam;

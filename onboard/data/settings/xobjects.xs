@@ -62,6 +62,14 @@ LineKeeper {
   file xline_keeper
 }
 
+LineMaster {
+  file nodes/line_master.u
+}
+
+FrontierAligner {
+  file nodes/frontier_aligner.u
+}
+
 Localization {
     prototype XLocalization
     args "xcsPaths.getSettings(\"xlocalization.xs\")"
