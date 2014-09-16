@@ -29,14 +29,14 @@ XDataplayer::XDataplayer(const std::string& name) :
   isPlaying_(false),
   endAll_(false) {
     //! decimal dot will be US .
-    if (std::setlocale(LC_NUMERIC, "C") == NULL){
+    if (std::setlocale(LC_NUMERIC, "C") == NULL) {
         XCS_LOG_WARN("XDataplayer cannot load POSIX locale.");
     }
 
     fillTypeCategories(syntacticCategoryMap_);
 
     XBindFunction(XDataplayer, init);
-    
+
     XBindVar(finished);
 
     finished = false;
@@ -213,7 +213,12 @@ void XDataplayer::videoDecoder() {
         }
         // Frame number is provisionally ignored, until seeking is needed. 
         //auto frameNumber = job.second; // frame
-        videoResults_.at(channel)->push(videoPlayers_.at(channel)->getFrame());
+        try {
+            auto frame = videoPlayers_.at(channel)->getFrame();
+            videoResults_.at(channel)->push(frame);
+        } catch (CorruptedVideoException &e) {
+            XCS_LOG_WARN("Video channel " << channel << " contains corrupted video.");
+        }
     }
 }
 

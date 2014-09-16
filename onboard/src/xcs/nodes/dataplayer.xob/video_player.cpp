@@ -38,7 +38,7 @@ VideoPlayer::VideoPlayer(const string &filename, const string &fontFile) :
     if (avformat_open_input(&contextPtr, filename.c_str(), nullptr, nullptr) != 0) { // avformat_open_input allocates format context
         throw runtime_error("Error while calling avformat_open_input (probably invalid file format, filename '" + filename + "')");
     }
-    
+
     // prepare context
     avFormat_ = AVFormatContextPtr(contextPtr, &avformat_free_context);
 
@@ -163,10 +163,8 @@ xcs::BitmapType VideoPlayer::getFrame() {
         }
         failCounter++;
 
-        //rewind video
         if (failCounter > 10) { // workaround for corrupted frames in stream, magic value
-            rewind();
-            failCounter = 0;
+            throw CorruptedVideoException();
         }
     } while (1);
 

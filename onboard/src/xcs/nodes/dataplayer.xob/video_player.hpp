@@ -16,6 +16,7 @@
 
 #include <xcs/types/bitmap_type.hpp>
 #include <xcs/types/timestamp.hpp>
+#include <xcs/exception.hpp>
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -67,6 +68,15 @@ struct Packet {
     }
 
     AVPacket packet;
+};
+
+class CorruptedVideoException : public xcs::Exception {
+public:
+    CorruptedVideoException() {
+    }
+
+    virtual ~CorruptedVideoException() {
+    }
 };
 
 class VideoPlayer {
