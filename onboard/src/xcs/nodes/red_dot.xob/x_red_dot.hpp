@@ -33,13 +33,14 @@ namespace reddot{
     protected:
         virtual void stateChanged(XObject::State state);
     public:
+        XInputPort<::urbi::UImage> video;        
         XInputPort<int> lowerH;
         XInputPort<int> upperH;
         XInputPort<int> lowerS;
         XInputPort<int> upperS;
         XInputPort<int> lowerV;
         XInputPort<int> upperV;
-        XInputPort<::urbi::UImage> video;
+
 
         XVar<::urbi::UImage> enhancedVideo;
         XVar<bool> found;
