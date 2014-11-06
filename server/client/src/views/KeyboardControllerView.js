@@ -13,8 +13,8 @@ var KeyboardControllerView = Backbone.View.extend({
             87: {control: 'pitch', value: -0.2}, // W
             37: {control: 'yaw', value: -1.0}, // left
             39: {control: 'yaw', value: 1.0}, // right
-            38: {control: 'gaz', value: 0.2}, // up
-            40: {control: 'gaz', value: -0.2} // down
+            38: {control: 'gaz', value: 1.0}, // up
+            40: {control: 'gaz', value: -1.0} // down
         };
         this.down = {};
 

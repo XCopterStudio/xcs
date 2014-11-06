@@ -98,21 +98,23 @@ bool XciParrot::setDefaultConfiguration() {
     setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("video:max_bitrate", "4000")));
     setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("video:video_channel", "0")));
 
-    //receive only reduced navdata set
-    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("general:navdata_demo", "FALSE")));
     // set which data will be send
     unsigned int ndOptions = ((1 << NAVDATA_DEMO_TAG) |
             (1 << NAVDATA_ALTITUDE_TAG) |
             (1 << NAVDATA_RAW_MEASURES_TAG) |
             (1 << NAVDATA_MAGNETO_TAG) |
-            (1 << NAVDATA_WIFI_TAG) |
             (1 << NAVDATA_TIME_TAG));
 
     stringstream ndOptionsString;
     ndOptionsString << ndOptions;
     setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("general:navdata_options", ndOptionsString.str())));
+    //receive only reduced navdata set
+    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("general:navdata_demo", "TRUE")));
     // disable visual detection
     setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("detect:detect_type", "3")));
+
+    // set max altitude
+    setConfirmedConfigure(AtCommandPtr(new AtCommandCONFIG("control:altitude_max", "5000")));
 
     return true;
 }
