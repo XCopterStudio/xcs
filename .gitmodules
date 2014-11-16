@@ -3,7 +3,7 @@
 	url = https://github.com/Kanma/rapidjson.git
 [submodule "3rd-party/armadillo"]
 	path = 3rd-party/armadillo
-	url = drones.ms.mff.cuni.cz:/srv/xcs/repo/armadillo.git
+	url = https://github.com/XCopterStudio/armadillo.git
 [submodule "3rd-party/vrep-remote"]
 	path = 3rd-party/vrep-remote
-	url = drones.ms.mff.cuni.cz:/srv/xcs/repo/vrep-remote.git
+	url = https://github.com/XCopterStudio/vrep-remote.git
